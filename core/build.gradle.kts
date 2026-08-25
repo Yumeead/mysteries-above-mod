@@ -6,9 +6,16 @@ plugins {
 // протече платформний тип, модуль просто не збереться. Це заміна
 // ArchitectureTest'у з плагіна — інваріант стереже компілятор.
 dependencies {
-    testImplementation(kotlin("test"))
+    // JUnit 5, а не kotlin.test: тести переїжджають із плагіна майже дослівно,
+    // і збережений API прибирає цілий клас помилок перекладу.
+    testImplementation(platform("org.junit:junit-bom:6.1.3"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 kotlin { jvmToolchain(25) }
 
-tasks.test { useJUnitPlatform() }
+tasks.test {
+    useJUnitPlatform()
+    testLogging { events("passed", "skipped", "failed") }
+}
