@@ -20,11 +20,11 @@ Real failure this skill exists to prevent: an agent asked for "Sequence 7 Vision
 ## Process
 
 1. **Resolve identity.** Open `pathways-reference.md`. Find the exact name + theme for `<pathway>` at `<sequence level>`. If the user said a name ("the Hypnotist"), translate it to its level via the table — don't assume.
-2. **Ground the lore.** `Glob` `domain/pathways/<pathway>/abilities/` and read 2–3 sibling abilities. Match their tone and Ukrainian voice. Use the reference's design hook + canonical LotM powers. If unsure of a canonical power, WebSearch the LotM wiki — don't fabricate.
+2. **Ground the lore.** `Glob` `mod/src/main/kotlin/me/vangoo/mysteries/pathways/<pathway>/` and read 2–3 sibling abilities. Match their tone and Ukrainian voice. Use the reference's design hook + canonical LotM powers. If unsure of a canonical power, WebSearch the LotM wiki — don't fabricate.
 3. **Check for duplication.** Confirm the power isn't already implemented in a sibling (or at a nearby sequence). If it overlaps, pick a different facet of the sequence's identity.
-4. **Design spec FIRST — present to the user, do not write code yet.** One short block: name (Ukrainian), sequence, base class, what it does, target/range, cost & cooldown, scaling dimension+strategy, the effect/feedback beats. Get a thumbs-up or adjust. (See "Don't skip the spec" below.)
+4. **Design spec FIRST — present to the user, do not write code yet.** One short block: name (Ukrainian), stable `identity`, sequence, base class, what it does, target/range, cost & cooldown, scaling dimension+strategy, the effect/feedback beats. Get a thumbs-up or adjust. (See "Don't skip the spec" below.)
 5. **Implement** per `api-reference.md`: right base class, contexts, `SequenceScaler`, guards with clear failure messages, juice checklist.
-6. **Register** in the pathway's `initializeAbilities()` at the correct sequence (merge into the existing `List.of`).
+6. **Register** in the pathway's roster map at the correct sequence (merge into the existing list — `Pathway` takes the roster through its constructor; there is no `initializeAbilities()`).
 7. **Mirror into creature kits** — NOT YET APPLICABLE. Creature ability kits do not
    inherit player abilities and are balanced independently, but the creature engine is
    phase 12 and does not exist yet. When it lands, restore this step. Until then note
@@ -35,10 +35,10 @@ Real failure this skill exists to prevent: an agent asked for "Sequence 7 Vision
 - Cost/cooldown scale **down** as sequence strengthens: `base / SequenceScaler.calculateMultiplier(seq, ...)`.
 - Effect magnitude scales **up**: `scaleValue(base, seq, strategy)`. Signature powers → `DIVINE`/`STRONG`; utility → `WEAK`/`MODERATE`; drawbacks → `PENALTY_*`.
 - Sanity-check cost/cooldown against sibling abilities at the same sequence, not against absolutes.
-- Powerful control on other Beyonders → opt into `getSequenceCheckTarget` so higher sequences can resist.
+- Powerful control on other Beyonders → override `contestedTarget(context)` so higher sequences can resist.
 
 ## Don't skip the spec
-Jumping straight to a Java file is the most common failure: it bakes in a wrong sequence, a duplicate, or off-theme flavor that's expensive to unwind. The spec is one paragraph and catches all three. Present it and wait — unless the user explicitly said "just build it."
+Jumping straight to a Kotlin file is the most common failure: it bakes in a wrong sequence, a duplicate, or off-theme flavor that's expensive to unwind. The spec is one paragraph and catches all three. Present it and wait — unless the user explicitly said "just build it."
 
 ## Red flags — STOP
 - "Sequence 7 is the Hypnotist" (or any sequence→name from memory) → **read the table.**
@@ -51,4 +51,4 @@ Jumping straight to a Java file is the most common failure: it bakes in a wrong 
 
 ## Files
 - `pathways-reference.md` — authoritative sequence↔name↔theme tables for all 5 pathways.
-- `api-reference.md` — base classes, contexts, scaling, registration, juice checklist, build command.
+- `api-reference.md` — base classes, the `core`/`mod` split, outcomes, contexts, scaling, sessions, registration, juice checklist, build command.
