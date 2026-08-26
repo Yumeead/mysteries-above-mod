@@ -38,6 +38,18 @@ dependencies {
     implementation(project(":core"))
     // core їде всередину джара мода — окремо його ніхто не ставитиме.
     include(project(":core"))
+
+    // Юніт-тести без гри. Перевіряється те, що Minecraft і не потребує: черга тіків,
+    // диспетчер корутин, семантика реєстру сесій. Ігровий світ тут не піднімається —
+    // саме тому ці тести й швидкі.
+    testImplementation(platform("org.junit:junit-bom:6.1.3"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.test {
+    useJUnitPlatform()
+    testLogging { events("passed", "skipped", "failed") }
 }
 
 kotlin { jvmToolchain(25) }

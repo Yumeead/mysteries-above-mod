@@ -1,5 +1,6 @@
 package me.vangoo.mysteries
 
+import me.vangoo.mysteries.ability.runtime.AbilityServices
 import me.vangoo.mysteries.net.ModChannels
 import me.vangoo.mysteries.server.BeyonderStatusSource
 import me.vangoo.mysteries.server.StatusCommand
@@ -19,6 +20,10 @@ object MysteriesAboveMod : ModInitializer {
         // Типи пакетів реєструються на обох сторонах і саме звідси: клієнт, що
         // зареєстрував інший набір, ніж сервер, — це «іноді не працює», а не помилка.
         ModChannels.registerTypes()
+
+        // Хребет здібностей: реєстр Потойбічних, кулдауни, повідомлення, виконавець
+        // касту. Далі кожна фаза додає сюди свій сервіс.
+        AbilityServices.bootstrap()
 
         ModChannels.STATUS_REQUEST.receiveOnServer { _, context ->
             val player = context.player()
