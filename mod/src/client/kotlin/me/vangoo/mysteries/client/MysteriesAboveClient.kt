@@ -1,6 +1,7 @@
 package me.vangoo.mysteries.client
 
 import me.vangoo.mysteries.MOD_ID
+import me.vangoo.mysteries.client.input.ModKeys
 import me.vangoo.mysteries.client.net.receiveOnClient
 import me.vangoo.mysteries.client.screen.BeyonderStatusScreen
 import me.vangoo.mysteries.net.ModChannels
@@ -28,6 +29,8 @@ object MysteriesAboveClient : ClientModInitializer {
                 else -> gui.setScreen(BeyonderStatusScreen(payload))
             }
         }
+
+        ModKeys.register()
 
         log.info("Mysteries Above: клієнтська частина піднялась")
     }

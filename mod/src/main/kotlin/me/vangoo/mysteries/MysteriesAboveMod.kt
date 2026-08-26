@@ -1,9 +1,13 @@
 package me.vangoo.mysteries
 
 import me.vangoo.mysteries.ability.runtime.AbilityServices
+import me.vangoo.mysteries.beyonder.AbilityRequests
+import me.vangoo.mysteries.beyonder.BeyonderStatus
+import me.vangoo.mysteries.item.ModComponents
+import me.vangoo.mysteries.item.ModItems
 import me.vangoo.mysteries.net.ModChannels
-import me.vangoo.mysteries.server.BeyonderStatusSource
-import me.vangoo.mysteries.server.StatusCommand
+import me.vangoo.mysteries.pathways.ModPathways
+import me.vangoo.mysteries.server.MysteriesCommand
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import org.slf4j.LoggerFactory
@@ -21,17 +25,29 @@ object MysteriesAboveMod : ModInitializer {
         // зареєстрував інший набір, ніж сервер, — це «іноді не працює», а не помилка.
         ModChannels.registerTypes()
 
+        // Компонент — перед предметом: предмет його вже вимагає.
+        ModComponents.register()
+        ModItems.register()
+
         // Хребет здібностей: реєстр Потойбічних, кулдауни, повідомлення, виконавець
         // касту. Далі кожна фаза додає сюди свій сервіс.
         AbilityServices.bootstrap()
 
         ModChannels.STATUS_REQUEST.receiveOnServer { _, context ->
-            val player = context.player()
-            ModChannels.BEYONDER_STATUS.sendTo(player, BeyonderStatusSource.snapshot(player))
+            BeyonderStatus.push(context.player())
         }
 
-        CommandRegistrationCallback.EVENT.register { dispatcher, _, _ -> StatusCommand.register(dispatcher) }
+        // Клавіша касту. Здібність обирає сервер — див. `CastRequestPayload`.
+        ModChannels.CAST_REQUEST.receiveOnServer { _, context ->
+            AbilityRequests.castSelected(context.player())
+        }
 
-        log.info("Mysteries Above: спільна частина піднялась, каналів — {}", ModChannels.all.size)
+        CommandRegistrationCallback.EVENT.register { dispatcher, _, _ -> MysteriesCommand.register(dispatcher) }
+
+        log.info(
+            "Mysteries Above: спільна частина піднялась — каналів {}, шляхів {}",
+            ModChannels.all.size,
+            ModPathways.all.size,
+        )
     }
 }

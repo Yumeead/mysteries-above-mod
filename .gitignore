@@ -18,3 +18,9 @@ remappedSrc/
 # OS
 .DS_Store
 Thumbs.db
+
+# Kotlin build metadata
+.kotlin/
+
+# Log4j output from Bootstrap.bootStrap() in :mod tests
+mod/logs/

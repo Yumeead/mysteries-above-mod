@@ -2,6 +2,7 @@ package me.vangoo.mysteries.ability.runtime
 
 import me.vangoo.mysteries.MOD_ID
 import me.vangoo.mysteries.ability.AbilityExecutor
+import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
 import me.vangoo.mysteries.schedule.TickScheduler
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
@@ -44,6 +45,9 @@ object AbilityServices {
 
     val scheduling = SessionHost(scheduler, beyonders, players, onError)
 
+    /** Яку здібність гравець тримає під клавішею. До фази 11 — увесь вибір, що є. */
+    val selection = AbilitySelection()
+
     val contexts = AbilityContexts(beyonders, cooldowns, messaging, scheduling)
 
     val passives = PassiveTicker(beyonders, contexts, players, onError)
@@ -59,8 +63,17 @@ object AbilityServices {
         ServerTickEvents.END_SERVER_TICK.register { s ->
             scheduler.advance()
             passives.tick(scheduler.tick)
+            // Духовність відновлюється раз на секунду — саме в цих одиницях і задані
+            // ставки регенерації (`SpiritualityCalculator.REGEN_RATES` — очок за секунду).
+            if (scheduler.tick % TICKS_PER_SECOND == 0L) regenerate()
             // Раз на пів хвилини: таблиця кулдаунів інакше росте на кожну здібність назавжди.
             if (s.tickCount % PRUNE_PERIOD_TICKS == 0) cooldowns.prune()
+        }
+
+        // Вхід у світ: постійні пасивки самі себе не ввімкнуть. До фази 09 реєстр порожній
+        // на старті, тож спрацьовує це лише для тих, кого вже наповнило зілля цієї сесії.
+        ServerPlayConnectionEvents.JOIN.register { handler, _, _ ->
+            passives.activate(handler.player)
         }
 
         // Вихід гравця гасить його сесії детерміновано. Сесія й сама помітить, що власника
@@ -70,7 +83,18 @@ object AbilityServices {
             passives.deactivate(player)
             passives.forget(player.uuid)
             scheduling.stopAll(player.uuid)
+            selection.forget(player.uuid)
         }
+    }
+
+    /**
+     * Відновлення духовності всім, хто в грі.
+     *
+     * Плагінний `BeyonderService.regenerateAll` ходив по **репозиторію**, тобто й по тих,
+     * кого в грі немає, і відсіював їх усередині. Тут реєстр і так тримає лише живих.
+     */
+    private fun regenerate() {
+        beyonders.online.forEach { it.regenerateSpirituality() }
     }
 
     private fun reset() {
@@ -83,6 +107,7 @@ object AbilityServices {
         beyonders.online.map { it.playerId }.forEach { id ->
             cooldowns.forget(id)
             passives.forget(id)
+            selection.forget(id)
         }
         beyonders.online.toList().forEach { beyonders.forget(it.playerId) }
         server = null

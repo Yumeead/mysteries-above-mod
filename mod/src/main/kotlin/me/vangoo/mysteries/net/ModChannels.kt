@@ -1,6 +1,7 @@
 package me.vangoo.mysteries.net
 
 import me.vangoo.mysteries.net.payload.BeyonderStatusPayload
+import me.vangoo.mysteries.net.payload.CastRequestPayload
 import me.vangoo.mysteries.net.payload.StatusRequestPayload
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.StreamCodec
@@ -30,6 +31,10 @@ object ModChannels {
     /** Клієнт просить сервер перечитати стан. */
     val STATUS_REQUEST: ServerboundChannel<StatusRequestPayload> =
         serverbound(StatusRequestPayload.TYPE, StatusRequestPayload.CODEC)
+
+    /** Клавіша касту: клієнт натиснув спуск, здібність обирає сервер. */
+    val CAST_REQUEST: ServerboundChannel<CastRequestPayload> =
+        serverbound(CastRequestPayload.TYPE, CastRequestPayload.CODEC)
 
     /** Усі оголошені канали — для логів і тестів. */
     val all: List<Channel<*>> get() = declared.toList()
