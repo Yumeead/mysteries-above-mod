@@ -13,6 +13,12 @@
         "adapter": "kotlin",
         "value": "me.vangoo.mysteries.MysteriesAboveMod"
       }
+    ],
+    "client": [
+      {
+        "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.client.MysteriesAboveClient"
+      }
     ]
   },
   "depends": {
