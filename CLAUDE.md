@@ -45,6 +45,23 @@ ArchUnit-тест; тут її стереже компілятор — не до
 
 Пакети дзеркалять плагін (`me.vangoo.domain.*`), щоб два дерева порівнювались файл-у-файл.
 
+### Клієнт-серверна межа всередині `mod`
+
+`mod` розділений на два source sets (`splitEnvironmentSourceSets()`):
+
+| Source set | Що всередині | Бачить `net.minecraft.client` |
+|---|---|---|
+| `mod/src/main` | спільне: логіка сервера, пакети, команди | **ні** |
+| `mod/src/client` | екрани, рендер, клієнтські приймачі, keybind'и | так |
+
+Інваріант той самий, що й у `core`, і стереже його той самий компілятор: клієнтський
+тип у `src/main` — не рантайм-падіння на виділеному сервері, а помилка збірки.
+
+**Пакети — лише через `me.vangoo.mysteries.net.ModChannels`.** Це один об'єкт, де
+оголошення каналу і є його реєстрацією; ad-hoc повідомлень по фічах бути не має.
+Напрямок — частина типу: `ClientboundChannel.sendTo(player)` є тільки в спільному коді,
+`ServerboundChannel.sendToServer()` — тільки в клієнтському. Переплутати сторони не вийде.
+
 ## Конвенції конвертації Java → Kotlin
 
 Зафіксовані на перших 44 файлах, тримайся їх:
@@ -75,6 +92,33 @@ ArchUnit-тест; тут її стереже компілятор — не до
 Канонічне джерело версій — `FabricMC/fabric-example-mod` гілка `26.2`
 (`gradle.properties` + `build.gradle`). **Не вгадувати версії з пам'яті.**
 
+## API 26.2 проти того, що пам'ятає модель
+
+26.x перейменувала й переробила частину клієнтського API. Виміряно на фазі 02 —
+кожен рядок нижче спершу не скомпілювався:
+
+| Було (1.21.x, у пам'яті моделі) | Стало на 26.2 |
+|---|---|
+| `net.minecraft.resources.ResourceLocation` | `net.minecraft.resources.Identifier` |
+| `Minecraft.screen` | `Minecraft.gui.screen()` |
+| `Minecraft.setScreen(s)` | `Minecraft.gui.setScreen(s)` (є ще `setScreenAndShow`, але той форсує кадр) |
+| `Renderable.render(GuiGraphics, …)` | `Renderable.extractRenderState(GuiGraphicsExtractor, …)` — рендер став retained-mode |
+| `GuiGraphics.drawString/drawCenteredString` | `GuiGraphicsExtractor.text(…)` / `centeredText(…)` |
+| `Screen.keyPressed(int, int, int)` | `Screen.keyPressed(KeyEvent)` |
+| `Button.OnPress` без аргументів натискання | `AbstractButton.onPress(InputWithModifiers)` |
+
+**Не вгадувати сигнатури — дивитись у джарі.** Loom уже поклав деобфусковані джари
+поруч, тож перевірка коштує секунду:
+
+```bash
+MCM=~/.gradle/caches/fabric-loom/minecraftMaven/net/minecraft/minecraft-merged-deobf/26.2/minecraft-merged-deobf-26.2.jar
+MCC=~/.gradle/caches/fabric-loom/minecraftMaven/net/minecraft/minecraft-clientonly-deobf/26.2/minecraft-clientonly-deobf-26.2.jar
+javap -cp "$MCM:$MCC" net.minecraft.client.gui.screens.Screen
+```
+
+Так само перевіряється Fabric API — його джари лежать у
+`~/.gradle/caches/modules-2/files-2.1/net.fabricmc.fabric-api/`.
+
 ## Ухвалені рішення (26.08.2026, остаточні)
 
 1. **Клієнт-серверний мод**, не серверний. Справжні `Screen`, справжній рендер моделей.
@@ -98,8 +142,9 @@ ArchUnit-тест; тут її стереже компілятор — не до
 - ✅ Фаза 01 — решта `core`: `brewing`(4), `contracts`(2), `market`(8), `spells`(3),
   `creatures`(12), `forage`(3), `rituals`(8) = 40 файлів, 21 тест-клас;
   усього 24 тест-класи / 178 тестів зелені. **`core` закритий**, механічний переклад скінчився.
-- ▶ **Фаза 02** — клієнтський каркас і мережа
-- Фаза 03 — хребет: `AbilityContext` проти Minecraft (єдина фаза-дизайн, не переклад)
+- ✅ Фаза 02 — клієнтський каркас і мережа: `splitEnvironmentSourceSets`, другий entrypoint,
+  пакетний шар (`net.ModChannels`), тестовий екран `BeyonderStatusScreen`
+- ▶ **Фаза 03** — хребет: `AbilityContext` проти Minecraft (єдина фаза-дизайн, не переклад)
 - Фаза 05 — перший вертикальний зріз до касту в грі (**головна віха**)
 
 Порядок фаз — ланцюг залежностей, не список побажань. Не переносити більше трьох здібностей,
