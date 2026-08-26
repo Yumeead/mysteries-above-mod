@@ -1,8 +1,14 @@
 # Pathways Reference (mysteries-above)
 
-**Authoritative source of sequence names:** `application/services/PathwayManager.initializePathways()`.
-The name list passed to each pathway is ordered **index 0 → 9 == Sequence 0 → 9**.
-`Pathway.getSequenceName(level)` does `sequenceNames.get(level)`, so **the sequence level IS the list index.**
+**Authoritative source of sequence names in the mod:** each pathway's own factory under
+`mod/src/main/kotlin/me/vangoo/mysteries/pathways/<pathway>/` (in the plugin it was
+`application/services/PathwayManager.initializePathways()`, which held the names apart from the
+abilities — that split is gone). The list is ordered **index 0 → 9 == Sequence 0 → 9**.
+`Pathway.sequenceName(level)` does `sequenceNames[level]`, so **the sequence level IS the list index.**
+
+**Ported so far:** only `Tyrant` and `Sun` exist in the mod, and only at the sequences named in
+their tables below — phase 05 carried three abilities, not three pathways. The other twenty
+pathways are still plugin-only until phase 08; `ModPathways.byName` returns `null` for them.
 
 - Sequence **9** = the FIRST potion a player drinks = **weakest** (index 9 in the list).
 - Sequence **0** = the LAST = **strongest / near-deity** (index 0 in the list).
@@ -13,6 +19,40 @@ The plugin uses its *own* sequence names — several differ from the LotM wiki. 
 > Lore note: where the project name matches canon, use canonical *Lord of the Mysteries* powers as inspiration. Where it's a project-original name, design from the **pathway theme** + the **already-implemented sibling abilities** in `domain/pathways/<pathway>/abilities/` (the established tone on this server). When unsure of a canonical power, WebSearch the LotM wiki rather than inventing — but the new ability must still feel consistent with siblings.
 
 ---
+
+## Tyrant — group `GodAlmighty` (theme: sea, storm, wind, thunder) — **ported (phase 05)**
+Sailor-family: the body belongs to the water, then the storm, then the sky. Utility and weather
+before violence; the lightning only arrives at the top half.
+
+| Seq | Name | Design hook | In the mod |
+|----|------|-------------|---|
+| 9 | Sailor | fish-like body, balance, swimming, sea affinity | `IllusoryScales` |
+| 8 | Furious One | rage, raw striking power, storm-hardened body | — |
+| 7 | Seafarer | water shaping, healing water, cleansing, sea memory | `RestorativeWater` |
+| 6 | Wind-Blessed | wind blades, flight, wind sprint, pressure waves | — |
+| 5 | Ocean Songster | song, lightning, abyssal dominion, thunder voice | — |
+| 4 | Calamity Patron | patronage over disaster, sea-borne calamity | — |
+| 3 | Sea King | rule the ocean and what lives in it | — |
+| 2 | Calamity | be the disaster: storm, flood, wreck | — |
+| 1 | God of Thunder | thunder as authority over a region | — |
+| 0 | Tyrant | command sea, storm and sky as one | — |
+
+## Sun — group `GodAlmighty` (theme: holy light, oath, judgment, purification) — **ported (phase 05)**
+Bard-family: light that sings first, then blesses, then burns. Anti-evil and anti-fear
+throughout; contracts and notarization in the upper half.
+
+| Seq | Name | Design hook | In the mod |
+|----|------|-------------|---|
+| 9 | Bard | singing, physical enhancement by light | — |
+| 8 | Light Petitioner | sunshine, blessing, evil detection, daytime | — |
+| 7 | Solar High Priest | summon holy light, halo, purifying cleave, holy water, oath | `ResistanceToHorror` |
+| 6 | Notary | notarize, bind contracts | — |
+| 5 | Priest of Light | holy wave, light as a weapon | — |
+| 4 | Shadowless | no shadow may touch or hide from you | — |
+| 3 | Justice Mentor | teach/impose justice, judge by light | — |
+| 2 | Light Seeker | seek and reveal what light does not reach | — |
+| 1 | White Angel | angelic authority of the sun | — |
+| 0 | Sun | be the sun: light, judgment, purification absolute | — |
 
 ## Error — group `LordOfMysteries` (theme: theft, deception, fate, observation, time)
 Marauder-family rogue: steals powers/objects/luck, sees through everything, bends fate and time.
@@ -97,5 +137,9 @@ Knowledge-seeker: analysis, deduction, mysticism, enhanced mind, prophecy, holy 
 ---
 
 **Before designing, always:**
-1. Confirm the exact name for your target sequence here (and against live `PathwayManager`).
+1. Confirm the exact name for your target sequence here (and against the pathway's factory in
+   `mod/src/main/kotlin/me/vangoo/mysteries/pathways/<pathway>/`).
 2. `Glob` the pathway's `abilities/` folder and read 2–3 sibling abilities — match their tone, and make sure your ability is **not a duplicate** of an existing one.
+3. If the pathway has no folder in the mod yet, its siblings live only in the plugin
+   (`C:\Users\yuryp\IdeaProjects\mysteries-above\src\main\java\me\vangoo\pathways\<pathway>\`) —
+   read those for tone and coverage, and create the factory the way `Tyrant`/`Sun` do it.

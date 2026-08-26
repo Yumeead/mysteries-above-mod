@@ -196,6 +196,10 @@ context.session {                       // ключ — гравець + ця з
 | `ServerLevel.getEntity(UUID)` | `ServerLevel.getEntityInAnyDimension(UUID)` (+ `getPlayerInAnyDimension`) |
 | `Level.getGameTime()` | нема; монотонний лічильник — `MinecraftServer.getTickCount()` |
 | `LivingEntity.hurt(source, amount)` | `hurtServer(ServerLevel, source, amount)` |
+| `Player.displayClientMessage(c, overlay)` | `sendSystemMessage(c, overlay)` (є ще `sendOverlayMessage(c)`) |
+| `CommandSourceStack.hasPermission(2)` | `.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))` — рівні стали `PermissionCheck`, не int |
+| `KeyMapping(name, key, "category.string")` | `KeyMapping(name, type, key, KeyMapping.Category)`; категорія реєструється як `Category.register(Identifier)`, підпис — ключ `key.category.<ns>.<path>` |
+| `KeyBindingHelper` (`…api.client.keybinding.v1`) | `KeyMappingHelper` (`…api.client.keymapping.v1`) |
 
 **Не вгадувати сигнатури — дивитись у джарі.** Loom уже поклав деобфусковані джари
 поруч, тож перевірка коштує секунду:
@@ -258,7 +262,57 @@ javap -cp "$MCM:$MCC" net.minecraft.client.gui.screens.Screen
   `PassiveTicker`, `AbilityContexts`; `AbilityContext` розділено на нього ж і `CastContext`.
   У `mod` з'явився власний тест-сорссет (гри не піднімає): 18 тестів на чергу тіків і
   семантику сесій. Разом 33 тест-класи / 255 тестів зелені.
-- ▶ **Фаза 05** — перший вертикальний зріз до касту в грі (**головна віха**)
+- ✅ Фаза 05 — вертикальний зріз. `mod`: `pathways` (Tyrant, Sun + 3 здібності), `item`
+  (`ModItems`, `ModComponents`, `PotionBrew`, `BeyonderPotionItem`), `beyonder` (`Ascension`,
+  `AbilityRequests`, `BeyonderStatus`), `MysteriesCommand`, `AbilitySelection`, клавіша касту
+  й канал `CAST_REQUEST`, регенерація духовності, `JOIN` → активація пасивок.
+  Разом 35 тест-класів / 266 тестів зелені.
+- ▶ **Фаза 06** — події через міксини
+
+### Вертикальний зріз (фаза 05)
+
+Цикл замкнувся: **видав шлях → випив зілля → скастував**.
+
+| Ланка | Де |
+|---|---|
+| зілля як предмет | `item.ModItems.BEYONDER_POTION` + компонент `PotionBrew` |
+| «випив» | `item.BeyonderPotionItem` → `beyonder.Ascension` |
+| «скастував» | `/mysteries cast`, клавіша **R** → `beyonder.AbilityRequests` → `AbilityExecutor` |
+| «видно» | `beyonder.BeyonderStatus.push` після кожної зміни |
+
+```
+/mysteries potion Tyrant 9     # видати зілля (оператор)
+/mysteries abilities           # список із кулдаунами; ▶ — обране
+/mysteries select <identity>   # під клавішу R
+/mysteries cast <identity>
+/mysteries mastery 100         # добити засвоєння (оператор)
+/mysteries forget              # зняти статус Потойбічного (оператор)
+```
+
+**Одне зілля на всі 220 варіантів.** Що налито, каже компонент `PotionBrew` (ім'я шляху +
+номер Послідовності), а не окремий зареєстрований предмет. Колір рідини йде з
+`PathwayBranding` через ванільний `POTION_CONTENTS`, а модель — ванільна ж пляшка з тінтом,
+тож **мод не несе жодної власної текстури**. Шлях їде **іменем**: імена стабільні й читаються
+в `/data get`, а порядок шляхів у реєстрі змінюється щофази.
+
+**Перенесено два шляхи, не двадцять два.** Здібностей у фазі рівно три (`IllusoryScales`,
+`RestorativeWater` — Tyrant; `ResistanceToHorror` — Sun), і більше шляхів було б нічим
+наповнити. `ModPathways.byName` повертає `null` для решти — зілля може існувати раніше
+за свій шлях, і це не помилка.
+
+**Вибір здібності живе на сервері.** `CastRequestPayload` порожній навмисно: клієнт не знає
+ні списку здібностей, ні того, чи вони ще є, тож ідентичність у пакеті довелося б звіряти
+тим самим пошуком, що й порожній. Клавіша лише натискає спуск; вибір тримає
+`AbilitySelection` (до фази 11 — увесь вибір, що є).
+
+**Духовність починається з нуля** й відновлюється раз на секунду
+(`SpiritualityCalculator.REGEN_RATES` — 1/с на Посл. 9). Свіжий Потойбічний чекає перед
+першим кастом — це баланс плагіна, не недогляд.
+
+**Тести мода можуть підняти реєстри.** `ModPathwaysTest` і `PotionBrewTest` кличуть
+`SharedConstants.tryDetectVersion()` + `Bootstrap.bootStrap()` у `@BeforeAll`: константа виду
+`MobEffects.NAUSEA` у полі здібності інакше падає `ExceptionInInitializerError`. Це реєстри, а
+не світ — секунда на весь клас; розкладати константи по лінивих обгортках заради тесту не варто.
 
 Порядок фаз — ланцюг залежностей, не список побажань. Не переносити більше трьох здібностей,
 поки цикл «видав шлях → випив зілля → скастував» не замкнувся в грі.

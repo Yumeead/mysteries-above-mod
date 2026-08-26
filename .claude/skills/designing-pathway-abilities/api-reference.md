@@ -94,9 +94,31 @@ Until phase 07, emit particles yourself via `level.sendParticles(…)`.
 
 ## Registration
 
-1. Put the class in `mod/src/main/kotlin/me/vangoo/mysteries/pathways/<pathway>/`.
-2. Add it to that pathway's roster map at the right sequence level. `Pathway` takes its
-   roster through the constructor — there is no `initializeAbilities()` to override.
+1. Put the class in `mod/src/main/kotlin/me/vangoo/mysteries/pathways/<pathway>/abilities/`.
+2. Add it to that pathway's `roster` map at the right sequence level, in
+   `pathways/<pathway>/<Pathway>.kt`. `Pathway` takes its roster through the constructor —
+   there is no `initializeAbilities()` to override, and the sequence names live in the same
+   factory, not in a separate manager.
+3. A brand-new pathway also goes into `ModPathways` — nothing else looks pathways up.
+4. `ModPathwaysTest` then covers it for free: unique identities, declared type vs. base class,
+   positive tick period, ten sequence names.
+
+## Try it in game
+
+The whole loop runs from one command (operator branches need level 2):
+
+```
+/mysteries potion Tyrant 9     # видає зілля; випий його
+/mysteries abilities           # список із кулдаунами, ▶ позначає обране
+/mysteries select <identity>
+/mysteries cast <identity>     # або клавіша R — вона кастує обране
+/mysteries mastery 100         # добити засвоєння, щоб піти на наступну Послідовність
+/mysteries forget              # скинути статус Потойбічного
+```
+
+Spirituality starts at 0 and regenerates once a second (`SpiritualityCalculator.REGEN_RATES`
+— 1/s at Sequence 9), so a fresh Beyonder waits before the first cast. That's the plugin's
+balance, not a bug.
 
 ## Sessions (stateful abilities that live in time)
 
