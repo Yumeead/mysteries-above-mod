@@ -7,6 +7,7 @@ import me.vangoo.domain.abilities.CastTicket
 import me.vangoo.domain.entities.Beyonder
 import me.vangoo.domain.valueobjects.SanityPenalty
 import me.vangoo.domain.valueobjects.SequenceBasedSuccessChance
+import me.vangoo.mysteries.MOD_ID
 import me.vangoo.mysteries.ability.context.Beyonders
 import me.vangoo.mysteries.ability.context.Cooldowns
 import me.vangoo.mysteries.ability.context.Messaging
@@ -14,6 +15,7 @@ import me.vangoo.mysteries.ability.runtime.AbilityContexts
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.LivingEntity
+import org.slf4j.LoggerFactory
 
 /**
  * Порядок одного касту — від натискання до розрахунку.
@@ -29,6 +31,8 @@ class AbilityExecutor(
     private val messaging: Messaging,
     private val contexts: AbilityContexts,
 ) {
+
+    private val log = LoggerFactory.getLogger(MOD_ID)
 
     fun cast(caster: ServerPlayer, ability: ActiveAbility): CastReport {
         val beyonder = beyonders.of(caster.uuid) ?: return report(caster, CastReport.NotBeyonder)
@@ -48,18 +52,31 @@ class AbilityExecutor(
             cast = PendingCast(this, caster, beyonder, ticket),
         )
 
-        if (!ability.canCast(context)) {
-            // Квиток просто зникає невитраченим — гравець нічого не заплатив.
-            return report(caster, CastReport.Refused(CastRefusal.NotCastable))
-        }
+        // Далі керування йде в код здібності. Виняток звідти інакше просто спливе:
+        // Fabric його залогує й перекине, а `BlockableEventLoop.doRunTask` проковтне —
+        // тобто квиток лишиться непогашеним, і зламана здібність стане безкоштовною
+        // й нескінченною. Решта рантайму (`TickScheduler`, `SessionHost`, `EventHub`)
+        // чужий код уже ізолює; це було єдине місце, де ні.
+        val outcome = try {
+            if (!ability.canCast(context)) {
+                // Квиток просто зникає невитраченим — гравець нічого не заплатив.
+                return report(caster, CastReport.Refused(CastRefusal.NotCastable))
+            }
 
-        contest(context, ability)?.let { chance ->
-            // Опір з'їдає кулдаун, але не духовність: спроба була, ефекту не було.
+            contest(context, ability)?.let { chance ->
+                // Опір з'їдає кулдаун, але не духовність: спроба була, ефекту не було.
+                cooldowns.set(caster.uuid, ability.identity, ability.cooldownSeconds(beyonder.sequence))
+                return report(caster, CastReport.Resisted(chance))
+            }
+
+            ability.cast(context)
+        } catch (error: Exception) {
+            log.error("Здібність {} впала під час касту", ability.identity, error)
+            // Той самий розрахунок, що й при опорі: кулдаун списано, духовність — ні.
+            // Без кулдауна гравець тримав би клавішу, а лог набирав би по рядку на тік.
             cooldowns.set(caster.uuid, ability.identity, ability.cooldownSeconds(beyonder.sequence))
-            return report(caster, CastReport.Resisted(chance))
+            AbilityOutcome.failed("Сила зірвалась")
         }
-
-        val outcome = ability.cast(context)
         val receipt = when (outcome) {
             is AbilityOutcome.Done -> if (context.cast.isComplete) null else context.cast.complete()
             // Квиток лишився в здібності: вона погасить його, коли ефект справді станеться.
