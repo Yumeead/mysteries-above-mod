@@ -62,6 +62,9 @@ object Ascension {
     fun forget(player: ServerPlayer) {
         AbilityServices.passives.deactivate(player)
         AbilityServices.passives.forget(player.uuid)
+        // `passives.deactivate` знімає підписки лише пасивок; те, на що підписалась
+        // активна здібність у `cast`, лишилось би жити на вже-не-Потойбічному.
+        AbilityServices.events.forget(player.uuid)
         AbilityServices.scheduling.stopAll(player.uuid)
         AbilityServices.cooldowns.forget(player.uuid)
         AbilityServices.selection.forget(player.uuid)
