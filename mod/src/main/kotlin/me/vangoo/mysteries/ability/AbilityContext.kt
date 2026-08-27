@@ -5,6 +5,7 @@ import me.vangoo.domain.entities.Beyonder
 import me.vangoo.domain.valueobjects.Sequence
 import me.vangoo.mysteries.ability.context.Beyonders
 import me.vangoo.mysteries.ability.context.Cooldowns
+import me.vangoo.mysteries.ability.context.Effects
 import me.vangoo.mysteries.ability.context.Events
 import me.vangoo.mysteries.ability.context.Messaging
 import me.vangoo.mysteries.ability.context.Scheduling
@@ -52,7 +53,6 @@ import net.minecraft.world.phys.Vec3
  *
  * | що | фаза |
  * |---|---|
- * | `effects` — словник фігур із частинок | 07 |
  * | `ui` — екрани вибору й ввід | 11 |
  * | `summons` — data-driven істоти | 12 |
  */
@@ -86,6 +86,7 @@ interface AbilityContext {
     val messaging: Messaging
     val scheduling: Scheduling
     val events: Events
+    val effects: Effects
 }
 
 /**

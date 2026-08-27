@@ -9,14 +9,11 @@ import me.vangoo.mysteries.ability.CastContext
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.chat.Component
-import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.LivingEntity
-import kotlin.math.cos
-import kotlin.math.sin
 
 /**
  * Tyrant, Посл. 7 (Мореплавець): **Цілюща Вода**.
@@ -42,12 +39,14 @@ class RestorativeWater : ActiveAbility(AbilityIdentity.of("tyrant_restorative_wa
         val caster = context.caster
         // Ціль — союзник на лінії зору, інакше сам кастер: промах не має коштувати касту.
         val target: LivingEntity = context.targeting.playerLookingAt(MAX_RANGE) ?: caster
+        val ticks = durationTicks(context.sequence)
 
-        target.addEffect(
-            MobEffectInstance(MobEffects.REGENERATION, durationTicks(context.sequence), 0, false, true, true),
-        )
+        target.addEffect(MobEffectInstance(MobEffects.REGENERATION, ticks, 0, false, true, true))
 
-        splash(context.level, target)
+        // Покрив тримається рівно стільки, скільки діє вода, і ходить із ціллю: колір
+        // шляху й планувальник має сам сервіс. Бризки — зустрічний рух до пасм.
+        context.effects.bodyAura(target, ticks, counterFlow = ParticleTypes.SPLASH)
+        splash(context, target)
 
         if (target !== caster) {
             context.messaging.actionBar(
@@ -63,30 +62,17 @@ class RestorativeWater : ActiveAbility(AbilityIdentity.of("tyrant_restorative_wa
         scale(BASE_DURATION_TICKS, sequence, SequenceScaler.ScalingStrategy.MODERATE)
 
     /**
-     * Бризки навколо голови плюс коло крапель під ногами.
+     * Сплеск у мить касту: без нього покрив «проявляється», замість початись.
      *
-     * Геометрія тут місцева й навмисно проста: словник складених фігур — фаза 07, і
-     * саме туди ця пара переїде цілком. Заводити для неї службу до того, як фігур
-     * стане більше однієї, нема сенсу.
+     * Лишається тут, а не в `context.effects`, і це та сама межа: два ванільні виклики
+     * без тривалості й без повтору. У словник фігур потрапляє те, що триває або що
+     * попросила друга здібність, а не все, що видно.
      */
-    private fun splash(level: ServerLevel, target: LivingEntity) {
+    private fun splash(context: CastContext, target: LivingEntity) {
         val eye = target.eyePosition
-        level.sendParticles(ParticleTypes.SPLASH, eye.x, eye.y, eye.z, 20, 0.4, 0.4, 0.4, 0.05)
-
-        val feet = target.position()
-        repeat(RING_POINTS) { index ->
-            val angle = 2.0 * Math.PI * index / RING_POINTS
-            level.sendParticles(
-                ParticleTypes.FALLING_WATER,
-                feet.x + RING_RADIUS * cos(angle),
-                feet.y + 0.1,
-                feet.z + RING_RADIUS * sin(angle),
-                1, 0.0, 0.0, 0.0, 0.0,
-            )
-        }
-
-        level.playSound(
-            null, feet.x, feet.y, feet.z,
+        context.level.sendParticles(ParticleTypes.SPLASH, eye.x, eye.y, eye.z, 20, 0.4, 0.4, 0.4, 0.05)
+        context.level.playSound(
+            null, eye.x, eye.y, eye.z,
             SoundEvents.WATER_AMBIENT, SoundSource.PLAYERS, 1.0f, 1.2f,
         )
     }
@@ -96,7 +82,5 @@ class RestorativeWater : ActiveAbility(AbilityIdentity.of("tyrant_restorative_wa
         const val BASE_DURATION_TICKS = 80
         const val MAX_RANGE = 20.0
         const val COOLDOWN_SECONDS = 20
-        const val RING_POINTS = 20
-        const val RING_RADIUS = 1.2
     }
 }

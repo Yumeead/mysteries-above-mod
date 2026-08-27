@@ -7,6 +7,7 @@ import me.vangoo.mysteries.ability.CastContext
 import me.vangoo.mysteries.ability.PendingCast
 import me.vangoo.mysteries.ability.context.Beyonders
 import me.vangoo.mysteries.ability.context.Cooldowns
+import me.vangoo.mysteries.ability.context.Effects
 import me.vangoo.mysteries.ability.context.Events
 import me.vangoo.mysteries.ability.context.Messaging
 import me.vangoo.mysteries.ability.context.Scheduling
@@ -16,13 +17,13 @@ import net.minecraft.server.level.ServerPlayer
 /**
  * Складає контексти.
  *
- * Не `ServiceContainer` плагіна й не фабрика заради фабрики: сервісів у контексті шість,
+ * Не `ServiceContainer` плагіна й не фабрика заради фабрики: сервісів у контексті сім,
  * і без цього класу їх довелося б перелічувати в кожному місці, що кличе здібність —
  * у виконавці касту, у такті пасивок, а далі в кожній наступній точці входу.
  *
- * Двоє з шести зібрані **під конкретний виклик**: `targeting` дивиться очима саме цього
- * гравця, а `events` підписується саме від цієї здібності. Решта — одні й ті самі об'єкти
- * на весь сервер.
+ * Троє з семи зібрані **під конкретний виклик**: `targeting` дивиться очима саме цього
+ * гравця, `events` підписується саме від цієї здібності, а `effects` знає колір шляху
+ * саме цього кастера. Решта — одні й ті самі об'єкти на весь сервер.
  */
 class AbilityContexts(
     private val beyonders: Beyonders,
@@ -38,6 +39,7 @@ class AbilityContexts(
             caster, beyonder, ability,
             beyonders, cooldowns, messaging, scheduling,
             LiveTargeting(caster), eventHub.scopeOf(caster.uuid, ability.identity),
+            LiveEffects.of(scheduling, beyonder.pathway.name),
         )
 
     /** Контекст одного касту: живе рівно стільки, скільки триває виклик `cast`. */
@@ -51,6 +53,7 @@ class AbilityContexts(
             caster, beyonder, ability, cast,
             beyonders, cooldowns, messaging, scheduling,
             LiveTargeting(caster), eventHub.scopeOf(caster.uuid, ability.identity),
+            LiveEffects.of(scheduling, beyonder.pathway.name),
         )
 }
 
@@ -64,6 +67,7 @@ internal class LiveAbilityContext(
     override val scheduling: Scheduling,
     override val targeting: Targeting,
     override val events: Events,
+    override val effects: Effects,
 ) : AbilityContext
 
 internal class LiveCastContext(
@@ -77,4 +81,5 @@ internal class LiveCastContext(
     override val scheduling: Scheduling,
     override val targeting: Targeting,
     override val events: Events,
+    override val effects: Effects,
 ) : CastContext
