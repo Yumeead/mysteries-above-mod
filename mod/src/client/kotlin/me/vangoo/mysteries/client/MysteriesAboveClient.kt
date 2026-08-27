@@ -2,6 +2,8 @@ package me.vangoo.mysteries.client
 
 import me.vangoo.mysteries.MOD_ID
 import me.vangoo.mysteries.client.beyonder.ClientAbilityState
+import me.vangoo.mysteries.client.hud.AbilityHud
+import me.vangoo.mysteries.client.hud.SpiritualityHud
 import me.vangoo.mysteries.client.input.ModKeys
 import me.vangoo.mysteries.client.net.receiveOnClient
 import me.vangoo.mysteries.client.screen.BeyonderStatusScreen
@@ -20,6 +22,9 @@ object MysteriesAboveClient : ClientModInitializer {
     private val log = LoggerFactory.getLogger("$MOD_ID/client")
 
     override fun onInitializeClient() {
+        // Перше, що робиться: далі і HUD, і клавіші читають налаштування як уже наявні.
+        ClientOptions.load()
+
         ModChannels.BEYONDER_STATUS.receiveOnClient { payload, context ->
             // Свіжий стан оновлює відкритий екран на місці; якщо екрана нема —
             // відкриває його. Так одна відповідь обслуговує і `/mysteries status`,
@@ -33,8 +38,8 @@ object MysteriesAboveClient : ClientModInitializer {
             }
         }
 
-        // Обидва знімки лягають у клієнтське сховище й більше нікуди: малювання —
-        // справа HUD (M3) і колеса (M4), а до них список видно на тестовому екрані.
+        // Обидва знімки лягають у клієнтське сховище й більше нікуди: малює з нього
+        // HUD, а з M4 — і колесо.
         ModChannels.ABILITY_ROSTER.receiveOnClient { payload, _ -> ClientAbilityState.accept(payload) }
         ModChannels.ABILITY_STATE.receiveOnClient { payload, _ -> ClientAbilityState.accept(payload) }
 
@@ -45,6 +50,8 @@ object MysteriesAboveClient : ClientModInitializer {
         // Наступний світ починає з чистого аркуша: чужий ростер малювати нічим і нема чого.
         ClientPlayConnectionEvents.DISCONNECT.register { _, _ -> ClientAbilityState.clear() }
 
+        SpiritualityHud.register()
+        AbilityHud.register()
         ModKeys.register()
 
         log.info("Mysteries Above: клієнтська частина піднялась")

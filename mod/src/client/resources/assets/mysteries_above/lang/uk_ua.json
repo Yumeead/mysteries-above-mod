@@ -1,5 +1,7 @@
 {
   "item.mysteries_above.beyonder_potion": "Потойбічне зілля",
   "key.category.mysteries_above.abilities": "Mysteries Above",
-  "key.mysteries_above.cast": "Застосувати здібність"
+  "key.mysteries_above.cast": "Застосувати здібність",
+  "hud.mysteries_above.no_selection": "Нічого не обрано",
+  "hud.mysteries_above.spirituality": "Духовність: %s / %s"
 }

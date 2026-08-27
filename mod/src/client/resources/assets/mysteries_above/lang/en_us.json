@@ -1,5 +1,7 @@
 {
   "item.mysteries_above.beyonder_potion": "Beyonder Potion",
   "key.category.mysteries_above.abilities": "Mysteries Above",
-  "key.mysteries_above.cast": "Use ability"
+  "key.mysteries_above.cast": "Use ability",
+  "hud.mysteries_above.no_selection": "Nothing selected",
+  "hud.mysteries_above.spirituality": "Spirituality: %s / %s"
 }
