@@ -2,6 +2,8 @@ package me.vangoo.mysteries.ability.runtime
 
 import me.vangoo.mysteries.MOD_ID
 import me.vangoo.mysteries.ability.AbilityExecutor
+import me.vangoo.mysteries.beyonder.AbilityStatePump
+import me.vangoo.mysteries.beyonder.BeyonderStatus
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
 import me.vangoo.mysteries.schedule.TickScheduler
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
@@ -54,6 +56,15 @@ object AbilityServices {
 
     val executor = AbilityExecutor(beyonders, cooldowns, messaging, contexts)
 
+    /**
+     * Коли штовхати клієнту стан здібностей. Годинник — той самий `tickCount`, у якому
+     * рахує [cooldowns]: інакше запобіжник міряв би одне, а `readyAtTick` означав інше.
+     */
+    val statePump = AbilityStatePump(
+        send = { id -> players(id)?.let(BeyonderStatus::pushState) },
+        now = { (server?.tickCount ?: 0).toLong() },
+    )
+
     fun bootstrap() {
         ServerLifecycleEvents.SERVER_STARTING.register { server = it }
         ServerLifecycleEvents.SERVER_STOPPED.register { reset() }
@@ -65,7 +76,12 @@ object AbilityServices {
             passives.tick(scheduler.tick)
             // Духовність відновлюється раз на секунду — саме в цих одиницях і задані
             // ставки регенерації (`SpiritualityCalculator.REGEN_RATES` — очок за секунду).
-            if (scheduler.tick % TICKS_PER_SECOND == 0L) regenerate()
+            if (scheduler.tick % TICKS_PER_SECOND == 0L) {
+                regenerate()
+                // Секундний такт синхронізації — тут само, бо регенерація і є
+                // найчастішим джерелом «брудних» гравців.
+                statePump.flush()
+            }
             // Раз на пів хвилини: таблиця кулдаунів інакше росте на кожну здібність назавжди.
             if (s.tickCount % PRUNE_PERIOD_TICKS == 0) cooldowns.prune()
         }
@@ -73,7 +89,12 @@ object AbilityServices {
         // Вхід у світ: постійні пасивки самі себе не ввімкнуть. До фази 09 реєстр порожній
         // на старті, тож спрацьовує це лише для тих, кого вже наповнило зілля цієї сесії.
         ServerPlayConnectionEvents.JOIN.register { handler, _, _ ->
-            passives.activate(handler.player)
+            val player = handler.player
+            passives.activate(player)
+            // Список здібностей клієнт інакше не дізнається ніяк: ростер летить на зміну,
+            // а вхід у світ — це зміна з «нічого» на «ось що є».
+            BeyonderStatus.pushRoster(player)
+            statePump.pushNow(player.uuid)
         }
 
         // Вихід гравця гасить його сесії детерміновано. Сесія й сама помітить, що власника
@@ -84,6 +105,7 @@ object AbilityServices {
             passives.forget(player.uuid)
             scheduling.stopAll(player.uuid)
             selection.forget(player.uuid)
+            statePump.forget(player.uuid)
         }
     }
 
@@ -94,7 +116,13 @@ object AbilityServices {
      * кого в грі немає, і відсіював їх усередині. Тут реєстр і так тримає лише живих.
      */
     private fun regenerate() {
-        beyonders.online.forEach { it.regenerateSpirituality() }
+        beyonders.online.forEach { beyonder ->
+            val before = beyonder.spirituality.current
+            beyonder.regenerateSpirituality()
+            // Бруднити лише тоді, коли число справді зросло: гравець зі стелею духовності
+            // не має породжувати жодного пакета.
+            if (beyonder.spirituality.current != before) statePump.markDirty(beyonder.playerId)
+        }
     }
 
     private fun reset() {
@@ -108,6 +136,7 @@ object AbilityServices {
             cooldowns.forget(id)
             passives.forget(id)
             selection.forget(id)
+            statePump.forget(id)
         }
         beyonders.online.toList().forEach { beyonders.forget(it.playerId) }
         server = null

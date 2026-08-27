@@ -7,6 +7,8 @@ import me.vangoo.domain.valueobjects.AbilityIdentity
 import me.vangoo.domain.valueobjects.Sequence
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
 import kotlin.math.ceil
 
 /**
@@ -29,6 +31,25 @@ abstract class Ability(
 
     /** Опис для меню; залежить від Послідовності, бо від неї залежать числа. */
     abstract fun description(sequence: Sequence): Component
+
+    /**
+     * Іконка для меню — звичайний [ItemStack].
+     *
+     * Найдешевше, що лишає двері відчиненими: мод і далі не несе жодної власної
+     * текстури (та сама лінія, що вже проведена зіллям — ванільна пляшка з тінтом
+     * замість 220 моделей), по дроту стек їде готовим `ItemStack.STREAM_CODEC`, а
+     * малюється одним ванільним викликом.
+     *
+     * Типова іконка — за типом здібності; перекривається однорядково. Колір шляху
+     * накладає збирач ростера, якщо здібність не оголосила власного `DYED_COLOR`.
+     *
+     * Кожен виклик має віддавати **свій** стек: збирач ростера його фарбує.
+     */
+    open val icon: ItemStack get() = when (type) {
+        AbilityType.ACTIVE -> ItemStack(Items.AMETHYST_SHARD)
+        AbilityType.TOGGLEABLE_PASSIVE -> ItemStack(Items.ECHO_SHARD)
+        AbilityType.PERMANENT_PASSIVE -> ItemStack(Items.PRISMARINE_SHARD)
+    }
 
     override val spiritualityCost: Int get() = 0
 

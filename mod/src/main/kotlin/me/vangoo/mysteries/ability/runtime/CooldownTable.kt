@@ -19,10 +19,29 @@ class CooldownTable(private val now: () -> Int) : Cooldowns {
     private val readyAt = HashMap<Key, Int>()
     private val lockedUntil = HashMap<UUID, Int>()
 
-    override fun remainingSeconds(playerId: UUID, identity: AbilityIdentity): Long {
+    override fun remainingSeconds(playerId: UUID, identity: AbilityIdentity): Long =
+        toSeconds(readyTick(playerId, identity) - now())
+
+    /**
+     * **Абсолютний** тік, коли здібність знову готова; `0` — готова зараз.
+     *
+     * Те саме число, що й [remainingSeconds], але не поділене на 20 перед відправкою.
+     * Клієнту потрібне саме воно: залишок довелося б надсилати щосекунди, інакше він
+     * застигав би, а абсолютний тік летить один раз — далі клієнт відлічує сам.
+     *
+     * Глобальне замикання ([lockAll]) виражається тут природно: усі здібності гравця
+     * повертають один і той самий тік.
+     */
+    fun readyAtTick(playerId: UUID, identity: AbilityIdentity): Int {
         val tick = now()
-        val ready = maxOf(readyAt[Key(playerId, identity)] ?: tick, lockedUntil[playerId] ?: tick)
-        return toSeconds(ready - tick)
+        val ready = readyTick(playerId, identity)
+        return if (ready <= tick) 0 else ready
+    }
+
+    /** Пізніший із двох таймерів — власного й глобального. Ніколи не раніший за «зараз». */
+    private fun readyTick(playerId: UUID, identity: AbilityIdentity): Int {
+        val tick = now()
+        return maxOf(readyAt[Key(playerId, identity)] ?: tick, lockedUntil[playerId] ?: tick)
     }
 
     override fun set(playerId: UUID, identity: AbilityIdentity, seconds: Int) {

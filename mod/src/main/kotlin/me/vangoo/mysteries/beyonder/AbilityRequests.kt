@@ -44,6 +44,9 @@ object AbilityRequests {
         val result = AbilityServices.executor.cast(player, ability)
         // Духовність і засвоєння змінились — екран не має лишатись зі старими числами.
         BeyonderStatus.push(player)
+        // Дія гравця штовхає стан негайно: після касту бар має впасти в той самий кадр,
+        // а не за 900 мс до наступного секундного такту.
+        AbilityServices.statePump.pushNow(player.uuid)
         return result
     }
 
@@ -52,6 +55,7 @@ object AbilityRequests {
         val beyonder = AbilityServices.beyonders.of(player.uuid) ?: return false
         val spec = beyonder.abilityBy(identity) ?: return false
         AbilityServices.selection.select(player.uuid, spec.identity)
+        AbilityServices.statePump.pushNow(player.uuid)
         return true
     }
 

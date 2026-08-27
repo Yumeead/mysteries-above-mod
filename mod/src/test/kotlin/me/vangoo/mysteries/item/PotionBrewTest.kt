@@ -1,8 +1,7 @@
 package me.vangoo.mysteries.item
 
 import com.mojang.serialization.JsonOps
-import net.minecraft.SharedConstants
-import net.minecraft.server.Bootstrap
+import me.vangoo.mysteries.GameRegistries
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -25,8 +24,7 @@ class PotionBrewTest {
         @JvmStatic
         @BeforeAll
         fun bootstrapRegistries() {
-            SharedConstants.tryDetectVersion()
-            Bootstrap.bootStrap()
+            GameRegistries.bootstrap()
         }
     }
 

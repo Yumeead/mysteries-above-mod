@@ -1,5 +1,8 @@
 package me.vangoo.mysteries.net
 
+import me.vangoo.mysteries.net.payload.AbilityActionPayload
+import me.vangoo.mysteries.net.payload.AbilityRosterPayload
+import me.vangoo.mysteries.net.payload.AbilityStatePayload
 import me.vangoo.mysteries.net.payload.BeyonderStatusPayload
 import me.vangoo.mysteries.net.payload.CastRequestPayload
 import me.vangoo.mysteries.net.payload.StatusRequestPayload
@@ -35,6 +38,21 @@ object ModChannels {
     /** Клавіша касту: клієнт натиснув спуск, здібність обирає сервер. */
     val CAST_REQUEST: ServerboundChannel<CastRequestPayload> =
         serverbound(CastRequestPayload.TYPE, CastRequestPayload.CODEC)
+
+    /**
+     * Рідкісний знімок: список здібностей, їхні описи, ціни й іконки.
+     * Летить лише на зміну самого списку — одиниці разів за сесію.
+     */
+    val ABILITY_ROSTER: ClientboundChannel<AbilityRosterPayload> =
+        clientbound(AbilityRosterPayload.TYPE, AbilityRosterPayload.CODEC)
+
+    /** Частий дрібний знімок: духовність, перепочинки, тоглі. Не частіше разу на секунду. */
+    val ABILITY_STATE: ClientboundChannel<AbilityStatePayload> =
+        clientbound(AbilityStatePayload.TYPE, AbilityStatePayload.CODEC)
+
+    /** Один намір гравця: обрати, кастувати, обрати й кастувати, перемкнути. */
+    val ABILITY_ACTION: ServerboundChannel<AbilityActionPayload> =
+        serverbound(AbilityActionPayload.TYPE, AbilityActionPayload.CODEC)
 
     /** Усі оголошені канали — для логів і тестів. */
     val all: List<Channel<*>> get() = declared.toList()

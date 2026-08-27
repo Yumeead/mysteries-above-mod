@@ -200,6 +200,17 @@ context.session {                       // ключ — гравець + ця з
 | `CommandSourceStack.hasPermission(2)` | `.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))` — рівні стали `PermissionCheck`, не int |
 | `KeyMapping(name, key, "category.string")` | `KeyMapping(name, type, key, KeyMapping.Category)`; категорія реєструється як `Category.register(Identifier)`, підпис — ключ `key.category.<ns>.<path>` |
 | `KeyBindingHelper` (`…api.client.keybinding.v1`) | `KeyMappingHelper` (`…api.client.keymapping.v1`) |
+| `Bootstrap.bootStrap()` вистачало для `ItemStack(Item)` | не вистачає: типові компоненти стали даними — `BuiltInRegistries.DATA_COMPONENT_INITIALIZERS.build(provider)` окремим кроком |
+| `RegistryAccess.EMPTY` / `fromRegistryOfRegistries` | без змін, але тегів не несе — а `fireResistant()` питає `damage_type/is_fire` |
+
+**Пастка компонентів у тестах.** Симптом — `NullPointerException: Components not bound
+yet` із конструктора `ItemStack`, і виглядає він як помилка в тому, хто стек будує.
+Штатний `DATA_COMPONENT_INITIALIZERS.build(...)` у юніт-тесті не проходить: ініціалізатори
+питають теги, а ті приїжджають із датапаку, тобто тягнуть `ResourceManager` і половину
+сервера. Тому `mod/src/test/…/GameRegistries` прив'язує прототипи **порожніми**
+(`Holder.Reference.bindComponents(DataComponentMap.EMPTY)`) — тестам потрібен предмет,
+який можна покласти в стек і провести по дроту, а не його ванільний баланс. Усе, що мод
+сам кладе в стек, живе в патчі поверх прототипу й перевіряється як є.
 
 **Не вгадувати сигнатури — дивитись у джарі.** Loom уже поклав деобфусковані джари
 поруч, тож перевірка коштує секунду:
@@ -267,7 +278,50 @@ javap -cp "$MCM:$MCC" net.minecraft.client.gui.screens.Screen
   `AbilityRequests`, `BeyonderStatus`), `MysteriesCommand`, `AbilitySelection`, клавіша касту
   й канал `CAST_REQUEST`, регенерація духовності, `JOIN` → активація пасивок.
   Разом 35 тест-класів / 266 тестів зелені.
-- ▶ **Фаза 06** — події через міксини
+- ▶ **Колесо Потойбічного, M1** — читальна модель і пакети на сервері. `mod`: три пакети
+  (`AbilityRosterPayload`, `AbilityStatePayload`, `AbilityActionPayload`) + три канали,
+  `BeyonderStatus.roster()/state()`, `AbilityStatePump`, `CooldownTable.readyAtTick`,
+  `Ability.icon`. Клієнт нічого не малює — приймачі пишуть у лог.
+  Разом 39 тест-класів / 293 тести зелені.
+- ⏸ **Фаза 06** — події через міксини (чекає; з UI не перетинається — події живуть у
+  перехопленні шкоди, UI у мережі й рендері)
+
+### Колесо Потойбічного (фаза UI, M1)
+
+Повна специфікація — артефакт «Колесо Потойбічного»
+(https://claude.ai/code/artifact/40f5bea3-2fee-4040-b6d1-a121f5e4f6e8), вісім віх.
+
+**Два знімки, а не один.** Частота в них різна на три порядки, тож вони й розділені:
+
+| Канал | Напрямок | Коли летить | Що всередині |
+|---|---|---|---|
+| `ABILITY_ROSTER` | сервер → клієнт | вхід у світ, зілля, піднесення, `forget` | описи, ціни, іконки |
+| `ABILITY_STATE` | сервер → клієнт | на зміну, не частіше разу на секунду | духовність, перепочинки, тоглі |
+| `ABILITY_ACTION` | клієнт → сервер | на дію гравця | намір + необов'язкова ідентичність |
+
+Злиття означало б слати повний опис кожної здібності щосекунди.
+
+**Кулдаун їде тіком кінця, а не залишком.** `CooldownTable.readyAtTick` — те саме число,
+що й `remainingSeconds`, просто не поділене на 20. Залишок довелося б надсилати щосекунди,
+інакше він застигає; абсолютний тік летить один раз, і клієнт відлічує сам від
+`serverTick` із пакета. Трафік за перепочинки між подіями — нуль.
+
+**Надсилати на зміну, а не на тік.** `AbilityStatePump` — брудний прапорець плюс
+запобіжник разу на секунду; `pushNow` обходить такт для дій гравця (після касту бар має
+впасти в той самий кадр). Регенерація духовності бруднить лише коли число справді зросло,
+тож гравець зі стелею не породжує жодного пакета. Насос знає тільки `UUID` і власний
+годинник — тому перевіряється без гри зовсім.
+
+**Іконка — це `ItemStack`.** Типова за типом здібності (`AMETHYST_SHARD` / `ECHO_SHARD` /
+`PRISMARINE_SHARD`), перекривається однорядково, фарбується в колір шляху ванільним
+`DYED_COLOR` уже в збирачі ростера. Мод і далі не несе жодної власної текстури — та сама
+лінія, що вже проведена зіллям. Власні текстури пізніше — це поле `Identifier?` у `Entry`
+й одна гілка в рендері.
+
+**`ABILITY_ACTION` оголошено, але сервер його ще не слухає.** Пакет потрібен зараз, щоб
+кодек перевірявся разом із рештою; `SELECT`/`SELECT_AND_CAST` під'єднує M4, `TOGGLE` — M5
+(і саме він стане першою точкою виклику `PassiveTicker.toggle`, написаного ще у фазі 04).
+Старий шлях (`CAST_REQUEST`, `/mysteries select`, `BeyonderStatusScreen`) лишається до M8.
 
 ### Вертикальний зріз (фаза 05)
 

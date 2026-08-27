@@ -30,6 +30,39 @@ object MysteriesAboveClient : ClientModInitializer {
             }
         }
 
+        // Читальна модель уже їде по дроту, але малювати її ще нема чим: сховище
+        // клієнта — віха M2, HUD — M3. Лог тут не тимчасовий милиць, а перевірка віхи:
+        // він доводить, що обидва знімки доходять цілими, і зникне разом із приймачем,
+        // коли пакет буде куди покласти.
+        ModChannels.ABILITY_ROSTER.receiveOnClient { payload, _ ->
+            val roster = payload.roster
+            if (roster == null) {
+                log.info("Ростер: гравець не Потойбічний")
+            } else {
+                log.info(
+                    "Ростер: {} Посл. {} ({}) — здібностей {}: {}",
+                    roster.pathwayId,
+                    roster.sequence.level,
+                    roster.sequenceName.string,
+                    roster.entries.size,
+                    roster.entries.joinToString { "${it.identity}/${it.type}/${it.cost}" },
+                )
+            }
+        }
+
+        ModChannels.ABILITY_STATE.receiveOnClient { payload, _ ->
+            log.info(
+                "Стан на тіку {}: духовність {}, обрано {}, живих {}: {}",
+                payload.serverTick,
+                payload.spirituality,
+                payload.selected ?: "—",
+                payload.live.size,
+                payload.live.joinToString {
+                    "${it.identity}@${it.readyAtTick}${if (it.toggled) "●" else ""}${if (it.sustaining) "◐" else ""}"
+                },
+            )
+        }
+
         ModKeys.register()
 
         log.info("Mysteries Above: клієнтська частина піднялась")

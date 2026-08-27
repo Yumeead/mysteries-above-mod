@@ -77,6 +77,10 @@ object MysteriesCommand {
     private fun status(context: CommandContext<CommandSourceStack>): Int {
         val player = context.source.playerOrException
         BeyonderStatus.push(player)
+        // Повне перечитування: і рідкісний знімок, і частий. Дешевше надіслати зайвий
+        // пакет на явне прохання, ніж лишити клієнт із застарілим списком.
+        BeyonderStatus.pushRoster(player)
+        AbilityServices.statePump.pushNow(player.uuid)
         context.source.sendSuccess({ Component.literal("Стан надіслано на клієнт.") }, false)
         return 1
     }
@@ -167,7 +171,9 @@ object MysteriesCommand {
             ?: return fail(context, "Ви не Потойбічний")
 
         beyonder.setMastery(Mastery.of(DoubleArgumentType.getDouble(context, "percent")))
+        // Засвоєння рухає стелю духовності — це вже число зі знімка стану.
         BeyonderStatus.push(player)
+        AbilityServices.statePump.pushNow(player.uuid)
         context.source.sendSuccess({ Component.literal("Засвоєння: ${beyonder.mastery}") }, false)
         return 1
     }

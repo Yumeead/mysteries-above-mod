@@ -34,7 +34,10 @@ object MysteriesAboveMod : ModInitializer {
         AbilityServices.bootstrap()
 
         ModChannels.STATUS_REQUEST.receiveOnServer { _, context ->
-            BeyonderStatus.push(context.player())
+            val player = context.player()
+            BeyonderStatus.push(player)
+            BeyonderStatus.pushRoster(player)
+            AbilityServices.statePump.pushNow(player.uuid)
         }
 
         // Клавіша касту. Здібність обирає сервер — див. `CastRequestPayload`.

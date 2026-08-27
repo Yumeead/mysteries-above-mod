@@ -1,5 +1,6 @@
 package me.vangoo.mysteries.pathways
 
+import me.vangoo.mysteries.GameRegistries
 import me.vangoo.domain.abilities.AbilityType
 import me.vangoo.domain.entities.Beyonder
 import me.vangoo.domain.entities.Pathway
@@ -11,8 +12,6 @@ import me.vangoo.mysteries.ability.PermanentPassiveAbility
 import me.vangoo.mysteries.ability.Ticking
 import me.vangoo.mysteries.pathways.sun.Sun
 import me.vangoo.mysteries.pathways.tyrant.Tyrant
-import net.minecraft.SharedConstants
-import net.minecraft.server.Bootstrap
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -44,8 +43,7 @@ class ModPathwaysTest {
         @JvmStatic
         @BeforeAll
         fun bootstrapRegistries() {
-            SharedConstants.tryDetectVersion()
-            Bootstrap.bootStrap()
+            GameRegistries.bootstrap()
         }
     }
 

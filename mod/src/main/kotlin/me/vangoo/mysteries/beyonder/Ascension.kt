@@ -53,6 +53,9 @@ object Ascension {
 
         aftertaste(player)
         BeyonderStatus.push(player)
+        // Список здібностей став іншим — ростер летить саме тут і більше ніде.
+        BeyonderStatus.pushRoster(player)
+        AbilityServices.statePump.pushNow(player.uuid)
     }
 
     /** Гравець більше не Потойбічний: усе, що тримав мод на нього, знімається. */
@@ -63,7 +66,11 @@ object Ascension {
         AbilityServices.cooldowns.forget(player.uuid)
         AbilityServices.selection.forget(player.uuid)
         AbilityServices.beyonders.forget(player.uuid)
+        AbilityServices.statePump.forget(player.uuid)
         BeyonderStatus.push(player)
+        // Порожній ростер — і є повідомлення «ти більше не Потойбічний»: стану після
+        // нього не летить нічого, бо стан має сенс лише в того, хто ним є.
+        BeyonderStatus.pushRoster(player)
     }
 
     // ── Перше зілля ─────────────────────────────────────────────────────────────
