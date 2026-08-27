@@ -5,6 +5,7 @@ import me.vangoo.domain.entities.Beyonder
 import me.vangoo.domain.valueobjects.Sequence
 import me.vangoo.mysteries.ability.context.Beyonders
 import me.vangoo.mysteries.ability.context.Cooldowns
+import me.vangoo.mysteries.ability.context.Events
 import me.vangoo.mysteries.ability.context.Messaging
 import me.vangoo.mysteries.ability.context.Scheduling
 import me.vangoo.mysteries.ability.context.Targeting
@@ -37,6 +38,13 @@ import net.minecraft.world.phys.Vec3
  * тут, а у [CastContext], який бачить лише [ActiveAbility.cast]. Пасивці не доведеться
  * писати `cast!!` — вона про квиток просто не знає.
  *
+ * ## Події — сервіс, а не хук
+ *
+ * [events] — не список ванільних подій, а підписка **від імені цієї здібності цього
+ * гравця**: власника видно з контексту, тож зняти чужу підписку нема як, а свої
+ * реєстр гасить сам. Це найпомітніша різниця з плагіном, де здібності знімали
+ * підписки одна одній через `unsubscribeAll(casterId)`.
+ *
  * ## Що ще сюди прийде
  *
  * Контекст росте разом із механікою, а не наперед: інтерфейс до підсистеми, якої
@@ -44,7 +52,6 @@ import net.minecraft.world.phys.Vec3
  *
  * | що | фаза |
  * |---|---|
- * | `events` — доменні події через міксини | 06 |
  * | `effects` — словник фігур із частинок | 07 |
  * | `ui` — екрани вибору й ввід | 11 |
  * | `summons` — data-driven істоти | 12 |
@@ -78,6 +85,7 @@ interface AbilityContext {
     val targeting: Targeting
     val messaging: Messaging
     val scheduling: Scheduling
+    val events: Events
 }
 
 /**

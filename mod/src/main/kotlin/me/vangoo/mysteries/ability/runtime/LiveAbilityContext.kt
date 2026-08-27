@@ -7,6 +7,7 @@ import me.vangoo.mysteries.ability.CastContext
 import me.vangoo.mysteries.ability.PendingCast
 import me.vangoo.mysteries.ability.context.Beyonders
 import me.vangoo.mysteries.ability.context.Cooldowns
+import me.vangoo.mysteries.ability.context.Events
 import me.vangoo.mysteries.ability.context.Messaging
 import me.vangoo.mysteries.ability.context.Scheduling
 import me.vangoo.mysteries.ability.context.Targeting
@@ -15,20 +16,29 @@ import net.minecraft.server.level.ServerPlayer
 /**
  * Складає контексти.
  *
- * Не `ServiceContainer` плагіна й не фабрика заради фабрики: сервісів у контексті п'ять,
+ * Не `ServiceContainer` плагіна й не фабрика заради фабрики: сервісів у контексті шість,
  * і без цього класу їх довелося б перелічувати в кожному місці, що кличе здібність —
  * у виконавці касту, у такті пасивок, а далі в кожній наступній точці входу.
+ *
+ * Двоє з шести зібрані **під конкретний виклик**: `targeting` дивиться очима саме цього
+ * гравця, а `events` підписується саме від цієї здібності. Решта — одні й ті самі об'єкти
+ * на весь сервер.
  */
 class AbilityContexts(
     private val beyonders: Beyonders,
     private val cooldowns: Cooldowns,
     private val messaging: Messaging,
     private val scheduling: Scheduling,
+    private val eventHub: EventHub,
 ) {
 
     /** Контекст без квитка: такт пасивки, вмикання тогла, вхід і вихід гравця. */
     fun of(caster: ServerPlayer, beyonder: Beyonder, ability: AbilitySpec): AbilityContext =
-        LiveAbilityContext(caster, beyonder, ability, beyonders, cooldowns, messaging, scheduling, LiveTargeting(caster))
+        LiveAbilityContext(
+            caster, beyonder, ability,
+            beyonders, cooldowns, messaging, scheduling,
+            LiveTargeting(caster), eventHub.scopeOf(caster.uuid, ability.identity),
+        )
 
     /** Контекст одного касту: живе рівно стільки, скільки триває виклик `cast`. */
     fun forCast(
@@ -37,7 +47,11 @@ class AbilityContexts(
         ability: AbilitySpec,
         cast: PendingCast,
     ): CastContext =
-        LiveCastContext(caster, beyonder, ability, cast, beyonders, cooldowns, messaging, scheduling, LiveTargeting(caster))
+        LiveCastContext(
+            caster, beyonder, ability, cast,
+            beyonders, cooldowns, messaging, scheduling,
+            LiveTargeting(caster), eventHub.scopeOf(caster.uuid, ability.identity),
+        )
 }
 
 internal class LiveAbilityContext(
@@ -49,6 +63,7 @@ internal class LiveAbilityContext(
     override val messaging: Messaging,
     override val scheduling: Scheduling,
     override val targeting: Targeting,
+    override val events: Events,
 ) : AbilityContext
 
 internal class LiveCastContext(
@@ -61,4 +76,5 @@ internal class LiveCastContext(
     override val messaging: Messaging,
     override val scheduling: Scheduling,
     override val targeting: Targeting,
+    override val events: Events,
 ) : CastContext

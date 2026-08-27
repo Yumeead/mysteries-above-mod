@@ -24,10 +24,17 @@ import java.util.UUID
  *    `Map<UUID, Map<Class<?>, PermanentPassiveAbility>>` паралельно до самого
  *    Потойбічного; список здібностей і так лежить у `Beyonder`, і читається звідти.
  *    Лишились рівно два записи стану: **що ввімкнено** й **що вже активовано**.
+ *
+ * Відколи пасивка вміє підписуватись на події (фаза 06), життєвий цикл тут керує ще й
+ * ними: **вмикання знімає попередні підписки цієї здібності, вимикання — всі її**.
+ * Пасивка, що підписалась в `onActivate`, після смерті й респавну не подвоїться, і
+ * писати їй для цього не треба нічого — рівно як `SessionHost` гасить попередню сесію
+ * на перекасті.
  */
 class PassiveTicker(
     private val beyonders: Beyonders,
     private val contexts: AbilityContexts,
+    private val events: EventHub,
     private val players: (UUID) -> ServerPlayer?,
     private val onError: (String, Throwable) -> Unit = { _, _ -> },
 ) {
@@ -74,9 +81,11 @@ class PassiveTicker(
 
         val nowEnabled = if (on.remove(ability.identity)) {
             guard("вимкнення ${ability.identity}") { ability.onDisable(context) }
+            events.forget(player.uuid, ability.identity)
             false
         } else {
             on += ability.identity
+            events.forget(player.uuid, ability.identity)
             guard("увімкнення ${ability.identity}") { ability.onEnable(context) }
             true
         }
@@ -100,10 +109,14 @@ class PassiveTicker(
             guard("деактивація $identity") {
                 ability.onDeactivate(contexts.of(player, beyonder, ability))
             }
+            events.forget(player.uuid, identity)
         }
 
         for (ability in current) {
             if (live.putIfAbsent(ability.identity, ability) != null) continue
+            // Порожній аркуш перед `onActivate`: активація тієї самої здібності вдруге
+            // (респавн, повторний вхід у світ) не має лишити позаду першу підписку.
+            events.forget(player.uuid, ability.identity)
             guard("активація ${ability.identity}") {
                 ability.onActivate(contexts.of(player, beyonder, ability))
             }
@@ -127,6 +140,7 @@ class PassiveTicker(
             guard("деактивація $identity") {
                 ability.onDeactivate(contexts.of(player, beyonder, ability))
             }
+            events.forget(player.uuid, identity)
         }
     }
 
@@ -145,6 +159,7 @@ class PassiveTicker(
                 guard("вимкнення ${ability.identity}") {
                     ability.onDisable(contexts.of(player, beyonder, ability))
                 }
+                events.forget(player.uuid, ability.identity)
             }
     }
 

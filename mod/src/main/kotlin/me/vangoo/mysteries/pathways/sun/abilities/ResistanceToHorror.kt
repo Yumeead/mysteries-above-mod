@@ -4,6 +4,7 @@ import me.vangoo.domain.valueobjects.AbilityIdentity
 import me.vangoo.domain.valueobjects.Sequence
 import me.vangoo.mysteries.ability.AbilityContext
 import me.vangoo.mysteries.ability.PermanentPassiveAbility
+import me.vangoo.mysteries.ability.Ticking
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
 import net.minecraft.core.Holder
 import net.minecraft.core.particles.ParticleTypes
@@ -19,8 +20,14 @@ import net.minecraft.world.effect.MobEffects
  * Святе світло опирається страху: щосекунди зрізає по дві секунди з тривалості
  * ментальних дебафів, прискорюючи їхній сплив. Миттєво не знімає нічого —
  * повільність теж не захищена, вона тут вважається фізичним ефектом, не ментальним.
+ *
+ * Такт тут доречний, на відміну від `IllusoryScales`: дебаф спливає **сам по собі**, і
+ * події, на яку можна було б почекати, не існує взагалі. Саме тому `Ticking` тепер
+ * дописується явно — пасивка оголошує, що їй потрібен годинник.
  */
-class ResistanceToHorror : PermanentPassiveAbility(AbilityIdentity.of("sun_resistance_to_horror")) {
+class ResistanceToHorror :
+    PermanentPassiveAbility(AbilityIdentity.of("sun_resistance_to_horror")),
+    Ticking {
 
     override val tickPeriodTicks: Int = TICKS_PER_SECOND
 

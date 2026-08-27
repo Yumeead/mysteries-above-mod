@@ -14,12 +14,14 @@ Kotlin/Fabric, not the plugin's Java/Spigot. Two halves, split across the module
 | Base class | Use for | You implement |
 |---|---|---|
 | `ActiveAbility(identity)` | triggered by the player | `cast(context: CastContext): AbilityOutcome` |
-| `PermanentPassiveAbility(identity)` | always-on | `tick(context: AbilityContext)` (+ optional `onActivate`, `onDeactivate`, `tickPeriodTicks`) |
-| `ToggleablePassiveAbility(identity)` | on/off switch held by the player | `onEnable`, `onDisable`, `tick` (+ `tickPeriodTicks`) |
+| `PermanentPassiveAbility(identity)` | always-on | optional `onActivate`, `onDeactivate` |
+| `ToggleablePassiveAbility(identity)` | on/off switch held by the player | `onEnable`, `onDisable` |
 
 Every ability also declares `displayName`, `description(sequence)`, and — if active — `spiritualityCost` and `cooldownSeconds(sequence)`.
 
-**A passive declares its period, it doesn't count one.** `tickPeriodTicks` (1 = every tick, 20 = once a second) — the ticker skips the off-beats. Never keep a `runs++ % 20` counter in a field; it desyncs on relog.
+**A tick is a choice, not an inheritance.** Add `, Ticking` to the class header when the ability really needs a clock, and implement `tick(context: AbilityContext)` plus `tickPeriodTicks`. Ask first whether an event would do: `IllusoryScales` polled the water twice a second until it learned to wait for `IncomingDamage`; `ResistanceToHorror` still ticks, and rightly — a debuff expires on its own and there is no event to wait for.
+
+**A ticking passive declares its period, it doesn't count one.** `tickPeriodTicks` (1 = every tick, 20 = once a second) — the ticker skips the off-beats. Never keep a `runs++ % 20` counter in a field; it desyncs on relog.
 
 **`identity` is explicit and stable.** In the plugin it was derived from the Ukrainian name; here it goes into saves and packets, so it must not travel with the text. Same identity across sequences = the stronger version replaces the weaker one on advancement.
 
@@ -80,12 +82,12 @@ The context carries only what the mod itself owns:
 | `targeting` | `livingNear(r)`, `playersNear(r)`, `lookingAt(range)`, `playerLookingAt(range)` |
 | `messaging` | `tell` / `actionBar`, by player **or by UUID** (target may be offline or in another dimension) |
 | `scheduling` | `after(ticks)`, `every(ticks)`, sessions — see below |
+| `events` | `on<E> { … }` — react to what happens in the world; see below |
 
 Not there yet, arriving with its own phase — don't invent a stand-in:
 
 | | phase |
 |---|---|
-| `events` — domain events via mixins | 06 |
 | `effects` — particle-shape vocabulary | 07 |
 | `ui` — choice screens and input | 11 |
 | `summons` — data-driven creatures | 12 |
@@ -148,6 +150,42 @@ Inside `SessionScope`: `ownerId`, `owner` (`ServerPlayer?`), `beyonder`, `ticksA
 5. Upkeep is all-or-nothing: `payUpkeep` either debits the full amount or debits nothing and returns `false`. Declare the price as `periodicCost(sequence)` on the spec.
 
 For non-session timing use `context.scheduling.after(ticks) { … }` / `.every(ticks) { … }`. There is no `runAsync`: everything is already on the server thread, and real background work is an explicit `withContext(Dispatchers.IO)` inside a session.
+
+## Events (reacting to the world)
+
+```kotlin
+override fun onActivate(context: AbilityContext) {
+    val owner = context.caster.uuid                 // a UUID, never the ServerPlayer
+
+    context.events.on<IncomingDamage> { damage ->
+        if (damage.victim.uuid != owner) return@on
+        if (!damage.victim.isInWater) return@on
+        damage.scale(1.0 - 0.20)                    // or damage.cancel()
+    }
+}
+```
+
+`on<E>(durationTicks = EVENT_FOREVER) { … }` returns a `Subscription` you only need if you
+want to unsubscribe early (a one-shot reaction cancels itself from inside the handler).
+
+1. **Never unsubscribe in `onDeactivate`.** The registry drops your subscriptions on
+   activation, loss of the ability, logout and server stop. **Activation replaces
+   subscriptions** — the same rule as "a re-cast replaces the session" — so subscribing in
+   `onActivate` cannot double up after a respawn.
+2. **Never capture the `ServerPlayer`.** A handler outlives the tick that made it, and death
+   gives the player a new entity. Capture `caster.uuid` and read everything else off the
+   event.
+3. **The event is an intent, not a fact.** `IncomingDamage` fires at the top of `hurtServer`:
+   armour, shields and vanilla's invulnerability *frames* have not been applied yet. Only
+   outright invulnerability is filtered out for you. A hit counter will over-count rapid hits.
+4. **Only add a new event type when something subscribes to it.** An event nobody listens for
+   is the same empty interface the context refuses to grow. A new one costs one class in
+   `mysteries/event` and one line in `GameEventBridge`.
+5. **Mixins are the last resort, not the first.** Search order: a ready Fabric API hook → your
+   own `Block`/`Item` → a `PassiveTicker` beat → and only then a mixin. Damage is the one
+   thing that got there, because `ALLOW_DAMAGE` returns a `boolean` and cannot change the
+   number. If you do write one: `@Inject` at `HEAD`/`RETURN` only, mandatory `require = 1`,
+   zero logic in the body.
 
 ## Effect/juice checklist
 

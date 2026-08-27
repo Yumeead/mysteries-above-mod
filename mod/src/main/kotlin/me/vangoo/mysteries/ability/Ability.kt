@@ -97,12 +97,20 @@ abstract class ActiveAbility(identity: AbilityIdentity) : Ability(identity, Abil
 /**
  * Те, що цокає власним тактом.
  *
+ * Не `sealed`: відколи такт став вибором пасивки, а не її обов'язком, оголошувати
+ * `Ticking` доводиться в пакеті самої здібності — а `sealed` дозволяє реалізацію лише
+ * у своєму.
+ *
  * [tickPeriodTicks] — головна відмінність від плагіна. Там `PassiveAbilityScheduler`
  * кликав `tick()` усім і кожен тік, а пасивка, якій вистачало разу на секунду, сама
  * рахувала `if (++runs % 20 == 0)`. Лічильник у полі здібності — це стан, який
  * розсинхронізується з перезаходом гравця; оголошений період — просто число.
+ *
+ * **Пасивка цього не успадковує.** Відколи вона вміє чекати на подію (фаза 06), такт
+ * для неї — вибір, а не обов'язок: опір, що спрацьовує на удар, опитувати світ двадцять
+ * разів на секунду не мусить. Хто хоче цокати — дописує `, Ticking` до свого заголовка.
  */
-sealed interface Ticking {
+interface Ticking {
 
     /** Період такту в тіках. 1 — щотік, 20 — раз на секунду. */
     val tickPeriodTicks: Int get() = 1
@@ -113,12 +121,17 @@ sealed interface Ticking {
 /** Пасивка, що працює завжди, поки здібність є в Потойбічного. */
 abstract class PermanentPassiveAbility(
     identity: AbilityIdentity,
-) : Ability(identity, AbilityType.PERMANENT_PASSIVE), Ticking {
+) : Ability(identity, AbilityType.PERMANENT_PASSIVE) {
 
-    /** Вхід у гру або отримання здібності при піднесенні. */
+    /**
+     * Вхід у гру, респавн або отримання здібності при піднесенні.
+     *
+     * Місце для підписки на події: реєстр знімає попередні підписки цієї здібності
+     * **перед** кожним викликом, тож активація вдруге не подвоює нічого.
+     */
     open fun onActivate(context: AbilityContext) {}
 
-    /** Вихід із гри або втрата здібності. */
+    /** Вихід із гри або втрата здібності. Підписки знімає реєстр, не здібність. */
     open fun onDeactivate(context: AbilityContext) {}
 }
 
@@ -132,7 +145,7 @@ abstract class PermanentPassiveAbility(
  */
 abstract class ToggleablePassiveAbility(
     identity: AbilityIdentity,
-) : Ability(identity, AbilityType.TOGGLEABLE_PASSIVE), Ticking {
+) : Ability(identity, AbilityType.TOGGLEABLE_PASSIVE) {
 
     abstract fun onEnable(context: AbilityContext)
 
