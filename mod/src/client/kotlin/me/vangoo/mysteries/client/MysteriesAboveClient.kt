@@ -1,11 +1,14 @@
 package me.vangoo.mysteries.client
 
 import me.vangoo.mysteries.MOD_ID
+import me.vangoo.mysteries.client.beyonder.ClientAbilityState
 import me.vangoo.mysteries.client.input.ModKeys
 import me.vangoo.mysteries.client.net.receiveOnClient
 import me.vangoo.mysteries.client.screen.BeyonderStatusScreen
 import me.vangoo.mysteries.net.ModChannels
 import net.fabricmc.api.ClientModInitializer
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import org.slf4j.LoggerFactory
 
 /**
@@ -30,38 +33,17 @@ object MysteriesAboveClient : ClientModInitializer {
             }
         }
 
-        // Читальна модель уже їде по дроту, але малювати її ще нема чим: сховище
-        // клієнта — віха M2, HUD — M3. Лог тут не тимчасовий милиць, а перевірка віхи:
-        // він доводить, що обидва знімки доходять цілими, і зникне разом із приймачем,
-        // коли пакет буде куди покласти.
-        ModChannels.ABILITY_ROSTER.receiveOnClient { payload, _ ->
-            val roster = payload.roster
-            if (roster == null) {
-                log.info("Ростер: гравець не Потойбічний")
-            } else {
-                log.info(
-                    "Ростер: {} Посл. {} ({}) — здібностей {}: {}",
-                    roster.pathwayId,
-                    roster.sequence.level,
-                    roster.sequenceName.string,
-                    roster.entries.size,
-                    roster.entries.joinToString { "${it.identity}/${it.type}/${it.cost}" },
-                )
-            }
-        }
+        // Обидва знімки лягають у клієнтське сховище й більше нікуди: малювання —
+        // справа HUD (M3) і колеса (M4), а до них список видно на тестовому екрані.
+        ModChannels.ABILITY_ROSTER.receiveOnClient { payload, _ -> ClientAbilityState.accept(payload) }
+        ModChannels.ABILITY_STATE.receiveOnClient { payload, _ -> ClientAbilityState.accept(payload) }
 
-        ModChannels.ABILITY_STATE.receiveOnClient { payload, _ ->
-            log.info(
-                "Стан на тіку {}: духовність {}, обрано {}, живих {}: {}",
-                payload.serverTick,
-                payload.spirituality,
-                payload.selected ?: "—",
-                payload.live.size,
-                payload.live.joinToString {
-                    "${it.identity}@${it.readyAtTick}${if (it.toggled) "●" else ""}${if (it.sustaining) "◐" else ""}"
-                },
-            )
-        }
+        // Годинник кулдаунів. Тік клієнта, а не настінний час: одиночна гра на паузі
+        // стоїть — і сервер, і відлік разом із нею.
+        ClientTickEvents.END_CLIENT_TICK.register { ClientAbilityState.tick() }
+
+        // Наступний світ починає з чистого аркуша: чужий ростер малювати нічим і нема чого.
+        ClientPlayConnectionEvents.DISCONNECT.register { _, _ -> ClientAbilityState.clear() }
 
         ModKeys.register()
 
