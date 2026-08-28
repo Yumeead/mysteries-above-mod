@@ -140,9 +140,27 @@ suspend fun SessionScope.sustain(
         if (ticksAlive >= deadline) return SessionEnd.EXPIRED
 
         sinceUpkeep += periodTicks
-        if (upkeep > 0 && sinceUpkeep >= upkeepPeriodTicks) {
-            sinceUpkeep = 0
-            if (!payUpkeep(upkeep)) return SessionEnd.EXHAUSTED
+        if (upkeep > 0) {
+            // Платиться **за кожен** період, що минув, а не один раз за такт. Такт сесії
+            // буває довшим за період оплати (`SunHalo` б'є раз на дві секунди, а платить
+            // щосекунди) — і попередня редакція в такому разі тихо списувала вдвічі менше,
+            // ніж оголошено. Лічильник зменшується на сплачене, а не обнуляється: інакше
+            // залишок такту губився б.
+            val due = upkeepDue(sinceUpkeep, upkeepPeriodTicks)
+            sinceUpkeep -= due * upkeepPeriodTicks
+            repeat(due) {
+                if (!payUpkeep(upkeep)) return SessionEnd.EXHAUSTED
+            }
         }
     }
 }
+
+/**
+ * Скільки разів настала оплата утримання за [sinceUpkeep] накопичених тіків.
+ *
+ * Окремою функцією саме тому, що тут була вада: `if (sinceUpkeep >= period)` платив рівно
+ * один раз, скільки б періодів не вмістилось у такт сесії. Тепер це ділення — і його
+ * можна перевірити без гри.
+ */
+internal fun upkeepDue(sinceUpkeep: Int, upkeepPeriodTicks: Int): Int =
+    if (upkeepPeriodTicks <= 0) 0 else sinceUpkeep / upkeepPeriodTicks

@@ -201,6 +201,17 @@ class SessionHostTest {
     }
 
     @Test
+    fun `утримання платиться за кожен період, а не раз на такт сесії`() {
+        // Такт `SunHalo` — 40 тіків, період оплати — 20: попередня редакція платила один
+        // раз за такт, тобто вдвічі менше за оголошене, і сила виходила майже безкоштовною.
+        assertEquals(2, upkeepDue(sinceUpkeep = 40, upkeepPeriodTicks = 20))
+        assertEquals(1, upkeepDue(sinceUpkeep = 20, upkeepPeriodTicks = 20))
+        assertEquals(0, upkeepDue(sinceUpkeep = 19, upkeepPeriodTicks = 20))
+        // Залишок не губиться: 25 тіків — це один період і п'ять тіків наперед.
+        assertEquals(1, upkeepDue(sinceUpkeep = 25, upkeepPeriodTicks = 20))
+    }
+
+    @Test
     fun `sustain gives up when the owner is not in the world`() {
         var end: SessionEnd? = null
         host.session(owner, wind) {
