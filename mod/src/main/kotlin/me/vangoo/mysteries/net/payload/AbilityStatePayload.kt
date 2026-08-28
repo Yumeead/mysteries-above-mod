@@ -1,5 +1,6 @@
 package me.vangoo.mysteries.net.payload
 
+import me.vangoo.domain.valueobjects.SanityLoss
 import me.vangoo.domain.valueobjects.Spirituality
 import me.vangoo.mysteries.modId
 import net.minecraft.network.RegistryFriendlyByteBuf
@@ -21,6 +22,12 @@ data class AbilityStatePayload(
     /** Якір: тік сервера на момент знімка. Від нього клієнт відлічує кулдауни сам. */
     val serverTick: Int,
     val spirituality: Spirituality,
+    /**
+     * Розхитаність розуму, 0..100. Клієнту потрібна не заради числа: від неї
+     * залежить, що гравець **чує й бачить** — шепіт і екранний ланцюг ставить
+     * клієнт сам, бо кадр малюється 60+ разів на секунду, а пакет летить раз.
+     */
+    val sanityLoss: SanityLoss,
     /** Ідентичність обраної здібності; `null` — не обрано нічого. */
     val selected: String?,
     /** Лише ті здібності, у кого є що сказати: решта готова, вимкнена й не триває. */
@@ -59,6 +66,7 @@ data class AbilityStatePayload(
             buf.writeVarInt(payload.serverTick)
             buf.writeVarInt(payload.spirituality.current)
             buf.writeVarInt(payload.spirituality.maximum)
+            buf.writeVarInt(payload.sanityLoss.scale)
 
             buf.writeBoolean(payload.selected != null)
             payload.selected?.let(buf::writeUtf)
@@ -76,6 +84,8 @@ data class AbilityStatePayload(
             val serverTick = buf.readVarInt()
             val current = buf.readVarInt()
             val maximum = buf.readVarInt()
+            // `SanityLoss` сам звіряє межі 0..100 — межа довіри, а не проста арифметика.
+            val sanityLoss = SanityLoss.of(buf.readVarInt())
             val selected = if (buf.readBoolean()) buf.readUtf() else null
             val live = List(buf.readVarInt()) {
                 Live(
@@ -85,7 +95,7 @@ data class AbilityStatePayload(
                     sustaining = buf.readBoolean(),
                 )
             }
-            return AbilityStatePayload(serverTick, Spirituality(current, maximum), selected, live)
+            return AbilityStatePayload(serverTick, Spirituality(current, maximum), sanityLoss, selected, live)
         }
     }
 }

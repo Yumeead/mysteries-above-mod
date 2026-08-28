@@ -7,6 +7,7 @@ import me.vangoo.domain.valueobjects.Spirituality
 import me.vangoo.mysteries.GameRegistries
 import me.vangoo.mysteries.net.payload.AbilityActionPayload
 import me.vangoo.mysteries.net.payload.AbilityRosterPayload
+import me.vangoo.domain.valueobjects.SanityLoss
 import me.vangoo.mysteries.net.payload.AbilityStatePayload
 import net.minecraft.core.RegistryAccess
 import net.minecraft.network.RegistryFriendlyByteBuf
@@ -102,7 +103,7 @@ class AbilityPayloadCodecTest {
     @Test
     @DisplayName("Стан без обраної здібності й без живих записів проїжджає порожнім")
     fun bareStateRoundTrips() {
-        val payload = AbilityStatePayload(12_345, Spirituality(0, 300), null, emptyList())
+        val payload = AbilityStatePayload(12_345, Spirituality(0, 300), SanityLoss.none(), null, emptyList())
 
         val decoded = roundTrip(payload, AbilityStatePayload.CODEC)
 
@@ -116,6 +117,7 @@ class AbilityPayloadCodecTest {
         val payload = AbilityStatePayload(
             serverTick = 987_654,
             spirituality = Spirituality(124, 300),
+            sanityLoss = SanityLoss.of(73),
             selected = "tyrant_restorative_water",
             live = listOf(
                 AbilityStatePayload.Live("tyrant_restorative_water", 988_054, false, false),
@@ -126,6 +128,22 @@ class AbilityPayloadCodecTest {
 
         // Стан — плоскі числа й рядки, тож звичайна рівність тут працює.
         assertEquals(payload, roundTrip(payload, AbilityStatePayload.CODEC))
+    }
+
+    @Test
+    @DisplayName("Розхитаність розуму доїжджає на обох межах шкали")
+    fun sanityBoundsRoundTrip() {
+        for (scale in intArrayOf(0, 1, 99, 100)) {
+            val payload = AbilityStatePayload(
+                serverTick = 1,
+                spirituality = Spirituality(10, 300),
+                sanityLoss = SanityLoss.of(scale),
+                selected = null,
+                live = emptyList(),
+            )
+
+            assertEquals(payload, roundTrip(payload, AbilityStatePayload.CODEC), "глузд $scale")
+        }
     }
 
     @Test

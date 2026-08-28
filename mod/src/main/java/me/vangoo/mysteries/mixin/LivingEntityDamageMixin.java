@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 /**
- * Єдиний міксин мода: дозволяє здібності **змінити** вхідну шкоду.
+ * Перший міксин мода: дозволяє здібності <b>змінити</b> вхідну шкоду.
  *
  * Скасування сюди не входить — його вміє готовий {@code ALLOW_DAMAGE} з Fabric API,
  * і саме там воно й лишилось. Тут рівно те, чого готовий гачок дати не може: число.

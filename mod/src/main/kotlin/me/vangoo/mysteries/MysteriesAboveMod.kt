@@ -3,6 +3,8 @@ package me.vangoo.mysteries
 import me.vangoo.mysteries.ability.runtime.AbilityServices
 import me.vangoo.mysteries.beyonder.AbilityRequests
 import me.vangoo.mysteries.beyonder.BeyonderStatus
+import me.vangoo.mysteries.effect.ModParticles
+import me.vangoo.mysteries.effect.ModSounds
 import me.vangoo.mysteries.item.ModComponents
 import me.vangoo.mysteries.item.ModItems
 import me.vangoo.mysteries.net.ModChannels
@@ -28,6 +30,11 @@ object MysteriesAboveMod : ModInitializer {
         // Компонент — перед предметом: предмет його вже вимагає.
         ModComponents.register()
         ModItems.register()
+
+        // Чуттєвий словник: частинки й звуки реєструються на обох сторонах — сервер
+        // шле їх у пакетах, клієнт малює й програє.
+        ModParticles.register()
+        ModSounds.register()
 
         // Хребет здібностей: реєстр Потойбічних, кулдауни, повідомлення, виконавець
         // касту. Далі кожна фаза додає сюди свій сервіс.

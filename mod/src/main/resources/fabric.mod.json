@@ -22,7 +22,11 @@
     ]
   },
   "mixins": [
-    "mysteries_above.mixins.json"
+    "mysteries_above.mixins.json",
+    {
+      "config": "mysteries_above.client.mixins.json",
+      "environment": "client"
+    }
   ],
   "depends": {
     "fabricloader": ">=0.19.3",

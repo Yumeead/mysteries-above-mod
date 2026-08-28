@@ -1,5 +1,6 @@
 package me.vangoo.mysteries.client.beyonder
 
+import me.vangoo.domain.valueobjects.SanityLoss
 import me.vangoo.domain.valueobjects.Spirituality
 import me.vangoo.mysteries.net.payload.AbilityRosterPayload
 import me.vangoo.mysteries.net.payload.AbilityStatePayload
@@ -41,6 +42,10 @@ object ClientAbilityState {
 
     /** `null` — стану ще не надсилали (або гравець не Потойбічний). */
     var spirituality: Spirituality? = null
+        private set
+
+    /** Розхитаність розуму. Поза Потойбічним — [SanityLoss.none]: нема чому хитатись. */
+    var sanityLoss: SanityLoss = SanityLoss.none()
         private set
 
     /** Ідентичність обраної здібності; вибір тримає сервер, тут лише його відлуння. */
@@ -87,6 +92,7 @@ object ClientAbilityState {
         anchored = true
 
         spirituality = payload.spirituality
+        sanityLoss = payload.sanityLoss
         selected = payload.selected
 
         // Знімок повний за задумом: у пакеті лише ті, у кого є що сказати, тож
@@ -103,6 +109,7 @@ object ClientAbilityState {
 
     private fun resetState() {
         spirituality = null
+        sanityLoss = SanityLoss.none()
         selected = null
         live.clear()
         anchored = false

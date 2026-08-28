@@ -1,0 +1,20 @@
+{
+  "whisper": {
+    "sounds": [
+      { "name": "minecraft:ambient/cave/cave2",  "volume": 0.30, "pitch": 0.62, "stream": false },
+      { "name": "minecraft:ambient/cave/cave7",  "volume": 0.28, "pitch": 0.58, "stream": false },
+      { "name": "minecraft:ambient/cave/cave11", "volume": 0.30, "pitch": 0.66, "stream": false },
+      { "name": "minecraft:ambient/cave/cave14", "volume": 0.26, "pitch": 0.55, "stream": false }
+    ],
+    "subtitle": "subtitles.mysteries_above.whisper"
+  },
+  "heartbeat": {
+    "sounds": [
+      { "name": "minecraft:mob/warden/heartbeat_1", "volume": 0.55, "pitch": 0.85 },
+      { "name": "minecraft:mob/warden/heartbeat_2", "volume": 0.55, "pitch": 0.82 },
+      { "name": "minecraft:mob/warden/heartbeat_3", "volume": 0.55, "pitch": 0.88 },
+      { "name": "minecraft:mob/warden/heartbeat_4", "volume": 0.55, "pitch": 0.80 }
+    ],
+    "subtitle": "subtitles.mysteries_above.heartbeat"
+  }
+}

@@ -79,6 +79,7 @@ object BeyonderStatus {
         return AbilityStatePayload(
             serverTick = player.level().server.tickCount,
             spirituality = beyonder.spirituality,
+            sanityLoss = beyonder.sanityLoss,
             selected = AbilityServices.selection.of(owner)?.id,
             live = beyonder.abilities.mapNotNull { spec ->
                 val readyAtTick = AbilityServices.cooldowns.readyAtTick(owner, spec.identity)

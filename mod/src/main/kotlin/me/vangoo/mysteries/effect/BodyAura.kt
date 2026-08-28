@@ -3,7 +3,6 @@ package me.vangoo.mysteries.effect
 import me.vangoo.domain.valueobjects.RgbColor
 import me.vangoo.mysteries.ability.context.Scheduling
 import me.vangoo.mysteries.schedule.TaskHandle
-import net.minecraft.core.particles.DustColorTransitionOptions
 import net.minecraft.core.particles.ParticleOptions
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
@@ -22,9 +21,12 @@ import kotlin.math.sin
  * ## Чому не коло під ногами
  *
  * Перевірено 28.08.2026 і відкинуто: рівна геометрична фігура читається як шар поверх
- * гри, а не як частина світу. Частинка пилу — піксельний квадрат, тобто єдина форма,
- * яка тут виглядає своєю. `DUST_COLOR_TRANSITION` до того ж світлішає за час життя
- * порошинки, тож кожна сама програє «речовина набирає світла».
+ * гри, а не як частина світу. Пасмо з окремих порошинок лишається піксельним — тобто
+ * своїм у грі, де все інше теж піксель.
+ *
+ * Порошинка тут власна ([ModParticles.SPIRIT_MOTE]), а не ванільний `DUST`: спалах на
+ * початку й згасання в кінці кожна відіграє сама, тож пасмо не мусить нічого гасити
+ * вручну — воно лише сіє.
  *
  * ## Чому фігура планує себе сама
  *
@@ -42,7 +44,7 @@ fun bodyAura(
 ) {
     require(durationTicks > 0) { "Тривалість покриву мусить бути додатною: $durationTicks" }
 
-    val mote = DustColorTransitionOptions(color.packed, HIGHLIGHT, MOTE_SCALE)
+    val mote = ModParticles.mote(color)
     val follow = follower(target)
     var step = 0
 
@@ -100,9 +102,6 @@ private fun draw(target: LivingEntity, mote: ParticleOptions, counterFlow: Parti
     }
 }
 
-/** Куди світлішає порошинка за час життя — не колір шляху, а спільне «набрало світла». */
-private const val HIGHLIGHT = 0xCFE9FF
-private const val MOTE_SCALE = 0.7f
 private const val TAU = (2.0 * PI).toFloat()
 
 /** Кожні два тіки: 1,5 порошинки на тік — покрив густий, але не спам. */

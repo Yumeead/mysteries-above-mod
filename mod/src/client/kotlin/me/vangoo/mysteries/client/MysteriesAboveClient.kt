@@ -2,6 +2,9 @@ package me.vangoo.mysteries.client
 
 import me.vangoo.mysteries.MOD_ID
 import me.vangoo.mysteries.client.beyonder.ClientAbilityState
+import me.vangoo.mysteries.client.beyonder.SanityAmbience
+import me.vangoo.mysteries.client.render.SpiritMoteParticle
+import me.vangoo.mysteries.effect.ModParticles
 import me.vangoo.mysteries.client.hud.AbilityHud
 import me.vangoo.mysteries.client.hud.SpiritualityHud
 import me.vangoo.mysteries.client.input.ModKeys
@@ -11,6 +14,7 @@ import me.vangoo.mysteries.net.ModChannels
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
+import net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry
 import org.slf4j.LoggerFactory
 
 /**
@@ -45,10 +49,23 @@ object MysteriesAboveClient : ClientModInitializer {
 
         // Годинник кулдаунів. Тік клієнта, а не настінний час: одиночна гра на паузі
         // стоїть — і сервер, і відлік разом із нею.
-        ClientTickEvents.END_CLIENT_TICK.register { ClientAbilityState.tick() }
+        ClientTickEvents.END_CLIENT_TICK.register {
+            ClientAbilityState.tick()
+            // Шепіт і екранний ланцюг — похідні від щойно оновленого стану, тож ідуть
+            // одразу за ним, а не окремою підпискою з невизначеним порядком.
+            SanityAmbience.tick()
+        }
+
+        // Рух і згасання порошинки — клієнтські: сервер шле лише «де і якого кольору».
+        ParticleProviderRegistry.getInstance().register(ModParticles.SPIRIT_MOTE) { sprites ->
+            SpiritMoteParticle.Provider(sprites.first())
+        }
 
         // Наступний світ починає з чистого аркуша: чужий ростер малювати нічим і нема чого.
-        ClientPlayConnectionEvents.DISCONNECT.register { _, _ -> ClientAbilityState.clear() }
+        ClientPlayConnectionEvents.DISCONNECT.register { _, _ ->
+            ClientAbilityState.clear()
+            SanityAmbience.clear()
+        }
 
         SpiritualityHud.register()
         AbilityHud.register()

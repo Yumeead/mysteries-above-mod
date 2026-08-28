@@ -3,5 +3,7 @@
   "key.category.mysteries_above.abilities": "Mysteries Above",
   "key.mysteries_above.cast": "Застосувати здібність",
   "hud.mysteries_above.no_selection": "Нічого не обрано",
-  "hud.mysteries_above.spirituality": "Духовність: %s / %s"
+  "hud.mysteries_above.spirituality": "Духовність: %s / %s",
+  "subtitles.mysteries_above.whisper": "Голоси, яких немає",
+  "subtitles.mysteries_above.heartbeat": "Власне серце"
 }

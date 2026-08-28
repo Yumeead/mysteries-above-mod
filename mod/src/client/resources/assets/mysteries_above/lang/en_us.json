@@ -3,5 +3,7 @@
   "key.category.mysteries_above.abilities": "Mysteries Above",
   "key.mysteries_above.cast": "Use ability",
   "hud.mysteries_above.no_selection": "Nothing selected",
-  "hud.mysteries_above.spirituality": "Spirituality: %s / %s"
+  "hud.mysteries_above.spirituality": "Spirituality: %s / %s",
+  "subtitles.mysteries_above.whisper": "Voices that aren't there",
+  "subtitles.mysteries_above.heartbeat": "Your own heart"
 }

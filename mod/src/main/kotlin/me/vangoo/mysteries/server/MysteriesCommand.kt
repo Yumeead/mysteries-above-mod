@@ -10,6 +10,7 @@ import me.vangoo.domain.abilities.AbilityType
 import me.vangoo.domain.entities.Pathway
 import me.vangoo.domain.valueobjects.AbilityIdentity
 import me.vangoo.domain.valueobjects.Mastery
+import me.vangoo.domain.valueobjects.SanityLoss
 import me.vangoo.domain.valueobjects.Sequence
 import me.vangoo.mysteries.ability.Ability
 import me.vangoo.mysteries.ability.runtime.AbilityServices
@@ -66,6 +67,12 @@ object MysteriesCommand {
                     Commands.literal("mastery").requires(OPERATOR).then(
                         Commands.argument("percent", DoubleArgumentType.doubleArg(0.0, 100.0))
                             .executes { context -> mastery(context) },
+                    ),
+                )
+                .then(
+                    Commands.literal("sanity").requires(OPERATOR).then(
+                        Commands.argument("scale", IntegerArgumentType.integer(0, 100))
+                            .executes { context -> sanity(context) },
                     ),
                 )
                 .then(Commands.literal("forget").requires(OPERATOR).executes(::forget)),
@@ -175,6 +182,27 @@ object MysteriesCommand {
         BeyonderStatus.push(player)
         AbilityServices.statePump.pushNow(player.uuid)
         context.source.sendSuccess({ Component.literal("Засвоєння: ${beyonder.mastery}") }, false)
+        return 1
+    }
+
+    /**
+     * Виставляє розхитаність розуму напряму.
+     *
+     * Існує з тієї ж причини, що й `mastery`: сама вона росте по два пункти за каст на
+     * порожньому баку, тож дійти до шепоту й екранного ланцюга «чесно» — це сотні кастів.
+     */
+    private fun sanity(context: CommandContext<CommandSourceStack>): Int {
+        val player = context.source.playerOrException
+        val beyonder = AbilityServices.beyonders.of(player.uuid)
+            ?: return fail(context, "Ви не Потойбічний")
+
+        val wanted = SanityLoss.of(IntegerArgumentType.getInteger(context, "scale"))
+        // Прямого сеттера в домені немає навмисно: глузд рухається подіями, не присвоєнням.
+        val delta = wanted.scale - beyonder.sanityLoss.scale
+        if (delta > 0) beyonder.increaseSanityLoss(delta) else beyonder.decreaseSanityLoss(-delta)
+
+        AbilityServices.statePump.pushNow(player.uuid)
+        context.source.sendSuccess({ Component.literal("Глузд: ${beyonder.sanityLoss}") }, false)
         return 1
     }
 
