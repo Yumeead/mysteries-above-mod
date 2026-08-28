@@ -23,9 +23,9 @@ object AbilityRequests {
     fun castSelected(player: ServerPlayer) {
         val selected = AbilityServices.selection.of(player.uuid)
         if (selected == null) {
-            player.sendSystemMessage(
+            AbilityServices.messaging.actionBar(
+                player,
                 Component.literal("Здібність не обрано: /mysteries select <здібність>"),
-                true,
             )
             return
         }
@@ -42,10 +42,13 @@ object AbilityRequests {
             ?: return report(player, CastReport.Refused(CastRefusal.NotCastable))
 
         val result = AbilityServices.executor.cast(player, ability)
-        // Духовність і засвоєння змінились — екран не має лишатись зі старими числами.
-        BeyonderStatus.push(player)
         // Дія гравця штовхає стан негайно: після касту бар має впасти в той самий кадр,
         // а не за 900 мс до наступного секундного такту.
+        //
+        // Знімок статусу (`BeyonderStatus.push`) сюди **не** йде, і це не економія:
+        // клієнт на цей пакет **відкриває екран**, тож кожен каст розгортав гравцеві
+        // меню здібностей просто в бою. Знімок належить явному запиту — команді
+        // `/mysteries status` і утриманню клавіші, — а не побічному ефекту удару.
         AbilityServices.statePump.pushNow(player.uuid)
         return result
     }
@@ -60,7 +63,7 @@ object AbilityRequests {
     }
 
     private fun report(player: ServerPlayer, report: CastReport): CastReport {
-        CastMessages.of(report)?.let { player.sendSystemMessage(it, true) }
+        CastMessages.of(report)?.let { AbilityServices.messaging.actionBar(player, it) }
         return report
     }
 }
