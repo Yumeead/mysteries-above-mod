@@ -185,11 +185,21 @@ object AbilityHud : HudElement {
         )
     }
 
-    private fun priceOf(entry: AbilityRosterPayload.Entry): Component? = when (entry.type) {
-        AbilityType.ACTIVE -> Component.literal("✦ ${entry.cost}")
-        AbilityType.TOGGLEABLE_PASSIVE ->
-            if (entry.upkeep > 0) Component.literal("✦ ${entry.upkeep}/с") else null
-        AbilityType.PERMANENT_PASSIVE -> null
+    /**
+     * Ціна здібності — разова, утримання, або обидві.
+     *
+     * Утримання показувалось лише для тоглів, а сила, що гасне сама (сесія з `upkeep`),
+     * оголошена **активною** — і виходило «✦ 0» там, де насправді щосекунди списується
+     * два десятки. Тип здібності тут узагалі ні до чого: питання просто в тому, які з
+     * двох цін ненульові.
+     */
+    private fun priceOf(entry: AbilityRosterPayload.Entry): Component? {
+        val parts = buildList {
+            if (entry.cost > 0) add("✦ ${entry.cost}")
+            if (entry.upkeep > 0) add("✦ ${entry.upkeep}/с")
+        }
+        if (parts.isNotEmpty()) return Component.literal(parts.joinToString(" · "))
+        return if (entry.type == AbilityType.ACTIVE) Component.literal("✦ 0") else null
     }
 
     private fun approach(current: Float, target: Float, step: Float): Float =

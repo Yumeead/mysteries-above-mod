@@ -130,10 +130,16 @@ class BeyonderStatusScreen(private var status: BeyonderStatusPayload) :
     private fun detailOf(entry: AbilityRosterPayload.Entry): String {
         val parts = mutableListOf<String>()
 
-        parts += when (entry.type) {
-            AbilityType.ACTIVE -> "✦ ${entry.cost}"
-            AbilityType.TOGGLEABLE_PASSIVE -> if (entry.upkeep > 0) "✦ ${entry.upkeep}/с" else "перемикач"
-            AbilityType.PERMANENT_PASSIVE -> "пасивна"
+        // Ненульові ціни, а не тип здібності: утримувана сила оголошена активною, і
+        // «✦ 0» у неї означало б, що вона безкоштовна.
+        if (entry.cost > 0) parts += "✦ ${entry.cost}"
+        if (entry.upkeep > 0) parts += "✦ ${entry.upkeep}/с"
+        if (parts.isEmpty()) {
+            parts += when (entry.type) {
+                AbilityType.ACTIVE -> "✦ 0"
+                AbilityType.TOGGLEABLE_PASSIVE -> "перемикач"
+                AbilityType.PERMANENT_PASSIVE -> "пасивна"
+            }
         }
 
         val seconds = ClientAbilityState.remainingSeconds(entry.identity)
