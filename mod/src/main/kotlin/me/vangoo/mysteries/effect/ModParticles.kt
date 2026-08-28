@@ -38,9 +38,34 @@ object ModParticles {
         { type -> ColorParticleOption.streamCodec(type) },
     )
 
+    /**
+     * Знак духу: та сама текстура, але **стала** — не спалахує, не змінює розміру, не
+     * дрейфує й живе фіксовані кілька тіків.
+     *
+     * ## Навіщо друга частинка, коли текстура одна
+     *
+     * [SPIRIT_MOTE] спроєктована як **іскра**: випадкове життя, випадковий розмір,
+     * спалах і згасання, від'ємна гравітація. Це саме те, що потрібно розсипу, покриву
+     * й сліду — і саме те, що руйнує **сталу фігуру**. Німб із мотів читався як хмара,
+     * що зринає: у кожну мить у повітрі висіло п'ять-сім поколінь, кожне на своїй фазі
+     * спалаху й уже піднявшись.
+     *
+     * Ванілька цю потребу не закриває. `DUST` не рухається, але живе 20–100 тіків, тож
+     * фігура, що має **ходити за гравцем**, лишала б за ним слід із кілець.
+     *
+     * Отже: коротке фіксоване життя (щоб не було сліду), нуль руху й нуль анімації (щоб
+     * була форма). Малюється така фігура частіше, ніж живе одна порошинка, і поколінь
+     * одночасно не більше двох.
+     */
+    val SPIRIT_GLYPH: ParticleType<ColorParticleOption> = FabricParticleTypes.complex(
+        { type -> ColorParticleOption.codec(type) },
+        { type -> ColorParticleOption.streamCodec(type) },
+    )
+
     /** Змушує клас ініціалізуватись до того, як реєстри закриються. */
     fun register() {
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, modId("spirit_mote"), SPIRIT_MOTE)
+        Registry.register(BuiltInRegistries.PARTICLE_TYPE, modId("spirit_glyph"), SPIRIT_GLYPH)
     }
 
     /**
@@ -51,6 +76,10 @@ object ModParticles {
      */
     fun mote(color: RgbColor): ColorParticleOption =
         ColorParticleOption.create(SPIRIT_MOTE, OPAQUE or color.packed)
+
+    /** Стала порошинка для фігур, що мусять тримати форму. Альфа так само наша. */
+    fun glyph(color: RgbColor): ColorParticleOption =
+        ColorParticleOption.create(SPIRIT_GLYPH, OPAQUE or color.packed)
 
     private const val OPAQUE = 0xFF shl 24
 }

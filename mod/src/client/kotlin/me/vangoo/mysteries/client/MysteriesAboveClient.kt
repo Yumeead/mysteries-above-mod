@@ -3,6 +3,7 @@ package me.vangoo.mysteries.client
 import me.vangoo.mysteries.MOD_ID
 import me.vangoo.mysteries.client.beyonder.ClientAbilityState
 import me.vangoo.mysteries.client.beyonder.SanityAmbience
+import me.vangoo.mysteries.client.render.SpiritGlyphParticle
 import me.vangoo.mysteries.client.render.SpiritMoteParticle
 import me.vangoo.mysteries.effect.ModParticles
 import me.vangoo.mysteries.client.hud.AbilityHud
@@ -58,7 +59,12 @@ object MysteriesAboveClient : ClientModInitializer {
 
         // Рух і згасання порошинки — клієнтські: сервер шле лише «де і якого кольору».
         ParticleProviderRegistry.getInstance().register(ModParticles.SPIRIT_MOTE) { sprites ->
-            SpiritMoteParticle.Provider(sprites.first())
+            // Набір, а не спрайт: атлас частинок у цю мить іще не зібрано, і `first()`
+            // тут падає `NullPointerException` на заставці гри.
+            SpiritMoteParticle.Provider(sprites)
+        }
+        ParticleProviderRegistry.getInstance().register(ModParticles.SPIRIT_GLYPH) { sprites ->
+            SpiritGlyphParticle.Provider(sprites)
         }
 
         // Наступний світ починає з чистого аркуша: чужий ростер малювати нічим і нема чого.

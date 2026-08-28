@@ -4,6 +4,7 @@ import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.client.particle.Particle
 import net.minecraft.client.particle.ParticleProvider
 import net.minecraft.client.particle.SingleQuadParticle
+import net.minecraft.client.particle.SpriteSet
 import net.minecraft.util.LightCoordsUtil
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
 import net.minecraft.core.particles.ColorParticleOption
@@ -72,8 +73,13 @@ class SpiritMoteParticle private constructor(
     /**
      * Один провайдер на всі кольори: колір приїжджає в [ColorParticleOption], а не
      * в окремому зареєстрованому типі на кожен шлях.
+     *
+     * **Тримає набір, а не спрайт.** Провайдери реєструються в конструкторі
+     * `ParticleResources`, тобто **до** того, як атлас частинок зібрано: `SpriteSet` у цю
+     * мить порожній, і будь-який `first()` там падає `NullPointerException` ще на
+     * заставці. Спрайт береться в [createParticle] — коли атлас уже є.
      */
-    class Provider(private val sprite: TextureAtlasSprite) : ParticleProvider<ColorParticleOption> {
+    class Provider(private val sprites: SpriteSet) : ParticleProvider<ColorParticleOption> {
         override fun createParticle(
             options: ColorParticleOption,
             level: ClientLevel,
@@ -84,7 +90,7 @@ class SpiritMoteParticle private constructor(
             yd: Double,
             zd: Double,
             random: RandomSource,
-        ): Particle = SpiritMoteParticle(level, x, y, z, xd, yd, zd, options, sprite)
+        ): Particle = SpiritMoteParticle(level, x, y, z, xd, yd, zd, options, sprites.get(random))
     }
 
     private companion object {
