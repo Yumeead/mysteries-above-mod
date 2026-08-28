@@ -84,6 +84,28 @@ The context carries only what the mod itself owns:
 | `scheduling` | `after(ticks)`, `every(ticks)`, sessions — see below |
 | `events` | `on<E> { … }` — react to what happens in the world; see below |
 
+**A context service is the only way in, not the convenient way in.** If a service covers
+what you need, call it — never the vanilla call underneath. Every member above already
+passed the phase-03 filter (a method earns its place only by adding something over one
+vanilla call), so going around one means writing that work a second time, worse. Measured
+on phase 08: `Messaging` was documented as optional, and one pathway produced half a dozen
+`level.server.playerList.getPlayer(id)?.sendSystemMessage(…)` — a hand-rolled copy of
+`ServerMessaging.find`, one of which silently dropped the message when the *caster* logged
+out. In particular: `messaging.tell/actionBar` over `player.sendSystemMessage`,
+`scheduling` over your own task loop, `targeting` over your own `clip`, `cooldowns` over
+your own map, `effects` over your own repeating particle task.
+
+**Into a session or an event handler goes the service, not the context.** The context
+carries one caster's identity and lives one call; the services carry nobody's and live as
+long as the server. `val messaging = context.messaging` before `context.session { … }`
+obeys the "don't capture the context" rule rather than dodging it — `RitualMagic.Rite`
+carries `scheduling`, `beyonders` and `messaging` exactly that way.
+
+What the rule does **not** forbid is vanilla with no service over it: `caster.health`,
+`caster.addEffect(…)`, `level.sendParticles(…)`, `level.playSound(…)`,
+`target.hurtServer(…)`. Don't wrap those — that is how the plugin grew
+`IDataContext.getFoodLevel(UUID)`.
+
 Not there yet, arriving with its own phase — don't invent a stand-in:
 
 | | phase |

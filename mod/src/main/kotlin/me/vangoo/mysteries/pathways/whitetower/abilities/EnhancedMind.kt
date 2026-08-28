@@ -75,7 +75,7 @@ class EnhancedMind :
         // Читання — вибір гравця, а не фон: інакше рядок над хотбаром зайнятий завжди.
         if (!context.caster.isShiftKeyDown) return
         val note = read(context) ?: return
-        context.caster.sendSystemMessage(note, true)
+        context.messaging.actionBar(context.caster, note)
     }
 
     /** Спершу жива ціль: камінь за нею цікавить менше, ніж вона сама. */

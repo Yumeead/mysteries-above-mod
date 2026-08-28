@@ -6,8 +6,8 @@
 abilities — that split is gone). The list is ordered **index 0 → 9 == Sequence 0 → 9**.
 `Pathway.sequenceName(level)` does `sequenceNames[level]`, so **the sequence level IS the list index.**
 
-**Ported so far:** `Tyrant` and `Sun` (phase 05, three abilities between them) and `WhiteTower`
-(phase 08, complete for Seq 9-5). The other nineteen pathways are still plugin-only;
+**Ported so far:** `WhiteTower` and `Sun` (phase 08, complete for Seq 9-5) and `Tyrant`
+(phase 05, two abilities only). The other nineteen pathways are still plugin-only;
 `ModPathways.byName` returns `null` for them.
 
 **The plugin fills Seq 9-5 only.** No pathway in the plugin has a roster at Seq 4-0 - writing
@@ -49,22 +49,36 @@ before violence; the lightning only arrives at the top half.
 | 1 | God of Thunder | thunder as authority over a region | — |
 | 0 | Tyrant | command sea, storm and sky as one | — |
 
-## Sun — group `GodAlmighty` (theme: holy light, oath, judgment, purification) — **ported (phase 05)**
+## Sun — group `GodAlmighty` (theme: holy light, oath, judgment, purification) — **ported (phase 08)**
 Bard-family: light that sings first, then blesses, then burns. Anti-evil and anti-fear
 throughout; contracts and notarization in the upper half.
 
 | Seq | Name | Design hook | In the mod |
 |----|------|-------------|---|
-| 9 | Bard | singing, physical enhancement by light | — |
-| 8 | Light Petitioner | sunshine, blessing, evil detection, daytime | — |
-| 7 | Solar High Priest | summon holy light, halo, purifying cleave, holy water, oath | `ResistanceToHorror` |
-| 6 | Notary | notarize, bind contracts | — |
-| 5 | Priest of Light | holy wave, light as a weapon | — |
+| 9 | Bard | singing, physical enhancement by light | `Singing`, `PhysicalEnhancement` (common) |
+| 8 | Light Petitioner | sunshine, blessing, evil detection, daytime | `RitualMagic` (common), `Sunshine`, `Blessing`, `EvilDetection`, `Daytime`, `NightVision` |
+| 7 | Solar High Priest | summon holy light, halo, purifying cleave, holy water, oath | `HolyLightSummoning`, `SunHalo`, `CleaveOfPurification`, `ResistanceToHorror`, `SunHolyWater`, `HolyOath`, `FireOfLight` |
+| 6 | Notary | notarize, bind contracts | `Notarization`, `Contract` |
+| 5 | Priest of Light | holy wave, light as a weapon | `HolyWave` |
 | 4 | Shadowless | no shadow may touch or hide from you | — |
 | 3 | Justice Mentor | teach/impose justice, judge by light | — |
 | 2 | Light Seeker | seek and reveal what light does not reach | — |
 | 1 | White Angel | angelic authority of the sun | — |
 | 0 | Sun | be the sun: light, judgment, purification absolute | — |
+
+**`abilities/HolyLight.kt` is Sun's shared layer** — `isProfane` (dark pathway or the vanilla
+`SENSITIVE_TO_SMITE` tag), `smite` (holy damage through `HolyAffinity`), `cleanse` (strip every
+`HARMFUL`-category effect). Reuse them; never hand-roll an undead list.
+
+**A pathway with many abilities must be distinct inside itself.** Sun has four "hit things with
+holy light" powers, so they are separated by *verb*, not by number: `Sunshine` hits one target,
+`HolyLightSummoning` falls from open sky (fails under a roof), `FireOfLight` claims a spot for
+seven seconds, `HolyWave` saves the party. When adding to a crowded pathway, find the verb first.
+
+**A power that must extinguish itself is `ActiveAbility` + a session, and its price is all upkeep.**
+`Blessing`, `Daytime`, `NightVision` and `SunHalo` declare `spiritualityCost = 0` and pay through
+`periodicCost`, so re-casting to switch the power *off* is free — otherwise the player pays to stop
+paying. A 3-4 s cooldown stays, against flicker.
 
 ## Error — group `LordOfMysteries` (theme: theft, deception, fate, observation, time)
 Marauder-family rogue: steals powers/objects/luck, sees through everything, bends fate and time.

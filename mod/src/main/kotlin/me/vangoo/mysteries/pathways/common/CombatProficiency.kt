@@ -5,6 +5,7 @@ import me.vangoo.domain.valueobjects.AbilityIdentity
 import me.vangoo.domain.valueobjects.Sequence
 import me.vangoo.mysteries.ability.AbilityContext
 import me.vangoo.mysteries.ability.PermanentPassiveAbility
+import me.vangoo.mysteries.ability.context.Messaging
 import me.vangoo.mysteries.ability.context.on
 import me.vangoo.mysteries.ability.grantAttribute
 import me.vangoo.mysteries.ability.modifierId
@@ -59,6 +60,8 @@ class CombatProficiency : PermanentPassiveAbility(AbilityIdentity.of("common_com
 
     override fun onActivate(context: AbilityContext) {
         val owner = context.caster.uuid
+        // У обробник їде сервіс, а не контекст: `Messaging` не тримає нічиєї особи.
+        val messaging = context.messaging
         context.caster.grantAttribute(Attributes.ATTACK_DAMAGE, modifier, weaponBonus(context.sequence))
 
         context.events.on<IncomingDamage> { damage ->
@@ -68,7 +71,7 @@ class CombatProficiency : PermanentPassiveAbility(AbilityIdentity.of("common_com
             if (!holdsWeapon(victim) || !faces(victim, blow)) return@on
 
             damage.scale(1.0 - PARRY_REDUCTION)
-            clang(victim, blow, damage.attacker)
+            clang(messaging, victim, blow, damage.attacker)
         }
     }
 
@@ -92,7 +95,7 @@ class CombatProficiency : PermanentPassiveAbility(AbilityIdentity.of("common_com
     }
 
     /** Дзвін і іскра в точці зустрічі — плюс рядок нападнику: він мусить зрозуміти, чому. */
-    private fun clang(victim: LivingEntity, blow: Entity, attacker: LivingEntity?) {
+    private fun clang(messaging: Messaging, victim: LivingEntity, blow: Entity, attacker: LivingEntity?) {
         val level = victim.level() as? ServerLevel ?: return
         val contact = victim.eyePosition.add(blow.position().subtract(victim.position()).normalize().scale(0.6))
         level.sendParticles(ParticleTypes.CRIT, contact.x, contact.y, contact.z, 10, 0.1, 0.1, 0.1, 0.25)
@@ -101,8 +104,9 @@ class CombatProficiency : PermanentPassiveAbility(AbilityIdentity.of("common_com
             SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 0.8f, 1.4f,
         )
         // Рядок іде відповідальному за удар, а не тому, що прилетіло: лучник має
-        // зрозуміти, чому стріла не спрацювала, а сама стріла читати не вміє.
-        (attacker as? ServerPlayer)?.sendSystemMessage(Component.literal("Ваш удар парировано"), true)
+        // зрозуміти, чому стріла не спрацювала, а сама стріла читати не вміє. Адресація
+        // за UUID заразом відсіює мобів — їх у списку гравців просто немає.
+        attacker?.let { messaging.actionBar(it.uuid, Component.literal("Ваш удар парировано")) }
     }
 
     private fun weaponBonus(sequence: Sequence): Double =

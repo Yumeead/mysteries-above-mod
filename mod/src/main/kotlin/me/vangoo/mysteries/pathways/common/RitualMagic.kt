@@ -14,6 +14,7 @@ import me.vangoo.mysteries.ability.AbilityOutcome
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
 import me.vangoo.mysteries.ability.context.Beyonders
+import me.vangoo.mysteries.ability.context.Messaging
 import me.vangoo.mysteries.ability.context.Scheduling
 import me.vangoo.mysteries.ability.session
 import me.vangoo.mysteries.ability.sessionRunning
@@ -125,6 +126,7 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
             offerings = offerings,
             scheduling = context.scheduling,
             beyonders = context.beyonders,
+            messaging = context.messaging,
         )
         val pending = context.cast
 
@@ -151,7 +153,7 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
             } finally {
                 // Скасування (перекаст, вихід, зупинка сервера) теж гасить обряд —
                 // і квиток лишається непогашеним, тобто безкоштовним.
-                if (!settled) owner?.sendSystemMessage(Component.literal("Обряд згас"), true)
+                if (!settled) rite.messaging.actionBar(ownerId, Component.literal("Обряд згас"))
             }
         }
 
@@ -265,7 +267,7 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
     }
 
     private fun stray(player: ServerPlayer, rite: Rite) {
-        player.sendSystemMessage(Component.literal("Ви вийшли з кола — обряд обірвався"), true)
+        rite.messaging.actionBar(player, Component.literal("Ви вийшли з кола — обряд обірвався"))
         // «Зірваний ритуал накличе невдачу» — обіцянка з каталогу, і вона мусить справдитись.
         if (rite.recipe.type == RitualType.LUCK_PRAYER) {
             player.addEffect(MobEffectInstance(MobEffects.UNLUCK, BACKLASH_TICKS, 0, false, true, true))
@@ -313,25 +315,25 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
     private fun pray(player: ServerPlayer, rite: Rite) {
         val ticks = rite.scaled(RitualEffectMath.LUCK_BASE_TICKS, SequenceScaler.ScalingStrategy.WEAK)
         player.addEffect(MobEffectInstance(MobEffects.LUCK, ticks, 0, false, true, true))
-        player.sendSystemMessage(Component.literal("Доля прихильна: ${ticks / TICKS_PER_SECOND} с"), true)
+        rite.messaging.actionBar(player, Component.literal("Доля прихильна: ${ticks / TICKS_PER_SECOND} с"))
     }
 
     private fun sanctify(player: ServerPlayer, rite: Rite) {
         val stack = player.getItemInHand(InteractionHand.MAIN_HAND)
         if (!stack.isDamageableItem || stack.damageValue == 0) {
-            player.sendSystemMessage(Component.literal("Освячувати нічого: предмет у руці цілий"), true)
+            rite.messaging.actionBar(player, Component.literal("Освячувати нічого: предмет у руці цілий"))
             return
         }
         val repair = rite.scaled(RitualEffectMath.SANCTIFY_BASE_DURABILITY, SequenceScaler.ScalingStrategy.MODERATE)
         stack.damageValue = (stack.damageValue - repair).coerceAtLeast(0)
-        player.sendSystemMessage(Component.literal("Предмет освячено: +$repair міцності"), true)
+        rite.messaging.actionBar(player, Component.literal("Предмет освячено: +$repair міцності"))
     }
 
     /** Предмет уже згорів у [consume] — оцінюється копія, знята в мить касту. */
     private fun burnOffering(player: ServerPlayer, self: Beyonder, rite: Rite) {
         val gain = SacrificeAppraiser.spiritualityFor(sacrificeKind(rite.sacrifice))
         self.setSpirituality(self.spirituality.increment(gain))
-        player.sendSystemMessage(Component.literal("Жертву прийнято: +$gain духовності"), true)
+        rite.messaging.actionBar(player, Component.literal("Жертву прийнято: +$gain духовності"))
     }
 
     /**
@@ -354,9 +356,9 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
         rite.scheduling.after(ticks) {
             seen.forEach { id -> (level.getEntityInAnyDimension(id) as? LivingEntity)?.setGlowingTag(false) }
         }
-        player.sendSystemMessage(
+        rite.messaging.actionBar(
+            player,
             Component.literal("Духи вказують: ${seen.size} присутніх на ${ticks / TICKS_PER_SECOND} с"),
-            true,
         )
     }
 
@@ -364,11 +366,11 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
     private fun divine(player: ServerPlayer, rite: Rite) {
         val others = rite.beyonders.online.filter { it.playerId != player.uuid }
         if (others.isEmpty()) {
-            player.sendSystemMessage(Component.literal("Дзеркало порожнє: інших носіїв сили немає"), true)
+            rite.messaging.actionBar(player, Component.literal("Дзеркало порожнє: інших носіїв сили немає"))
             return
         }
 
-        player.sendSystemMessage(Component.literal("Дзеркало показує тих, хто носить силу:"))
+        rite.messaging.tell(player, Component.literal("Дзеркало показує тих, хто носить силу:"))
         others.forEach { other ->
             val who = player.level().server.playerList.getPlayer(other.playerId)
             val name = who?.name?.string ?: "невідомий"
@@ -377,7 +379,8 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
                 who.level() !== player.level() -> "в іншому світі"
                 else -> "${player.position().distanceTo(who.position()).toInt()} бл."
             }
-            player.sendSystemMessage(
+            rite.messaging.tell(
+                player,
                 Component.literal(
                     "  $name — ${other.pathway.name} ${other.sequenceLevel} " +
                         "(${other.pathway.sequenceName(other.sequenceLevel)}) · $where",
@@ -412,7 +415,7 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
                 }
             step++
         }
-        player.sendSystemMessage(Component.literal("Стіна духовності стоїть ${ticks / TICKS_PER_SECOND} с"), true)
+        rite.messaging.actionBar(player, Component.literal("Стіна духовності стоїть ${ticks / TICKS_PER_SECOND} с"))
     }
 
     /** Ванільна рідкісність — готова шкала цінності; свого переліку матеріалів мод не тримає. */
@@ -441,6 +444,7 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
         val offerings: List<ItemEntity>,
         val scheduling: Scheduling,
         val beyonders: Beyonders,
+        val messaging: Messaging,
     ) {
         fun scaled(base: Int, strategy: SequenceScaler.ScalingStrategy): Int = scale(base, sequence, strategy)
     }

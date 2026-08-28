@@ -69,13 +69,35 @@ class ModPathwaysTest {
     }
 
     @Test
-    @DisplayName("Ідентичності здібностей унікальні по всіх шляхах")
-    fun abilityIdentitiesAreUnique() {
-        val identities = ModPathways.all
-            .flatMap { pathway -> (0 until Pathway.SEQUENCE_COUNT).flatMap(pathway::abilitiesFor) }
-            .map { it.identity }
+    @DisplayName("Усередині шляху ідентичності унікальні")
+    fun abilityIdentitiesAreUniqueWithinPathway() {
+        ModPathways.all.forEach { pathway ->
+            val identities = (0 until Pathway.SEQUENCE_COUNT)
+                .flatMap(pathway::abilitiesFor)
+                .map { it.identity }
 
-        assertEquals(identities.size, identities.toSet().size, "дубльовані ідентичності: $identities")
+            assertEquals(
+                identities.size, identities.toSet().size,
+                "дубльовані ідентичності в ${pathway.name}: $identities",
+            )
+        }
+    }
+
+    @Test
+    @DisplayName("Спільна ідентичність означає спільний клас, а не збіг імен")
+    fun sharedIdentityMeansSharedClass() {
+        // Ідентичність — глобальний ключ (вона їде в збереження й пакети), тож та сама
+        // на двох шляхах допустима **лише** для справді спільної здібності з
+        // `pathways/common`. Копія `sun_holy_wave` під тим самим ім'ям в іншому шляху
+        // означала б, що сильніша версія одного шляху заміщає версію іншого.
+        ModPathways.all
+            .flatMap { pathway -> (0 until Pathway.SEQUENCE_COUNT).flatMap(pathway::abilitiesFor) }
+            .groupBy { it.identity }
+            .filterValues { it.size > 1 }
+            .forEach { (identity, specs) ->
+                val classes = specs.map { it::class }.toSet()
+                assertEquals(1, classes.size, "ідентичність $identity носять різні класи: $classes")
+            }
     }
 
     @Test

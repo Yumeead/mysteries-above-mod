@@ -65,6 +65,9 @@ class Deduction : ActiveAbility(AbilityIdentity.of("whitetower_deduction")) {
         val casterId = context.caster.uuid
         val targetId = target.uuid
         val level = context.level
+        // У обробник їде сервіс, а не контекст: контекст несе особу кастера й живе
+        // один виклик, `Messaging` не тримає нічиєї особи й живе стільки, скільки сервер.
+        val messaging = context.messaging
 
         var hits = 0
         val mark = context.events.on<IncomingDamage>(durationTicks = ticks) { damage ->
@@ -74,8 +77,7 @@ class Deduction : ActiveAbility(AbilityIdentity.of("whitetower_deduction")) {
             hits = min(hits + 1, MAX_STACKS)
             damage.scale(1.0 + step * hits / 100.0)
             deduce(level, damage.victim)
-            level.server.playerList.getPlayer(casterId)
-                ?.sendSystemMessage(Component.literal("Розбір: +${step * hits}%"), true)
+            messaging.actionBar(casterId, Component.literal("Розбір: +${step * hits}%"))
         }
 
         // Сесія тут не за тактом, а за прибиранням: перекаст по новій цілі мусить

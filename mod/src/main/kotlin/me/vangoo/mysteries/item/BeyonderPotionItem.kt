@@ -1,5 +1,6 @@
 package me.vangoo.mysteries.item
 
+import me.vangoo.mysteries.ability.runtime.AbilityServices
 import me.vangoo.mysteries.beyonder.Ascension
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
@@ -59,7 +60,7 @@ class BeyonderPotionItem(properties: Properties) : Item(properties) {
     }
 
     private fun refuse(player: ServerPlayer, reason: Component): InteractionResult {
-        player.sendSystemMessage(reason, true)
+        AbilityServices.messaging.actionBar(player, reason)
         return InteractionResult.FAIL
     }
 }

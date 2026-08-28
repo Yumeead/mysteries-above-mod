@@ -9,6 +9,7 @@ import me.vangoo.mysteries.ability.Ability
 import me.vangoo.mysteries.ability.AbilityOutcome
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
+import me.vangoo.mysteries.ability.context.Messaging
 import me.vangoo.mysteries.ability.session
 import me.vangoo.mysteries.ability.sessionRunning
 import me.vangoo.mysteries.beyonder.BeyonderStatus
@@ -80,6 +81,7 @@ class Analysis : ActiveAbility(AbilityIdentity.of("whitetower_analysis")) {
         val ticks = borrowTicks(context.sequence)
         val targetId = target.uuid
         val mote = ModParticles.mote(context.effects.pathwayColor)
+        val messaging = context.messaging
 
         context.session {
             // Розбір: дві секунди Ерудит стоїть і читає. Позики ще немає, квиток
@@ -99,11 +101,11 @@ class Analysis : ActiveAbility(AbilityIdentity.of("whitetower_analysis")) {
             if (!self.grantOffPathway(borrowed)) return@session
             pending.complete()
             try {
-                announce(owner, targetId, borrowed, granted = true)
+                announce(messaging, owner, targetId, borrowed, granted = true)
                 waitTicks(ticks)
             } finally {
                 self.remove(borrowed.identity)
-                announce(owner, targetId, borrowed, granted = false)
+                announce(messaging, owner, targetId, borrowed, granted = false)
             }
         }
 
@@ -115,19 +117,29 @@ class Analysis : ActiveAbility(AbilityIdentity.of("whitetower_analysis")) {
     }
 
     /**
-     * Обидві сторони мусять знати. Гравці беруться зі списку сервера щоразу наново —
-     * позика переживає і смерть, і перехід між вимірами, а `ServerPlayer` ні.
+     * Обидві сторони мусять знати.
+     *
+     * Донор адресується **за UUID**, і саме тому через [Messaging]: позика переживає і
+     * смерть, і перехід між вимірами, тож шукати його треба щоразу наново й по всіх
+     * світах. Попередня редакція шукала його `self.level().server.playerList` — тобто
+     * вручну переписувала те, що сервіс уже вміє, і мовчки губила рядок, коли з гри
+     * виходив **кастер**, а не донор.
      */
-    private fun announce(self: ServerPlayer?, targetId: java.util.UUID, spec: AbilitySpec, granted: Boolean) {
+    private fun announce(
+        messaging: Messaging,
+        self: ServerPlayer?,
+        targetId: java.util.UUID,
+        spec: AbilitySpec,
+        granted: Boolean,
+    ) {
         val name = (spec as? Ability)?.displayName?.string ?: spec.identity.id
         self?.let { BeyonderStatus.pushRoster(it) }
 
         val toSelf = if (granted) "Ви опанували: $name" else "Аналіз згас: $name забуто"
-        self?.sendSystemMessage(Component.literal(toSelf), true)
+        self?.let { messaging.actionBar(it, Component.literal(toSelf)) }
 
-        val donor = self?.level()?.server?.playerList?.getPlayer(targetId) ?: return
         val toDonor = if (granted) "Вашу силу розібрано: $name" else "Розбір вашої сили розсіявся"
-        donor.sendSystemMessage(Component.literal(toDonor), true)
+        messaging.actionBar(targetId, Component.literal(toDonor))
     }
 
     private fun borrowTicks(sequence: Sequence): Int =
