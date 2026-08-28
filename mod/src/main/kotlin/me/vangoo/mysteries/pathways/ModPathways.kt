@@ -3,6 +3,7 @@ package me.vangoo.mysteries.pathways
 import me.vangoo.domain.entities.Pathway
 import me.vangoo.mysteries.pathways.sun.Sun
 import me.vangoo.mysteries.pathways.tyrant.Tyrant
+import me.vangoo.mysteries.pathways.whitetower.WhiteTower
 
 /**
  * Шляхи, які мод уміє видати.
@@ -19,7 +20,7 @@ import me.vangoo.mysteries.pathways.tyrant.Tyrant
  */
 object ModPathways {
 
-    private val byName: Map<String, Pathway> = listOf(Tyrant.create(), Sun.create())
+    private val byName: Map<String, Pathway> = listOf(Tyrant.create(), Sun.create(), WhiteTower.create())
         .associateBy { it.name }
 
     val all: Collection<Pathway> get() = byName.values

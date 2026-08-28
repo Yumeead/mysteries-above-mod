@@ -6,9 +6,21 @@
 abilities — that split is gone). The list is ordered **index 0 → 9 == Sequence 0 → 9**.
 `Pathway.sequenceName(level)` does `sequenceNames[level]`, so **the sequence level IS the list index.**
 
-**Ported so far:** only `Tyrant` and `Sun` exist in the mod, and only at the sequences named in
-their tables below — phase 05 carried three abilities, not three pathways. The other twenty
-pathways are still plugin-only until phase 08; `ModPathways.byName` returns `null` for them.
+**Ported so far:** `Tyrant` and `Sun` (phase 05, three abilities between them) and `WhiteTower`
+(phase 08, complete for Seq 9-5). The other nineteen pathways are still plugin-only;
+`ModPathways.byName` returns `null` for them.
+
+**The plugin fills Seq 9-5 only.** No pathway in the plugin has a roster at Seq 4-0 - writing
+those is new game design, not a port. Match the plugin's coverage unless told otherwise.
+
+**Phase 08 rule: the plugin is the list of powers, not their implementation.** What an ability
+*is* - pathway, sequence, place in the roster, lore - comes from the plugin as-is. What it
+*does* is redesigned whenever the mod can do it better than Spigot could. Measured on WhiteTower:
+`Agility` went from 149 lines of polling to two transient attribute modifiers; `MysticalReenactment`
+became `CrimeReconstruction`, reading vanilla `lastHurtByMob` instead of keeping a world-change
+journal; `Spellcasting`'s six-row chest editor became a vanilla book-and-quill you write an
+incantation into; `RitualMagic`'s choice menu became a real altar of lit candles with the offering
+lying on the ground. Same power, bigger effect, smaller file.
 
 - Sequence **9** = the FIRST potion a player drinks = **weakest** (index 9 in the list).
 - Sequence **0** = the LAST = **strongest / near-deity** (index 0 in the list).
@@ -118,21 +130,25 @@ Spectator-family: read/heal/manipulate minds, hypnosis, dream-walking, illusion 
 | 1 | Author | write a target's behaviour/fate like a story |
 | 0 | Visionary | treat minds & reality as a manuscript to rewrite |
 
-## WhiteTower — group `GodAlmighty` (theme: knowledge, deduction, light, prophecy)
-Knowledge-seeker: analysis, deduction, mysticism, enhanced mind, prophecy, holy light.
+## WhiteTower — group `GodAlmighty` (theme: knowledge, deduction, light, prophecy) — **ported (phase 08)**
+Knowledge-seeker: read the world, deduce from it, then rewrite the rules of a spell.
 
-| Seq | Name | Design hook |
-|----|------|-------------|
-| 9 | Reader | analysis, enhanced mental attributes, agility |
-| 8 | Student | combat/spell proficiency, mystical reenactment |
-| 7 | Detective | deduce facts from clues, reconstruct events |
-| 6 | Polymath | broad spellcasting, mirror curse |
-| 5 | Mysticism Magister | mastery of mystical arts/rituals |
-| 4 | Prophet | foresee/prophesy events |
-| 3 | Cognizer | comprehend any knowledge instantly |
-| 2 | Wisdom Angel | grant/withhold knowledge, holy insight |
-| 1 | Omniscient Eye | perceive truth across distance |
-| 0 | White Tower | near-omniscience, light/knowledge as power |
+| Seq | Name | Design hook | In the mod |
+|----|------|-------------|---|
+| 9 | Reader | enhanced mind, ritual magic | `RitualMagic` (common), `EnhancedMind` |
+| 8 | Student | study a target, learn its weak point | `Deduction` |
+| 7 | Detective | reconstruct events, agility, combat training | `CombatProficiency` + `PhysicalEnhancement` (common), `Agility`, `CrimeReconstruction` |
+| 6 | Polymath | know a bit of everything - borrow another's power | `Analysis` |
+| 5 | Mysticism Magister | compose spells, mirror curse | `Spellcasting`, `MirrorCurse` |
+| 4 | Prophet | foresee/prophesy events | — |
+| 3 | Cognizer | comprehend any knowledge instantly | — |
+| 2 | Wisdom Angel | grant/withhold knowledge, holy insight | — |
+| 1 | Omniscient Eye | perceive truth across distance | — |
+| 0 | White Tower | near-omniscience, light/knowledge as power | — |
+
+**Shared abilities live in `pathways/common/`** — `RitualMagic`, `CombatProficiency`,
+`PhysicalEnhancement`. Reuse them; `PhysicalEnhancement` is parameterised (identity, name,
+flavour, hearts, effects) and each pathway passes its **own** identity.
 
 ---
 
