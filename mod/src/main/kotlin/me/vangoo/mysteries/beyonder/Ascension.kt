@@ -58,6 +58,28 @@ object Ascension {
         AbilityServices.statePump.pushNow(player.uuid)
     }
 
+    /**
+     * Ставить шлях і Послідовність напряму — операторський короткий шлях до сили.
+     *
+     * Драбина «видав зілля → випив → добив засвоєння → випив наступне» — це десяток
+     * команд і десяток секунд на кожну Послідовність, і саме її доводиться проходити
+     * заново після кожної правки здібності. Перевірка механіки не має коштувати
+     * стільки; сам ланцюг зілль лишається на місці й лишається єдиним шляхом для гравця.
+     *
+     * Попередній стан **знімається цілком** — через [forget], а не заміною запису в
+     * реєстрі: інакше на новому шляху лишились би сесії, підписки й перепочинки старого.
+     */
+    fun bestow(player: ServerPlayer, pathway: Pathway, sequence: Sequence) {
+        if (AbilityServices.beyonders.of(player.uuid) != null) forget(player)
+
+        AbilityServices.beyonders.register(Beyonder(player.uuid, sequence, pathway))
+        AbilityServices.passives.activate(player)
+
+        BeyonderStatus.push(player)
+        BeyonderStatus.pushRoster(player)
+        AbilityServices.statePump.pushNow(player.uuid)
+    }
+
     /** Гравець більше не Потойбічний: усе, що тримав мод на нього, знімається. */
     fun forget(player: ServerPlayer) {
         AbilityServices.passives.deactivate(player)
@@ -90,10 +112,12 @@ object Ascension {
         AbilityServices.beyonders.register(beyonder)
         AbilityServices.passives.activate(player)
 
-        player.sendSystemMessage(
+        AbilityServices.messaging.tell(
+            player,
             Component.literal("Вітаємо у світі Потойбічних, ${player.name.string}"),
         )
-        player.sendSystemMessage(
+        AbilityServices.messaging.tell(
+            player,
             Component.literal(
                 "Шлях: ${pathway.name} · Посл. ${beyonder.sequenceLevel} " +
                     "(${pathway.sequenceName(beyonder.sequenceLevel)})",
@@ -151,14 +175,15 @@ object Ascension {
         AbilityServices.passives.refresh(player)
         AbilityServices.selection.forget(player.uuid)
 
-        player.sendSystemMessage(
+        AbilityServices.messaging.tell(
+            player,
             Component.literal(
                 "Ви піднеслись до Послідовності ${beyonder.sequenceLevel} — " +
                     "${pathway.sequenceName(beyonder.sequenceLevel)}",
             ),
         )
         if (changingPathway) {
-            player.sendSystemMessage(Component.literal("Ваш шлях відтепер — ${pathway.name}"))
+            AbilityServices.messaging.tell(player, Component.literal("Ваш шлях відтепер — ${pathway.name}"))
         }
     }
 

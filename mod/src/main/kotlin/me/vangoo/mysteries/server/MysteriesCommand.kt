@@ -56,6 +56,14 @@ object MysteriesCommand {
                     ),
                 )
                 .then(
+                    Commands.literal("become").requires(OPERATOR).then(
+                        pathwayArgument().then(
+                            Commands.argument("sequence", IntegerArgumentType.integer(0, Pathway.SEQUENCE_COUNT - 1))
+                                .executes { context -> become(context) },
+                        ),
+                    ),
+                )
+                .then(
                     Commands.literal("potion").requires(OPERATOR).then(
                         pathwayArgument().then(
                             Commands.argument("sequence", IntegerArgumentType.integer(0, Pathway.SEQUENCE_COUNT - 1))
@@ -147,6 +155,33 @@ object MysteriesCommand {
     }
 
     // ── Оператор ────────────────────────────────────────────────────────────────
+
+    /**
+     * Видає шлях і Послідовність одразу, без ланцюга зілль.
+     *
+     * Існує з тієї самої причини, що й `mastery`: пройти драбину чесно — це десяток
+     * команд на кожну Послідовність, а перевіряти здібність доводиться після кожної
+     * правки. Гравцеві цей шлях недоступний — гілка операторська.
+     */
+    private fun become(context: CommandContext<CommandSourceStack>): Int {
+        val player = context.source.playerOrException
+        val name = StringArgumentType.getString(context, "pathway")
+        val pathway = ModPathways.byName(name)
+            ?: return fail(context, "Невідомий шлях: $name")
+        val sequence = Sequence(IntegerArgumentType.getInteger(context, "sequence"))
+
+        Ascension.bestow(player, pathway, sequence)
+        context.source.sendSuccess(
+            {
+                Component.literal(
+                    "Ви — ${pathway.name} · Посл. ${sequence.level} " +
+                        "(${pathway.sequenceName(sequence.level)})",
+                )
+            },
+            false,
+        )
+        return 1
+    }
 
     private fun potion(context: CommandContext<CommandSourceStack>): Int {
         val player = context.source.playerOrException
