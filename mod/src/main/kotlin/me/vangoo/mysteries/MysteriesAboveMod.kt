@@ -10,6 +10,7 @@ import me.vangoo.mysteries.item.ModItems
 import me.vangoo.mysteries.net.ModChannels
 import me.vangoo.mysteries.pathways.ModPathways
 import me.vangoo.mysteries.server.MysteriesCommand
+import me.vangoo.mysteries.world.SpiritWorld
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import org.slf4j.LoggerFactory
@@ -39,6 +40,11 @@ object MysteriesAboveMod : ModInitializer {
         // Хребет здібностей: реєстр Потойбічних, кулдауни, повідомлення, виконавець
         // касту. Далі кожна фаза додає сюди свій сервіс.
         AbilityServices.bootstrap()
+
+        // Духовний світ сам по собі — дані, але гравець, що вийшов із гри всередині
+        // нього, лишився б там назавжди: сесія, яка вміла його повернути, гасне разом
+        // із його з'єднанням.
+        SpiritWorld.guardStranded()
 
         ModChannels.STATUS_REQUEST.receiveOnServer { _, context ->
             val player = context.player()

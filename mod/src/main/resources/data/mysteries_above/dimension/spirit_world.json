@@ -1,0 +1,11 @@
+{
+  "type": "mysteries_above:spirit_world",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "mysteries_above:spirit_world",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "mysteries_above:spirit_world"
+    }
+  }
+}

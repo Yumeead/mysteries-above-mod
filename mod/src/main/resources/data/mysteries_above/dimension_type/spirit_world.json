@@ -1,0 +1,31 @@
+{
+  "ambient_light": 1.0,
+  "attributes": {
+    "minecraft:gameplay/bed_rule": {
+      "can_set_spawn": "never",
+      "can_sleep": "never",
+      "explodes": false
+    },
+    "minecraft:gameplay/respawn_anchor_works": false,
+    "minecraft:visual/ambient_light_color": "#ffffff",
+    "minecraft:visual/fog_color": "#eef1f6",
+    "minecraft:visual/fog_end_distance": 48.0,
+    "minecraft:visual/fog_start_distance": 4.0,
+    "minecraft:visual/sky_color": "#ffffff",
+    "minecraft:visual/sky_light_color": "#ffffff",
+    "minecraft:visual/sky_light_factor": 0.0
+  },
+  "coordinate_scale": 1.0,
+  "has_ceiling": false,
+  "has_ender_dragon_fight": false,
+  "has_fixed_time": true,
+  "has_skylight": false,
+  "height": 256,
+  "infiniburn": "#minecraft:infiniburn_overworld",
+  "logical_height": 256,
+  "min_y": 0,
+  "monster_spawn_block_light_limit": 0,
+  "monster_spawn_light_level": 0,
+  "skybox": "none",
+  "timelines": "#mysteries_above:spirit_world"
+}
