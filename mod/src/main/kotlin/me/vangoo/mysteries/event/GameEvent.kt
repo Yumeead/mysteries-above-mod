@@ -1,5 +1,7 @@
 package me.vangoo.mysteries.event
 
+import me.vangoo.domain.abilities.AbilitySpec
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.LivingEntity
@@ -102,4 +104,30 @@ class IncomingDamage(
     override fun toString(): String =
         "IncomingDamage(${victim.name.string}, ${source.msgId}, $original → $amount" +
             if (isCancelled) ", скасовано)" else ")"
+}
+
+/**
+ * Потойбічний **щойно застосував силу** — і це помітно збоку.
+ *
+ * Друга подія мода й перша, джерело якої не гра, а сам мод: її публікує
+ * [me.vangoo.mysteries.ability.AbilityExecutor] після того, як здібність відпрацювала.
+ * Міксин тут ні до чого — точка вже наша.
+ *
+ * Подія існує тому, що на неї підписані дві здібності Дверей: `DecryptPatterns` читає
+ * чужі патерни в радіусі, `Record` чекає саме на ту силу, яку записує. Правило те саме,
+ * що й для решти шини: подія, на яку не підписано нічого, — інтерфейс до порожнечі.
+ *
+ * Публікується для [me.vangoo.mysteries.ability.AbilityOutcome.Done] і
+ * [me.vangoo.mysteries.ability.AbilityOutcome.Awaiting]: сила, що зірвалась на відсутній
+ * цілі, збоку не видно ніяк.
+ *
+ * @property caster хто кастував; живий об'єкт, бо подія розсилається синхронно з кастом
+ * @property spec що саме кастували — половина `core`, тож назву дістає підписник
+ */
+class AbilityCast(
+    val caster: ServerPlayer,
+    val spec: AbilitySpec,
+) : GameEvent {
+
+    override fun toString(): String = "AbilityCast(${caster.name.string}, ${spec.identity})"
 }

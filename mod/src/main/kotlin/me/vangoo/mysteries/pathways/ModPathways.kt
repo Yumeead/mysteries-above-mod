@@ -1,6 +1,7 @@
 package me.vangoo.mysteries.pathways
 
 import me.vangoo.domain.entities.Pathway
+import me.vangoo.mysteries.pathways.door.Door
 import me.vangoo.mysteries.pathways.sun.Sun
 import me.vangoo.mysteries.pathways.tyrant.Tyrant
 import me.vangoo.mysteries.pathways.whitetower.WhiteTower
@@ -20,8 +21,9 @@ import me.vangoo.mysteries.pathways.whitetower.WhiteTower
  */
 object ModPathways {
 
-    private val byName: Map<String, Pathway> = listOf(Tyrant.create(), Sun.create(), WhiteTower.create())
-        .associateBy { it.name }
+    private val byName: Map<String, Pathway> =
+        listOf(Tyrant.create(), Sun.create(), WhiteTower.create(), Door.create())
+            .associateBy { it.name }
 
     val all: Collection<Pathway> get() = byName.values
 

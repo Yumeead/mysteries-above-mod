@@ -12,6 +12,8 @@ import me.vangoo.mysteries.ability.context.Beyonders
 import me.vangoo.mysteries.ability.context.Cooldowns
 import me.vangoo.mysteries.ability.context.Messaging
 import me.vangoo.mysteries.ability.runtime.AbilityContexts
+import me.vangoo.mysteries.event.AbilityCast
+import me.vangoo.mysteries.event.GameEvent
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.LivingEntity
@@ -30,6 +32,12 @@ class AbilityExecutor(
     private val cooldowns: Cooldowns,
     private val messaging: Messaging,
     private val contexts: AbilityContexts,
+    /**
+     * Куди повідомити, що сила спрацювала. Шина мода — вона ж, у яку їде шкода з міксину:
+     * каст помітний збоку так само, як удар, і здібностям, що його читають, байдуже,
+     * звідки подія прийшла.
+     */
+    private val publish: (GameEvent) -> Unit = {},
 ) {
 
     private val log = LoggerFactory.getLogger(MOD_ID)
@@ -83,6 +91,8 @@ class AbilityExecutor(
             is AbilityOutcome.Awaiting -> null
             is AbilityOutcome.Failed -> null
         }
+        // Зірваний каст збоку не видно ніяк — ні спалаху, ні звуку, тож і події немає.
+        if (outcome !is AbilityOutcome.Failed) publish(AbilityCast(caster, ability))
         return report(caster, CastReport.Performed(outcome, receipt))
     }
 

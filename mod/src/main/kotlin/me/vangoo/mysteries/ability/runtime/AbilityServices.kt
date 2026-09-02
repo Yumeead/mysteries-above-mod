@@ -39,7 +39,9 @@ object AbilityServices {
 
     private val players: (UUID) -> ServerPlayer? = { id -> server?.playerList?.getPlayer(id) }
 
-    val beyonders = BeyonderRegistry()
+    // Тоглі живуть у `passives`, а той будується пізніше — тіло лямбди читає його в мить
+    // виклику, тобто задовго після ініціалізації об'єкта.
+    val beyonders: BeyonderRegistry = BeyonderRegistry { id, ability -> passives.isEnabled(id, ability) }
 
     /** Годинник усього мода: власний лічильник, що цокає лише разом із тіком сервера. */
     val scheduler = TickScheduler(onError)
@@ -48,7 +50,7 @@ object AbilityServices {
 
     val messaging = ServerMessaging { server }
 
-    val scheduling = SessionHost(scheduler, beyonders, players, onError)
+    val scheduling: SessionHost = SessionHost(scheduler, beyonders, players, onError)
 
     /**
      * Підписки здібностей на події гри. Годинник той самий, що в сесій — тік мода:
@@ -59,11 +61,11 @@ object AbilityServices {
     /** Яку здібність гравець тримає під клавішею. До фази 11 — увесь вибір, що є. */
     val selection = AbilitySelection()
 
-    val contexts = AbilityContexts(beyonders, cooldowns, messaging, scheduling, events)
+    val contexts: AbilityContexts = AbilityContexts(beyonders, cooldowns, messaging, scheduling, events)
 
-    val passives = PassiveTicker(beyonders, contexts, events, players, onError)
+    val passives: PassiveTicker = PassiveTicker(beyonders, contexts, events, players, onError)
 
-    val executor = AbilityExecutor(beyonders, cooldowns, messaging, contexts)
+    val executor: AbilityExecutor = AbilityExecutor(beyonders, cooldowns, messaging, contexts, events::publish)
 
     /**
      * Коли штовхати клієнту стан здібностей. Годинник — той самий `tickCount`, у якому

@@ -42,6 +42,7 @@ class SessionHostTest {
         private val byId = HashMap<UUID, Beyonder>()
         override fun of(id: UUID): Beyonder? = byId[id]
         override fun of(entity: Entity): Beyonder? = null
+        override fun isToggled(id: UUID, ability: AbilityIdentity): Boolean = false
         override val online: Collection<Beyonder> get() = byId.values
         fun add(beyonder: Beyonder) {
             byId[beyonder.playerId] = beyonder

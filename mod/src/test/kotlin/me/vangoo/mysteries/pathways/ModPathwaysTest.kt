@@ -10,6 +10,7 @@ import me.vangoo.domain.valueobjects.Sequence
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.PermanentPassiveAbility
 import me.vangoo.mysteries.ability.Ticking
+import me.vangoo.mysteries.pathways.door.Door
 import me.vangoo.mysteries.pathways.sun.Sun
 import me.vangoo.mysteries.pathways.tyrant.Tyrant
 import org.junit.jupiter.api.BeforeAll
@@ -145,6 +146,21 @@ class ModPathwaysTest {
         assertEquals(20, spec.cooldownSeconds(Sequence(7)))
         // Активна здібність не утримується — платить разово.
         assertEquals(0, spec.periodicCost(Sequence(7)))
+    }
+
+    @Test
+    @DisplayName("Двері заповнюють Посл. 9–5 і мовчать вище")
+    fun doorFillsTheSameSequencesAsThePlugin() {
+        val door = Door.create()
+
+        assertEquals("Apprentice", door.sequenceName(9))
+        assertEquals("Traveler", door.sequenceName(5))
+        assertEquals("Door", door.sequenceName(0))
+
+        // Ростер — єдине місце, де ціла Послідовність може мовчки лишитись порожньою:
+        // здібність, забуту в списку, не спіймає ні компілятор, ні решта тестів.
+        assertEquals(listOf(1, 4, 4, 3, 2), (9 downTo 5).map { door.abilitiesFor(it).size })
+        assertTrue((4 downTo 0).all { door.abilitiesFor(it).isEmpty() }, "вище Посл. 5 плагін не піднімався")
     }
 
     @Test
