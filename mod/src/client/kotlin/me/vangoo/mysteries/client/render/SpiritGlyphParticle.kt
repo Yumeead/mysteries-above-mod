@@ -87,7 +87,12 @@ class SpiritGlyphParticle private constructor(
      * знак мовчки лишався статичним, а слід нікуди не дівався.
      */
     private val owner: AbstractClientPlayer? = level.players()
-        .minByOrNull { headOf(it).distanceToSqr(x, y, z) }
+        // Нульовий зсув означає «фігура стоїть у світі», а не «на маківці»: її ставлять
+        // формою `count = 1` з нульовими дельтами. Без цієї перевірки двері, намальовані
+        // за крок від гравця, мовчки чіплялись би йому на голову й їхали разом із ним —
+        // і виглядало б це не як помилка, а як «ефект чомусь не там».
+        .takeIf { offset != Vec3.ZERO }
+        ?.minByOrNull { headOf(it).distanceToSqr(x, y, z) }
         ?.takeIf { headOf(it).distanceToSqr(x, y, z) <= LATCH_RANGE * LATCH_RANGE }
 
     init {
