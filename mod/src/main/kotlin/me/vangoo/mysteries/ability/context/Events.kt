@@ -64,6 +64,18 @@ interface Events {
         durationTicks: Int,
         handler: (E) -> Unit,
     ): Subscription
+
+    /**
+     * Raises a mod event of the ability's own making — the same bus [AbilityCast] and
+     * [me.vangoo.mysteries.event.IncomingDamage] travel on, only this time the source is not a
+     * mixin but the ability itself.
+     *
+     * Exists for the same reason sessions and subscriptions read their owner from the context
+     * instead of a passed `UUID`: `PowerProhibition` (Justiciar) and `Punishment` used to talk
+     * through a private static map and a direct static call — the very cross-ability coupling
+     * this bus was built to replace everywhere else.
+     */
+    fun publish(event: me.vangoo.mysteries.event.GameEvent)
 }
 
 /**

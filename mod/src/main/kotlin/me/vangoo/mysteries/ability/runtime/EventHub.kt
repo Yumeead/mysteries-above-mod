@@ -88,6 +88,8 @@ class EventHub(
             durationTicks: Int,
             handler: (E) -> Unit,
         ): Subscription = this@EventHub.subscribe(owner, ability, type, durationTicks, handler)
+
+        override fun publish(event: GameEvent) = this@EventHub.publish(event)
     }
 
     // ── Dispatch ────────────────────────────────────────────────────────────────

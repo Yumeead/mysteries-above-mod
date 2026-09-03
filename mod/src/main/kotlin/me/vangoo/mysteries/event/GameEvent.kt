@@ -138,6 +138,25 @@ class AbilityCast(
 }
 
 /**
+ * A Justiciar's `PowerProhibition` was broken — published by the ability itself through
+ * [me.vangoo.mysteries.ability.context.Events.publish], not by a mixin.
+ *
+ * The plugin coupled `PowerProhibition` and `Punishment` directly: a private static method call
+ * over a private static map, so the enforcer had to know the punisher's class by name. Here
+ * `Punishment` merely subscribes like any other ability — it could vanish from the roster and
+ * `PowerProhibition` would not need to change a line.
+ *
+ * @property enforcerId the Beyonder whose zone was broken
+ * @property violatorId who broke it
+ * @property action a short, already-Ukrainian description for the enforcer's action bar
+ */
+class ProhibitionViolated(
+    val enforcerId: java.util.UUID,
+    val violatorId: java.util.UUID,
+    val action: String,
+) : GameEvent
+
+/**
  * A creature is **taking someone as its target** — before the target is actually assigned.
  *
  * The mod's third event and the second to need a mixin. There is no ready hook: the Fabric API

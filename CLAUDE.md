@@ -719,7 +719,7 @@ javap -cp "$MCM:$MCC" net.minecraft.client.gui.screens.Screen
   `/mysteries sanity`. Активи: перша власна текстура (`textures/particle/spirit_mote.png`),
   `sounds.json`, `shaders/post/sanity.fsh`, два `post_effect/*.json`.
   Разом 40 тест-класів / 304 тести зелені.
-- 🔄 **Фаза 08** — шар здібностей, усі 9 шляхів. **Закрито 6 з 9.**
+- 🔄 **Фаза 08** — шар здібностей, усі 9 шляхів. **Закрито 7 з 9.**
   - **WhiteTower** (Посл. 9–5): `pathways/common` (`RitualMagic`, `CombatProficiency`,
     `PhysicalEnhancement`), `pathways/whitetower` (`EnhancedMind`, `Deduction`, `Agility`,
     `CrimeReconstruction`, `Analysis`, `Spellcasting`, `MirrorCurse`), `ability/AttributeGrant`.
@@ -772,7 +772,33 @@ javap -cp "$MCM:$MCC" net.minecraft.client.gui.screens.Screen
     вільний рядок у чат за 30 с — не переніс: захоплення чат-вводу належить `ui`, фазі 11).
   Разом 43 тест-класи / 322 тести зелені (Tyrant рахунок не змінює: нових тест-класів не додано,
   дві застарілі перевірки фази 05 виправлено під повний ростер).
-  Далі за розміром: justiciar → fool → death.
+  - **Justiciar** (Посл. 9–5, 13 нових здібностей + перевикористаний `AntiDivination` Дверей):
+    `Authority`, `ArbitersGaze`, `AreaOfJurisdiction`, `Recognition`, `Intuition`, `WhipOfPain`,
+    `PsychicPiercing`, `BrandOfRestraint`, `PsychicLashing`, `Verdict`, `PowerProhibition`,
+    `SpawnProhibition`, `Punishment`. Приїхав спільний примітив `pathways/justiciar/Zone.kt`
+    (коло, що знає, хто всередині, і само малює межу — заміна трьох ручних зон плагіна:
+    `ProhibitionZone`, `SpawnBanZone`, `JurisdictionSession`) та `Restraint.kt`
+    (`rootInPlace` — спільний якір-цикл замість двох копій у `BrandOfRestraint` і
+    `Punishment`). Шина подій отримала третій тип, і вперше **не** від мода/міксину, а від
+    самої здібності: `ProhibitionViolated` (`context.events.publish` — новий метод в `Events`,
+    `PowerProhibition` публікує, `Punishment` підписується) замінює плагінний прямий виклик
+    `Punishment.registerViolation` через приватну статичну мапу.
+    Костилі, замінені справжньою механікою: **чотири** мод-цикли sneak+ПКМ (`Verdict`,
+    `PowerProhibition`, `SpawnProhibition`, старий `Punishment`) → інструмент у руці, той самий
+    прийом, що вже витягнув Двері з `DivinationArts` (перо/ґрати/ланцюг/чахлик/тризуб для
+    `Verdict`; тотем/елітри/меч для `PowerProhibition`; яйця-спавнери для `SpawnProhibition`;
+    друга рука для `Punishment`, бо перша вже зайнята вибором зони); еталонний евристичний
+    список «хто мирний» в `Authority` (нейметег/житель/голем/кінь/приручене/тварина) →
+    ванільний маркер `Enemy`; емуляція Тотема Безсмертя в `PowerProhibition.KILL_BAN`
+    (`playEffect` + ручне встановлення HP) → справжнє скасування шкоди через
+    `IncomingDamage.cancel()`. `PowerProhibition` звужено з шести режимів до трьох
+    (`KILL_BAN`, `FLIGHT_BAN`, `WEAPON_BAN`): заборона телепортації, вхід у чужий домен і
+    повний лок блоків не мають готового гачка у Fabric API і вимагали б окремого міксину
+    заради однієї утилітарної здібності Посл. 6 — той самий розрахунок, що звузив
+    `LightningBoltArrow` і `ThunderVoice` у Tyrant. `SpawnProhibition` лишився поллінгом
+    (двічі на секунду виганяє заборонений вид із зони), бо `CreatureSpawnEvent` теж не має
+    аналога на Fabric — чесний компроміс, не костиль: зона **виганяє**, а не **скасовує**.
+  Далі за розміром: fool → death.
 
 ### Колесо Потойбічного (фаза UI, M1–M3)
 

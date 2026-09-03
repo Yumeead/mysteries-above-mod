@@ -3,6 +3,7 @@ package me.vangoo.mysteries.pathways
 import me.vangoo.domain.entities.Pathway
 import me.vangoo.mysteries.pathways.door.Door
 import me.vangoo.mysteries.pathways.error.Error
+import me.vangoo.mysteries.pathways.justiciar.Justiciar
 import me.vangoo.mysteries.pathways.sun.Sun
 import me.vangoo.mysteries.pathways.tyrant.Tyrant
 import me.vangoo.mysteries.pathways.visionary.Visionary
@@ -26,6 +27,7 @@ object ModPathways {
     private val byName: Map<String, Pathway> =
         listOf(
             Tyrant.create(), Sun.create(), WhiteTower.create(), Door.create(), Error.create(), Visionary.create(),
+            Justiciar.create(),
         ).associateBy { it.name }
 
     val all: Collection<Pathway> get() = byName.values
