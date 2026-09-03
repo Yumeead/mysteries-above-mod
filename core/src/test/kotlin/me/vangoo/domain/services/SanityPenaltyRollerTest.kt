@@ -28,13 +28,13 @@ class SanityPenaltyRollerTest {
 
     @Test
     fun `negligible loss never rolls at all`() {
-        // Сценарій порожній: якщо роллер сюди дійде, тест впаде на вичерпаному кидку.
+        // The script is empty: if the roller gets this far, the test fails on an exhausted roll.
         assertFalse(roll(scale = 10).hasEffect())
     }
 
     @Test
     fun `a passed check yields no penalty`() {
-        // 11-20 -> шанс провалу 5%; кидок 0.99 вище за нього.
+        // 11-20 -> failure chance 5%; a roll of 0.99 is above it.
         assertFalse(roll(scale = 15, doubles = listOf(0.99)).hasEffect())
     }
 
@@ -81,7 +81,7 @@ class SanityPenaltyRollerTest {
 
     @Test
     fun `extreme severity always fires and always kills`() {
-        // Шанс провалу на 96+ дорівнює 1.0, тож найвищий можливий кидок усе одно менший.
+        // The failure chance at 96+ equals 1.0, so even the highest possible roll is below it.
         val penalty = roll(scale = 100, doubles = listOf(0.999999))
         assertEquals(PenaltyType.EXTREME, penalty.type)
         assertTrue(penalty.hasEffect())

@@ -10,15 +10,15 @@ import net.minecraft.network.codec.StreamMemberEncoder
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 
 /**
- * Сервер → клієнт: стан Потойбічного, яким його бачить власник.
+ * Server → client: the Beyonder's state as its owner sees it.
  *
- * `beyonder == null` означає звичайного гравця. Шлях і послідовність або є разом,
- * або їх нема разом — тому вони живуть у вкладеному типі, а не двома нульованими
- * полями: формат просто не вміє виразити «шлях без послідовності».
+ * `beyonder == null` means an ordinary player. The pathway and the sequence are either both
+ * there or both absent — hence they live in a nested type rather than as two nullable fields:
+ * the format simply cannot express "a pathway with no sequence".
  */
 data class BeyonderStatusPayload(val beyonder: Beyonder?) : CustomPacketPayload {
 
-    /** VO їдуть із `core` як є — по дроту летять лише їхні числа. */
+    /** The VOs travel from `core` as they are — only their numbers go over the wire. */
     data class Beyonder(
         val pathwayId: String,
         val sequence: Sequence,

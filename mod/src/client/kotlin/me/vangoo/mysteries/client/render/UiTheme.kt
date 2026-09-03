@@ -6,41 +6,42 @@ import net.minecraft.network.chat.Component
 import net.minecraft.util.ARGB
 
 /**
- * Палітра мода й чотири примітиви, з яких складені всі його поверхні.
+ * The mod's palette and the four primitives all its surfaces are built from.
  *
- * Існує заради того, щоб HUD (M3), колесо (M4) і книга (M6) виглядали одним модом, а
- * не трьома. Тричі скопійована палітра — це те, з чого UI починає розповзатись:
- * перший же підбір відтінку робиться в одному файлі, і два інші лишаються з давнім.
+ * It exists so that the HUD (M3), the wheel (M4) and the book (M6) look like one mod rather than
+ * three. A palette copied three times is where a UI starts to come apart: the very first shade
+ * adjustment is made in one file, and the other two are left with the old one.
  *
- * Тло майже чорне з прозорістю, рамки волосяні, кольору потьмянілого золота. Колір
- * шляху сюди не входить навмисно — він приходить ззовні й з'являється рівно у двох
- * місцях на весь UI: рамка картки під курсором і волосок під HUD. Окультне читається
- * зі стриманості, а не з кількості ефектів.
+ * The background is almost black with transparency, the frames are hairlines in the colour of
+ * tarnished gold. The pathway colour deliberately does not belong here — it comes from outside
+ * and appears in exactly two places in the whole UI: the frame of the card under the cursor and
+ * the hairline under the HUD. The occult reads through restraint, not through the number of
+ * effects.
  *
- * Стану тут немає: усе — чисті функції від переданих чисел.
+ * There is no state here: everything is a pure function of the numbers passed in.
  */
 object UiTheme {
 
-    /** Тло панелей. */
+    /** The panel background. */
     const val PANEL: Int = 0x0A0A0F
 
-    /** Потьмяніле золото: рамки, заповнена частина барів, акценти. */
+    /** Tarnished gold: frames, the filled part of bars, accents. */
     const val ACCENT: Int = 0xC8A44B
 
-    /** Те саме золото, приглушене: ділянка бару, яку ось-ось витратять. */
+    /** The same gold, muted: the stretch of the bar that is about to be spent. */
     const val ACCENT_DEEP: Int = 0x6E5824
 
     const val TEXT: Int = 0xEDE8DC
 
     const val MUTED: Int = 0xB0AAA0
 
-    /** Бракує духовності, зірваний каст — усе, що вимагає уваги. */
+    /** Not enough spirituality, a failed cast — anything that needs attention. */
     const val CRITICAL: Int = 0xC46A55
 
-    /** Незаповнена частина бару й тло бейджа. */
+    /** The unfilled part of a bar and the badge background. */
     const val TRACK: Int = 0x2A2C39
 
-    /** Висота бейджа: рядок плюс піксель зверху й знизу. */
+    /** The badge height: a line plus a pixel above and below. */
     const val BADGE_HEIGHT: Int = 11
 
     private const val BADGE_PADDING = 3
@@ -49,7 +50,7 @@ object UiTheme {
     private const val TRACK_ALPHA = 0.85f
     private const val VEIL_ALPHA = 0.62f
 
-    /** RGB плюс окрема прозорість. Кольори тут — без альфи, щоб її множили в місці малювання. */
+    /** RGB plus a separate opacity. The colours here carry no alpha, so it is multiplied in at the drawing site. */
     fun argb(rgb: Int, alpha: Float): Int =
         ARGB.color(
             (alpha.coerceIn(0f, 1f) * 255f).toInt(),
@@ -58,18 +59,18 @@ object UiTheme {
             rgb and 0xFF,
         )
 
-    /** Панель: темне тло й волосяна золота рамка. */
+    /** A panel: a dark background and a hairline gold frame. */
     fun panel(graphics: GuiGraphicsExtractor, x: Int, y: Int, width: Int, height: Int, alpha: Float) {
         graphics.fill(x, y, x + width, y + height, argb(PANEL, PANEL_ALPHA * alpha))
         graphics.outline(x, y, width, height, argb(ACCENT, FRAME_ALPHA * alpha))
     }
 
-    /** Волосок в один піксель — єдине місце, куди пускається колір шляху. */
+    /** A one-pixel hairline — the only place the pathway colour is let in. */
     fun hairline(graphics: GuiGraphicsExtractor, x: Int, y: Int, width: Int, rgb: Int, alpha: Float) {
         graphics.fill(x, y, x + width, y + 1, argb(rgb, alpha))
     }
 
-    /** Горизонтальний бар: доріжка й заповнення зліва направо. */
+    /** A horizontal bar: the track and the fill from left to right. */
     fun bar(
         graphics: GuiGraphicsExtractor,
         x: Int,
@@ -86,9 +87,10 @@ object UiTheme {
     }
 
     /**
-     * Шматок бару між двома частками — щоб позначити ділянку, а не рівень.
+     * A stretch of the bar between two fractions — to mark a range rather than a level.
      *
-     * Духовність малює ним ціну обраної здібності: видно наперед, що лишиться.
+     * Spirituality draws the selected ability's cost with it: what will be left is visible in
+     * advance.
      */
     fun barSlice(
         graphics: GuiGraphicsExtractor,
@@ -108,9 +110,9 @@ object UiTheme {
     }
 
     /**
-     * Перепочинок поверх іконки: тінь знизу вгору, що спадає в міру готовності.
+     * The cooldown over the icon: a veil from the bottom up that recedes as readiness grows.
      *
-     * [remaining] — частка перепочинку, що ще лишилась: `1` — щойно почався, `0` — готова.
+     * [remaining] is the share of the cooldown still left: `1` — it just started, `0` — ready.
      */
     fun cooldownVeil(graphics: GuiGraphicsExtractor, x: Int, y: Int, size: Int, remaining: Float, alpha: Float) {
         val covered = (size * remaining.coerceIn(0f, 1f)).toInt()
@@ -120,7 +122,7 @@ object UiTheme {
 
     fun badgeWidth(font: Font, text: Component): Int = font.width(text) + BADGE_PADDING * 2
 
-    /** Бейдж: підкладка й текст. Ціна, підпис клавіші слота, лічильник сторінок. */
+    /** A badge: a backing and the text. A cost, a slot key caption, a page counter. */
     fun badge(
         graphics: GuiGraphicsExtractor,
         font: Font,

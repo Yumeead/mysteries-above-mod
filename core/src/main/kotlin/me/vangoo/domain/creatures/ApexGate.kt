@@ -1,23 +1,23 @@
 package me.vangoo.domain.creatures
 
 /**
- * Чисте правило: чи можна показати цю істоту гравцеві з такою послідовністю.
+ * A pure rule: whether this creature may be shown to a player of that sequence.
  *
- * Apex-істоти — це Послідовність 5. Вони ваншотять будь-кого слабшого, а їхній лут —
- * інгредієнти рецепта Посл. 5, тобто гравцеві Посл. 9 вони не потрібні ні як виклик, ні як
- * здобич. Тому apex зустрічає лише той, хто вже підійшов до Посл. 5 упритул.
+ * Apex creatures are Sequence 5. They one-shot anyone weaker, and their loot is the
+ * ingredients of a Seq. 5 recipe, so a Seq. 9 player needs them neither as a challenge nor as
+ * spoils. Hence only someone who has come right up to Seq. 5 ever meets an apex.
  *
- * Одне правило на всіх споживачів (структурний спавн, ambient-спавн) — щоб гейт не лишився
- * в одному лістенері, поки істота приходить із другого.
+ * One rule for every consumer (structure spawn, ambient spawn) — so the gate does not stay in
+ * one listener while the creature arrives through another.
  */
 object ApexGate {
 
-    /** Гравець мусить бути щонайменше Посл. 6 (менше число = сильніший), щоб зустріти apex. */
+    /** The player must be at least Seq. 6 (a smaller number = stronger) to meet an apex. */
     const val APEX_MIN_SEQUENCE = 6
 
     /**
-     * @param tier тір істоти
-     * @param playerSequenceLevel послідовність гравця, або `null`, якщо він не потойбічний
+     * @param tier the creature's tier
+     * @param playerSequenceLevel the player's sequence, or `null` if he is not a Beyonder
      */
     fun allows(tier: CreatureTier, playerSequenceLevel: Int?): Boolean =
         tier != CreatureTier.APEX || (playerSequenceLevel != null && playerSequenceLevel <= APEX_MIN_SEQUENCE)

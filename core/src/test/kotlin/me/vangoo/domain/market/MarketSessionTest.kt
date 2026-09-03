@@ -38,7 +38,7 @@ internal class MarketSessionTest {
         val a = session.registerParticipant(seller)
         val b = session.registerParticipant(buyer)
         assertNotEquals(a, b)
-        assertEquals(a, session.registerParticipant(seller)) // ідемпотентно
+        assertEquals(a, session.registerParticipant(seller)) // idempotent
         assertEquals("Незнайомець №$a", session.aliasOf(seller))
     }
 
@@ -51,8 +51,8 @@ internal class MarketSessionTest {
 
     @Test
     fun registeringMoreThanNinetyNineParticipantsTerminatesWithDistinctAliases() {
-        // Понад 99 учасників вичерпує діапазон 1..99 — цикл рандомізації має
-        // розширювати межі, інакше зависає назавжди на головному потоці.
+        // More than 99 participants exhausts the 1..99 range — the randomisation loop must
+        // widen the bounds, otherwise it hangs forever on the main thread.
         assertTimeoutPreemptively(Duration.ofSeconds(5)) {
             val assigned = mutableSetOf<Int>()
             assigned.add(session.registerParticipant(seller))
@@ -94,7 +94,7 @@ internal class MarketSessionTest {
     @Test
     fun buyLotSettlesWithCommission() {
         val lotId = session.listLot(seller, "custom:x", 1, Consideration.money(PoundMoney.ofCoppets(30)))
-        // покупець: 2 фунти, 0 коппетів
+        // buyer: 2 pounds, 0 coppets
         val s = session.buyLot(buyer, lotId, 2, 0)
         assertEquals(buyer, s.payerId)
         assertEquals(seller, s.payeeId)
@@ -103,7 +103,7 @@ internal class MarketSessionTest {
         assertEquals(27, s.sellerProceeds.coppets) // 30 − 3
         assertEquals(30, s.payerCharge.paidCoppets)
         assertEquals(lotId, s.escrowRef)
-        assertTrue(session.activeLots().isEmpty()) // лот зник зі списку
+        assertTrue(session.activeLots().isEmpty()) // the lot is gone from the list
     }
 
     @Test
@@ -117,8 +117,8 @@ internal class MarketSessionTest {
     fun cannotBuyOwnLotOrWithoutFunds() {
         val lotId = session.listLot(seller, "custom:x", 1, Consideration.money(PoundMoney.ofCoppets(30)))
         assertThrows(MarketException::class.java) { session.buyLot(seller, lotId, 5, 5) }
-        assertThrows(MarketException::class.java) { session.buyLot(buyer, lotId, 1, 9) } // 29 к < 30 к
-        assertEquals(1, session.activeLots().size) // невдалі спроби не знімають лот
+        assertThrows(MarketException::class.java) { session.buyLot(buyer, lotId, 1, 9) } // 29 c < 30 c
+        assertEquals(1, session.activeLots().size) // failed attempts do not remove the lot
     }
 
     @Test

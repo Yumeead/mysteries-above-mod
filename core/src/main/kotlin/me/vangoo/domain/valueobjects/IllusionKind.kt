@@ -1,19 +1,19 @@
 package me.vangoo.domain.valueobjects
 
 /**
- * Види локальних ілюзій Фокусника (Seq 7 шляху Блазня — Illusion Creation).
+ * Kinds of local illusions of the Magician (Seq 7 of the Fool pathway — Illusion Creation).
  *
- * Чистий VO: id + вартість духовності. Конкретні звуки/партикли/дим —
- * у шарі pathways (`IllusionCreation`).
+ * A pure VO: id + spirituality cost. The concrete sounds/particles/smoke live
+ * in the pathways layer (`IllusionCreation`).
  */
 enum class IllusionKind(val displayName: String, val spiritualityCost: Int) {
 
-    /** Фальшивий вибух — гучний звук + дим. */
+    /** A fake explosion — a loud sound + smoke. */
     EXPLOSION("Ілюзія вибуху", 40),
 
-    /** Фальшиві кроки — тихі звуки поблизу цілі. */
+    /** Fake footsteps — quiet sounds near the target. */
     FOOTSTEPS("Ілюзія кроків", 20),
 
-    /** Фальшива пожежа — вогняні партикли + тріск. */
+    /** A fake fire — flame particles + crackling. */
     FIRE("Ілюзія пожежі", 30),
 }

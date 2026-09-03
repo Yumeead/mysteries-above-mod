@@ -7,11 +7,11 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 /**
- * Синхронізація стану: гри не піднімає й піднімати не мусить.
+ * State synchronisation: it brings up no game and must not.
  *
- * Насос не знає ні про гравців, ні про пакети — лише про `UUID` і власний годинник.
- * Саме тому найдорожче правило шару («не частіше разу на секунду») перевіряється тут,
- * а не руками на `runClient`.
+ * The pump knows nothing about players or packets — only about a `UUID` and its own clock. That
+ * is exactly why the layer's most expensive rule ("no more than once a second") is checked here
+ * rather than by hand on `runClient`.
  */
 class AbilityStatePumpTest {
 
@@ -40,13 +40,13 @@ class AbilityStatePumpTest {
     @Test
     @DisplayName("Брудний гравець отримує рівно один пакет за такт")
     fun dirtyPlayerIsFlushedOnce() {
-        // Бруднити можна скільки завгодно — це прапорець, а не черга.
+        // Marking dirty can happen any number of times — it is a flag, not a queue.
         repeat(5) { pump.markDirty(alice) }
         pump.flush()
 
         assertEquals(listOf(alice), sent)
 
-        // Другий такт без нового бруднення мовчить.
+        // A second tick with no new marking stays silent.
         tick += TICKS_PER_SECOND
         pump.flush()
         assertEquals(listOf(alice), sent)
@@ -64,14 +64,14 @@ class AbilityStatePumpTest {
     @DisplayName("Такт не дублює щойно надісланий стан")
     fun flushDoesNotDuplicateFreshPush() {
         pump.pushNow(alice)
-        // Бруднення в ту саму секунду: каст списав духовність, і регенерація її повернула.
+        // Marked dirty within the same second: a cast spent spirituality and regeneration returned it.
         pump.markDirty(alice)
 
         tick += TICKS_PER_SECOND - 1
         pump.flush()
         assertEquals(listOf(alice), sent, "запобіжник пропустив другий пакет у ту саму секунду")
 
-        // Секунда минула — борг віддається.
+        // A second has passed — the debt is paid.
         tick += 1
         pump.flush()
         assertEquals(listOf(alice, alice), sent)
@@ -98,7 +98,7 @@ class AbilityStatePumpTest {
 
         assertEquals(emptyList<UUID>(), sent)
 
-        // Таймер теж забутий: перший же такт після повернення відпрацьовує без затримки.
+        // The timer is forgotten too: the first tick after coming back runs with no delay.
         pump.markDirty(alice)
         pump.flush()
         assertEquals(listOf(alice), sent)

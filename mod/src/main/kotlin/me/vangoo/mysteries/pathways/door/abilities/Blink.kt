@@ -17,23 +17,24 @@ import net.minecraft.sounds.SoundSource
 import net.minecraft.world.phys.Vec3
 
 /**
- * Door, Посл. 5 (Мандрівник): **Блимання**.
+ * Door, Seq. 5 (Traveller): **Instant Step**.
  *
- * Найпростіша сила Мандрівника й найчастіша: п'ятнадцять блоків у бік погляду, миттєво.
+ * The Traveller's simplest power and their most frequent: fifteen blocks in the direction of
+ * the gaze, instantly.
  *
- * ## Безпечне місце шукається, а не гарантується
+ * ## A safe spot is searched for, not guaranteed
  *
- * Промінь дає точку, а точка може бути в лаві, в стелі або в повітрі над прірвою. Пошук
- * той самий, що в плагіні — до трьох блоків униз і вгору, — і причина його існування та
- * сама: без нього сила регулярно вбивала б власника, і гравець замість «блимнути» думав
- * би «чи не блимнути в лаву».
+ * The ray gives a point, and a point can be in lava, in a ceiling or in mid-air over a chasm.
+ * The search is the same as in the plugin — up to three blocks down and up — and its reason for
+ * existing is the same: without it the power would regularly kill its owner, and instead of
+ * "blink" the player would be thinking "or should I not blink into lava".
  *
- * Опори під ногами тут **не вимагається** навмисно: інакше блимнути з обриву стало б
- * неможливо, а це половина того, для чого сила потрібна.
+ * Footing underneath is deliberately **not** required: otherwise stepping off a cliff would
+ * become impossible, and that is half of what the power is for.
  */
 class Blink : ActiveAbility(AbilityIdentity.of("door_blink")) {
 
-    override val displayName: Component = Component.literal("Блимання")
+    override val displayName: Component = Component.literal("Миттєвий крок")
 
     override val spiritualityCost: Int = 60
 
@@ -42,13 +43,13 @@ class Blink : ActiveAbility(AbilityIdentity.of("door_blink")) {
     override fun description(sequence: Sequence): Component = Component.literal(
         "Миттєве переміщення в бік погляду.\n" +
             "▪ Дальність ${distance(sequence).toInt()} бл.; упреться в стіну — станете перед нею\n" +
-            "▪ Перепочинок ${COOLDOWN_SECONDS} с",
+            "▪ Відкат ${COOLDOWN_SECONDS} с",
     )
 
     override fun cast(context: CastContext): AbilityOutcome {
         val reach = distance(context.sequence)
         val look = context.look
-        // Крок назад від стіни: рівно в її площину гравець не вміщається.
+        // A step back from the wall: the player does not fit exactly in its plane.
         val aim = context.caster.pick(reach, 1.0f, false).location.subtract(look.scale(CLEARANCE))
 
         val landing = safeSpot(context.level, aim)
@@ -72,14 +73,14 @@ class Blink : ActiveAbility(AbilityIdentity.of("door_blink")) {
             SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1.5f, 1.2f,
         )
 
-        return AbilityOutcome.done("Ви блимнули на ${from.distanceTo(landing).toInt()} бл.")
+        return AbilityOutcome.done("Ви перенеслись на ${from.distanceTo(landing).toInt()} бл.")
     }
 
     /**
-     * Місце, де вміщається гравець: під ноги й під голову потрібне повітря.
+     * A spot where the player fits: air is needed under the feet and under the head.
      *
-     * Перевіряється сама точка, далі вниз до [SEARCH] і, якщо не вийшло, вгору — бо
-     * найчастіший промах це «влучив у підлогу», а не «влучив у стелю».
+     * The point itself is checked, then downwards to [SEARCH] and, failing that, upwards —
+     * because the commonest miss is "hit the floor", not "hit the ceiling".
      */
     private fun safeSpot(level: ServerLevel, aim: Vec3): Vec3? {
         val base = BlockPos.containing(aim)
@@ -95,7 +96,7 @@ class Blink : ActiveAbility(AbilityIdentity.of("door_blink")) {
         return Vec3(pos.x + 0.5, pos.y.toDouble(), pos.z + 0.5)
     }
 
-    /** Постать, що лишається на місці зникнення й проявляється на місці появи. */
+    /** A figure left behind at the place of disappearance and appearing at the place of arrival. */
     private fun silhouette(level: ServerLevel, at: Vec3, mote: ParticleOptions) {
         var y = 0.0
         while (y <= BODY_HEIGHT) {

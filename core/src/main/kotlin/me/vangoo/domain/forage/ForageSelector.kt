@@ -5,13 +5,14 @@ import me.vangoo.domain.creatures.ConvergenceBias
 import java.util.Locale
 
 /**
- * Чисте правило вибору допоміжного інгредієнта для фореджу за біомом (аналог `CreatureSelector`).
- * Зважений детермінований вибір при поданому [roll] ∈ [0,1). Без стану.
+ * The pure rule for picking an auxiliary forage ingredient by biome (the counterpart of
+ * `CreatureSelector`). A weighted deterministic choice for a given [roll] ∈ [0,1). Stateless.
  *
- * Закон конвергенції діє тут так само, як на спавні істот: інгредієнт із рецепта шляху гравця
- * важить більше — найбільше той, що потрібен для НАСТУПНОЇ послідовності. Це ВАГОВИЙ ухил у межах
- * таблиці біому, а не фільтр: чужі інгредієнти далі випадають, і загальна ймовірність появи ноди
- * не змінюється (її вирішує спавнер до виклику).
+ * The Law of Convergence works here just as it does on creature spawns: an ingredient from the
+ * player's pathway recipe weighs more — most of all the one needed for the NEXT sequence. This
+ * is a WEIGHTED bias within the biome table, not a filter: other pathways' ingredients still
+ * drop, and the overall probability of a node appearing does not change (the spawner decides
+ * that before the call).
  */
 class ForageSelector(
     byBiome: Map<String, List<ForageEntry>>,
@@ -19,7 +20,7 @@ class ForageSelector(
 ) {
     private val byBiome: Map<String, List<ForageEntry>> = byBiome.mapValues { it.value.toList() }
 
-    /** ingredientId -> {"pathway:sequence"} усіх рецептів, де він потрібен (шлях у нижньому регістрі). */
+    /** ingredientId -> {"pathway:sequence"} of every recipe that needs it (pathway in lower case). */
     private val recipeSlots: Map<String, Set<String>> = buildMap<String, MutableSet<String>> {
         recipesByPathway.forEach { (pathway, bySequence) ->
             bySequence.forEach { (sequence, def) ->

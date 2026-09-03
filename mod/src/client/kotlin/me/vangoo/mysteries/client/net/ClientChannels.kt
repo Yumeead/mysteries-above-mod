@@ -6,22 +6,22 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 
 /**
- * Клієнтська половина пакетного шару.
+ * The client half of the packet layer.
  *
- * Живе в `src/client` навмисно: `ClientPlayNetworking` існує лише на клієнті, і
- * спроба надіслати щось «із сервера на сервер» тут просто не скомпілюється у
- * спільному коді — імпорту не буде.
+ * It lives in `src/client` on purpose: `ClientPlayNetworking` exists only on the client, and an
+ * attempt to send something "from the server to the server" simply will not compile here in
+ * shared code — the import will not be there.
  */
 
-/** Клієнт → сервер. Мовчки нічого не робить поза грою: гра могла вже від'єднатись. */
+/** Client → server. Silently does nothing outside a game: the game may already have disconnected. */
 fun <T : CustomPacketPayload> ServerboundChannel<T>.sendToServer(payload: T) {
     if (!ClientPlayNetworking.canSend(type)) return
     ClientPlayNetworking.send(payload)
 }
 
 /**
- * Обробник виконується на головному потоці клієнта — Fabric сам його туди
- * переносить, тож усередині можна чіпати екрани й світ напряму.
+ * The handler runs on the client's main thread — Fabric moves it there itself, so screens and
+ * the world can be touched directly inside.
  */
 fun <T : CustomPacketPayload> ClientboundChannel<T>.receiveOnClient(
     handler: (T, ClientPlayNetworking.Context) -> Unit,

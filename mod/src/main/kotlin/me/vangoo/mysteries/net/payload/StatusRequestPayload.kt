@@ -6,8 +6,8 @@ import net.minecraft.network.codec.StreamCodec
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 
 /**
- * Клієнт → сервер: «перечитай мій стан». Тіла нема — гравця сервер бере з
- * контексту з'єднання, а не з пакета; інакше будь-хто просив би чужий стан.
+ * Client → server: "re-read my state". There is no body — the server takes the player from the
+ * connection context, not from the packet; otherwise anyone could ask for someone else's state.
  */
 data object StatusRequestPayload : CustomPacketPayload {
 

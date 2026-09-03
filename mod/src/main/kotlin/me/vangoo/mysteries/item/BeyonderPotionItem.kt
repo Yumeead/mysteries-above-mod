@@ -13,22 +13,22 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
 
 /**
- * Пляшка потойбічного зілля.
+ * A bottle of Beyonder potion.
  *
- * Анімацію, звук і перетворення на порожню пляшку робить ванільний компонент
- * `CONSUMABLE`, оголошений у [ModItems] — власного коду тут рівно два хуки: перевірити
- * **до** ковтка й подіяти **після**.
+ * The animation, the sound and the turning into an empty bottle are done by the vanilla
+ * `CONSUMABLE` component declared in [ModItems] — there are exactly two hooks of our own code
+ * here: check **before** the sip and act **after**.
  *
- * У плагіні це був один слухач `PlayerItemConsumeEvent`, який на половині шляху
- * скасовував подію. Тут скасовувати нема чого: зілля, яке пити не можна, і не
- * починають пити — [use] відмовляє до того, як рука підніметься.
+ * In the plugin this was one `PlayerItemConsumeEvent` listener that cancelled the event halfway
+ * through. Here there is nothing to cancel: a potion that must not be drunk is never started on
+ * — [use] refuses before the hand goes up.
  */
 class BeyonderPotionItem(properties: Properties) : Item(properties) {
 
     /**
-     * Рішення ухвалює сервер: реєстр Потойбічних живе тільки там, і на виділеному
-     * сервері клієнт про нього нічого не знає. Клієнт починає анімацію оптимістично —
-     * якщо сервер відмовив, він же надішле поправку.
+     * The server makes the decision: the Beyonder registry lives only there, and on a dedicated
+     * server the client knows nothing about it. The client starts the animation optimistically —
+     * if the server refuses, it will send a correction.
      */
     override fun use(level: Level, player: Player, hand: InteractionHand): InteractionResult {
         if (level.isClientSide || player !is ServerPlayer) return super.use(level, player, hand)
@@ -48,8 +48,8 @@ class BeyonderPotionItem(properties: Properties) : Item(properties) {
         val brew = stack.get(ModComponents.POTION_BREW)
             ?: return super.finishUsingItem(stack, level, entity)
 
-        // Стан міг змінитись між ковтком і його кінцем. Якщо змінився — пляшка лишається
-        // повною: втратити рідкісне зілля через гонку гірше, ніж не випити його.
+        // The state could have changed between the sip and its end. If it did, the bottle stays
+        // full: losing a rare potion to a race is worse than not drinking it.
         Ascension.refusal(entity, brew)?.let {
             refuse(entity, it)
             return stack

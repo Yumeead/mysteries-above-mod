@@ -8,28 +8,27 @@ import net.minecraft.world.entity.ai.attributes.Attribute
 import net.minecraft.world.entity.ai.attributes.AttributeModifier
 
 /**
- * Модифікатор атрибута, накладений здібністю.
+ * An attribute modifier applied by an ability.
  *
- * ## Чому це замінює половину плагінних пасивок
+ * ## Why this replaces half the plugin's passives
  *
- * У Bukkit «сильне тіло» доводилось відігравати ефектом зілля: `SPEED`, `STRENGTH`,
- * `HEALTH_BOOST` на нескінченну тривалість, поновлювані тактом. Це давало три вади
- * одразу — іконка в списку зілль поруч зі справжніми зіллями, зняття чужим молоком і
- * крок сили, прибитий до цілих рівнів ефекту (`SPEED I` — рівно +20 %, інших чисел
- * ванілька не має).
+ * In Bukkit a "strong body" had to be acted out with a potion effect: `SPEED`, `STRENGTH`,
+ * `HEALTH_BOOST` at infinite duration, refreshed by a tick. That gave three flaws at once — an
+ * icon in the potion list next to real potions, removal by someone else's milk, and a power
+ * step nailed to whole effect levels (`SPEED I` is exactly +20 %, vanilla has no other numbers).
  *
- * Атрибут не має жодної з них: число довільне, іконки немає, молоко його не бере, а
- * бонус до шкоди ще й **сам показується в підказці предмета** — зворотний зв'язок,
- * якого плагін дати не міг узагалі. Те саме, що вже сталось з `IllusoryScales`:
- * механіку змінено, баланс — ні.
+ * An attribute has none of them: the number is arbitrary, there is no icon, milk does not take
+ * it, and a damage bonus **shows up in the item tooltip by itself** — feedback the plugin could
+ * not give at all. The same thing that already happened to `IllusoryScales`: the mechanics
+ * changed, the balance did not.
  *
- * ## Транзієнтний, а не постійний
+ * ## Transient, not permanent
  *
- * `addPermanentModifier` запікає модифікатор у файл гравця — і той переживе втрату
- * здібності, зміну шляху й видалення мода. Здібність, яку більше не мають, не має
- * лишати по собі +4 до здоров'я. Тому **тільки** транзієнтні: реєстр накладає їх
- * наново при кожній активації (вхід, респавн, піднесення), а `addOrUpdate` робить
- * повторну активацію ідемпотентною.
+ * `addPermanentModifier` bakes the modifier into the player's file — and it would outlive
+ * losing the ability, changing the pathway and removing the mod. An ability one no longer has
+ * must not leave +4 health behind. Hence **only** transient ones: the registry applies them
+ * anew on every activation (join, respawn, ascension), and `addOrUpdate` makes a repeated
+ * activation idempotent.
  */
 fun LivingEntity.grantAttribute(
     attribute: Holder<Attribute>,
@@ -40,10 +39,10 @@ fun LivingEntity.grantAttribute(
     getAttribute(attribute)?.addOrUpdateTransientModifier(AttributeModifier(id, amount, operation))
 }
 
-/** Знімає модифікатор [id]. Мовчить, якщо його не було: втрата здібності — не помилка. */
+/** Removes the modifier [id]. Silent if it was not there: losing an ability is not an error. */
 fun LivingEntity.revokeAttribute(attribute: Holder<Attribute>, id: Identifier) {
     getAttribute(attribute)?.removeModifier(id)
 }
 
-/** Ідентифікатор модифікатора: `mysteries_above:<здібність>/<атрибут>`. */
+/** The modifier's identifier: `mysteries_above:<ability>/<attribute>`. */
 fun modifierId(ability: String, attribute: String): Identifier = modId("$ability/$attribute")

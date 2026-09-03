@@ -15,20 +15,20 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.component.DyedItemColor
 
 /**
- * Стан Потойбічного, яким його бачить клієнт.
+ * The Beyonder's state as the client sees it.
  *
- * Джерело — живий реєстр. Порожній реєстр означає, що гравець ще звичайний, і це та
- * сама відповідь, яку екран уже вміє показувати. Наповнює реєстр сховище (фаза 09) на
- * вхід гравця, а до того — зілля.
+ * The source is the live registry. An empty registry means the player is still ordinary, and
+ * that is the same answer the screen already knows how to show. Storage (phase 09) fills the
+ * registry when the player joins; until then, the potion does.
  *
- * **Чистий збирач знімків.** Коли який знімок летить, вирішує [AbilityStatePump]; тут
- * лише «зібрати й віддати». Два знімки, а не один, бо частота в них різна на три
- * порядки: [roster] — одиниці разів за сесію, [state] — до разу на секунду. Злиття
- * означало б слати описи здібностей щосекунди.
+ * **A pure snapshot builder.** [AbilityStatePump] decides which snapshot flies when; here there
+ * is only "assemble and hand over". Two snapshots rather than one, because their frequency
+ * differs by three orders of magnitude: [roster] a handful of times per session, [state] up to
+ * once a second. Merging them would mean sending ability descriptions every second.
  */
 object BeyonderStatus {
 
-    // ── Знімки ──────────────────────────────────────────────────────────────────
+    // ── Snapshots ───────────────────────────────────────────────────────────────
 
     fun snapshot(player: ServerPlayer): BeyonderStatusPayload {
         val beyonder = AbilityServices.beyonders.of(player.uuid)
@@ -44,16 +44,16 @@ object BeyonderStatus {
     }
 
     /**
-     * Список здібностей з усім, що потрібно меню. Числа вже пораховані під
-     * Послідовність власника — клієнт не має ні `SequenceScaler`, ні причин його мати.
+     * The ability list with everything the menu needs. The numbers are already computed for the
+     * owner's Sequence — the client has no `SequenceScaler` and no reason to have one.
      *
-     * `AbilitySpec`, який не є [Ability], сюди не потрапляє: назви й іконки в нього
-     * немає, а мовчазний пропуск чесніший за порожню картку. У моді таких і не буває —
-     * усе, що реєструють шляхи, спадкує [Ability].
+     * An `AbilitySpec` that is not an [Ability] never gets here: it has neither a name nor an
+     * icon, and skipping it silently is more honest than an empty card. There are none such in
+     * the mod anyway — everything the pathways register inherits [Ability].
      *
-     * Бере [Beyonder], а не гравця, навмисно: у списку здібностей немає нічого, що
-     * потребувало б живого світу, тож знімок перевіряється звичайним юніт-тестом.
-     * `null` — гравець не Потойбічний.
+     * It takes a [Beyonder] rather than a player deliberately: nothing in the ability list needs
+     * a live world, so the snapshot is checked by an ordinary unit test.
+     * `null` — the player is not a Beyonder.
      */
     fun roster(beyonder: Beyonder?): AbilityRosterPayload {
         if (beyonder == null) return AbilityRosterPayload.NONE
@@ -71,7 +71,7 @@ object BeyonderStatus {
         )
     }
 
-    /** `null` — гравець не Потойбічний; про це вже сказав порожній [roster]. */
+    /** `null` — the player is not a Beyonder; the empty [roster] has already said so. */
     fun state(player: ServerPlayer): AbilityStatePayload? {
         val beyonder = AbilityServices.beyonders.of(player.uuid) ?: return null
         val owner = player.uuid
@@ -85,31 +85,31 @@ object BeyonderStatus {
                 val readyAtTick = AbilityServices.cooldowns.readyAtTick(owner, spec.identity)
                 val toggled = AbilityServices.passives.isEnabled(owner, spec.identity)
                 val sustaining = AbilityServices.scheduling.isRunning(owner, spec.identity)
-                // Готова, вимкнена й не триває — сказати про неї нічого.
+                // Ready, switched off and not running — there is nothing to say about it.
                 if (readyAtTick == 0 && !toggled && !sustaining) return@mapNotNull null
                 AbilityStatePayload.Live(spec.identity.id, readyAtTick, toggled, sustaining)
             },
         )
     }
 
-    // ── Відправка ───────────────────────────────────────────────────────────────
+    // ── Sending ─────────────────────────────────────────────────────────────────
 
     fun push(player: ServerPlayer) {
         ModChannels.BEYONDER_STATUS.sendTo(listOf(player), snapshot(player))
     }
 
-    /** Список здібностей став іншим: зілля, піднесення, демоція, вхід у світ, `forget`. */
+    /** The ability list changed: a potion, an ascension, a demotion, joining a world, `forget`. */
     fun pushRoster(player: ServerPlayer) {
         ModChannels.ABILITY_ROSTER.sendTo(listOf(player), roster(AbilityServices.beyonders.of(player.uuid)))
     }
 
-    /** Звичайному гравцеві не летить нічого: стан має сенс лише в Потойбічного. */
+    /** Nothing flies to an ordinary player: state only makes sense for a Beyonder. */
     fun pushState(player: ServerPlayer) {
         val state = state(player) ?: return
         ModChannels.ABILITY_STATE.sendTo(listOf(player), state)
     }
 
-    // ── Збирання картки ─────────────────────────────────────────────────────────
+    // ── Assembling a card ───────────────────────────────────────────────────────
 
     private fun entryOf(ability: Ability, beyonder: Beyonder): AbilityRosterPayload.Entry {
         val sequence = beyonder.sequence
@@ -126,13 +126,13 @@ object BeyonderStatus {
     }
 
     /**
-     * Фарбує іконку в колір шляху — безкоштовно, ванільним компонентом.
+     * Dyes the icon in the pathway colour — for free, with a vanilla component.
      *
-     * Здібність, що оголосила власний `DYED_COLOR`, лишається зі своїм: перекриття
-     * має бути сильнішим за типове, інакше воно нічого не варте.
+     * An ability that declared its own `DYED_COLOR` keeps it: an override must be stronger than
+     * a default, otherwise it is worth nothing.
      *
-     * Копія навмисна. Типова іконка будується щоразу нова, але перекрита може бути
-     * полем — і тоді фарба лягла б на спільний екземпляр назавжди.
+     * The copy is deliberate. A default icon is built anew each time, but an overridden one may
+     * be a field — and then the dye would settle on a shared instance forever.
      */
     private fun tinted(icon: ItemStack, pathwayName: String): ItemStack {
         if (icon.has(DataComponents.DYED_COLOR)) return icon

@@ -22,29 +22,31 @@ import net.minecraft.sounds.SoundSource
 import net.minecraft.world.entity.LivingEntity
 
 /**
- * WhiteTower, Посл. 6 (Ерудит): **Аналіз**.
+ * WhiteTower, Seq. 6 (Scholar of Yore): **Analysis**.
  *
- * Ерудит дивиться на чужу силу дві секунди — і на якийсь час уміє те саме. Не назавжди:
- * розібраний прийом тримається в голові, поки тримається аналіз, а тоді забувається.
+ * The Scholar looks at someone else's power for two seconds — and for a while can do the same.
+ * Not forever: a technique taken apart stays in the head while the analysis holds, and then it is
+ * forgotten.
  *
- * ## Чому позика, а не копія
+ * ## Why a loan rather than a copy
  *
- * Плагінна `Analysis` копіювала здібність **назавжди**, тримала список украденого в
- * полі (`MAX_REMEMBERED_ABILITIES = 10`) і мусила мати другий режим — `DELETE`, — щоб
- * гравець міг звільнити місце. Разом із режимами приїжджало меню перемикання, а разом
- * із «назавжди» — питання, що з цим списком робить збереження. Обидва тягнуть за собою
- * фази, яких ще немає (11 і 09).
+ * The plugin's `Analysis` copied an ability **forever**, kept the list of what it had taken in a
+ * field (`MAX_REMEMBERED_ABILITIES = 10`) and had to have a second mode — `DELETE` — so the
+ * player could free up room. Together with the modes came a switching menu, and together with
+ * "forever" came the question of what persistence does with that list. Both drag in phases that
+ * do not exist yet (11 and 09).
  *
- * Позика не тягне жодної: вона живе рівно стільки, скільки живе сесія, і зникає разом
- * із нею — при виході, при перекасті, при зупинці сервера. Списку немає, режимів немає,
- * зберігати нічого. І Ерудитом це виглядає **точніше**: широта замість глибини — те, що
- * вмієш усе потроху й ненадовго, а не крадій, який назбирав чужого назавжди.
+ * A loan drags in none: it lives exactly as long as the session and disappears with it — on
+ * leaving, on a recast, on a server shutdown. There is no list, no modes, nothing to persist.
+ * And as a Scholar it looks **more accurate**: breadth instead of depth — being able to do a
+ * little of everything, briefly, rather than being a thief who has hoarded other people's powers
+ * forever.
  *
- * ## Опір кидає рушій, а не здібність
+ * ## The engine rolls the resistance, not the ability
  *
- * Плагін рахував шанс сам: 20 % бази, ±10 % за різницю Послідовностей, +5 % за кожен
- * відомий рецепт. Тут це [contestedTarget] — і той самий кидок робить `AbilityExecutor`
- * для будь-якої сили проти Потойбічного. Провал з'їдає кулдаун, але не духовність.
+ * The plugin computed the chance itself: 20 % base, ±10 % for the Sequence difference, +5 % per
+ * known recipe. Here that is [contestedTarget] — and the same roll is made by `AbilityExecutor`
+ * for any power against a Beyonder. A failure eats the cooldown but not the spirituality.
  */
 class Analysis : ActiveAbility(AbilityIdentity.of("whitetower_analysis")) {
 
@@ -62,7 +64,7 @@ class Analysis : ActiveAbility(AbilityIdentity.of("whitetower_analysis")) {
             "▪ Чим вища Послідовність цілі, тим імовірніше вона встоїть",
     )
 
-    /** Поки триває позика, другий аналіз нічого не дасть: сесія в гравця одна. */
+    /** While the loan runs, a second analysis gives nothing: a player has one session. */
     override fun canCast(context: CastContext): Boolean = !context.sessionRunning
 
     override fun contestedTarget(context: CastContext): LivingEntity? = context.targeting.lookingAt(RANGE)
@@ -84,8 +86,8 @@ class Analysis : ActiveAbility(AbilityIdentity.of("whitetower_analysis")) {
         val messaging = context.messaging
 
         context.session {
-            // Розбір: дві секунди Ерудит стоїть і читає. Позики ще немає, квиток
-            // непогашений — зірваний аналіз не коштує нічого.
+            // The reading: for two seconds the Scholar stands and studies. There is no loan yet
+            // and the ticket is unsettled — a broken analysis costs nothing.
             repeat(SCAN_TICKS / SCAN_PERIOD_TICKS) {
                 val self = owner ?: return@session
                 val victim = self.level().getEntityInAnyDimension(targetId) ?: return@session
@@ -117,13 +119,13 @@ class Analysis : ActiveAbility(AbilityIdentity.of("whitetower_analysis")) {
     }
 
     /**
-     * Обидві сторони мусять знати.
+     * Both sides must know.
      *
-     * Донор адресується **за UUID**, і саме тому через [Messaging]: позика переживає і
-     * смерть, і перехід між вимірами, тож шукати його треба щоразу наново й по всіх
-     * світах. Попередня редакція шукала його `self.level().server.playerList` — тобто
-     * вручну переписувала те, що сервіс уже вміє, і мовчки губила рядок, коли з гри
-     * виходив **кастер**, а не донор.
+     * The donor is addressed **by UUID**, and that is exactly why through [Messaging]: the loan
+     * outlives both death and a dimension change, so the donor has to be looked up anew each time
+     * and across all worlds. The previous revision looked them up via `self.level().server
+     * .playerList` — i.e. rewrote by hand what the service already does, and silently lost the
+     * line when it was the **caster** who left the game rather than the donor.
      */
     private fun announce(
         messaging: Messaging,

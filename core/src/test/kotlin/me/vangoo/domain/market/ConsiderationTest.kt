@@ -26,7 +26,7 @@ internal class ConsiderationTest {
         assertTrue(c.isBarter)
         assertEquals(demand, c.item)
         assertFalse(c.hasMoney)
-        assertEquals(0, c.commission(0.10).coppets) // бартер ніколи не платить комісію
+        assertEquals(0, c.commission(0.10).coppets) // a barter never pays commission
     }
 
     @Test

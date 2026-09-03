@@ -15,15 +15,16 @@ import me.vangoo.mysteries.ability.context.Targeting
 import net.minecraft.server.level.ServerPlayer
 
 /**
- * Складає контексти.
+ * Assembles contexts.
  *
- * Не `ServiceContainer` плагіна й не фабрика заради фабрики: сервісів у контексті сім,
- * і без цього класу їх довелося б перелічувати в кожному місці, що кличе здібність —
- * у виконавці касту, у такті пасивок, а далі в кожній наступній точці входу.
+ * Not the plugin's `ServiceContainer` and not a factory for a factory's sake: there are seven
+ * services in a context, and without this class they would have to be listed at every place
+ * that calls an ability — in the cast executor, in the passives' tick, and then at every
+ * further entry point.
  *
- * Троє з семи зібрані **під конкретний виклик**: `targeting` дивиться очима саме цього
- * гравця, `events` підписується саме від цієї здібності, а `effects` знає колір шляху
- * саме цього кастера. Решта — одні й ті самі об'єкти на весь сервер.
+ * Three of the seven are assembled **for a specific call**: `targeting` looks through this very
+ * player's eyes, `events` subscribes on behalf of this very ability, and `effects` knows this
+ * very caster's pathway colour. The rest are the same objects for the whole server.
  */
 class AbilityContexts(
     private val beyonders: Beyonders,
@@ -33,7 +34,7 @@ class AbilityContexts(
     private val eventHub: EventHub,
 ) {
 
-    /** Контекст без квитка: такт пасивки, вмикання тогла, вхід і вихід гравця. */
+    /** A context with no ticket: a passive's tick, switching a toggle on, a player joining and leaving. */
     fun of(caster: ServerPlayer, beyonder: Beyonder, ability: AbilitySpec): AbilityContext =
         LiveAbilityContext(
             caster, beyonder, ability,
@@ -42,7 +43,7 @@ class AbilityContexts(
             LiveEffects.of(scheduling, beyonder.pathway.name),
         )
 
-    /** Контекст одного касту: живе рівно стільки, скільки триває виклик `cast`. */
+    /** The context of one cast: it lives exactly as long as the `cast` call. */
     fun forCast(
         caster: ServerPlayer,
         beyonder: Beyonder,

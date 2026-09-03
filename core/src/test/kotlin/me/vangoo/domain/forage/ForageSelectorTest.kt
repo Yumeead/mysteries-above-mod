@@ -34,7 +34,7 @@ internal class ForageSelectorTest {
 
     @Test
     fun weightedSegmentsByRoll() {
-        // сума 80; a:[0,50) b:[50,80)
+        // sum 80; a:[0,50) b:[50,80)
         val s = ForageSelector(mapOf("PLAINS" to listOf(ForageEntry("a", 50), ForageEntry("b", 30))))
         assertEquals("a", s.pickForBiome("PLAINS", 0.1)) // target 8  -> a
         assertEquals("a", s.pickForBiome("PLAINS", 0.6)) // target 48 -> a
@@ -48,7 +48,7 @@ internal class ForageSelectorTest {
         assertEquals("real", s.pickForBiome("PLAINS", 0.0))
     }
 
-    /** Рецепти: Error 6 потребує "next", Error 7 — "current", Visionary 6 — "other". */
+    /** Recipes: Error 6 needs "next", Error 7 needs "current", Visionary 6 needs "other". */
     private val recipes = mapOf(
         "Error" to mapOf(
             6 to RecipeDefinition(emptyList(), listOf("next")),
@@ -72,7 +72,7 @@ internal class ForageSelectorTest {
 
     @Test
     fun convergenceFavoursNextSequenceOfOwnPathway() {
-        // Посл. 7 гравця Error: "next" (Посл. 6) x4 = 40, "current" (Посл. 7) x2 = 20, "other" x1 = 10
+        // Seq. 7 Error player: "next" (Seq. 6) x4 = 40, "current" (Seq. 7) x2 = 20, "other" x1 = 10
         val s = biased()
         val bias = ConvergenceBias("Error", 7)
         assertEquals("next", s.pickForBiome("PLAINS", bias, 0.5)) // target 35 -> next [0,40)
@@ -92,7 +92,7 @@ internal class ForageSelectorTest {
     fun nullBiasKeepsPlainBiomeWeights() {
         val s = biased()
         assertEquals(s.pickForBiome("PLAINS", 0.5), s.pickForBiome("PLAINS", null, 0.5))
-        assertEquals("current", s.pickForBiome("PLAINS", 0.5)) // рівні ваги: 10/10/10
+        assertEquals("current", s.pickForBiome("PLAINS", 0.5)) // equal weights: 10/10/10
     }
 
     @Test
@@ -110,7 +110,7 @@ internal class ForageSelectorTest {
             mapOf("PLAINS" to listOf(ForageEntry("mainNext", 10), ForageEntry("plain", 10))),
             mapOf("Error" to mapOf(6 to RecipeDefinition(listOf("mainNext"), emptyList()))),
         )
-        // mainNext: x4 = 40, plain: x1 = 10; сума 50, mainNext у [0,40)
+        // mainNext: x4 = 40, plain: x1 = 10; sum 50, mainNext in [0,40)
         assertEquals("mainNext", s.pickForBiome("PLAINS", ConvergenceBias("Error", 7), 0.79))
         assertEquals("plain", s.pickForBiome("PLAINS", ConvergenceBias("Error", 7), 0.81))
     }

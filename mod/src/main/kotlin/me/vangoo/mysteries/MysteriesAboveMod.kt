@@ -1,6 +1,7 @@
 package me.vangoo.mysteries
 
 import me.vangoo.mysteries.ability.runtime.AbilityServices
+import me.vangoo.mysteries.pathways.error.abilities.ConceptualTheft
 import me.vangoo.mysteries.beyonder.AbilityRequests
 import me.vangoo.mysteries.beyonder.BeyonderStatus
 import me.vangoo.mysteries.effect.ModParticles
@@ -16,34 +17,38 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import org.slf4j.LoggerFactory
 
 /**
- * Спільний entrypoint: усе, що однаково потрібне клієнту й виділеному серверу.
- * Клієнтська половина — [me.vangoo.mysteries.client.MysteriesAboveClient].
+ * The shared entrypoint: everything the client and a dedicated server need alike.
+ * The client half is [me.vangoo.mysteries.client.MysteriesAboveClient].
  */
 object MysteriesAboveMod : ModInitializer {
 
     private val log = LoggerFactory.getLogger(MOD_ID)
 
     override fun onInitialize() {
-        // Типи пакетів реєструються на обох сторонах і саме звідси: клієнт, що
-        // зареєстрував інший набір, ніж сервер, — це «іноді не працює», а не помилка.
+        // Packet types are registered on both sides and from exactly here: a client that
+        // registered a different set from the server is "sometimes broken", not an error.
         ModChannels.registerTypes()
 
-        // Компонент — перед предметом: предмет його вже вимагає.
+        // The component before the item: the item already requires it.
         ModComponents.register()
         ModItems.register()
 
-        // Чуттєвий словник: частинки й звуки реєструються на обох сторонах — сервер
-        // шле їх у пакетах, клієнт малює й програє.
+        // The sensory vocabulary: particles and sounds are registered on both sides — the
+        // server sends them in packets, the client draws and plays them.
         ModParticles.register()
         ModSounds.register()
 
-        // Хребет здібностей: реєстр Потойбічних, кулдауни, повідомлення, виконавець
-        // касту. Далі кожна фаза додає сюди свій сервіс.
+        // The ability backbone: the Beyonder registry, cooldowns, messaging, the cast executor.
+        // Each further phase adds its own service here.
         AbilityServices.bootstrap()
 
-        // Духовний світ сам по собі — дані, але гравець, що вийшов із гри всередині
-        // нього, лишився б там назавжди: сесія, яка вміла його повернути, гасне разом
-        // із його з'єднанням.
+        // Error's stolen dream refuses its owner a bed. A Fabric event cannot be unregistered,
+        // so the hook is hung once here and the theft registry decides whether it bites.
+        ConceptualTheft.install()
+
+        // The spirit world is data in itself, but a player who left the game inside it would
+        // stay there forever: the session that could bring them back goes out together with
+        // their connection.
         SpiritWorld.guardStranded()
 
         ModChannels.STATUS_REQUEST.receiveOnServer { _, context ->
@@ -53,7 +58,7 @@ object MysteriesAboveMod : ModInitializer {
             AbilityServices.statePump.pushNow(player.uuid)
         }
 
-        // Клавіша касту. Здібність обирає сервер — див. `CastRequestPayload`.
+        // The cast key. The server picks the ability — see `CastRequestPayload`.
         ModChannels.CAST_REQUEST.receiveOnServer { _, context ->
             AbilityRequests.castSelected(context.player())
         }

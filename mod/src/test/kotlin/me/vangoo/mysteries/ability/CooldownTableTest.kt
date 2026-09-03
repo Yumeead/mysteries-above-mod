@@ -9,11 +9,11 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 /**
- * Кулдауни: гри не піднімає — годинник тут підставний.
+ * Cooldowns: no game is brought up — the clock here is a stand-in.
  *
- * Головне, що доводиться: [CooldownTable.readyAtTick] і `remainingSeconds` не
- * розходяться. Це два погляди на одне число — секунди для сервера, абсолютний тік для
- * клієнта, — і саме розбіжність між ними дала б заливку, що не збігається з цифрою.
+ * The main thing proven: [CooldownTable.readyAtTick] and `remainingSeconds` do not drift apart.
+ * They are two views of one number — seconds for the server, an absolute tick for the client —
+ * and a discrepancy between them is exactly what would give a fill that does not match the digit.
  */
 class CooldownTableTest {
 
@@ -38,7 +38,7 @@ class CooldownTableTest {
 
         assertEquals(1_000 + 20 * TICKS_PER_SECOND, table.readyAtTick(alice, water))
 
-        // Час іде — число не змінюється. У цьому й сенс: клієнт відлічує сам.
+        // Time passes — the number does not change. That is the point: the client counts down itself.
         tick += 5 * TICKS_PER_SECOND
         assertEquals(1_000 + 20 * TICKS_PER_SECOND, table.readyAtTick(alice, water))
         assertEquals(15L, table.remainingSeconds(alice, water))
@@ -56,7 +56,7 @@ class CooldownTableTest {
             if (readyAtTick == 0) {
                 assertEquals(0L, seconds, "готова за тіком, але не за секундами (тік $tick)")
             } else {
-                // Те саме округлення вгору, що й у таблиці: клієнт малює цю ж цифру.
+                // The same rounding up as in the table: the client draws this very digit.
                 val expected = (readyAtTick - tick + TICKS_PER_SECOND - 1) / TICKS_PER_SECOND
                 assertEquals(expected.toLong(), seconds, "розбіжність на тіку $tick")
             }

@@ -8,22 +8,22 @@ import kotlinx.coroutines.InternalCoroutinesApi
 import kotlin.coroutines.CoroutineContext
 
 /**
- * Диспетчер, для якого «потік» — це серверний тік.
+ * A dispatcher for which a "thread" is the server tick.
  *
- * Корутина, запущена тут, прокидається всередині [TickScheduler.advance], тобто на
- * головному потоці сервера. Тому здібності в сесії дозволено чіпати світ напряму:
- * ніякого `runTask(plugin, …)` навколо кожного дотику, як було в плагіні.
+ * A coroutine launched here wakes up inside [TickScheduler.advance], i.e. on the server's main
+ * thread. That is why abilities in a session are allowed to touch the world directly: no
+ * `runTask(plugin, …)` around every touch, as there was in the plugin.
  *
- * ## Чому реалізовано ще й [Delay]
+ * ## Why [Delay] is implemented too
  *
- * Без нього `delay()` пішов би через власний фоновий таймер корутин — стінний час.
- * Одиночна гра на паузі стоїть, а такий `delay` цокав би далі, і сесія прокинулась би
- * з боргом у тіках. З [Delay] **усяке** очікування міряється тіками: `delay(1.seconds)`
- * — це рівно 20 тіків сервера, скільки б реального часу вони не зайняли.
+ * Without it `delay()` would go through the coroutines' own background timer — wall time. A
+ * paused single-player game stands still, while such a `delay` would keep ticking, and the
+ * session would wake up with a debt in ticks. With [Delay] **every** wait is measured in ticks:
+ * `delay(1.seconds)` is exactly 20 server ticks, however much real time they take.
  *
- * Ціна — опт-ін на [InternalCoroutinesApi]: інтерфейс [Delay] позначено внутрішнім.
- * Він стабільний роками й ним живуть усі мод-диспетчери; альтернатива — лишити
- * пастку, у яку вступить перший же `delay()` замість [waitTicks].
+ * The price is an opt-in to [InternalCoroutinesApi]: the [Delay] interface is marked internal.
+ * It has been stable for years and every mod dispatcher lives on it; the alternative is leaving
+ * a trap the very first `delay()` would step into instead of [waitTicks].
  */
 @OptIn(InternalCoroutinesApi::class)
 class ServerTickDispatcher(private val scheduler: TickScheduler) : CoroutineDispatcher(), Delay {
@@ -37,8 +37,8 @@ class ServerTickDispatcher(private val scheduler: TickScheduler) : CoroutineDisp
         continuation: CancellableContinuation<Unit>,
     ) {
         val handle = scheduler.after(millisToTicks(timeMillis)) {
-            // resumeWith, а не resume(value, onCancellation): продовження диспетчиться
-            // назад сюди ж, тобто прокидається в тому самому тіку, у якому настав строк.
+            // resumeWith rather than resume(value, onCancellation): the continuation is
+            // dispatched back here, i.e. it wakes up in the very tick its term came due.
             continuation.resumeWith(Result.success(Unit))
         }
         continuation.invokeOnCancellation { handle.cancel() }

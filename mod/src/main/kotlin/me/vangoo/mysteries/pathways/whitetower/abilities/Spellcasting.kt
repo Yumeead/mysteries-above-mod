@@ -27,51 +27,50 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * WhiteTower, Посл. 5 (Магістр містицизму): **Складене заклинання**.
+ * WhiteTower, Seq. 5 (Master of Mysticism): **Composed Spell**.
  *
- * Магістр не має списку готових заклинань — він їх **пише**. Візьміть книгу з пером,
- * складіть замовляння, тримайте книгу в руці й скастуйте: мод знайде у вашому тексті
- * слова сили й збере з них заклинання.
+ * The Master has no list of ready spells — they **write** them. Take a book and quill, compose an
+ * incantation, hold the book in hand and cast: the mod will find the words of power in your text
+ * and assemble a spell from them.
  *
  * ```
  * Хай промінь вогню вдарить далеко й сильно
  * ```
- * → Промінь · вогонь · далеко ×1 · сильно ×1
+ * → Beam · fire · far ×1 · strong ×1
  *
- * ## Чому книга, а не конструктор у скрині
+ * ## Why a book rather than a builder in a chest
  *
- * Плагінна `Spellcasting` — 562 рядки, і 480 із них розкладають іконки по слотах
- * шестирядкової скрині: слот форми, слоти модифікаторів, слот попереднього перегляду,
- * слот «створити», слот рандомайзера імені. Це не дизайн заклинання, а малювання
- * інтерфейсу руками, бо іншого інтерфейсу Spigot не мав.
+ * The plugin's `Spellcasting` is 562 lines, and 480 of them lay icons out into the slots of a
+ * six-row chest: the shape slot, the modifier slots, the preview slot, the "create" slot, the
+ * name randomiser slot. That is not spell design but drawing an interface by hand, because Spigot
+ * had no other interface.
  *
- * Редактор тексту в грі **вже є**, і він ванільний: книга з пером. Її можна назвати,
- * підписати, покласти в скриню, дати іншому гравцеві, скопіювати в копіювальні. Усе це —
- * механіки, яких конструктор у скрині не давав жодної, і жодна з них не коштувала тут
- * рядка коду.
+ * A text editor in the game **already exists**, and it is vanilla: a book and quill. It can be
+ * named, signed, put into a chest, given to another player, copied in a copier. All of those are
+ * mechanics the chest builder gave none of, and not one of them cost a line of code here.
  *
- * Побічний наслідок, який виявився головним: **заклинання стало предметом**. Гримуар
- * Магістра можна вкрасти.
+ * A side effect that turned out to be the main one: **a spell became an item**. A Master's
+ * grimoire can be stolen.
  *
- * ## Слова шукаються за коренем, а не за збігом
+ * ## Words are matched by stem, not by exact match
  *
- * Інакше довелось би писати «промінь вогонь сильно» — список, а не замовляння. Корінь
- * («вог» у «вогню», «вогнем», «вогненний») ловить відмінок і дозволяє решті тексту бути
- * якою завгодно. Слова, яких мод не знає, просто не читаються — тобто вірш навколо слів
- * сили дозволений, і це саме те, чим замовляння й має бути.
+ * Otherwise one would have to write "промінь вогонь сильно" — a list, not an incantation. The
+ * stem ("вог" in "вогню", "вогнем", "вогненний") catches the grammatical case and lets the rest
+ * of the text be whatever it likes. Words the mod does not know are simply not read — that is, a
+ * poem around the words of power is allowed, and that is exactly what an incantation should be.
  *
- * ## Ціна оголошується сталою, а доплата стягується окремо
+ * ## The cost is declared as a constant and the surcharge is taken separately
  *
- * `AbilitySpec.spiritualityCost` — властивість, і `Beyonder.authorize` читає її **до**
- * того, як хтось побачив книгу. Тому квиток покриває найдешевшу форму, а надлишок
- * стягує `Beyonder.payUpkeep` уже в касті: він списує все або нічого, тож заклинання не
- * буває наполовину оплаченим.
+ * `AbilitySpec.spiritualityCost` is a property, and `Beyonder.authorize` reads it **before**
+ * anyone has seen the book. So the ticket covers the cheapest form, and the surplus is taken by
+ * `Beyonder.payUpkeep` during the cast: it spends everything or nothing, so a spell is never
+ * half paid for.
  */
 class Spellcasting : ActiveAbility(AbilityIdentity.of("whitetower_spellcasting")) {
 
     override val displayName: Component = Component.literal("Складене заклинання")
 
-    /** Покриває найдешевшу форму; решту доплачує сам каст. */
+    /** Covers the cheapest form; the cast itself pays the rest. */
     override val spiritualityCost: Int = Shape.entries.minOf { it.cost }
 
     override fun cooldownSeconds(sequence: Sequence): Int = COOLDOWN_SECONDS
@@ -108,7 +107,7 @@ class Spellcasting : ActiveAbility(AbilityIdentity.of("whitetower_spellcasting")
         return AbilityOutcome.done(spell.summary())
     }
 
-    // ── Форми ───────────────────────────────────────────────────────────────────
+    // ── Shapes ──────────────────────────────────────────────────────────────────
 
     private fun beam(context: CastContext, spell: Incantation, mote: ParticleOptions) {
         val reach = spell.reach(BEAM_RANGE)
@@ -186,9 +185,9 @@ class Spellcasting : ActiveAbility(AbilityIdentity.of("whitetower_spellcasting")
         )
     }
 
-    // ── Влучання ────────────────────────────────────────────────────────────────
+    // ── Impact ──────────────────────────────────────────────────────────────────
 
-    /** Шкода плюс те, що додала стихія. Форми, які нікого не б'ють, сюди не заходять. */
+    /** Damage plus whatever the element added. Forms that hit nobody never come in here. */
     private fun strike(context: CastContext, victim: LivingEntity, spell: Incantation) {
         victim.hurtServer(
             context.level,
@@ -208,9 +207,9 @@ class Spellcasting : ActiveAbility(AbilityIdentity.of("whitetower_spellcasting")
     }
 
     /**
-     * Блискавка тільки для вигляду: удар уже завдано, а ванільний розряд додав би до
-     * нього власну шкоду, підпал і — під відкритим небом — власні правила. Балансом
-     * лишається число вище, ефектом — справжня блискавка.
+     * The lightning is for show only: the blow has already been dealt, and a vanilla bolt would
+     * add its own damage, its own ignition and — under open sky — its own rules. The balance stays
+     * the number above, the effect is real lightning.
      */
     private fun thunder(context: CastContext, victim: LivingEntity) {
         val bolt = EntityTypes.LIGHTNING_BOLT.create(context.level, EntitySpawnReason.TRIGGERED) ?: return
@@ -219,7 +218,7 @@ class Spellcasting : ActiveAbility(AbilityIdentity.of("whitetower_spellcasting")
         context.level.addFreshEntity(bolt)
     }
 
-    // ── Малювання ───────────────────────────────────────────────────────────────
+    // ── Drawing ─────────────────────────────────────────────────────────────────
 
     private fun trace(context: CastContext, from: Vec3, to: Vec3, mote: ParticleOptions) {
         val steps = (from.distanceTo(to) / BEAM_STEP).toInt().coerceIn(1, BEAM_MAX_STEPS)
@@ -233,15 +232,15 @@ class Spellcasting : ActiveAbility(AbilityIdentity.of("whitetower_spellcasting")
         context.level.sendParticles(mote, at.x, at.y + 1.0, at.z, 20, 0.3, 0.6, 0.3, 0.02)
     }
 
-    /** Сила заклинання: слова дають крок, Послідовність — множник. */
+    /** A spell's power: the words give the step, the Sequence the multiplier. */
     private fun potency(sequence: Sequence, spell: Incantation): Int =
         scale(BASE_POTENCY + spell.power * POTENCY_PER_WORD, sequence, SequenceScaler.ScalingStrategy.STRONG)
 
-    // ── Книга ───────────────────────────────────────────────────────────────────
+    // ── The book ────────────────────────────────────────────────────────────────
 
     /**
-     * Текст із книги в будь-якій руці. Приймаються обидві: неписана книга з пером
-     * (можна правити на ходу) і підписана (можна дарувати й копіювати).
+     * The text from a book in either hand. Both are accepted: an unwritten book and quill (it can
+     * be edited on the move) and a signed one (it can be given away and copied).
      */
     private fun bookInHand(context: CastContext): String? =
         InteractionHand.entries.firstNotNullOfOrNull { hand -> textOf(context.caster.getItemInHand(hand)) }
@@ -256,7 +255,7 @@ class Spellcasting : ActiveAbility(AbilityIdentity.of("whitetower_spellcasting")
         return null
     }
 
-    // ── Граматика ───────────────────────────────────────────────────────────────
+    // ── Grammar ─────────────────────────────────────────────────────────────────
 
     internal enum class Shape(val label: String, val cost: Int, val stems: List<String>) {
         BEAM("Промінь", 60, listOf("промін")),
@@ -274,10 +273,10 @@ class Spellcasting : ActiveAbility(AbilityIdentity.of("whitetower_spellcasting")
     }
 
     /**
-     * Розібране замовляння.
+     * A parsed incantation.
      *
-     * Незнайомі слова свідомо ігноруються: замовляння мусить читатись як текст, а не як
-     * список аргументів. Ціна рахується тут-таки — вона і є мірою складності.
+     * Unknown words are deliberately ignored: an incantation must read as text, not as a list of
+     * arguments. The cost is computed right here — it is the measure of complexity.
      */
     internal class Incantation(
         val shape: Shape,
@@ -322,7 +321,7 @@ class Spellcasting : ActiveAbility(AbilityIdentity.of("whitetower_spellcasting")
                 )
             }
 
-            /** Повторення підсилює, але не нескінченно: інакше сторінка «сильно» була б заклинанням. */
+            /** Repetition strengthens, but not endlessly: otherwise a page of "сильно" would be a spell. */
             private fun count(words: List<String>, stems: List<String>): Int =
                 words.count { w -> stems.any(w::contains) }.coerceAtMost(MAX_WORD_STACKS)
         }

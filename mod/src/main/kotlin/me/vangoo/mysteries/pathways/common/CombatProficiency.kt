@@ -25,25 +25,25 @@ import net.minecraft.world.entity.ai.attributes.Attributes
 import kotlin.math.roundToInt
 
 /**
- * Спільна пасивка «Бойова майстерність»: зброя в руках слухається краще.
+ * The shared "Combat Proficiency" passive: a weapon in your hands obeys you better.
  *
- * ## Бонус шкоди — атрибут, і його **видно**
+ * ## The damage bonus is an attribute, and it is **visible**
  *
- * Плагін тримав це числом усередині обробника `EntityDamageByEntityEvent`: гравець бачив
- * лише те, що ворог падає швидше. Модифікатор `ATTACK_DAMAGE` натомість друкується
- * ванількою просто в підказці меча — зворотний зв'язок, якого в плагіні не було взагалі,
- * ціною нуля рядків.
+ * The plugin kept this as a number inside an `EntityDamageByEntityEvent` handler: the player
+ * only saw that the enemy went down faster. An `ATTACK_DAMAGE` modifier, by contrast, is
+ * printed by vanilla right in the sword's tooltip — feedback the plugin did not have at all,
+ * at the price of zero lines.
  *
- * ## Парирування стало парируванням
+ * ## A parry became a parry
  *
- * У плагіні це був пласкі −20 % вхідної шкоди, поки в руці зброя, — тобто пасивний щит із
- * дивною умовою. Тут умова та, що робить його **майстерністю**: парирувати можна лише те,
- * що ти бачиш. Удар у спину проходить повністю, а розворот до нападника — це вже рішення
- * гравця, а не стан інвентаря.
+ * In the plugin this was a flat −20 % incoming damage while a weapon was in hand — that is, a
+ * passive shield with an odd condition. Here the condition is the one that makes it
+ * **proficiency**: you can only parry what you see. A blow in the back lands in full, and
+ * turning to face the attacker is now the player's decision rather than a state of the inventory.
  *
- * Побічний улов: `directCause` для стріли — сама стріла, тож обернений до лучника Арбітр
- * відбиває постріл. Плагін такого не вмів: він дивився на `getDamager()`, тобто на
- * лучника, який стоїть за сорок блоків десь позаду.
+ * A side catch: the `directCause` of an arrow is the arrow itself, so a Justiciar turned towards
+ * the archer deflects the shot. The plugin could not do that: it looked at `getDamager()`, i.e.
+ * at an archer standing forty blocks somewhere behind.
  */
 class CombatProficiency : PermanentPassiveAbility(AbilityIdentity.of("common_combat_proficiency")) {
 
@@ -60,7 +60,7 @@ class CombatProficiency : PermanentPassiveAbility(AbilityIdentity.of("common_com
 
     override fun onActivate(context: AbilityContext) {
         val owner = context.caster.uuid
-        // У обробник їде сервіс, а не контекст: `Messaging` не тримає нічиєї особи.
+        // The service goes into the handler, not the context: `Messaging` holds nobody's identity.
         val messaging = context.messaging
         context.caster.grantAttribute(Attributes.ATTACK_DAMAGE, modifier, weaponBonus(context.sequence))
 
@@ -80,21 +80,21 @@ class CombatProficiency : PermanentPassiveAbility(AbilityIdentity.of("common_com
     }
 
     /**
-     * Тег `melee_weapon_enchantable` — ванільна відповідь на питання «це зброя?»: мечі,
-     * сокири й тризуб. Свого списку матеріалів мод не тримає, тож зброя з іншого мода,
-     * яка чесно ставить тег, парирує теж.
+     * The `melee_weapon_enchantable` tag is vanilla's answer to "is this a weapon?": swords,
+     * axes and the trident. The mod keeps no material list of its own, so a weapon from another
+     * mod that honestly sets the tag parries too.
      */
     private fun holdsWeapon(victim: LivingEntity): Boolean =
         victim.getItemInHand(InteractionHand.MAIN_HAND).typeHolder().`is`(ItemTags.MELEE_WEAPON_ENCHANTABLE)
 
-    /** Удар у спину не парирується: майстерність — це те, що ти бачиш. */
+    /** A blow in the back is not parried: proficiency is what you can see. */
     private fun faces(victim: LivingEntity, blow: Entity): Boolean {
         val toBlow = blow.position().subtract(victim.position())
         if (toBlow.lengthSqr() < 1.0e-4) return false
         return victim.getViewVector(1.0f).dot(toBlow.normalize()) >= FACING_DOT
     }
 
-    /** Дзвін і іскра в точці зустрічі — плюс рядок нападнику: він мусить зрозуміти, чому. */
+    /** A ring and a spark at the meeting point — plus a line to the attacker: they must understand why. */
     private fun clang(messaging: Messaging, victim: LivingEntity, blow: Entity, attacker: LivingEntity?) {
         val level = victim.level() as? ServerLevel ?: return
         val contact = victim.eyePosition.add(blow.position().subtract(victim.position()).normalize().scale(0.6))
@@ -103,9 +103,9 @@ class CombatProficiency : PermanentPassiveAbility(AbilityIdentity.of("common_com
             null, contact.x, contact.y, contact.z,
             SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 0.8f, 1.4f,
         )
-        // Рядок іде відповідальному за удар, а не тому, що прилетіло: лучник має
-        // зрозуміти, чому стріла не спрацювала, а сама стріла читати не вміє. Адресація
-        // за UUID заразом відсіює мобів — їх у списку гравців просто немає.
+        // The line goes to whoever is responsible for the blow, not to what arrived: the archer
+        // must understand why the arrow did not work, and the arrow itself cannot read.
+        // Addressing by UUID also filters out mobs — they are simply not in the player list.
         attacker?.let { messaging.actionBar(it.uuid, Component.literal("Ваш удар парировано")) }
     }
 
@@ -113,10 +113,10 @@ class CombatProficiency : PermanentPassiveAbility(AbilityIdentity.of("common_com
         scale(BASE_BONUS_TENTHS, sequence, SequenceScaler.ScalingStrategy.MODERATE) / 10.0
 
     private companion object {
-        /** +2,0 шкоди на Посл. 9 — десятими, бо [scale] цілочисельний. */
+        /** +2.0 damage at Seq. 9 — in tenths, because [scale] is integral. */
         const val BASE_BONUS_TENTHS = 20
         const val PARRY_REDUCTION = 0.35
-        /** ~66° від напрямку погляду в кожен бік: конус, а не голка. */
+        /** ~66° from the look direction on either side: a cone, not a needle. */
         const val FACING_DOT = 0.4
     }
 }

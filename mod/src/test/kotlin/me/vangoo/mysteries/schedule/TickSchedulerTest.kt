@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 /**
- * Черга тіків. Minecraft тут не потрібен — і в цьому вся суть: годинник мода можна
- * прокрутити на тисячу тіків за мілісекунду й побачити, що саме він зробив.
+ * The tick queue. Minecraft is not needed here — and that is the whole point: the mod's clock
+ * can be wound a thousand ticks on in a millisecond, and what it did is there to see.
  */
 class TickSchedulerTest {
 
@@ -63,8 +63,8 @@ class TickSchedulerTest {
 
     @Test
     fun `work queued from inside a tick runs in that same tick`() {
-        // Це і є умова, за якої waitTicks(1) чекає рівно один тік: продовження корутини
-        // диспетчиться під час розбору черги й мусить потрапити в цей самий тік.
+        // This is the condition under which waitTicks(1) waits exactly one tick: the coroutine's
+        // continuation is dispatched while the queue is drained and must land in this same tick.
         val order = mutableListOf<String>()
         scheduler.after(1) {
             order += "перше на тіку ${scheduler.tick}"

@@ -1,10 +1,10 @@
 package me.vangoo.domain.valueobjects
 
 /**
- * Персистентний знімок почту нежиті одного власника (Death, Посл. 6): пишеться при виході з
- * серверу, читається при вході. [guardPost] ненульовий лише якщо останній наказ був
- * «стерегти це місце» — `FOLLOW`/`ATTACK` до диску не доїжджають, бо ціль наказу все
- * одно вже невалідна після relog/рестарту.
+ * A persistent snapshot of one owner's undead retinue (Death, Seq. 6): written on leaving the
+ * server, read on joining. [guardPost] is non-null only if the last order was "guard this
+ * place" — `FOLLOW`/`ATTACK` never reach the disk, because the order's target is invalid
+ * after a relog/restart anyway.
  */
 data class RetinueSnapshot(
     val servants: List<RetinueServant>,

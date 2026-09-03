@@ -3,19 +3,20 @@ package me.vangoo.domain.valueobjects
 import kotlin.math.min
 
 /**
- * Чисте правило балансу: підсумковий шанс успіху гадання проти цілі з опором (Anti-Divination).
+ * A pure balance rule: the final success chance of divination against a target that
+ * resists (Anti-Divination).
  *
- * Бере «сирий» шанс із [SequenceBasedSuccessChance] (різниця Sequence) і накладає
- * додаткові коригування:
- * - якщо кастер у перевазі — невеликий штраф, але не нижче підлоги;
- * - якщо кастер слабший — динамічне падіння, плюс окреме обмеження на велику різницю.
+ * Takes the "raw" chance from [SequenceBasedSuccessChance] (the Sequence difference) and
+ * applies further corrections:
+ * - if the caster has the advantage — a small penalty, but never below the floor;
+ * - if the caster is weaker — a dynamic drop, plus a separate cap on a large gap.
  *
- * Жодного RNG чи повідомлень — це детермінована математика. Сам кидок
- * (`rng < probability`) і вивід відсотка лишаються в шарі ефектів.
+ * No RNG and no messages — this is deterministic math. The roll itself
+ * (`rng < probability`) and printing the percentage stay in the effect layer.
  */
 data class DivinationOdds(val casterSequence: Int, val targetSequence: Int) {
 
-    /** Імовірність успіху в діапазоні [0.0, 1.0]. */
+    /** Success probability in the range [0.0, 1.0]. */
     fun successProbability(): Double {
         val base = SequenceBasedSuccessChance(casterSequence, targetSequence)
         val baseChance = base.calculateChance()
@@ -37,7 +38,7 @@ data class DivinationOdds(val casterSequence: Int, val targetSequence: Int) {
         return finalChance.coerceIn(0.0, 1.0)
     }
 
-    /** Готовий до показу відсоток (наприклад `"94%"`). */
+    /** Display-ready percentage (for example `"94%"`). */
     fun formattedPercent(): String = "%.0f%%".format(successProbability() * 100)
 
     private companion object {

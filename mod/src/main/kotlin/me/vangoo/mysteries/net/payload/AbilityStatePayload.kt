@@ -10,37 +10,37 @@ import net.minecraft.network.codec.StreamMemberEncoder
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 
 /**
- * Сервер → клієнт: **частий** знімок — усе, що змінюється в бою.
+ * Server → client: the **frequent** snapshot — everything that changes in a fight.
  *
- * Летить не частіше разу на секунду (див. `AbilityStatePump`), тож мусить лишатись
- * дрібним: жодних текстів, лише числа й ключі.
+ * It flies no more than once a second (see `AbilityStatePump`), so it must stay small: no text
+ * at all, only numbers and keys.
  *
- * Надсилається тільки Потойбічним. Що гравець перестав ним бути, каже порожній
- * [AbilityRosterPayload], а не стан із нульовою духовністю.
+ * Sent only to Beyonders. That a player stopped being one is said by an empty
+ * [AbilityRosterPayload], not by a state with zero spirituality.
  */
 data class AbilityStatePayload(
-    /** Якір: тік сервера на момент знімка. Від нього клієнт відлічує кулдауни сам. */
+    /** The anchor: the server tick at the moment of the snapshot. The client counts cooldowns down from it. */
     val serverTick: Int,
     val spirituality: Spirituality,
     /**
-     * Розхитаність розуму, 0..100. Клієнту потрібна не заради числа: від неї
-     * залежить, що гравець **чує й бачить** — шепіт і екранний ланцюг ставить
-     * клієнт сам, бо кадр малюється 60+ разів на секунду, а пакет летить раз.
+     * Sanity loss, 0..100. The client needs it not for the number's sake: it decides what the
+     * player **hears and sees** — the whisper and the screen chain are put up by the client
+     * itself, because a frame is drawn 60+ times a second while a packet flies once.
      */
     val sanityLoss: SanityLoss,
-    /** Ідентичність обраної здібності; `null` — не обрано нічого. */
+    /** The identity of the selected ability; `null` — nothing is selected. */
     val selected: String?,
-    /** Лише ті здібності, у кого є що сказати: решта готова, вимкнена й не триває. */
+    /** Only the abilities with something to say: the rest are ready, switched off and not running. */
     val live: List<Live>,
 ) : CustomPacketPayload {
 
     /**
-     * Стан однієї здібності.
+     * The state of one ability.
      *
-     * [readyAtTick] — **абсолютний тік** кінця перепочинку, а не залишок. Залишок
-     * довелося б надсилати щосекунди, інакше він застигав би; абсолютний тік надсилається
-     * один раз, коли перепочинок почався, і клієнт відлічує сам від [serverTick].
-     * `0` — здібність готова.
+     * [readyAtTick] is the **absolute tick** the cooldown ends at, not the remainder. The
+     * remainder would have to be sent every second or it would freeze; an absolute tick is sent
+     * once, when the cooldown started, and the client counts down itself from [serverTick].
+     * `0` — the ability is ready.
      */
     data class Live(
         val identity: String,
@@ -84,7 +84,7 @@ data class AbilityStatePayload(
             val serverTick = buf.readVarInt()
             val current = buf.readVarInt()
             val maximum = buf.readVarInt()
-            // `SanityLoss` сам звіряє межі 0..100 — межа довіри, а не проста арифметика.
+            // `SanityLoss` checks the 0..100 bounds itself — a trust boundary, not plain arithmetic.
             val sanityLoss = SanityLoss.of(buf.readVarInt())
             val selected = if (buf.readBoolean()) buf.readUtf() else null
             val live = List(buf.readVarInt()) {

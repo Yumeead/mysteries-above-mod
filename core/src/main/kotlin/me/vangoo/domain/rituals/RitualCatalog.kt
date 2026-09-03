@@ -1,6 +1,6 @@
 package me.vangoo.domain.rituals
 
-/** Каталог семи ритуалів. Гейт: Посл. 9 — 3 ритуали, 8 — 5, 7 — усі 7. */
+/** The catalogue of seven rituals. The gate: Seq. 9 — 3 rituals, 8 — 5, 7 — all 7. */
 object RitualCatalog {
 
     val ALL: List<RitualRecipe> = listOf(
@@ -15,7 +15,7 @@ object RitualCatalog {
             9, 3, mapOf("IRON_INGOT" to 15), false,
         ),
         RitualRecipe(
-            RitualType.SACRIFICE, "Жертвопринесення",
+            RitualType.SACRIFICE, "Жертвоприношення",
             "Спаліть предмет із головної руки — відновіть духовність",
             9, 3, emptyMap(), true,
         ),

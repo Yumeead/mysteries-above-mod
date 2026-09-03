@@ -7,15 +7,15 @@ object SequenceScaler {
 
     enum class ScalingStrategy(val percentPerLevel: Double) {
 
-        WEAK(5.0),      // +5% за рівень (Seq 0: +45%)
-        MODERATE(15.0), // +15% за рівень (Seq 0: +135%)
-        STRONG(30.0),   // +30% за рівень (Seq 0: +270%)
-        DIVINE(60.0),   // +60% за рівень (Seq 0: +540% - справжня потужність)
+        WEAK(5.0),      // +5% per level (Seq 0: +45%)
+        MODERATE(15.0), // +15% per level (Seq 0: +135%)
+        STRONG(30.0),   // +30% per level (Seq 0: +270%)
+        DIVINE(60.0),   // +60% per level (Seq 0: +540% - true might)
 
-        // Штрафи (High Risk): Штраф стає набагато жорсткішим для низьких послідовностей
-        PENALTY_LINEAR(20.0),   // +20% до штрафу за кожен рівень сили
-        PENALTY_SEVERE(50.0),   // +50% до штрафу за кожен рівень сили
-        PENALTY_EXTREME(100.0); // Штраф подвоюється за кожен рівень сили (екстремальний ризик)
+        // Penalties (High Risk): the penalty gets much harsher for low sequences
+        PENALTY_LINEAR(20.0),   // +20% to the penalty per level of power
+        PENALTY_SEVERE(50.0),   // +50% to the penalty per level of power
+        PENALTY_EXTREME(100.0); // The penalty doubles per level of power (extreme risk)
     }
 
     fun calculateMultiplier(sequence: Int, strategy: ScalingStrategy): Double {
@@ -26,10 +26,10 @@ object SequenceScaler {
     fun scaleSpiritualityLoss(maxSpirituality: Int, sequence: Int): Int {
         val power = 9 - sequence
 
-        // Seq 9: втрачає ~5% від максимуму
-        // Seq 0: втрачає ~50% від максимуму (катастрофічно)
+        // Seq 9: loses ~5% of the maximum
+        // Seq 0: loses ~50% of the maximum (catastrophic)
         val basePercent = 0.05
-        val growthPerLevel = 0.05 // +5% до загального обсягу за кожну послідовність
+        val growthPerLevel = 0.05 // +5% to the total pool per sequence
 
         val totalPercent = basePercent + power * growthPerLevel
         val loss = (maxSpirituality * totalPercent).toInt()
@@ -40,12 +40,12 @@ object SequenceScaler {
     fun scaleDamagePenalty(sequence: Int): Int {
         val power = 9 - sequence
 
-        // Базова шкода: 2 (1 серце)
-        // Додаємо прогресію: Seq 9 = 2, Seq 5 = 10, Seq 0 = 20 (10 сердець!)
+        // Base damage: 2 (one heart)
+        // Add the progression: Seq 9 = 2, Seq 5 = 10, Seq 0 = 20 (ten hearts!)
         val baseDamage = 2
         var escalation = power * 2
 
-        // Для напівбогів (Seq 4-0) додаємо додатковий "божественний відкат"
+        // For demigods (Seq 4-0) add an extra "divine kickback"
         if (sequence <= 4) {
             escalation += (5 - sequence) * 3
         }
@@ -54,10 +54,11 @@ object SequenceScaler {
     }
 
     /**
-     * Скейлінг ЗАХИСТУ від потойбічних істот (WEAK): чим сильніший Beyonder (нижчий sequence),
-     * тим менше урону по ньому проходить. Seq 9 → 0%, Seq 5 → 20%, Seq 0 → 45% (стеля).
+     * Scaling of PROTECTION against Beyonder creatures (WEAK): the stronger the Beyonder (the
+     * lower the sequence), the less damage gets through. Seq 9 → 0%, Seq 5 → 20%, Seq 0 → 45%
+     * (the ceiling).
      *
-     * @return частка зниження урону в діапазоні [0.0, 0.45]
+     * @return the damage reduction share in the range [0.0, 0.45]
      */
     fun creatureDamageReduction(sequenceLevel: Int): Double {
         val power = 9 - sequenceLevel // Seq 9 = 0, Seq 0 = 9

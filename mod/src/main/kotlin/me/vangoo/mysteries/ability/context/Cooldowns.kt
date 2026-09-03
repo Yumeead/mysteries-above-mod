@@ -4,11 +4,11 @@ import me.vangoo.domain.valueobjects.AbilityIdentity
 import java.util.UUID
 
 /**
- * Кулдауни здібностей.
+ * Ability cooldowns.
  *
- * Живуть у моді, а не в `core`: це таймер, прив'язаний до серверного тіку, а не
- * правило. Саме тому [me.vangoo.domain.entities.Beyonder.authorize] їх не перевіряє —
- * питати треба **до** нього.
+ * They live in the mod, not in `core`: this is a timer tied to the server tick, not a rule.
+ * That is exactly why [me.vangoo.domain.entities.Beyonder.authorize] does not check them —
+ * they must be asked **before** it.
  */
 interface Cooldowns {
 
@@ -21,9 +21,9 @@ interface Cooldowns {
 
     fun clear(playerId: UUID, identity: AbilityIdentity)
 
-    /** Замикає геть усі здібності гравця — приголомшення, зрив касту, ефект чужої сили. */
+    /** Locks every one of a player's abilities — a stun, a broken cast, someone else's power. */
     fun lockAll(playerId: UUID, seconds: Int)
 
-    /** Гравець вийшов зі світу: тримати його таймери більше нема сенсу. */
+    /** The player left the world: there is no sense keeping their timers any more. */
     fun forget(playerId: UUID)
 }

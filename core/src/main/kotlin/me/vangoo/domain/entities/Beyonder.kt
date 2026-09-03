@@ -23,13 +23,13 @@ import kotlin.math.roundToInt
 import kotlin.random.Random
 
 /**
- * Потойбічний: шлях, Послідовність, засвоєння, духовність, глузд і список здібностей.
+ * A Beyonder: pathway, Sequence, mastery, spirituality, sanity and the list of abilities.
  *
- * **Живе на серверному потоці й тільки там.** У плагіні кожен мутатор був
- * `synchronized`, бо `BukkitRunnable` міг прийти з асинхронного пулу. У Fabric
- * тік-луп один, а планувальник фази 04 повертає роботу на нього ж — тож замків тут
- * навмисно немає. Дістатись сюди з іншого потоку — помилка виклику, а не гонка,
- * яку слід глушити.
+ * **Lives on the server thread and only there.** In the plugin every mutator was
+ * `synchronized`, because a `BukkitRunnable` could arrive from an async pool. In Fabric the
+ * tick loop is single and the phase 04 scheduler returns work onto it — so there are
+ * deliberately no locks here. Reaching this from another thread is a call-site bug, not a
+ * race to be muffled.
  */
 class Beyonder private constructor(
     val playerId: UUID,
@@ -73,7 +73,7 @@ class Beyonder private constructor(
     val sequenceLevel: Int get() = sequence.level
     val maxSpirituality: Int get() = spirituality.maximum
 
-    /** Здібності шляху плюс позашляхові: вкрадені, подаровані, одноразові. */
+    /** The pathway's abilities plus off-pathway ones: stolen, granted, single-use. */
     val abilities: List<AbilitySpec> get() = pathwayAbilities + offPathwayAbilities
 
     fun abilityBy(identity: AbilityIdentity): AbilitySpec? =
@@ -81,11 +81,11 @@ class Beyonder private constructor(
 
     fun has(spec: AbilitySpec): Boolean = abilities.any { it.identity == spec.identity }
 
-    // ── Каст: дозвіл → квиток → розрахунок ──────────────────────────────────────
+    // ── Cast: authorize → ticket → settle ───────────────────────────────────────
 
     /**
-     * Перевіряє право на каст і резервує його ціну. Кулдаун тут не перевіряється —
-     * він живий таймер і належить моду; мод питає його **до** цього виклику.
+     * Checks the right to cast and reserves its price. The cooldown is not checked here —
+     * it is a live timer and belongs to the mod; the mod asks it **before** this call.
      */
     fun authorize(spec: AbilitySpec): CastAuthorization {
         if (!has(spec)) return CastAuthorization.Refused(CastRefusal.NotOwned)
@@ -102,9 +102,9 @@ class Beyonder private constructor(
     }
 
     /**
-     * Гасить квиток: списує духовність, нараховує засвоєння, кидає на штраф глузду.
-     * Викликається рівно один раз і тільки коли ефект справді стався — здібність, що
-     * чекала вводу й не дочекалась, просто не гасить квиток, і гравець не платить.
+     * Settles the ticket: spends spirituality, accrues mastery, rolls for the sanity penalty.
+     * Called exactly once and only when the effect actually happened — an ability that waited
+     * for input and never got it simply does not settle the ticket, and the player pays nothing.
      */
     fun settle(ticket: CastTicket): CastReceipt {
         require(ticket.casterId == playerId) { "Квиток виданий іншому Потойбічному" }
@@ -118,13 +118,13 @@ class Beyonder private constructor(
             updateMaximumSpirituality()
         }
 
-        // Робота на порожньому баку розхитує розум.
+        // Working on an empty tank rattles the mind.
         if (spirituality.isCritical()) increaseSanityLoss(2)
 
         val penalty = SanityPenaltyRoller.roll(sanityLoss, sequence, maxSpirituality, random)
-        // Втрату духовності від штрафу знімаємо тут. У плагіні це робив лише шлях
-        // відкладених здібностей, а звичайний — ні, тож один і той самий штраф важив
-        // по-різному залежно від того, як здібність написана.
+        // The spirituality loss from the penalty is taken here. In the plugin only the
+        // deferred-ability path did this and the ordinary one did not, so the very same
+        // penalty weighed differently depending on how the ability was written.
         if (penalty.type == SanityPenalty.PenaltyType.SPIRITUALITY_LOSS) {
             spirituality = spirituality.decrement(penalty.amount)
         }
@@ -137,7 +137,7 @@ class Beyonder private constructor(
         )
     }
 
-    // ── Просування шляхом ───────────────────────────────────────────────────────
+    // ── Advancing along the pathway ─────────────────────────────────────────────
 
     fun canAdvance(): Boolean = mastery.canAdvance() && sequence.canAdvance()
 
@@ -155,8 +155,9 @@ class Beyonder private constructor(
     }
 
     /**
-     * Слабшає на одну Послідовність: Характеристику вже вилучено (Закон Конвергенції),
-     * тож живий оригінал втрачає відповідну частку сили. На Посл. 9 — no-op.
+     * Falls one Sequence back: the Characteristic has already been extracted (the Law of
+     * Convergence), so the living original loses the matching share of power. At Seq. 9 it is
+     * a no-op.
      */
     fun demote() {
         if (!sequence.canDemote()) return
@@ -167,7 +168,7 @@ class Beyonder private constructor(
         reloadAbilities()
     }
 
-    /** Піднесення зі зміною шляху всередині групи — доступне лише з Посл. 9. */
+    /** Ascension with a pathway change inside the group — available only from Seq. 9. */
     fun advanceWithPathwayChange(newPathway: Pathway) {
         require(newPathway.group == pathway.group) {
             "New pathway must be from the same group: current=${pathway.group}, new=${newPathway.group}"
@@ -186,9 +187,9 @@ class Beyonder private constructor(
         reloadAbilities()
     }
 
-    // ── Позашляхові здібності ───────────────────────────────────────────────────
+    // ── Off-pathway abilities ───────────────────────────────────────────────────
 
-    /** false, якщо здібність із такою ідентичністю вже є. */
+    /** false if an ability with this identity is already present. */
     fun grantOffPathway(spec: AbilitySpec): Boolean {
         if (has(spec)) return false
         offPathwayAbilities += spec
@@ -207,7 +208,7 @@ class Beyonder private constructor(
         offPathwayAbilities.clear()
     }
 
-    // ── Глузд і духовність ──────────────────────────────────────────────────────
+    // ── Sanity and spirituality ─────────────────────────────────────────────────
 
     fun increaseSanityLoss(amount: Int) {
         sanityLoss = sanityLoss.increase(resist(amount))
@@ -218,9 +219,9 @@ class Beyonder private constructor(
     }
 
     /**
-     * Пасивки-опору послаблюють **усяку** вхідну втрату глузду — і від чужих
-     * здібностей, і від власного перенапруження. Береться найсильніший опір, а не
-     * добуток: кілька пасивок не мають складатись в імунітет.
+     * Resistance passives weaken **any** incoming sanity loss — both from other people's
+     * abilities and from one's own overexertion. The strongest resistance is taken, not the
+     * product: several passives must not add up to immunity.
      */
     private fun resist(amount: Int): Int {
         if (amount <= 0) return amount
@@ -229,15 +230,15 @@ class Beyonder private constructor(
     }
 
     /**
-     * Утримання сили, що триває в часі: тогл, канал, жива сесія.
+     * Upkeep of a power that lasts in time: a toggle, a channel, a live session.
      *
-     * Списує рівно [amount] або не списує нічого — вичерпана сесія має згаснути, а не
-     * працювати в борг. У плагіні цього методу не було, і кожна з 22 сесій писала ту саму
-     * трійку «дістати Потойбічного → звірити `current() < cost` → `decrement`» власноруч;
-     * саме тому вони й розійшлись у дрібницях (хтось звіряв `<`, хтось `<=`).
+     * Spends exactly [amount] or spends nothing — an exhausted session must go out, not run
+     * on credit. The plugin had no such method, and each of its 22 sessions wrote the same
+     * trio of "fetch the Beyonder → check `current() < cost` → `decrement`" by hand; that is
+     * exactly why they drifted apart in details (some checked `<`, some `<=`).
      *
-     * Це не каст: квитка немає, засвоєння не нараховується, штраф глузду не кидається.
-     * Ціну утримання здібність оголошує через [AbilitySpec.periodicCost].
+     * This is not a cast: there is no ticket, no mastery is accrued, no sanity penalty is
+     * rolled. The ability declares the upkeep price through [AbilitySpec.periodicCost].
      */
     fun payUpkeep(amount: Int): Boolean {
         require(amount >= 0) { "Ціна утримання не може бути від'ємною: $amount" }
@@ -260,7 +261,7 @@ class Beyonder private constructor(
         }
     }
 
-    /** Пряма зміна — для ефектів, що живлять або висушують духовність повз каст. */
+    /** A direct change — for effects that feed or drain spirituality outside a cast. */
     fun setSpirituality(value: Spirituality) {
         require(value.maximum == spirituality.maximum) {
             "Spirituality maximum is derived from sequence and mastery, got ${value.maximum} " +
@@ -274,7 +275,7 @@ class Beyonder private constructor(
         updateMaximumSpirituality()
     }
 
-    // ── Підміна особистості (маріонетки) ────────────────────────────────────────
+    // ── Identity substitution (marionettes) ─────────────────────────────────────
 
     fun snapshot(): BeyonderSnapshot = BeyonderSnapshot(
         pathway = pathway,
@@ -286,7 +287,7 @@ class Beyonder private constructor(
         offPathwayAbilities = offPathwayAbilities.toList(),
     )
 
-    /** Вселитись у чужу особистість; знімок беруть **до** виклику. */
+    /** Move into another identity; the snapshot is taken **before** the call. */
     fun possess(newPathway: Pathway, newSequence: Sequence) {
         pathway = newPathway
         sequence = newSequence
@@ -307,9 +308,9 @@ class Beyonder private constructor(
         spirituality = snapshot.spirituality
     }
 
-    // ── Внутрішнє ───────────────────────────────────────────────────────────────
+    // ── Internals ───────────────────────────────────────────────────────────────
 
-    /** Перезбирає список здібностей зі шляху; позашляхові не чіпає. */
+    /** Rebuilds the ability list from the pathway; off-pathway ones are left alone. */
     fun reloadAbilities() {
         val fromPathway = sequence.getAllSequencesUpToCurrent()
             .flatMap { pathway.abilitiesFor(it) }
@@ -325,12 +326,12 @@ class Beyonder private constructor(
         "Beyonder($playerId, ${pathway.name} $sequence, mastery=$mastery, spirituality=$spirituality)"
 
     companion object {
-        /** Змінити шлях можна лише поки ти ще Посл. 9 — далі особистість уже склалась. */
+        /** The pathway can only be changed while still at Seq. 9 — beyond that the identity has set. */
         const val PATHWAY_CHANGE_MIN_SEQUENCE: Int = 9
 
         /**
-         * Відновлення зі сховища (фаза 09). Формат вільний — збережень плагіна не існує,
-         * тож тут лише те, що не виводиться зі шляху й Послідовності.
+         * Restoring from storage (phase 09). The format is free — the plugin's saves do not
+         * exist, so only what cannot be derived from the pathway and the Sequence is here.
          */
         fun restore(
             playerId: UUID,
@@ -355,8 +356,8 @@ class Beyonder private constructor(
 }
 
 /**
- * Незмінний зріз особистості Потойбічного. Живе тільки в пам'яті: маріонетка
- * повертає оригінал наприкінці, зберігати нічого.
+ * An immutable slice of a Beyonder's identity. Lives in memory only: the marionette gives the
+ * original back at the end, there is nothing to persist.
  */
 data class BeyonderSnapshot(
     val pathway: Pathway,

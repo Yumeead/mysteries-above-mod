@@ -14,18 +14,19 @@ import net.minecraft.network.chat.Component
 import net.minecraft.world.item.ItemStack
 
 /**
- * Тестовий екран фази 02, дотягнутий до віхи M2: тепер він друкує список здібностей.
+ * The phase 02 test screen, brought up to milestone M2: it now prints the ability list.
  *
- * Він і далі одноразовий за задумом — справжні поверхні (HUD, колесо, книга) приїдуть
- * віхами M3–M6, і тоді цей екран видаляється. Доти він доводить рівно одне, і саме те,
- * що потрібно довести зараз: читальна модель дійшла до клієнта цілою й живе між пакетами.
- * Назви, ціни й іконки прийшли ростером, духовність і секунди перепочинку — станом, а
- * спадають вони між пакетами, бо [ClientAbilityState] відлічує сам.
+ * It is still disposable by design — the real surfaces (the HUD, the wheel, the book) arrive
+ * with milestones M3–M6, and then this screen is deleted. Until then it proves exactly one
+ * thing, and exactly the thing that needs proving now: the read model reached the client whole
+ * and stays alive between packets. The names, costs and icons came with the roster, the
+ * spirituality and the cooldown seconds with the state, and they count down between packets
+ * because [ClientAbilityState] does the counting itself.
  */
 class BeyonderStatusScreen(private var status: BeyonderStatusPayload) :
     Screen(Component.literal("Стан Потойбічного")) {
 
-    /** Рядок списку: іконка та два готові тексти. */
+    /** A list row: an icon and two ready-made texts. */
     private data class Row(val icon: ItemStack, val title: Component, val detail: Component, val accent: Boolean)
 
     private var responses = 1
@@ -52,15 +53,15 @@ class BeyonderStatusScreen(private var status: BeyonderStatusPayload) :
     }
 
     /**
-     * Такт клієнта, а не кадр: секунди перепочинку спадають двадцять разів на секунду
-     * щонайбільше, а `extractRenderState` кличеться щокадру й нічого будувати в ньому
-     * не можна — retained-mode лише читає готове.
+     * The client tick, not the frame: the cooldown seconds count down twenty times a second at
+     * most, while `extractRenderState` is called every frame and nothing may be built in it —
+     * retained-mode only reads what is ready.
      */
     override fun tick() {
         rebuild()
     }
 
-    /** Викликається з клієнтського приймача, коли сервер надіслав свіжий стан. */
+    /** Called from the client receiver when the server has sent fresh state. */
     fun update(fresh: BeyonderStatusPayload) {
         status = fresh
         responses++
@@ -101,14 +102,15 @@ class BeyonderStatusScreen(private var status: BeyonderStatusPayload) :
                 Component.literal("відповідей від сервера: $responses"),
             )
 
-        // Духовність — з каналу стану, а не зі статусного: той приходить лише на подіях,
-        // а цей ще й на регенерацію, тож число справді росте на очах.
+        // Spirituality comes from the state channel rather than the status one: that arrives only
+        // on events, while this one arrives on regeneration too, so the number really does grow
+        // before your eyes.
         val spirituality = ClientAbilityState.spirituality
             ?: beyonder.spirituality
 
         return listOf(
             Component.literal("Шлях: ${beyonder.pathwayId} · Послідовність ${beyonder.sequence.level}"),
-            Component.literal("Дух: ${spirituality.current} / ${spirituality.maximum}"),
+            Component.literal("Духовність: ${spirituality.current} / ${spirituality.maximum}"),
             Component.literal("відповідей від сервера: $responses"),
         )
     }
@@ -130,8 +132,8 @@ class BeyonderStatusScreen(private var status: BeyonderStatusPayload) :
     private fun detailOf(entry: AbilityRosterPayload.Entry): String {
         val parts = mutableListOf<String>()
 
-        // Ненульові ціни, а не тип здібності: утримувана сила оголошена активною, і
-        // «✦ 0» у неї означало б, що вона безкоштовна.
+        // Non-zero prices rather than the ability type: a sustained power is declared active, and
+        // "✦ 0" on it would mean it is free.
         if (entry.cost > 0) parts += "✦ ${entry.cost}"
         if (entry.upkeep > 0) parts += "✦ ${entry.upkeep}/с"
         if (parts.isEmpty()) {
@@ -147,7 +149,7 @@ class BeyonderStatusScreen(private var status: BeyonderStatusPayload) :
 
         if (ClientAbilityState.isToggled(entry.identity)) parts += "●"
         if (ClientAbilityState.isSustaining(entry.identity)) parts += "◐"
-        if (!ClientAbilityState.canAfford(entry)) parts += "✕ мало"
+        if (!ClientAbilityState.canAfford(entry)) parts += "✕ бракує"
 
         return parts.joinToString(" · ")
     }

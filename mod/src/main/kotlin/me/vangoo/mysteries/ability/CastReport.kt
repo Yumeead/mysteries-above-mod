@@ -5,26 +5,29 @@ import me.vangoo.domain.abilities.CastRefusal
 import me.vangoo.domain.valueobjects.SequenceBasedSuccessChance
 import net.minecraft.network.chat.Component
 
-/** Чим скінчилась спроба касту. Те, що [AbilityExecutor] віддає тому, хто його покликав. */
+/** How a cast attempt ended. What [AbilityExecutor] hands back to whoever called it. */
 sealed interface CastReport {
 
-    /** Здібність відпрацювала; [receipt] є, тільки якщо квиток погашено вже зараз. */
+    /** The ability ran; [receipt] is present only if the ticket was settled right away. */
     data class Performed(val outcome: AbilityOutcome, val receipt: CastReceipt?) : CastReport
 
     data class Refused(val reason: CastRefusal) : CastReport
 
     data class OnCooldown(val remainingSeconds: Long) : CastReport
 
-    /** Ціль устояла. Кулдаун списано, духовність — ні. */
+    /** The target held out. The cooldown is charged, the spirituality is not. */
     data class Resisted(val chance: SequenceBasedSuccessChance) : CastReport
 
-    /** Гравець узагалі не Потойбічний. */
+    /** Someone stole this power: the owner cannot call it until the window closes. */
+    data class Suppressed(val secondsLeft: Long) : CastReport
+
+    /** The player is not a Beyonder at all. */
     data object NotBeyonder : CastReport
 }
 
 /**
- * Український текст для звіту про каст. Окремо від [AbilityExecutor], щоб той лишався
- * про порядок дій, а не про формулювання.
+ * The Ukrainian text for a cast report. Kept apart from [AbilityExecutor] so that it stays
+ * about the order of actions rather than about wording.
  */
 object CastMessages {
 
@@ -32,20 +35,23 @@ object CastMessages {
         is CastReport.NotBeyonder -> Component.literal("Ви не Потойбічний")
 
         is CastReport.OnCooldown ->
-            Component.literal("Перепочинок: ${report.remainingSeconds} с")
+            Component.literal("Відкат: ${report.remainingSeconds} с")
+
+        is CastReport.Suppressed ->
+            Component.literal("Цю силу у вас вкрали — повернеться за ${report.secondsLeft} с")
 
         is CastReport.Resisted ->
             Component.literal("Ціль чинила опір! (шанс успіху ${report.chance.getFormattedChance()})")
 
         is CastReport.Refused -> when (val reason = report.reason) {
             is CastRefusal.NotOwned -> Component.literal("У вас немає цієї здібності")
-            is CastRefusal.NotCastable -> Component.literal("Цю силу не викликають навмисно")
+            is CastRefusal.NotCastable -> Component.literal("Цю здібність не застосовують вручну")
             is CastRefusal.InsufficientSpirituality -> Component.literal(
                 "Недостатньо духовності: потрібно ${reason.required}, є ${reason.available}",
             )
         }
 
-        // Своє повідомлення здібність формулює сама — переказувати його нема кому.
+        // An ability words its own message — there is nobody to paraphrase it.
         is CastReport.Performed -> report.outcome.message
     }
 }

@@ -12,34 +12,36 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * Покрив на тілі: пасма, що зринають від ніг до плечей і **ходять разом із ціллю**.
+ * An aura on the body: strands that rise from the feet to the shoulders and **travel with the
+ * target**.
  *
- * Перша фігура словника ефектів. Форма загальна — «жива речовина огортає когось», —
- * а чим саме вона є, каже колір: вода Мореплавця, світло Сонця, попіл Смерті. Тому
- * тут немає нічого водяного, крім типового [counterFlow], який кожен кличе свій.
+ * The first shape in the effects vocabulary. The form is generic — "living matter wrapping
+ * someone" — and what it actually is, the colour says: the Sailor's water, the Sun's light, the
+ * Death's ash. Hence there is nothing watery here beyond the default [counterFlow], which every
+ * caller supplies for itself.
  *
- * ## Чому не коло під ногами
+ * ## Why not a circle underfoot
  *
- * Перевірено 28.08.2026 і відкинуто: рівна геометрична фігура читається як шар поверх
- * гри, а не як частина світу. Пасмо з окремих порошинок лишається піксельним — тобто
- * своїм у грі, де все інше теж піксель.
+ * Tried on 28.08.2026 and rejected: an even geometric figure reads as a layer on top of the
+ * game rather than as part of the world. A strand of separate motes stays pixelated — that is,
+ * at home in a game where everything else is a pixel too.
  *
- * Порошинка тут власна ([ModParticles.SPIRIT_MOTE]), а не ванільний `DUST`: спалах на
- * початку й згасання в кінці кожна відіграє сама, тож пасмо не мусить нічого гасити
- * вручну — воно лише сіє.
+ * The mote here is the mod's own ([ModParticles.SPIRIT_MOTE]) rather than a vanilla `DUST`: each
+ * one plays its own flash at the start and fade at the end, so the strand need not extinguish
+ * anything by hand — it only sows.
  *
- * ## Чому фігура планує себе сама
+ * ## Why the shape schedules itself
  *
- * Сесія належить здібності й гасне разом із нею; покрив — ні. Тому він бере власне
- * завдання в [Scheduling] і сам себе скасовує, коли вийшов строк. Здібність за нього
- * не відповідає й лічильника тактів не бачить.
+ * A session belongs to an ability and goes out with it; an aura does not. So it takes its own
+ * job in [Scheduling] and cancels itself when the term expires. The ability is not responsible
+ * for it and never sees the tick counter.
  */
 fun bodyAura(
     scheduling: Scheduling,
     target: LivingEntity,
     durationTicks: Int,
     color: RgbColor,
-    /** Що зривається вниз, поки пасма йдуть угору. Без зустрічного руху це обертання, не течія. */
+    /** What falls downwards while the strands go up. Without a counter-flow this is rotation, not a current. */
     counterFlow: ParticleOptions? = null,
 ) {
     require(durationTicks > 0) { "Тривалість покриву мусить бути додатною: $durationTicks" }
@@ -57,11 +59,11 @@ fun bodyAura(
 }
 
 /**
- * Як знаходити ціль щотакту.
+ * How to find the target every tick.
  *
- * Гравця не кешувати: після смерті чи переходу між вимірами сервер створює **новий**
- * `ServerPlayer`, і покрив лишився б на об'єкті, якого вже ніхто не бачить. Решта
- * сутностей живуть тим самим об'єктом, тож їх досить питати, чи вони ще у світі.
+ * Do not cache the player: after a death or a dimension change the server creates a **new**
+ * `ServerPlayer`, and the aura would be left on an object nobody can see any more. Other
+ * entities live on as the same object, so it is enough to ask whether they are still in the world.
  */
 private fun follower(target: LivingEntity): () -> LivingEntity? {
     if (target !is ServerPlayer) return { target.takeIf { !it.isRemoved } }
@@ -76,8 +78,8 @@ private fun draw(target: LivingEntity, mote: ParticleOptions, counterFlow: Parti
     val height = target.bbHeight * TOP
 
     for (strand in 0 until STRANDS) {
-        // Пасма зсунуті по фазі, тож у будь-яку мить вони на різній висоті: однакова
-        // фаза дала б кільце, що стрибає вгору, тобто те саме коло, лише вертикальне.
+        // The strands are phase-shifted, so at any moment they are at different heights: an
+        // identical phase would give a ring jumping upwards — that is, the same circle, only vertical.
         val climb = (step * RISE_PER_STEP + strand.toFloat() / STRANDS) % 1f
         val angle = TAU * (climb * TURNS + strand.toFloat() / STRANDS)
         val radius = RADIUS * (1f - NARROWING * climb)
@@ -104,14 +106,14 @@ private fun draw(target: LivingEntity, mote: ParticleOptions, counterFlow: Parti
 
 private const val TAU = (2.0 * PI).toFloat()
 
-/** Кожні два тіки: 1,5 порошинки на тік — покрив густий, але не спам. */
+/** Every two ticks: 1.5 motes per tick — the aura is dense but not spam. */
 private const val PERIOD_TICKS = 2
 private const val STRANDS = 3
-/** Повний підйом — за 20 тактів, тобто дві секунди. */
+/** A full rise takes 20 steps, i.e. two seconds. */
 private const val RISE_PER_STEP = 0.05f
 private const val TURNS = 1.5f
 private const val RADIUS = 0.55f
-/** Догори покрив стягується до плечей, а не йде колоною. */
+/** Towards the top the aura draws in to the shoulders rather than running as a column. */
 private const val NARROWING = 0.35f
 private const val TOP = 1.05f
 private const val JITTER = 0.02

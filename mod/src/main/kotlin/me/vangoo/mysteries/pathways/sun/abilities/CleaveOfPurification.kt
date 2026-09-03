@@ -17,20 +17,20 @@ import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
 
 /**
- * Sun, Посл. 7 (Сонячний Первосвященник): **Очищувальний удар**.
+ * Sun, Seq. 7 (Solar High Priest): **Cleave of Purification**.
  *
- * Освячує зброю на кілька наступних ударів: кожен додає святу шкоду понад звичайну —
- * повну по скверні, знижену по решті.
+ * Consecrates the weapon for the next few blows: each adds holy damage on top of the ordinary —
+ * in full against the unclean, reduced against everyone else.
  *
- * ## Заряди живуть у касті, а не в здібності
+ * ## The charges live in the cast, not in the ability
  *
- * Лічильник — звичайна локальна змінна, захоплена обробником події. Полем класу вона
- * бути **не може**: екземпляр здібності один на весь сервер, тож два Первосвященники
- * витрачали б заряди один одному. Замикання ж належить конкретному касту й помирає
- * разом із підпискою.
+ * The counter is an ordinary local variable captured by the event handler. It **cannot** be a
+ * class field: there is one ability instance for the whole server, so two High Priests would
+ * spend each other's charges. A closure, on the other hand, belongs to a specific cast and dies
+ * together with the subscription.
  *
- * Підписка має строк ([DURATION_SECONDS]): заряди, які не витратили, згорають самі —
- * гасити їх нема кому, і `EventHub` знімає прострочену підписку під час розсилки.
+ * The subscription has a term ([DURATION_SECONDS]): charges left unspent burn out on their own —
+ * there is nobody to clear them, and `EventHub` removes an expired subscription during dispatch.
  */
 class CleaveOfPurification : ActiveAbility(AbilityIdentity.of("sun_cleave_of_purification")) {
 
@@ -43,7 +43,7 @@ class CleaveOfPurification : ActiveAbility(AbilityIdentity.of("sun_cleave_of_pur
     override fun description(sequence: Sequence): Component = Component.literal(
         "Освячує зброю в руках.\n" +
             "▪ Наступні ${charges(sequence)} ударів у ближньому бою: +${bonus(sequence)} святої шкоди\n" +
-            "▪ По скверні — повна, по решті — знижена\n" +
+            "▪ По нечисті — повна, по решті — знижена\n" +
             "▪ Невитрачені заряди згорають за $DURATION_SECONDS с",
     )
 
@@ -58,8 +58,8 @@ class CleaveOfPurification : ActiveAbility(AbilityIdentity.of("sun_cleave_of_pur
             durationTicks = DURATION_SECONDS * TICKS_PER_SECOND,
         ) { damage ->
             if (damage.attacker?.uuid != casterId) return@on
-            // Освячена **зброя**, тож рахуються удари в ближньому бою: стріла чи вибух
-            // до леза не торкались.
+            // It is the **weapon** that is consecrated, so melee blows are what count: an arrow
+            // or an explosion never touched the blade.
             if (damage.directCause !== damage.attacker) return@on
             if (left <= 0) return@on
 
@@ -70,8 +70,8 @@ class CleaveOfPurification : ActiveAbility(AbilityIdentity.of("sun_cleave_of_pur
             messaging.actionBar(casterId, Component.literal("Освячення: лишилось $left"))
         }
 
-        // Строк підписки й так її зніме; посилання потрібне лише щоб зупинити раніше,
-        // а зупиняти тут нема на що — тож воно й не зберігається.
+        // The subscription's term will remove it anyway; the handle is only needed to stop it
+        // early, and there is nothing to stop here — so it is not kept.
         check(blessing.isActive)
 
         context.level.playSound(

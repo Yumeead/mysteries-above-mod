@@ -3,6 +3,7 @@ package me.vangoo.mysteries.ability
 import me.vangoo.domain.abilities.CastAuthorization
 import me.vangoo.domain.abilities.CastReceipt
 import me.vangoo.domain.abilities.CastRefusal
+import me.vangoo.mysteries.beyonder.TheftRegistry
 import me.vangoo.domain.abilities.CastTicket
 import me.vangoo.domain.entities.Beyonder
 import me.vangoo.domain.valueobjects.SanityPenalty
@@ -20,12 +21,12 @@ import net.minecraft.world.entity.LivingEntity
 import org.slf4j.LoggerFactory
 
 /**
- * Порядок одного касту — від натискання до розрахунку.
+ * The order of one cast — from the key press to the settlement.
  *
- * У плагіні цей порядок був розмазаний по трьох місцях: `Beyonder.useAbility` знімав
- * ресурси, `Ability.execute` тримав хуки й кулдаун, `AbilityResourceConsumer` робив те
- * саме ще раз для відкладених здібностей — і трохи інакше. Тут він один, і різниця
- * між звичайним і відкладеним кастом зводиться до того, хто гасить квиток.
+ * In the plugin this order was smeared across three places: `Beyonder.useAbility` took the
+ * resources, `Ability.execute` held the hooks and the cooldown, and `AbilityResourceConsumer`
+ * did the same again for deferred abilities — and slightly differently. Here it is one, and
+ * the difference between an ordinary and a deferred cast comes down to who settles the ticket.
  */
 class AbilityExecutor(
     private val beyonders: Beyonders,
@@ -33,9 +34,9 @@ class AbilityExecutor(
     private val messaging: Messaging,
     private val contexts: AbilityContexts,
     /**
-     * Куди повідомити, що сила спрацювала. Шина мода — вона ж, у яку їде шкода з міксину:
-     * каст помітний збоку так само, як удар, і здібностям, що його читають, байдуже,
-     * звідки подія прийшла.
+     * Where to report that a power fired. The mod's bus — the same one damage from the mixin
+     * travels on: a cast is as visible from the outside as a blow, and abilities that read it
+     * do not care where the event came from.
      */
     private val publish: (GameEvent) -> Unit = {},
 ) {
@@ -47,6 +48,17 @@ class AbilityExecutor(
 
         val remaining = cooldowns.remainingSeconds(caster.uuid, ability.identity)
         if (remaining > 0) return report(caster, CastReport.OnCooldown(remaining))
+
+        // The one place a stolen power is refused to its owner. Every cast passes here, so no
+        // guard is needed at any call site — and sessions the victim already started keep
+        // running, because only new casts come through this door.
+        if (TheftRegistry.isSuppressed(caster.uuid, ability.identity)) {
+            return report(caster, CastReport.Suppressed(TheftRegistry.suppressionSecondsLeft(caster.uuid, ability.identity)))
+        }
+
+        // The first call of something stolen starts its real term. Unconditional on purpose: the
+        // gate lives inside the record, so nothing here knows what a reserve term is.
+        TheftRegistry.markUsed(caster.uuid, ability.identity)
 
         val ticket = when (val authorization = beyonder.authorize(ability)) {
             is CastAuthorization.Refused -> return report(caster, CastReport.Refused(authorization.reason))
@@ -60,45 +72,48 @@ class AbilityExecutor(
             cast = PendingCast(this, caster, beyonder, ticket),
         )
 
-        // Далі керування йде в код здібності. Виняток звідти інакше просто спливе:
-        // Fabric його залогує й перекине, а `BlockableEventLoop.doRunTask` проковтне —
-        // тобто квиток лишиться непогашеним, і зламана здібність стане безкоштовною
-        // й нескінченною. Решта рантайму (`TickScheduler`, `SessionHost`, `EventHub`)
-        // чужий код уже ізолює; це було єдине місце, де ні.
+        // From here control goes into the ability's code. An exception from there would
+        // otherwise simply drift away: Fabric logs it and rethrows, and
+        // `BlockableEventLoop.doRunTask` swallows it — meaning the ticket stays unsettled and
+        // a broken ability becomes free and endless. The rest of the runtime (`TickScheduler`,
+        // `SessionHost`, `EventHub`) already isolates foreign code; this was the only place
+        // that did not.
         val outcome = try {
             if (!ability.canCast(context)) {
-                // Квиток просто зникає невитраченим — гравець нічого не заплатив.
+                // The ticket simply disappears unspent — the player paid nothing.
                 return report(caster, CastReport.Refused(CastRefusal.NotCastable))
             }
 
             contest(context, ability)?.let { chance ->
-                // Опір з'їдає кулдаун, але не духовність: спроба була, ефекту не було.
+                // Resistance eats the cooldown but not the spirituality: there was an attempt,
+                // there was no effect.
                 cooldowns.set(caster.uuid, ability.identity, ability.cooldownSeconds(beyonder.sequence))
                 return report(caster, CastReport.Resisted(chance))
             }
 
             ability.cast(context)
         } catch (error: Exception) {
-            log.error("Здібність {} впала під час касту", ability.identity, error)
-            // Той самий розрахунок, що й при опорі: кулдаун списано, духовність — ні.
-            // Без кулдауна гравець тримав би клавішу, а лог набирав би по рядку на тік.
+            log.error("Ability {} threw while casting", ability.identity, error)
+            // The same settlement as on resistance: the cooldown is charged, the spirituality
+            // is not. Without a cooldown the player would hold the key down and the log would
+            // gain a line per tick.
             cooldowns.set(caster.uuid, ability.identity, ability.cooldownSeconds(beyonder.sequence))
             AbilityOutcome.failed("Сила зірвалась")
         }
         val receipt = when (outcome) {
             is AbilityOutcome.Done -> if (context.cast.isComplete) null else context.cast.complete()
-            // Квиток лишився в здібності: вона погасить його, коли ефект справді станеться.
+            // The ticket stayed with the ability: it will settle it when the effect really happens.
             is AbilityOutcome.Awaiting -> null
             is AbilityOutcome.Failed -> null
         }
-        // Зірваний каст збоку не видно ніяк — ні спалаху, ні звуку, тож і події немає.
+        // A failed cast is invisible from the outside — no flash, no sound, so no event either.
         if (outcome !is AbilityOutcome.Failed) publish(AbilityCast(caster, ability))
         return report(caster, CastReport.Performed(outcome, receipt))
     }
 
     /**
-     * Погашення квитка. Викликається або звідси одразу після [AbilityOutcome.Done],
-     * або пізніше самою здібністю через [PendingCast.complete].
+     * Settling the ticket. Called either from here right after [AbilityOutcome.Done], or later
+     * by the ability itself through [PendingCast.complete].
      */
     internal fun settle(caster: ServerPlayer, beyonder: Beyonder, ticket: CastTicket): CastReceipt {
         val receipt = beyonder.settle(ticket)
@@ -110,8 +125,9 @@ class AbilityExecutor(
     }
 
     /**
-     * Втрату духовності `core` вже зняв сам — тут лишаються ефекти у світі. `EXTREME`
-     * поки що б'є на смерть; повний ритуал шаленства — фаза, що принесе Rampage.
+     * `core` has already taken the spirituality loss itself — what is left here are the effects
+     * in the world. `EXTREME` currently strikes to kill; the full madness ritual belongs to the
+     * phase that brings Rampage.
      */
     private fun applyPenalty(caster: ServerPlayer, penalty: SanityPenalty) {
         when (penalty.type) {
@@ -130,8 +146,8 @@ class AbilityExecutor(
         caster.damageSources().magic()
 
     /**
-     * Кидок опору за Послідовністю. Опирається лише інший Потойбічний: звичайна
-     * істота нічого не протиставляє. Повертає шанс, якщо ціль устояла.
+     * The Sequence-based resistance roll. Only another Beyonder resists: an ordinary creature
+     * has nothing to put up. Returns the chance if the target held out.
      */
     private fun contest(
         context: CastContext,

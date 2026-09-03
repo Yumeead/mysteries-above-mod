@@ -6,16 +6,16 @@ import me.vangoo.domain.entities.Beyonder
 import net.minecraft.server.level.ServerPlayer
 
 /**
- * Незакінчений каст: єдине, що здібності дозволено пережити виклик `cast`.
+ * An unfinished cast: the only thing an ability is allowed to outlive the `cast` call with.
  *
- * Це заміна плагінного `AbilityResult.deferred()` разом із `AbilityResourceConsumer`.
- * Там інваріант тримався коментарем — «КРИТИЧНО: НЕ встановлювати кулдаун якщо
- * результат deferred» — і кожна відкладена здібність мусила не забути покликати
- * консюмер вручну. Тут забути нічого: не покликав [complete] — каст був безкоштовний,
- * покликав двічі — впав `check()` усередині квитка.
+ * This replaces the plugin's `AbilityResult.deferred()` together with
+ * `AbilityResourceConsumer`. There the invariant was held by a comment — "CRITICAL: do NOT set
+ * the cooldown if the result is deferred" — and every deferred ability had to remember to call
+ * the consumer by hand. Here there is nothing to forget: never call [complete] and the cast was
+ * free, call it twice and a `check()` inside the ticket fails.
  *
- * Контекст цілком у сесію не бере: він несе ідентичність одного касту й одного
- * кастера. Цей об'єкт — теж, але він рівно про це і є.
+ * It does not take the whole context into a session: that carries the identity of one cast and
+ * one caster. This object does too, but that is exactly what it is about.
  */
 class PendingCast internal constructor(
     private val executor: AbilityExecutor,
@@ -27,8 +27,8 @@ class PendingCast internal constructor(
     val isComplete: Boolean get() = ticket.isSettled
 
     /**
-     * Списує духовність, нараховує засвоєння, ставить кулдаун і накладає штраф глузду.
-     * Рівно один раз.
+     * Spends the spirituality, accrues the mastery, sets the cooldown and applies the sanity
+     * penalty. Exactly once.
      */
     fun complete(): CastReceipt = executor.settle(caster, beyonder, ticket)
 

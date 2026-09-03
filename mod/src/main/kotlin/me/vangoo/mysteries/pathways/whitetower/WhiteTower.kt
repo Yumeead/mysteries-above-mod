@@ -16,19 +16,19 @@ import me.vangoo.mysteries.pathways.whitetower.abilities.Spellcasting
 import net.minecraft.network.chat.Component
 
 /**
- * Шлях Білої Вежі — знання, дедукція, світло.
+ * The pathway of the White Tower — knowledge, deduction, light.
  *
- * Перший шлях фази 08 і навмисно найменший: 2 397 рядків у плагіні проти 6 735 у
- * Смерті. Рутина відпрацьовується на дешевому.
+ * The first pathway of phase 08 and deliberately the smallest: 2,397 lines in the plugin against
+ * Death's 6,735. The routine is worked out on something cheap.
  *
- * **Заповнено Посл. 9–5.** Вище плагін не піднімався взагалі — жоден із двадцяти двох
- * шляхів не має ростера на Посл. 4–0. Дописати їх — це нова гра, а не порт.
+ * **Filled for Seq. 9–5.** The plugin never went higher at all — not one of its twenty-two
+ * pathways has a roster for Seq. 4–0. Writing those is a new game, not a port.
  */
 object WhiteTower {
 
     const val NAME: String = "WhiteTower"
 
-    /** Індекс списку **дорівнює** Послідовності: 0 — Біла Вежа, 9 — Читач. */
+    /** The list index **equals** the Sequence: 0 — White Tower, 9 — Reader. */
     private val SEQUENCE_NAMES = listOf(
         "White Tower", "Omniscient Eye", "Wisdom Angel", "Cognizer", "Prophet",
         "Mysticism Magister", "Polymath", "Detective", "Student", "Reader",

@@ -7,7 +7,7 @@ import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.projectile.ProjectileUtil
 import net.minecraft.world.phys.EntityHitResult
 
-/** Вибір цілей навколо конкретного кастера. */
+/** Picking targets around a specific caster. */
 internal class LiveTargeting(private val caster: ServerPlayer) : Targeting {
 
     override fun livingNear(radius: Double): List<LivingEntity> =
@@ -23,7 +23,7 @@ internal class LiveTargeting(private val caster: ServerPlayer) : Targeting {
         return (hit as? EntityHitResult)?.entity as? LivingEntity
     }
 
-    /** Кастер сам собі не ціль; глядачі й трупи — теж. */
+    /** The caster is never their own target; spectators and corpses are not either. */
     private fun isViableTarget(entity: Entity): Boolean =
         entity !== caster &&
             entity is LivingEntity &&

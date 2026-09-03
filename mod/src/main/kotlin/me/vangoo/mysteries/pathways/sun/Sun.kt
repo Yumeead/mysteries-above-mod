@@ -25,21 +25,21 @@ import net.minecraft.network.chat.Component
 import net.minecraft.world.effect.MobEffects
 
 /**
- * Шлях Сонця — святе світло, клятви й присуди.
+ * The pathway of the Sun — holy light, oaths and verdicts.
  *
- * Другий шлях фази 08 (після Білої Вежі) і перший, у якому здібностей багато: шістнадцять
- * на Посл. 9–5 проти семи. Через це шлях мусив стати **несхожим усередині себе**: чотири
- * сили, які «б'ють святим світлом», розрізнено дієсловом, а не числом —
- * `Сонячне сяйво` влучає, `Святе світло` падає з відкритого неба, `Вогонь Світла` займає
- * місце, `Хвиля святості` рятує загін.
+ * The second pathway of phase 08 (after the White Tower) and the first with many abilities:
+ * sixteen across Seq. 9–5 against seven. Because of that the pathway had to become **unlike
+ * itself inside**: four powers that "strike with holy light" are told apart by the verb rather
+ * than by a number — `Сонячне сяйво` hits, `Святе світло` falls from open sky, `Вогонь Світла`
+ * takes ground, `Хвиля святості` saves the party.
  *
- * **Заповнено Посл. 9–5** — стільки ж, скільки заповнював плагін.
+ * **Filled for Seq. 9–5** — as much as the plugin filled.
  */
 object Sun {
 
     const val NAME: String = "Sun"
 
-    /** Канон новели; індекс списку **дорівнює** Послідовності: 0 — Сонце, 9 — Бард. */
+    /** The novel's canon; the list index **equals** the Sequence: 0 — Sun, 9 — Bard. */
     private val SEQUENCE_NAMES = listOf(
         "Sun", "White Angel", "Light Seeker", "Justice Mentor", "Shadowless",
         "Priest of Light", "Notary", "Solar High Priest", "Light Petitioner", "Bard",

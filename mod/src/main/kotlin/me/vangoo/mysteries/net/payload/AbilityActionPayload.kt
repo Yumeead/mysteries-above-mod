@@ -8,29 +8,29 @@ import net.minecraft.network.codec.StreamMemberEncoder
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 
 /**
- * Клієнт → сервер: один намір гравця на всі способи його висловити.
+ * Client → server: one player intent for every way of expressing it.
  *
- * Узагальнення порожнього [CastRequestPayload], а не другий шлях поруч із ним:
- * `identity == null` означає «те, що вже обрано» — рівно сьогоднішній порожній пакет.
- * Коли новий шлях буде прогнаний руками, старий піде (віха M8).
+ * A generalisation of the empty [CastRequestPayload] rather than a second path beside it:
+ * `identity == null` means "whatever is already selected" — exactly today's empty packet.
+ * When the new path has been walked by hand, the old one goes (milestone M8).
  *
- * **Ідентичність тут — прохання, а не право.** Клієнт може надіслати будь-який рядок;
- * сервер однаково шукає його в `Beyonder.abilities` тим самим пошуком, яким шукав би
- * обране. Слот на клієнті — ярлик до ідентичності, і перевіряється вона як будь-яка інша.
+ * **The identity here is a request, not a right.** The client may send any string; the server
+ * looks it up in `Beyonder.abilities` with the same search it would use for the selected one.
+ * A slot on the client is a shortcut to an identity, and it is verified like any other.
  */
 data class AbilityActionPayload(val action: Action, val identity: String?) : CustomPacketPayload {
 
     enum class Action {
-        /** Покласти здібність «на руку». */
+        /** Put the ability "in hand". */
         SELECT,
 
-        /** Кастувати обране. */
+        /** Cast what is selected. */
         CAST,
 
-        /** Обрати й одразу кастувати — відпускання колеса. */
+        /** Select and cast at once — releasing the wheel. */
         SELECT_AND_CAST,
 
-        /** Перемкнути тогл. */
+        /** Flip a toggle. */
         TOGGLE,
     }
 
@@ -38,7 +38,7 @@ data class AbilityActionPayload(val action: Action, val identity: String?) : Cus
 
     companion object {
 
-        /** Клавіша касту без вибору: «кастуй те, що я тримаю». */
+        /** The cast key with no selection: "cast what I am holding". */
         fun castSelected(): AbilityActionPayload = AbilityActionPayload(Action.CAST, null)
 
         val TYPE: CustomPacketPayload.Type<AbilityActionPayload> =
@@ -62,7 +62,7 @@ data class AbilityActionPayload(val action: Action, val identity: String?) : Cus
             return AbilityActionPayload(action, identity)
         }
 
-        /** Число з мережі — чуже: межі перевіряються тут, а не `entries[]`-падінням. */
+        /** A number off the network is foreign: the bounds are checked here, not by an `entries[]` crash. */
         private fun action(ordinal: Int): Action {
             val values = Action.entries
             require(ordinal in values.indices) { "Невідома дія: $ordinal" }

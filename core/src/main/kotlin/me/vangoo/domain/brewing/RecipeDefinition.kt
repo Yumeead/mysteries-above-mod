@@ -1,10 +1,10 @@
 package me.vangoo.domain.brewing
 
 /**
- * Сирий опис рецепта з конфіга: id основних та допоміжних інгредієнтів.
+ * A raw recipe description from the config: ids of the main and auxiliary ingredients.
  *
- * НЕ data class: конструктор робить захисні копії списків, а згенерований `copy()`
- * пройшов би повз них — та сама причина, що й у `CustomItem`.
+ * NOT a data class: the constructor makes defensive copies of the lists, and the generated
+ * `copy()` would go around them — the same reason as in `CustomItem`.
  */
 class RecipeDefinition(mainIds: List<String>, auxIds: List<String>) {
     val mainIds: List<String> = mainIds.toList()

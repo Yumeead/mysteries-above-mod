@@ -17,7 +17,7 @@ import java.util.UUID
 class BeyonderProgressionTest {
 
     private val seq9 = TestAbilitySpec.of("sailor")
-    private val seq8 = TestAbilitySpec.of("sailor", cost = 50) // та сама ідентичність, сильніша
+    private val seq8 = TestAbilitySpec.of("sailor", cost = 50) // the same identity, stronger
     private val seq8Extra = TestAbilitySpec.of("cutthroat")
 
     private fun tyrant(roster: Map<Int, List<AbilitySpec>>) = Pathway(

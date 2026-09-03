@@ -3,7 +3,7 @@ package me.vangoo.mysteries.schedule
 import java.util.PriorityQueue
 import java.util.concurrent.ConcurrentLinkedQueue
 
-/** Те, що поставлено в чергу і що з неї можна зняти. */
+/** Something put in the queue that can be taken back out of it. */
 interface TaskHandle {
 
     val isActive: Boolean
@@ -12,35 +12,36 @@ interface TaskHandle {
 }
 
 /**
- * Черга робіт, прив'язана до серверного тіку.
+ * A work queue tied to the server tick.
  *
- * ## Навіщо власний планувальник
+ * ## Why a scheduler of our own
  *
- * У Bukkit був `Bukkit.getScheduler()`, і плагін висів на ньому 92 викликами. Fabric
- * планувальника не має взагалі — є лише подія кінця тіку. Це той шматок, який лоадер
- * не дає й доводиться написати: сам цикл, черга відкладених робіт і скасування.
+ * Bukkit had `Bukkit.getScheduler()`, and the plugin hung on it through 92 calls. Fabric has no
+ * scheduler at all — only an end-of-tick event. This is the piece the loader does not give and
+ * that has to be written: the loop itself, the queue of deferred work and cancellation.
  *
- * ## Годинник — тік, а не стінний час
+ * ## The clock is the tick, not wall time
  *
- * Лічильник цокає лише в [advance], тобто рівно тоді, коли цокнув сервер. Поставлена
- * на паузу одиночна гра стоїть — і сесії разом із нею. `System.currentTimeMillis`
- * ішов би далі, і гравець, який вийшов у меню на хвилину, повернувся б у світ, де
- * його тогл усе списав, а вітер уже стих.
+ * The counter ticks only in [advance], i.e. exactly when the server ticked. A paused
+ * single-player game stands still — and the sessions with it. `System.currentTimeMillis` would
+ * keep going, and a player who opened the menu for a minute would come back to a world where
+ * their toggle had spent everything and the wind had already died down.
  *
- * ## Один зламаний тік не валить решту
+ * ## One broken tick does not bring down the rest
  *
- * Виняток усередині роботи ловиться тут і йде в [onError]. У плагіні цей же інваріант
- * тримав `try/catch` у кожному циклі `PassiveAbilityScheduler`, і забути його було
- * питанням часу.
+ * An exception inside a job is caught here and goes to [onError]. In the plugin this same
+ * invariant was held by a `try/catch` in every `PassiveAbilityScheduler` loop, and forgetting
+ * it was a matter of time.
  *
- * Клас **не** потребує Minecraft і саме тому перевіряється звичайним юніт-тестом.
+ * The class does **not** need Minecraft, and that is exactly why it is checked by an ordinary
+ * unit test.
  */
 class TickScheduler(private val onError: (String, Throwable) -> Unit = { _, _ -> }) {
 
     private class Entry(
         val block: () -> Unit,
         var dueTick: Long,
-        /** 0 — одноразова робота; більше нуля — період повтору. */
+        /** 0 — one-off work; more than zero — the repeat period. */
         val periodTicks: Int,
     ) : TaskHandle {
 
@@ -56,24 +57,24 @@ class TickScheduler(private val onError: (String, Throwable) -> Unit = { _, _ ->
 
     private val lock = Any()
 
-    /** Відкладені роботи, найближча — зверху. */
+    /** Deferred work, the nearest on top. */
     private val timed = PriorityQueue<Entry>(compareBy { it.dueTick })
 
     /**
-     * Роботи «на зараз». Черга конкурентна навмисно: корутина, що повернулась із
-     * `Dispatchers.IO`, диспетчиться сюди з чужого потоку.
+     * Work "for right now". The queue is concurrent on purpose: a coroutine returning from
+     * `Dispatchers.IO` dispatches itself here from a foreign thread.
      */
     private val immediate = ConcurrentLinkedQueue<Entry>()
 
-    /** Скільки разів цокнув сервер, відколи піднявся планувальник. */
+    /** How many times the server has ticked since the scheduler came up. */
     var tick: Long = 0L
         private set
 
-    /** Виконати якнайшвидше: цього ж тіку, якщо він ще розбирає чергу. */
+    /** Run as soon as possible: this very tick, if it is still draining the queue. */
     fun submit(block: () -> Unit): TaskHandle =
         Entry(block, tick, periodTicks = 0).also { immediate += it }
 
-    /** Один раз, через [delayTicks] тіків. Нуль і менше — цього ж тіку. */
+    /** Once, after [delayTicks] ticks. Zero or less — this very tick. */
     fun after(delayTicks: Int, block: () -> Unit): TaskHandle {
         if (delayTicks <= 0) return submit(block)
         val entry = Entry(block, tick + delayTicks, periodTicks = 0)
@@ -81,7 +82,7 @@ class TickScheduler(private val onError: (String, Throwable) -> Unit = { _, _ ->
         return entry
     }
 
-    /** Раз на [periodTicks] тіків, уперше — через [delayTicks]. */
+    /** Once every [periodTicks] ticks, the first time after [delayTicks]. */
     fun every(periodTicks: Int, delayTicks: Int = periodTicks, block: () -> Unit): TaskHandle {
         require(periodTicks > 0) { "Період повтору мусить бути додатним: $periodTicks" }
         val entry = Entry(block, tick + maxOf(0, delayTicks), periodTicks)
@@ -90,13 +91,13 @@ class TickScheduler(private val onError: (String, Throwable) -> Unit = { _, _ ->
     }
 
     /**
-     * Один тік сервера: настали строки — виконати, черга «на зараз» — розібрати.
+     * One server tick: run whatever came due, drain the "right now" queue.
      *
-     * Розбирається до порожньої, а не фіксованою порцією: корутина, що чекала цього
-     * тіку, після відновлення часто диспетчить продовження одразу, і воно мусить
-     * потрапити в **цей** тік, інакше `waitTicks(1)` мовчки коштувало б два.
-     * Стеля [MAX_DRAIN] тут — від зациклення (`while (true) { yield() }`), а не від
-     * навантаження.
+     * It is drained until empty rather than in a fixed portion: a coroutine that was waiting for
+     * this tick often dispatches its continuation straight after resuming, and that continuation
+     * must land in **this** tick, otherwise `waitTicks(1)` would silently cost two.
+     * The [MAX_DRAIN] ceiling here guards against a loop (`while (true) { yield() }`), not
+     * against load.
      */
     fun advance() {
         tick++
@@ -132,7 +133,7 @@ class TickScheduler(private val onError: (String, Throwable) -> Unit = { _, _ ->
         )
     }
 
-    /** Зупинка сервера: черга не має пережити світ, у якому її наповнили. */
+    /** Server shutdown: the queue must not outlive the world that filled it. */
     fun cancelAll() {
         synchronized(lock) {
             timed.forEach { it.cancel() }
@@ -144,7 +145,7 @@ class TickScheduler(private val onError: (String, Throwable) -> Unit = { _, _ ->
         }
     }
 
-    /** Скільки робіт чекає. Для тестів і діагностики. */
+    /** How many jobs are waiting. For tests and diagnostics. */
     val pending: Int get() = synchronized(lock) { timed.size } + immediate.size
 
     private companion object {

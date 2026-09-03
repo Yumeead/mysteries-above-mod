@@ -17,7 +17,7 @@ internal class RitualCatalogTest {
         assertEquals(3, RitualCatalog.availableFor(9).size)
         assertEquals(5, RitualCatalog.availableFor(8).size)
         assertEquals(7, RitualCatalog.availableFor(7).size)
-        assertEquals(7, RitualCatalog.availableFor(0).size) // нижче — все лишається
+        assertEquals(7, RitualCatalog.availableFor(0).size) // below that, everything stays
     }
 
     @Test
@@ -29,9 +29,9 @@ internal class RitualCatalogTest {
     }
 
     /**
-     * Жертву з руки беруть рівно два ритуали, і саме вони не мають списку матеріалів:
-     * Жертвопринесення (палить будь-що) і Одкровення (платить інгредієнтом чужого шляху,
-     * якого не виразити через ключ предмета).
+     * Exactly two rituals take a sacrifice from the hand, and those are the two with no
+     * material list: Sacrifice (burns anything) and Bestowment (pays with an ingredient of
+     * another pathway, which cannot be expressed as an item key).
      */
     @Test
     fun handSacrificeRitualsHaveNoMaterialListAndViceVersa() {

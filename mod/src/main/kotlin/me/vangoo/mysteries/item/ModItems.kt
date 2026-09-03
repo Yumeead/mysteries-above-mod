@@ -21,12 +21,12 @@ import net.minecraft.world.item.component.Consumables
 import net.minecraft.world.item.component.ItemLore
 import java.util.Optional
 
-/** Предмети мода. Оголошення тут — і є реєстрацією, як у `ModChannels`. */
+/** The mod's items. Declaring them here **is** registering them, as in `ModChannels`. */
 object ModItems {
 
     /**
-     * Потойбічне зілля. Один предмет на всі 220 варіантів: що саме налито, каже
-     * компонент [ModComponents.POTION_BREW], а не окремий зареєстрований предмет.
+     * The Beyonder potion. One item for all 220 variants: what exactly is poured is said by the
+     * [ModComponents.POTION_BREW] component, not by a separately registered item.
      */
     val BEYONDER_POTION: Item = register("beyonder_potion") { properties ->
         BeyonderPotionItem(
@@ -38,15 +38,15 @@ object ModItems {
         )
     }
 
-    /** Змушує клас ініціалізуватись до того, як реєстри закриються. */
+    /** Forces the class to initialise before the registries close. */
     fun register() = Unit
 
     /**
-     * Пляшка конкретного шляху й Послідовності.
+     * A bottle of a specific pathway and Sequence.
      *
-     * Колір рідини береться з `PathwayBranding` через ванільний `POTION_CONTENTS`:
-     * модель предмета — вана ж пляшка зілля з тінтом, тож жодної нової текстури мод не
-     * несе, а всі 22 шляхи вже мають свій відтінок.
+     * The liquid colour comes from `PathwayBranding` through the vanilla `POTION_CONTENTS`: the
+     * item model is the vanilla potion bottle with a tint, so the mod carries no new texture at
+     * all, and all 22 pathways already have their own shade.
      */
     fun potionOf(pathway: Pathway, sequence: Sequence): ItemStack {
         val branding = PathwayBranding.of(pathway.name)

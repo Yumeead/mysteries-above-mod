@@ -15,57 +15,56 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.phys.Vec3
 
 /**
- * Усе, що здібність бачить, поки працює.
+ * Everything an ability sees while it works.
  *
- * ## Чому це не порт `IAbilityContext`
+ * ## Why this is not a port of `IAbilityContext`
  *
- * У плагіні контекст був **фасадом над Bukkit**: 16 інтерфейсів, які приймали `UUID`
- * і повертали `Location`, бо домену не можна було торкатись `org.bukkit`, а плагін
- * не мав під рукою самої сутності — лише її ідентифікатор і серверний хендл.
- * Звідси 27 методів `IDataContext` виду `getHealth(UUID)`, `getFoodLevel(UUID)`,
+ * In the plugin the context was a **facade over Bukkit**: 16 interfaces that took a `UUID` and
+ * returned a `Location`, because the domain was not allowed to touch `org.bukkit` and the
+ * plugin did not have the entity itself at hand — only its identifier and a server handle.
+ * Hence the 27 methods of `IDataContext` shaped like `getHealth(UUID)`, `getFoodLevel(UUID)`,
  * `isSneaking(UUID)`.
  *
- * Тут ця причина зникла. Здібності живуть у моді, тож [caster] — це живий
- * [ServerPlayer], і `caster.health`, `caster.isInWater`, `caster.addEffect(...)`
- * доступні напряму. **Обгортка навколо одного ванільного виклику в контекст не
- * додається** — це те саме правило, що діяло в плагіні, просто тепер під нього
- * потрапляє вся арифметика гравця й сутностей.
+ * Here that reason is gone. Abilities live in the mod, so [caster] is a live [ServerPlayer],
+ * and `caster.health`, `caster.isInWater`, `caster.addEffect(...)` are available directly.
+ * **A wrapper around a single vanilla call is never added to the context** — the same rule
+ * that applied in the plugin, only now it covers all the arithmetic of players and entities.
  *
- * Лишається те, чим ванільний Minecraft не володіє: **сервіси самого мода**.
+ * What remains is what vanilla Minecraft does not own: **the mod's own services**.
  *
- * ## Каст — це [CastContext], не цей інтерфейс
+ * ## A cast is a [CastContext], not this interface
  *
- * Пасивка цокає без квитка: платити нема за що, гасити нема чого. Тому квиток лежить не
- * тут, а у [CastContext], який бачить лише [ActiveAbility.cast]. Пасивці не доведеться
- * писати `cast!!` — вона про квиток просто не знає.
+ * A passive ticks without a ticket: there is nothing to pay and nothing to settle. So the
+ * ticket lives not here but in [CastContext], which only [ActiveAbility.cast] ever sees. A
+ * passive never has to write `cast!!` — it simply does not know about the ticket.
  *
- * ## Події — сервіс, а не хук
+ * ## Events are a service, not a hook
  *
- * [events] — не список ванільних подій, а підписка **від імені цієї здібності цього
- * гравця**: власника видно з контексту, тож зняти чужу підписку нема як, а свої
- * реєстр гасить сам. Це найпомітніша різниця з плагіном, де здібності знімали
- * підписки одна одній через `unsubscribeAll(casterId)`.
+ * [events] is not a list of vanilla events but a subscription **on behalf of this ability of
+ * this player**: the owner is visible from the context, so someone else's subscription cannot
+ * be removed, and the registry cancels one's own. This is the most visible difference from the
+ * plugin, where abilities removed each other's subscriptions through `unsubscribeAll(casterId)`.
  *
- * ## Що ще сюди прийде
+ * ## What else will come here
  *
- * Контекст росте разом із механікою, а не наперед: інтерфейс до підсистеми, якої
- * ще немає, — це інтерфейс ні до чого.
+ * The context grows together with the mechanics, not ahead of them: an interface to a
+ * subsystem that does not exist yet is an interface to nothing.
  *
- * | що | фаза |
+ * | what | phase |
  * |---|---|
- * | `ui` — екрани вибору й ввід | 11 |
- * | `summons` — data-driven істоти | 12 |
+ * | `ui` — choice screens and input | 11 |
+ * | `summons` — data-driven creatures | 12 |
  */
 interface AbilityContext {
 
-    // ── Кастер ──────────────────────────────────────────────────────────────────
+    // ── Caster ──────────────────────────────────────────────────────────────────
 
     val caster: ServerPlayer
 
-    /** Доменна половина кастера: Послідовність, духовність, глузд, список здібностей. */
+    /** The caster's domain half: Sequence, spirituality, sanity, the list of abilities. */
     val beyonder: Beyonder
 
-    /** Здібність, яка зараз працює. Ключ її сесії й джерело її ж цін. */
+    /** The ability running right now. The key of its session and the source of its own prices. */
     val ability: AbilitySpec
 
     val level: ServerLevel get() = caster.level()
@@ -78,7 +77,7 @@ interface AbilityContext {
 
     val look: Vec3 get() = caster.getViewVector(1.0f)
 
-    // ── Сервіси мода ────────────────────────────────────────────────────────────
+    // ── The mod's services ──────────────────────────────────────────────────────
 
     val beyonders: Beyonders
     val cooldowns: Cooldowns
@@ -90,40 +89,42 @@ interface AbilityContext {
 }
 
 /**
- * Контекст **одного касту**: те саме, що [AbilityContext], плюс квиток.
+ * The context of **one cast**: the same as [AbilityContext], plus the ticket.
  *
- * Вужчий тип рівно там, де він потрібен — у [ActiveAbility.cast] та її вартових. Усе
- * решта (такт пасивки, увімкнення тогла) працює на [AbilityContext] і квитка не бачить.
+ * A narrower type exactly where it is needed — in [ActiveAbility.cast] and its guards.
+ * Everything else (a passive's tick, switching a toggle on) works on [AbilityContext] and
+ * never sees the ticket.
  */
 interface CastContext : AbilityContext {
 
     /**
-     * Квиток цього касту. [PendingCast.complete] списує духовність, нараховує
-     * засвоєння і ставить кулдаун; не викликати — і каст безкоштовний.
+     * This cast's ticket. [PendingCast.complete] spends the spirituality, accrues the mastery
+     * and sets the cooldown; never call it and the cast is free.
      *
-     * Активна здібність, що повернула [AbilityOutcome.Done], нічого з ним не робить:
-     * гасить [AbilityExecutor]. Здібність, що чекає вибору гравця, **тримає саме цей
-     * об'єкт** (не весь контекст — той несе ідентичність одного касту) і гасить його,
-     * коли ефект справді стався.
+     * An active ability that returned [AbilityOutcome.Done] does nothing with it:
+     * [AbilityExecutor] settles it. An ability waiting for the player's choice holds **this
+     * very object** (not the whole context — that carries the identity of a single cast) and
+     * settles it when the effect actually happens.
      */
     val cast: PendingCast
 }
 
-// ── Сесії ───────────────────────────────────────────────────────────────────────
+// ── Sessions ────────────────────────────────────────────────────────────────────
 
 /**
- * Відкриває сесію цієї здібності для цього гравця, гасячи попередню.
+ * Opens this ability's session for this player, cancelling the previous one.
  *
- * Ключ береться з контексту, тож переплутати чужу сесію зі своєю не вийде. У тіло
- * контекст **не передається**: він несе живого `ServerPlayer` і живе рівно один виклик,
- * а сесія переживає і респавн, і зміну виміру — гравця вона питає наново щотакту.
+ * The key is taken from the context, so someone else's session cannot be mistaken for one's
+ * own. The context is **not** passed into the body: it carries a live `ServerPlayer` and lives
+ * exactly one call, while a session outlives both a respawn and a dimension change — it asks
+ * for the player anew on every tick.
  */
 fun AbilityContext.session(block: suspend SessionScope.() -> Unit): Session =
     scheduling.session(caster.uuid, ability, block)
 
-/** Чи цокає зараз сесія цієї здібності в цього гравця. */
+/** Whether this ability's session is ticking for this player right now. */
 val AbilityContext.sessionRunning: Boolean
     get() = scheduling.isRunning(caster.uuid, ability.identity)
 
-/** Гасить сесію цієї здібності. `true` — вона була жива. */
+/** Cancels this ability's session. `true` — it was alive. */
 fun AbilityContext.stopSession(): Boolean = scheduling.stop(caster.uuid, ability.identity)

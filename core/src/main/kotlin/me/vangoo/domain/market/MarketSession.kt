@@ -4,11 +4,12 @@ import java.util.UUID
 import kotlin.random.Random
 
 /**
- * Агрегат одного збору: учасники з псевдонімами, лоти, замовлення, торги, комісія.
+ * The aggregate of one gathering: participants with aliases, lots, orders, negotiations,
+ * commission.
  *
- * Чисте правило: предмети представлені `itemKey` (`custom:<id>` /
- * `characteristic:<pathway>:<seq>` / `recipe:<pathway>:<seq>`), реальні стаки тримає
- * ескроу-сховище в шарі застосунку за `escrowRef` (lotId / negotiationId).
+ * A pure rule: items are represented by an `itemKey` (`custom:<id>` /
+ * `characteristic:<pathway>:<seq>` / `recipe:<pathway>:<seq>`), the real stacks are held by
+ * the escrow storage in the application layer under `escrowRef` (lotId / negotiationId).
  */
 class MarketSession(
     private val commissionRate: Double,
@@ -20,7 +21,7 @@ class MarketSession(
         }
     }
 
-    /** Порушення правила ринку; [message] українською, показується гравцеві як є. */
+    /** A breach of a market rule; [message] is Ukrainian and is shown to the player as is. */
     class MarketException(message: String) : RuntimeException(message)
 
     data class Lot(
@@ -32,7 +33,7 @@ class MarketSession(
         val sold: Boolean,
     )
 
-    /** Команда застосунку: хто платить, хто отримує, скільки згорає, який ескроу передати. */
+    /** An application command: who pays, who receives, how much burns, which escrow to hand over. */
     data class Settlement(
         val payerId: UUID,
         val payeeId: UUID,
@@ -45,7 +46,7 @@ class MarketSession(
         val amount: Int,
     )
 
-    /** Команда застосунку: повернути ескроу-стак власникові. */
+    /** An application command: return the escrowed stack to its owner. */
     data class Refund(val ownerId: UUID, val escrowRef: UUID)
 
     data class BuyOrder(
@@ -58,7 +59,7 @@ class MarketSession(
 
     enum class NegotiationState { OPEN, ACCEPTED, WITHDRAWN }
 
-    /** Проєкція торгу для UI (без мутабельного стану назовні). */
+    /** A projection of a negotiation for the UI (no mutable state leaks out). */
     data class NegotiationView(
         val negotiationId: UUID,
         val orderId: UUID,
@@ -79,7 +80,7 @@ class MarketSession(
         val sellerId: UUID,
         val buyerId: UUID,
         var currentPrice: Consideration,
-        /** Хто ОТРИМАВ останню ціну — тільки він може прийняти або дати зустрічну. */
+        /** Who RECEIVED the last price — only he may accept it or counter. */
         var turnOf: UUID,
     ) {
         var state: NegotiationState = NegotiationState.OPEN
@@ -91,12 +92,12 @@ class MarketSession(
     private val negotiations = LinkedHashMap<UUID, Negotiation>()
     private var closed = false
 
-    /** Реєструє учасника; повертає його номер-псевдонім (ідемпотентно). */
+    /** Registers a participant; returns his alias number (idempotent). */
     fun registerParticipant(playerId: UUID): Int {
         aliases[playerId]?.let { return it }
 
-        // Діапазон розширюється разом із кількістю учасників, щоб щонайменше половина
-        // кандидатів завжди була вільна — інакше зі 100-м учасником цикл зависав би назавжди.
+        // The range widens together with the number of participants so that at least half the
+        // candidates are always free — otherwise the loop would hang forever on participant 100.
         val bound = maxOf(99, (aliases.size + 1) * 2)
         val taken = aliases.values.toSet()
         var alias: Int
@@ -119,7 +120,7 @@ class MarketSession(
         ensureOpen()
         ensureParticipant(sellerId)
         if (amount <= 0) throw MarketException("Кількість має бути додатною")
-        // Інваріант Consideration уже гарантує непорожню ціну (гроші > 0 або предметна вимога).
+        // The Consideration invariant already guarantees a non-empty price (money > 0 or an item requirement).
 
         val lotId = UUID.randomUUID()
         lots[lotId] = Lot(lotId, sellerId, itemKey, amount, price, false)
@@ -161,7 +162,7 @@ class MarketSession(
 
     fun openOrders(): List<BuyOrder> = orders.values.filterNot { it.fulfilled }
 
-    /** Оферта продавця. Застосунок кладе предмет у ескроу за повернутим negotiationId. */
+    /** A seller's offer. The application puts the item into escrow under the returned negotiationId. */
     fun offerOnOrder(sellerId: UUID, orderId: UUID, price: Consideration): UUID {
         ensureOpen()
         ensureParticipant(sellerId)
@@ -171,7 +172,7 @@ class MarketSession(
         if (order.buyerId == sellerId) throw MarketException("Це ваше власне замовлення")
 
         val negotiationId = UUID.randomUUID()
-        // Покупець отримав першу ціну — хід його.
+        // The buyer received the first price — it is his move.
         negotiations[negotiationId] =
             Negotiation(negotiationId, orderId, sellerId, order.buyerId, price, order.buyerId)
         return negotiationId
@@ -188,8 +189,8 @@ class MarketSession(
     }
 
     /**
-     * Акцепт того, чий зараз хід. Платить ЗАВЖДИ покупець, тому гаманець
-     * ([buyerPounds]/[buyerCoppets]) — покупця, незалежно від того, хто приймає.
+     * Acceptance by whoever is to move. The buyer ALWAYS pays, so the wallet
+     * ([buyerPounds]/[buyerCoppets]) is the buyer's, regardless of who accepts.
      */
     fun accept(actorId: UUID, negotiationId: UUID, buyerPounds: Int, buyerCoppets: Int): AcceptResult {
         ensureOpen()
@@ -207,7 +208,7 @@ class MarketSession(
         negotiation.state = NegotiationState.ACCEPTED
         orders[order.orderId] = order.copy(fulfilled = true)
 
-        // Решта торгів на це замовлення програли — ескроу продавців повертається.
+        // The remaining negotiations for this order lost — the sellers' escrow comes back.
         val released = negotiations.values
             .filter { it.orderId == negotiation.orderId && it.state == NegotiationState.OPEN }
             .map {
@@ -224,7 +225,7 @@ class MarketSession(
         return AcceptResult(settlement, released)
     }
 
-    /** Відмова будь-якої сторони; ескроу повертається продавцеві. */
+    /** A refusal by either side; the escrow goes back to the seller. */
     fun withdraw(actorId: UUID, negotiationId: UUID): Refund {
         ensureOpen()
         val negotiation = openNegotiation(negotiationId)
@@ -248,7 +249,7 @@ class MarketSession(
             )
         }
 
-    /** Закриває сесію: усі непродані лоти й відкриті торги → повернення власникам. */
+    /** Closes the session: every unsold lot and open negotiation → returned to its owner. */
     fun close(): List<Refund> {
         if (closed) return emptyList()
         closed = true

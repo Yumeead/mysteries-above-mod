@@ -5,9 +5,9 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 
 /**
- * Радіус «Бачення ниток» (Seq 5 Маріонетника шляху Блазня): нитки над головами
- * істот + виявлення невидимих сущностей поблизу. База 24 блоки, росте зі силою.
- * Обмежений заради продуктивності. Чиста математика.
+ * Radius of "Thread Vision" (Seq 5 Marionettist of the Fool pathway): threads above the heads
+ * of creatures + detecting invisible entities nearby. 24 blocks base, grows with power.
+ * Capped for performance. Pure math.
  */
 object ThreadVisionRange {
 

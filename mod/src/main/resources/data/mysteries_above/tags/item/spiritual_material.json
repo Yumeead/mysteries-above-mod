@@ -1,0 +1,29 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:amethyst_shard",
+    "minecraft:glow_ink_sac",
+    "minecraft:ink_sac",
+    "minecraft:phantom_membrane",
+    "minecraft:ghast_tear",
+    "minecraft:blaze_rod",
+    "minecraft:blaze_powder",
+    "minecraft:nether_wart",
+    "minecraft:fermented_spider_eye",
+    "minecraft:spider_eye",
+    "minecraft:rabbit_foot",
+    "minecraft:magma_cream",
+    "minecraft:glistering_melon_slice",
+    "minecraft:turtle_scute",
+    "minecraft:armadillo_scute",
+    "minecraft:honeycomb",
+    "minecraft:prismarine_crystals",
+    "minecraft:prismarine_shard",
+    "minecraft:heart_of_the_sea",
+    "minecraft:dragon_breath",
+    "minecraft:breeze_rod",
+    "minecraft:slime_ball",
+    "minecraft:gunpowder",
+    "minecraft:glowstone_dust"
+  ]
+}

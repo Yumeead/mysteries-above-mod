@@ -23,21 +23,21 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * Sun, Посл. 7 (Сонячний Первосвященник): **Вогонь Світла**.
+ * Sun, Seq. 7 (Solar High Priest): **Fire of Light**.
  *
- * Золоте святе полум'я, що **лишається стояти**: пляма на землі горить
- * [BURN_SECONDS] с і б'є все, що в ній, раз на секунду.
+ * A golden holy flame that **stays standing**: a patch on the ground burns for [BURN_SECONDS] s
+ * and strikes everything inside it once a second.
  *
- * ## Чому це не третій спосіб завдати шкоди
+ * ## Why this is not a third way of dealing damage
  *
- * У Первосвященника вже є `Сонячне сяйво` (промінь) і `Святе світло` (стовп), тож
- * третій удар по площі був би тим самим утретє. Різниця тут у **дієслові**: сяйво і
- * стовп — це «влучити», а Вогонь — це «зайняти місце». Він не вбиває того, хто
- * пробігає; він забороняє коридор, вихід із печери, міст.
+ * The High Priest already has `Сонячне сяйво` (a beam) and `Святе світло` (a pillar), so a third
+ * area strike would be the same thing a third time. The difference here is in the **verb**: the
+ * beam and the pillar are "to hit", the Fire is "to take ground". It does not kill whoever runs
+ * through; it forbids a corridor, a cave mouth, a bridge.
  *
- * Тому й радіус більший, і шкода за одне спрацювання менша за стовп, і горить воно
- * там, куди Первосвященник уже не дивиться: полум'я живе власною сесією й не питає,
- * де зараз кастер.
+ * Hence the bigger radius, the smaller damage per trigger than the pillar, and the fact that it
+ * burns where the High Priest is no longer looking: the flame lives in its own session and does
+ * not ask where the caster is now.
  */
 class FireOfLight : ActiveAbility(AbilityIdentity.of("sun_fire_of_light")) {
 
@@ -50,11 +50,11 @@ class FireOfLight : ActiveAbility(AbilityIdentity.of("sun_fire_of_light")) {
     override fun description(sequence: Sequence): Component = Component.literal(
         "Золоте полум'я в точці під прицілом — і воно лишається горіти.\n" +
             "▪ Радіус: ${RADIUS} бл., горить $BURN_SECONDS с\n" +
-            "▪ Щосекунди: ${tickDamage(sequence)} по скверні, знижена по решті\n" +
-            "▪ Скверна в полум'ї спалахує",
+            "▪ Щосекунди: ${tickDamage(sequence)} по нечисті, знижена по решті\n" +
+            "▪ Нечисть у полум'ї спалахує",
     )
 
-    /** Друге вогнище поверх першого гасить перше — сесія в гравця одна. */
+    /** A second fire on top of the first puts the first out — a player has one session. */
     override fun canCast(context: CastContext): Boolean = !context.sessionRunning
 
     override fun cast(context: CastContext): AbilityOutcome {
@@ -88,10 +88,10 @@ class FireOfLight : ActiveAbility(AbilityIdentity.of("sun_fire_of_light")) {
         return AbilityOutcome.done("Вогонь Світла зайнявся на $BURN_SECONDS с")
     }
 
-    /** Пляма горить нерівно: щосекунди інший малюнок, інакше це килим, а не вогонь. */
+    /** The patch burns unevenly: a different pattern every second, otherwise it is a carpet, not a fire. */
     private fun blaze(level: ServerLevel, centre: Vec3, mote: ParticleOptions) {
         repeat(TONGUES) { i ->
-            // Годинник — тік сервера: `Level.gameTime` на 26.2 більше немає.
+            // The clock is the server tick: `Level.gameTime` is gone on 26.2.
             val angle = TAU * i / TONGUES + level.server.tickCount * 0.05
             val r = RADIUS * ((i % 3) + 1) / 3.0
             level.sendParticles(

@@ -1,13 +1,13 @@
 package me.vangoo.domain.market
 
 /**
- * Прайс скупки організатором (за одиницю, в коппетах). Свідомо нижче ринкових очікувань —
- * «підлога» цін і джерело емісії монет.
+ * The organiser's buyback price list (per unit, in coppets). Deliberately below market
+ * expectations — a price "floor" and the source of coin emission.
  *
- * Усі категорії скейляться від послідовності предмета (9 = найслабша … 0 = найсильніша):
- * інгредієнт — за послідовністю рецепта, де він ужитий, книга рецептів і Характеристика — за
- * власною послідовністю. Інгредієнт без послідовності (не входить у жоден рецепт) отримує
- * плоский [ingredientFallbackCoppets].
+ * Every category scales from the item's sequence (9 = weakest … 0 = strongest): an ingredient
+ * by the sequence of the recipe it is used in, a recipe book and a Characteristic by their own
+ * sequence. An ingredient with no sequence (part of no recipe) gets the flat
+ * [ingredientFallbackCoppets].
  */
 data class BuybackPriceTable(
     val ingredientCoppetsBySeq: Map<Int, Int>,

@@ -10,12 +10,12 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 /**
- * Утримання сили, що триває в часі.
+ * Upkeep of a power that lasts in time.
  *
- * У плагіні цієї операції не існувало: кожна з 22 сесій діставала Потойбічного,
- * звіряла `getSpirituality().current() < cost` і кликала `decrement` сама. Тут це одне
- * правило, і тести стережуть головне в ньому — **або списалось повністю, або не
- * списалось нічого**. Сесія, що змогла б піти в борг, тікала б вічно.
+ * The plugin had no such operation: each of its 22 sessions fetched the Beyonder, checked
+ * `getSpirituality().current() < cost` and called `decrement` itself. Here it is one rule, and
+ * the tests guard the main thing about it — **either it is spent in full or nothing is spent
+ * at all**. A session able to run on credit would run forever.
  */
 class BeyonderUpkeepTest {
 

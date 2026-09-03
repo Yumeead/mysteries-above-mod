@@ -1,8 +1,8 @@
 package me.vangoo.domain.valueobjects
 
 /**
- * Збережена морська мітка (Морська Пам'ять, Tyrant). Чистий VO — світ і координати
- * зберігаємо примітивами, конвертацію в `Location` робить ефект-шар.
+ * A saved sea marker (Sea Memory, Tyrant). A pure VO — the world and the coordinates are kept
+ * as primitives, the effect layer converts them into a `Location`.
  */
 data class Waypoint(
     val name: String,

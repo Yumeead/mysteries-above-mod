@@ -1,8 +1,9 @@
 package me.vangoo.domain.valueobjects
 
 /**
- * Слід минулої події з CoreProtect. Чистий VO — світ і координати зберігаємо
- * примітивами, як [Waypoint] і [RetinuePoint]; конвертацію в `Location` робить ефект-шар.
+ * A trace of a past event from CoreProtect. A pure VO — the world and the coordinates are
+ * kept as primitives, like [Waypoint] and [RetinuePoint]; the effect layer converts them
+ * into a `Location`.
  */
 data class RecordedEvent(
     val world: String,
@@ -12,7 +13,7 @@ data class RecordedEvent(
     val description: String,
     val type: EventType,
     val timestamp: Long,
-    /** Сире ім'я винуватця з CoreProtect (може бути null або службове "#tnt"). */
+    /** Raw name of the culprit from CoreProtect (may be null or an internal "#tnt"). */
     val actor: String?,
 ) {
     enum class EventType {

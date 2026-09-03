@@ -25,37 +25,35 @@ import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.phys.AABB
 
 /**
- * Sun, Посл. 8 (Прохач Світла): **Благословення**.
+ * Sun, Seq. 8 (Light Seeker): **Blessing**.
  *
- * Утримуване світло: поки Прохач платить, усі поруч зцілюються, а скверна поруч —
- * тліє. Гасне, коли скінчилась духовність або коли Прохач скастував удруге.
+ * Sustained light: while the Seeker pays, everyone nearby is healed and the unclean nearby
+ * smoulder. It goes out when the spirituality runs out or when the Seeker casts a second time.
  *
- * ## Сила, що гасне сама, — це сесія, а не тогл
+ * ## A power that goes out on its own is a session, not a toggle
  *
- * `ToggleablePassiveAbility` тут не годиться: перемикач у ньому лежить **поза**
- * здібністю, і дотягнутись до нього зсередини — коли бак спорожнів — нічим. Сесія
- * навпаки сама вирішує, коли згаснути, і `sustain` повертає причину.
+ * `ToggleablePassiveAbility` will not do here: its switch lies **outside** the ability, and
+ * there is nothing to reach it with from inside when the tank runs dry. A session, by contrast,
+ * decides for itself when to go out, and `sustain` returns the reason.
  *
- * ## Ціна вся в утриманні, а не в касті
+ * ## The whole price is in the upkeep, not in the cast
  *
- * [spiritualityCost] нуль, а платить [periodicCost]. Інакше вимкнути благословення
- * коштувало б окремого касту — тобто гравець платив би за те, щоб **перестати**
- * платити. Перепочинок у три секунди лишається: він проти миготіння, не проти
- * використання.
+ * [spiritualityCost] is zero and [periodicCost] pays. Otherwise switching the blessing off would
+ * cost a separate cast — that is, the player would pay to **stop** paying. The three-second
+ * cooldown stays: it is against flickering, not against use.
  */
 class Blessing : ActiveAbility(AbilityIdentity.of("sun_blessing")) {
 
     override val displayName: Component = Component.literal("Благословення")
 
-    /** Каст безкоштовний: ціна цієї сили — утримання, і вимикати її має бути дарма. */
+    /** The cast is free: the price of this power is its upkeep, and switching it off must cost nothing. */
     override val spiritualityCost: Int = 0
 
     /**
-     * Ціна утримання росте з Послідовністю — і мусить, бо разом із нею росте
-     * **регенерація**: 2 очки/с на Посл. 8 проти 6 на Посл. 5 (і 9 при повному
-     * засвоєнні). Пласка ціна, взята з плагіна, на Посл. 5 виявилась нижчою за
-     * відновлення, тобто сила ставала безкоштовною, а смуга духовності повзла назад
-     * до стелі просто під час утримання.
+     * The upkeep grows with the Sequence — and it must, because **regeneration** grows with it
+     * too: 2 points/s at Seq. 8 against 6 at Seq. 5 (and 9 at full mastery). The flat price taken
+     * from the plugin turned out at Seq. 5 to be below the regeneration, i.e. the power became
+     * free and the spirituality bar crept back up to the ceiling while it was being sustained.
      */
     override fun periodicCost(sequence: Sequence): Int =
         scale(BASE_PERIODIC_COST, sequence, SequenceScaler.ScalingStrategy.MODERATE)
@@ -63,10 +61,10 @@ class Blessing : ActiveAbility(AbilityIdentity.of("sun_blessing")) {
     override fun cooldownSeconds(sequence: Sequence): Int = COOLDOWN_SECONDS
 
     override fun description(sequence: Sequence): Component = Component.literal(
-        "Утримуване світло навколо вас: союзники зцілюються, скверна тліє.\n" +
+        "Світло тримається навколо вас: союзники зцілюються, нечисть тліє.\n" +
             "▪ Радіус: ${range(sequence).toInt()} бл.\n" +
-            "▪ Скверні: ${undeadDamage(sequence)} шкоди щосекунди\n" +
-            "▪ Утримання: ${periodicCost(sequence)} духовності/с; повторний каст гасить",
+            "▪ Нечисті: ${undeadDamage(sequence)} шкоди щосекунди\n" +
+            "▪ Витрата: ${periodicCost(sequence)} духовності/с; повторний каст вимикає",
     )
 
     override fun cast(context: CastContext): AbilityOutcome {
@@ -86,8 +84,8 @@ class Blessing : ActiveAbility(AbilityIdentity.of("sun_blessing")) {
                 val end = sustain(periodTicks = TICKS_PER_SECOND, upkeep = periodicCost) { priest ->
                     radiate(priest, mote, radius)
                     reach(priest, radius).forEach { nearby ->
-                        // Три категорії, не дві: скверні шкода, своїм зцілення, решті
-                        // світу — нічого. Корова під благословенням не зцілюється.
+                        // Three categories, not two: damage to the unclean, healing to one's own,
+                        // nothing to the rest of the world. A cow under a blessing is not healed.
                         if (nearby.isProfane(beyonders)) {
                             smite(priest.level() as ServerLevel, priest, beyonders, nearby, burn)
                         } else if (nearby.isFaithful(beyonders)) {
@@ -112,7 +110,7 @@ class Blessing : ActiveAbility(AbilityIdentity.of("sun_blessing")) {
         return AbilityOutcome.done("Благословення розгорнулось")
     }
 
-    /** Хто в колі. Береться щотакту наново — коло рухається разом із Прохачем. */
+    /** Who is in the circle. Taken anew every tick — the circle moves with the Seeker. */
     private fun reach(priest: ServerPlayer, radius: Double): List<LivingEntity> {
         val level = priest.level() as? ServerLevel ?: return emptyList()
         return level.getEntitiesOfClass(
@@ -151,7 +149,7 @@ class Blessing : ActiveAbility(AbilityIdentity.of("sun_blessing")) {
         const val BASE_PERIODIC_COST = 18
         const val COOLDOWN_SECONDS = 3
         const val BASE_UNDEAD_DAMAGE = 3
-        /** Трохи довше за такт, щоб між тактами не блимало. */
+        /** A little longer than the tick, so it does not blink between ticks. */
         const val MERCY_TICKS = 30
         const val HALO_POINTS = 20
         const val TAU = 2.0 * Math.PI

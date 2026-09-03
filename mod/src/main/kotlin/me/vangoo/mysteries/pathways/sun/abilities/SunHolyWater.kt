@@ -18,20 +18,21 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * Sun, Посл. 7 (Сонячний Первосвященник): **Свята вода Сонця**.
+ * Sun, Seq. 7 (Solar High Priest): **Holy Water of the Sun**.
  *
- * Освячує пляшку води в інвентарі — і вона вивільняється сплеском екзорцизму навколо:
- * скверні шкода, союзникам — знята скверна з тіла.
+ * Consecrates a bottle of water in the inventory — and it bursts out as a splash around: damage
+ * to the unclean, and everything harmful lifted off allies.
  *
- * ## Єдина здібність шляху з матеріальною ціною
+ * ## The pathway's only ability with a material price
  *
- * Решта Сонця платить лише духовністю. Ця витрачає **пляшку води** — звичайну,
- * ванільну, ту саму, що робиться в котлі. Це навмисно: сила, яка чистить поле бою від
- * дебафів, мусить мати запас, який колись скінчиться, і поповнюється він руками, а не
- * очікуванням.
+ * The rest of the Sun pays only in spirituality. This one spends a **bottle of water** — an
+ * ordinary, vanilla one, the same as is made in a cauldron. That is deliberate: a power that
+ * clears a battlefield of debuffs must have a supply that will run out one day, and it is
+ * replenished by hand rather than by waiting.
  *
- * Пляшка шукається `Inventory.findSlotMatchingItem` по **точному** стеку
- * `PotionContents.createItemStack(POTION, WATER)`: зіллям зілля не є, а вода — це вода.
+ * The bottle is found with `Inventory.findSlotMatchingItem` against the **exact** stack
+ * `PotionContents.createItemStack(POTION, WATER)`: a potion is not a potion here, and water is
+ * water.
  */
 class SunHolyWater : ActiveAbility(AbilityIdentity.of("sun_holy_water")) {
 
@@ -42,9 +43,9 @@ class SunHolyWater : ActiveAbility(AbilityIdentity.of("sun_holy_water")) {
     override fun cooldownSeconds(sequence: Sequence): Int = COOLDOWN_SECONDS
 
     override fun description(sequence: Sequence): Component = Component.literal(
-        "Освячує пляшку води з інвентаря й вивільняє сплеск екзорцизму навколо.\n" +
+        "Освячує пляшку води з інвентаря — і б’є сплеском святої води навколо себе.\n" +
             "▪ Радіус: ${RADIUS.toInt()} бл.\n" +
-            "▪ Скверні: ${damage(sequence)} шкоди\n" +
+            "▪ Нечисті: ${damage(sequence)} шкоди\n" +
             "▪ Решті: знімає всі шкідливі ефекти\n" +
             "▪ Ціна: одна пляшка води",
     )
@@ -66,16 +67,16 @@ class SunHolyWater : ActiveAbility(AbilityIdentity.of("sun_holy_water")) {
                     smite(context.level, context.caster, context.beyonders, target, damage(context.sequence))
                     burned++
                 }
-                // Кастер завжди свій — навіть якщо сам пішов темним шляхом.
+                // The caster is always one's own — even if they took a dark pathway themselves.
                 target === context.caster || target.isFaithful(context.beyonders) ->
                     cleaned += cleanse(target)
             }
         }
 
-        return AbilityOutcome.done("Сплеск екзорцизму: $burned опалено, знято $cleaned дебаф(и)")
+        return AbilityOutcome.done("Свята вода: опалено $burned, знято шкідливих ефектів: $cleaned")
     }
 
-    /** Слот із **водою**, не зіллям: точний збіг стеку відсіює й зілля, і порожні пляшки. */
+    /** The slot with **water**, not a potion: an exact stack match filters out both potions and empty bottles. */
     private fun waterSlot(context: CastContext): Int =
         context.caster.inventory.findSlotMatchingItem(
             PotionContents.createItemStack(Items.POTION, Potions.WATER),

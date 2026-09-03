@@ -3,10 +3,10 @@ package me.vangoo.domain.contracts
 import java.util.UUID
 
 /**
- * Обопільний контракт (Sun, Seq 6): [partyA] пропонує, [partyB] засвідчує згодою
- * (ефект-шар збирає її через стеження за присіданням, як Telepathy). Persisted лише
- * ПІСЛЯ підпису ([sign]) — незасвідчена пропозиція живе тільки в пам'яті сервісу
- * контрактів і не переживає рестарт.
+ * A mutual contract (Sun, Seq 6): [partyA] offers, [partyB] confirms by agreeing (the effect
+ * layer collects that by watching for sneaking, like Telepathy). Persisted only AFTER the
+ * signature ([sign]) — an unconfirmed offer lives only in the contract service's memory and
+ * does not survive a restart.
  */
 class Contract private constructor(
     val id: UUID,
@@ -67,7 +67,7 @@ class Contract private constructor(
             System.currentTimeMillis(), ContractState.PROPOSED,
         )
 
-        /** Гідрація з persisted-стану. */
+        /** Hydration from persisted state. */
         fun restore(
             id: UUID,
             partyA: UUID,
@@ -80,7 +80,7 @@ class Contract private constructor(
 
         private fun validateParams(term: ContractTerm, params: Map<String, String>) {
             when (term) {
-                ContractTerm.PEACE -> Unit // без додаткових параметрів
+                ContractTerm.PEACE -> Unit // no extra parameters
                 ContractTerm.DEBT -> requireKeys(term, params, "amount", "deadlineEpochMillis")
             }
         }

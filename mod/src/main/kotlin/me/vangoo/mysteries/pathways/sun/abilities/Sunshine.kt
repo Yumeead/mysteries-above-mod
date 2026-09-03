@@ -19,14 +19,14 @@ import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.phys.Vec3
 
 /**
- * Sun, Посл. 8 (Прохач Світла): **Сонячне сяйво**.
+ * Sun, Seq. 8 (Light Seeker): **Sunshine**.
  *
- * Робоча зброя шляху: дешевий промінь святого світла з коротким перепочинком. Не
- * найсильніше, що вміє Сонце, — найчастіше.
+ * The pathway's workhorse: a cheap beam of holy light on a short cooldown. Not the strongest
+ * thing the Sun can do — the most frequent.
  *
- * Скверна (темний шлях або нежить) дістає повну шкоду, підпал і засліплення; решта —
- * лише знижену шкоду. Це не пом'якшення заради балансу, а те, чим світло **є**: воно
- * судить за природою цілі, і зомбі болить від нього більше, ніж людині.
+ * The unclean (a dark pathway or undead) take full damage, ignition and blinding; everyone else
+ * only reduced damage. This is not a softening for balance's sake but what light **is**: it
+ * judges by the target's nature, and it hurts a zombie more than a person.
  */
 class Sunshine : ActiveAbility(AbilityIdentity.of("sun_sunshine")) {
 
@@ -38,15 +38,15 @@ class Sunshine : ActiveAbility(AbilityIdentity.of("sun_sunshine")) {
 
     override fun description(sequence: Sequence): Component = Component.literal(
         "Промінь святого світла в ціль під прицілом.\n" +
-            "▪ Шкода: ${damage(sequence)} по скверні, знижена по решті\n" +
-            "▪ Скверні також: підпал ${FIRE_TICKS / TICKS_PER_SECOND} с і засліплення " +
+            "▪ Шкода: ${damage(sequence)} по нечисті, знижена по решті\n" +
+            "▪ Нечисті також: підпал ${FIRE_TICKS / TICKS_PER_SECOND} с і засліплення " +
             "${BLIND_TICKS / TICKS_PER_SECOND} с\n" +
-            "▪ Дальність ${MAX_RANGE.toInt()} бл., перепочинок ${COOLDOWN_SECONDS} с",
+            "▪ Дальність ${MAX_RANGE.toInt()} бл., відкат ${COOLDOWN_SECONDS} с",
     )
 
     override fun cast(context: CastContext): AbilityOutcome {
         val target = context.targeting.lookingAt(MAX_RANGE)
-            ?: return AbilityOutcome.failed("Промінь нема в кого спрямувати")
+            ?: return AbilityOutcome.failed("Немає цілі")
 
         val mote = ModParticles.mote(context.effects.pathwayColor)
         ray(context, target, mote)
@@ -61,11 +61,11 @@ class Sunshine : ActiveAbility(AbilityIdentity.of("sun_sunshine")) {
         context.messaging.actionBar(target.uuid, Component.literal("Вас торкнулось святе світло"))
         return AbilityOutcome.done(
             "Сяйво вразило ${target.name.string} на ${dealt.toInt()}" +
-                if (profane) " — скверна горить" else "",
+                if (profane) " — нечисть горить" else "",
         )
     }
 
-    /** Промінь від ока до цілі плюс спалах у точці влучання. */
+    /** A beam from the eye to the target plus a flash at the point of impact. */
     private fun ray(context: CastContext, target: LivingEntity, mote: ParticleOptions) {
         val from = context.eye
         val to = target.position().add(0.0, target.bbHeight * 0.5, 0.0)

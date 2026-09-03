@@ -3,60 +3,61 @@ package me.vangoo.mysteries.ability.context
 import me.vangoo.mysteries.event.GameEvent
 import kotlin.reflect.KClass
 
-/** Підписка живе, доки її не скасують або доки не спливе оголошений строк. */
+/** A subscription lives until it is cancelled or until its declared term expires. */
 const val EVENT_FOREVER: Int = Int.MAX_VALUE
 
 /**
- * На що здібність підписалась і як цю підписку зняти.
+ * What the ability subscribed to and how to cancel that subscription.
  *
- * Тримати його **не обов'язково**: підписка вмирає й сама — разом зі здібністю
- * (див. [Events]). Об'єкт потрібен лише тому, хто хоче відписатись раніше: одноразова
- * реакція гасить себе першим же спрацюванням.
+ * Keeping it is **not required**: a subscription dies on its own together with the ability
+ * (see [Events]). The object is only needed by someone who wants to unsubscribe earlier: a
+ * one-shot reaction cancels itself on its first firing.
  */
 interface Subscription {
 
-    /** `false` — підписка вже знята або її строк вийшов. */
+    /** `false` — the subscription has already been cancelled or its term has expired. */
     val isActive: Boolean
 
-    /** Ідемпотентно. */
+    /** Idempotent. */
     fun cancel()
 }
 
 /**
- * Підписка на події гри — **від імені цієї здібності цього гравця**.
+ * Subscribing to game events — **on behalf of this ability of this player**.
  *
- * ## Чим це не `IEventContext` плагіна
+ * ## How this differs from the plugin's `IEventContext`
  *
- * Плагінний інтерфейс приймав `UUID playerId` окремим аргументом, а знімався пакетно —
- * `unsubscribeAll(casterId)`. Наслідок: здібність, яка прибирала за собою, знімала
- * підписки **всіх інших здібностей того самого гравця**. Двадцять здібностей, що
- * поводяться коректно, ламали одна одну саме тим, що поводились коректно.
+ * The plugin's interface took a `UUID playerId` as a separate argument and was cancelled in
+ * bulk — `unsubscribeAll(casterId)`. The consequence: an ability that cleaned up after itself
+ * removed the subscriptions of **every other ability of the same player**. Twenty abilities
+ * behaving correctly broke each other precisely by behaving correctly.
  *
- * Тут власника не передають — його знає сам сервіс: контекст видано під конкретну пару
- * «гравець + здібність», і чужу підписку зняти нема як. Той самий хід, що вже зроблено
- * для сесій у `Scheduling.session` — ключ береться з контексту, а не з аргументу.
+ * Here the owner is not passed in — the service knows it: the context was issued for a specific
+ * "player + ability" pair, and there is no way to cancel someone else's subscription. The same
+ * move already made for sessions in `Scheduling.session` — the key comes from the context, not
+ * from an argument.
  *
- * ## Хто гасить підписки
+ * ## Who cancels subscriptions
  *
- * Здібність не мусить робити нічого. Реєстр знімає їх сам, коли:
+ * The ability need do nothing. The registry removes them itself when:
  *
- * | коли | де |
+ * | when | where |
  * |---|---|
- * | здібність активують наново (вхід у світ, піднесення) | `PassiveTicker.activate` |
- * | здібність втрачено (демоція, зміна шляху, `forget`) | там само |
- * | гравець вийшов зі світу | `AbilityServices` |
- * | сервер зупинився | `AbilityServices.reset` |
+ * | the ability is activated anew (joining a world, ascension) | `PassiveTicker.activate` |
+ * | the ability is lost (demotion, pathway change, `forget`) | the same place |
+ * | the player left the world | `AbilityServices` |
+ * | the server stopped | `AbilityServices.reset` |
  *
- * Перша ланка важлива окремо: **активація замінює підписки**, точно як перекаст
- * замінює сесію. Пасивка, що підписується в `onActivate`, після смерті й респавну не
- * подвоїться, і писати їй для цього нічого не треба.
+ * The first row matters on its own: **activation replaces subscriptions**, exactly as a recast
+ * replaces a session. A passive that subscribes in `onActivate` will not double up after death
+ * and respawn, and it need write nothing to get that.
  */
 interface Events {
 
     /**
-     * Підписатись на події типу [type].
+     * Subscribe to events of type [type].
      *
-     * @param durationTicks скільки тіків жити; [EVENT_FOREVER] — доки живе сама здібність
+     * @param durationTicks how many ticks to live; [EVENT_FOREVER] — as long as the ability itself
      */
     fun <E : GameEvent> subscribe(
         type: KClass<E>,
@@ -66,7 +67,7 @@ interface Events {
 }
 
 /**
- * Те саме, але тип події видно очима:
+ * The same thing, but with the event type visible to the eye:
  *
  * ```kotlin
  * context.events.on<IncomingDamage> { damage ->

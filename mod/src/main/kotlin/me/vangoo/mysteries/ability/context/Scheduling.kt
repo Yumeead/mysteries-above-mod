@@ -8,30 +8,31 @@ import me.vangoo.mysteries.schedule.TaskHandle
 import java.util.UUID
 
 /**
- * Час: відкладена робота й живі сесії.
+ * Time: deferred work and live sessions.
  *
- * Прямий спадкоємець плагінного `ISchedulingContext`, але без третього його методу.
- * `runAsync` сюди не переїхав навмисно: у Bukkit ним тікали з головного потоку, бо
- * інакше сервер підвисав, і половина викликів робила це «про всяк випадок». Тут будь-яка
- * робота і так на серверному потоці, а справжня фонова — це `withContext(Dispatchers.IO)`
- * усередині сесії, написане явно й видно очима.
+ * A direct descendant of the plugin's `ISchedulingContext`, but without its third method.
+ * `runAsync` deliberately did not move here: in Bukkit it was used to flee the main thread,
+ * because otherwise the server stalled, and half the calls did it "just in case". Here any work
+ * is on the server thread anyway, and genuinely background work is `withContext(Dispatchers.IO)`
+ * inside a session, written out explicitly and visible to the eye.
  *
- * Годинник — тік сервера. Гра на паузі часу не витрачає.
+ * The clock is the server tick. A paused game spends no time.
  */
 interface Scheduling {
 
-    /** Скільки тіків сервер відпрацював, відколи піднявся мод. */
+    /** How many ticks the server has run since the mod came up. */
     val tick: Long
 
-    /** Один раз, через [delayTicks]. Нуль і менше — цього ж тіку. */
+    /** Once, after [delayTicks]. Zero or less — this very tick. */
     fun after(delayTicks: Int, block: () -> Unit): TaskHandle
 
-    /** Раз на [periodTicks], уперше — через [delayTicks]. */
+    /** Once every [periodTicks], the first time after [delayTicks]. */
     fun every(periodTicks: Int, delayTicks: Int = periodTicks, block: () -> Unit): TaskHandle
 
     /**
-     * Відкриває сесію [ability] для [owner], **гасячи попередню з тим самим ключем**.
-     * Перекаст замінює сесію — це поведінка реєстру, а не обов'язок здібності.
+     * Opens a session of [ability] for [owner], **cancelling the previous one with the same
+     * key**. A recast replaces the session — that is the registry's behaviour, not the
+     * ability's duty.
      */
     fun session(
         owner: UUID,
@@ -44,12 +45,12 @@ interface Scheduling {
     fun isRunning(owner: UUID, ability: AbilityIdentity): Boolean =
         sessionOf(owner, ability)?.isActive == true
 
-    /** Гасить одну сесію. `true` — вона була жива. */
+    /** Cancels one session. `true` — it was alive. */
     fun stop(owner: UUID, ability: AbilityIdentity): Boolean
 
-    /** Гасить усі сесії гравця: вихід із гри, втрата шляху, смерть. */
+    /** Cancels all of a player's sessions: leaving the game, losing the pathway, death. */
     fun stopAll(owner: UUID)
 
-    /** Скільки сесій живе зараз — для діагностики й тестів. */
+    /** How many sessions are alive right now — for diagnostics and tests. */
     val live: Collection<Session>
 }

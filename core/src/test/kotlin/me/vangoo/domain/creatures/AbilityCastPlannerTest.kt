@@ -10,7 +10,7 @@ import kotlin.random.Random
 
 internal class AbilityCastPlannerTest {
 
-    // kit: signature (вага 2), filler (вага 1); обидві з кулдауном 300; ГКД 120
+    // kit: signature (weight 2), filler (weight 1); both with cooldown 300; GCD 120
     private fun planner(seed: Int) = AbilityCastPlanner(
         listOf(
             AbilityCastPlanner.KitEntry("signature", 300),
@@ -31,16 +31,16 @@ internal class AbilityCastPlannerTest {
     fun neverPicksAbilityOnItsOwnCooldown() {
         val p = planner(1)
         val first = p.pickNext(0)!!
-        val second = p.pickNext(120)!! // перша ще на кулдауні до 300
+        val second = p.pickNext(120)!! // the first is still on cooldown until 300
         assertNotEquals(first, second)
     }
 
     @Test
     fun returnsNullWhenEverythingOnCooldown() {
         val p = planner(1)
-        p.pickNext(0) // готова знову з 300
-        p.pickNext(120) // готова знову з 420
-        assertNull(p.pickNext(240)) // ГКД минув, обидві на кулдауні
+        p.pickNext(0) // ready again from 300
+        p.pickNext(120) // ready again from 420
+        assertNull(p.pickNext(240)) // the GCD has passed, both are on cooldown
     }
 
     @Test
@@ -48,13 +48,13 @@ internal class AbilityCastPlannerTest {
         val p = planner(1)
         val first = p.pickNext(0)!!
         p.pickNext(120)
-        // t=300: перша знову готова, друга — лише з 420 → вибір детермінований
+        // t=300: the first is ready again, the second only from 420 → the choice is deterministic
         assertEquals(first, p.pickNext(300))
     }
 
     @Test
     fun selectionIsWeightedTowardEarlierEntries() {
-        // обидві завжди готові (кулдаун 0), ГКД 1 → чиста перевірка ваг 2:1
+        // both always ready (cooldown 0), GCD 1 → a pure check of the 2:1 weights
         val p = AbilityCastPlanner(
             listOf(
                 AbilityCastPlanner.KitEntry("signature", 0),
@@ -64,7 +64,7 @@ internal class AbilityCastPlannerTest {
             Random(42),
         )
         val signaturePicks = (0L until 3000L).count { p.pickNext(it * 2) == "signature" }
-        // очікування 2/3 від 3000 = 2000; фіксований сід робить перевірку детермінованою
+        // expectation 2/3 of 3000 = 2000; the fixed seed makes the check deterministic
         assertTrue(
             signaturePicks in 1701..2299,
             "signature picked $signaturePicks/3000 — вага 2:1 не працює",

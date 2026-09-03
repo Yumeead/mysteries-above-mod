@@ -9,27 +9,28 @@ import net.minecraft.server.level.ServerPlayer
 import java.util.UUID
 
 /**
- * Такт пасивок — спадкоємець `PassiveAbilityScheduler` плюс `PassiveAbilityManager` плагіна
- * (490 рядків на двох).
+ * The passives' tick — the descendant of the plugin's `PassiveAbilityScheduler` plus
+ * `PassiveAbilityManager` (490 lines between them).
  *
- * Скоротилось трьома рішеннями:
+ * It shrank through three decisions:
  *
- * 1. **Період оголошується, а не рахується.** Плагін кликав `tick()` кожній пасивці
- *    кожен тік, і та, якій треба було раз на секунду, тримала власне поле `runs`.
- *    Тепер це [Ticking.tickPeriodTicks] — число, а не стан, що переживе перезахід.
- * 2. **Контекст не кешується.** Плагін тримав мапу `UUID → IAbilityContext`, бо контекст
- *    коштував дорого й ніс `Player`. Тутешній — вісім посилань, і будується щотакту;
- *    зате він не може віддати `ServerPlayer`, який після респавну вже не той гравець.
- * 3. **Реєстру здібностей немає.** Плагін вів `Map<UUID, Set<AbilityIdentity>>` і
- *    `Map<UUID, Map<Class<?>, PermanentPassiveAbility>>` паралельно до самого
- *    Потойбічного; список здібностей і так лежить у `Beyonder`, і читається звідти.
- *    Лишились рівно два записи стану: **що ввімкнено** й **що вже активовано**.
+ * 1. **The period is declared, not counted.** The plugin called `tick()` on every passive every
+ *    tick, and one that only needed a second's cadence kept a `runs` field of its own.
+ *    Now it is [Ticking.tickPeriodTicks] — a number, not state that survives a relog.
+ * 2. **The context is not cached.** The plugin kept a `UUID → IAbilityContext` map, because a
+ *    context was expensive and carried a `Player`. This one is eight references and is built
+ *    every tick; in exchange it cannot hand out a `ServerPlayer` who is no longer that player
+ *    after a respawn.
+ * 3. **There is no ability registry.** The plugin kept a `Map<UUID, Set<AbilityIdentity>>` and a
+ *    `Map<UUID, Map<Class<?>, PermanentPassiveAbility>>` in parallel with the Beyonder itself;
+ *    the ability list already lies in `Beyonder` and is read from there.
+ *    Exactly two records of state remain: **what is switched on** and **what is already activated**.
  *
- * Відколи пасивка вміє підписуватись на події (фаза 06), життєвий цикл тут керує ще й
- * ними: **вмикання знімає попередні підписки цієї здібності, вимикання — всі її**.
- * Пасивка, що підписалась в `onActivate`, після смерті й респавну не подвоїться, і
- * писати їй для цього не треба нічого — рівно як `SessionHost` гасить попередню сесію
- * на перекасті.
+ * Ever since a passive learned to subscribe to events (phase 06), the lifecycle here manages
+ * those too: **switching on removes this ability's previous subscriptions, switching off removes
+ * all of them**. A passive that subscribed in `onActivate` will not double up after death and
+ * respawn, and it need write nothing for that — exactly as `SessionHost` cancels the previous
+ * session on a recast.
  */
 class PassiveTicker(
     private val beyonders: Beyonders,
@@ -39,17 +40,17 @@ class PassiveTicker(
     private val onError: (String, Throwable) -> Unit = { _, _ -> },
 ) {
 
-    /** Тоглі, які гравець увімкнув. Порожня множина не зберігається. */
+    /** The toggles the player switched on. An empty set is not stored. */
     private val enabled = HashMap<UUID, MutableSet<AbilityIdentity>>()
 
     /**
-     * Постійні пасивки, яким уже сказали `onActivate`. Тримаються **екземпляри**, а не
-     * ідентичності: коли здібність зникає з Потойбічного (демоція, зміна шляху), сказати
-     * їй `onDeactivate` вже нема кому, якщо не тримати саму здібність.
+     * Permanent passives that have already been told `onActivate`. **Instances** are held, not
+     * identities: when an ability disappears from the Beyonder (demotion, pathway change), there
+     * is nobody left to tell `onDeactivate` unless the ability itself is held.
      */
     private val activated = HashMap<UUID, MutableMap<AbilityIdentity, PermanentPassiveAbility>>()
 
-    // ── Такт ────────────────────────────────────────────────────────────────────
+    // ── Tick ────────────────────────────────────────────────────────────────────
 
     fun tick(tickCount: Long) {
         for (beyonder in beyonders.online.toList()) {
@@ -61,52 +62,52 @@ class PassiveTicker(
                 if (spec is ToggleablePassiveAbility && on?.contains(spec.identity) != true) continue
                 if (tickCount % ticking.tickPeriodTicks.coerceAtLeast(1) != 0L) continue
 
-                guard("такт ${spec.identity} гравця ${beyonder.playerId}") {
+                guard("tick of ${spec.identity} for ${beyonder.playerId}") {
                     ticking.tick(contexts.of(player, beyonder, spec))
                 }
             }
         }
     }
 
-    // ── Тоглі ───────────────────────────────────────────────────────────────────
+    // ── Toggles ─────────────────────────────────────────────────────────────────
 
     fun isEnabled(owner: UUID, ability: AbilityIdentity): Boolean =
         enabled[owner]?.contains(ability) == true
 
-    /** Перемикає тогл. Повертає новий стан: `true` — увімкнено. */
+    /** Flips a toggle. Returns the new state: `true` — on. */
     fun toggle(player: ServerPlayer, ability: ToggleablePassiveAbility): Boolean {
         val beyonder = beyonders.of(player.uuid) ?: return false
         val context = contexts.of(player, beyonder, ability)
         val on = enabled.getOrPut(player.uuid) { LinkedHashSet() }
 
         val nowEnabled = if (on.remove(ability.identity)) {
-            guard("вимкнення ${ability.identity}") { ability.onDisable(context) }
+            guard("disable of ${ability.identity}") { ability.onDisable(context) }
             events.forget(player.uuid, ability.identity)
             false
         } else {
             on += ability.identity
             events.forget(player.uuid, ability.identity)
-            guard("увімкнення ${ability.identity}") { ability.onEnable(context) }
+            guard("enable of ${ability.identity}") { ability.onEnable(context) }
             true
         }
         if (on.isEmpty()) enabled.remove(player.uuid)
         return nowEnabled
     }
 
-    // ── Життєвий цикл ───────────────────────────────────────────────────────────
+    // ── Lifecycle ───────────────────────────────────────────────────────────────
 
-    /** Вхід у світ або поява нових здібностей: активує постійні пасивки, яких ще не активували. */
+    /** Joining a world or gaining new abilities: activates the permanent passives not yet activated. */
     fun activate(player: ServerPlayer) {
         val beyonder = beyonders.of(player.uuid) ?: return
         val live = activated.getOrPut(player.uuid) { LinkedHashMap() }
 
         val current = beyonder.abilities.filterIsInstance<PermanentPassiveAbility>()
 
-        // Втрачені при демоції чи зміні шляху — попрощатись, поки екземпляр іще під рукою.
+        // Lost on demotion or a pathway change — say goodbye while the instance is still at hand.
         val lost = live.keys - current.map { it.identity }.toSet()
         for (identity in lost) {
             val ability = live.remove(identity) ?: continue
-            guard("деактивація $identity") {
+            guard("deactivate of $identity") {
                 ability.onDeactivate(contexts.of(player, beyonder, ability))
             }
             events.forget(player.uuid, identity)
@@ -114,22 +115,22 @@ class PassiveTicker(
 
         for (ability in current) {
             if (live.putIfAbsent(ability.identity, ability) != null) continue
-            // Порожній аркуш перед `onActivate`: активація тієї самої здібності вдруге
-            // (респавн, повторний вхід у світ) не має лишити позаду першу підписку.
+            // A clean slate before `onActivate`: activating the same ability a second time
+            // (respawn, rejoining a world) must not leave the first subscription behind.
             events.forget(player.uuid, ability.identity)
-            guard("активація ${ability.identity}") {
+            guard("activate of ${ability.identity}") {
                 ability.onActivate(contexts.of(player, beyonder, ability))
             }
         }
     }
 
-    /** Зміна Послідовності: список здібностей став іншим, тоглі гаснуть. */
+    /** A Sequence change: the ability list is different now, the toggles go out. */
     fun refresh(player: ServerPlayer) {
         disableToggles(player)
         activate(player)
     }
 
-    /** Вихід зі світу або втрата статусу Потойбічного. */
+    /** Leaving the world or losing Beyonder status. */
     fun deactivate(player: ServerPlayer) {
         val beyonder = beyonders.of(player.uuid)
         disableToggles(player)
@@ -137,14 +138,14 @@ class PassiveTicker(
         val live = activated.remove(player.uuid) ?: return
         if (beyonder == null) return
         for ((identity, ability) in live) {
-            guard("деактивація $identity") {
+            guard("deactivate of $identity") {
                 ability.onDeactivate(contexts.of(player, beyonder, ability))
             }
             events.forget(player.uuid, identity)
         }
     }
 
-    /** Гравця вже немає на сервері — питати його ні про що, просто забути. */
+    /** The player is no longer on the server — there is nothing to ask them, simply forget. */
     fun forget(owner: UUID) {
         enabled.remove(owner)
         activated.remove(owner)
@@ -156,7 +157,7 @@ class PassiveTicker(
         beyonder.abilities.filterIsInstance<ToggleablePassiveAbility>()
             .filter { it.identity in on }
             .forEach { ability ->
-                guard("вимкнення ${ability.identity}") {
+                guard("disable of ${ability.identity}") {
                     ability.onDisable(contexts.of(player, beyonder, ability))
                 }
                 events.forget(player.uuid, ability.identity)
@@ -164,14 +165,14 @@ class PassiveTicker(
     }
 
     /**
-     * Одна впала пасивка не має спиняти такт решти. У плагіні цей самий інваріант тримали
-     * три окремі `try/catch` у циклах `PassiveAbilityManager`.
+     * One fallen passive must not stop the rest from ticking. In the plugin this very invariant
+     * was held by three separate `try/catch` blocks in `PassiveAbilityManager`'s loops.
      */
     private inline fun guard(what: String, block: () -> Unit) {
         try {
             block()
         } catch (error: Throwable) {
-            onError("Пасивка впала: $what", error)
+            onError("Passive threw: $what", error)
         }
     }
 }

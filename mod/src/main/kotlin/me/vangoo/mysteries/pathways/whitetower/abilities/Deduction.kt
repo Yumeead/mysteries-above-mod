@@ -19,27 +19,26 @@ import net.minecraft.world.entity.LivingEntity
 import kotlin.math.min
 
 /**
- * WhiteTower, Посл. 8 (Студент): **Дедукція**.
+ * WhiteTower, Seq. 8 (Student): **Deduction**.
  *
- * Студент не б'є сильніше — він швидко вчиться. Позначена ціль світиться, і кожен
- * наступний ваш удар по ній влучає точніше за попередній: перший — як завжди, п'ятий —
- * у слабке місце, яке ви вже прорахували.
+ * The Student does not hit harder — they learn fast. A marked target glows, and every next blow
+ * of yours against it lands more precisely than the last: the first as usual, the fifth into the
+ * weak spot you have already worked out.
  *
- * ## Чому не пласкі +28 %, як у плагіні
+ * ## Why not a flat +28 %, as in the plugin
  *
- * Плагінна мітка множила шкоду на сталу — тобто була просто дорогим бафом на 8 секунд.
- * Дедукція так не працює: висновок не приходить готовим, він **збирається зі спостережень**.
- * Тому бонус наростає по [BASE_STEP_PERCENT] % за влучання й тримається на
- * [MAX_STACKS] — і той, хто провів усі п'ять ударів по одній цілі, отримує більше за
- * плагінне число, а той, хто ткнув один раз і побіг, — менше. Механіка тепер збігається
- * з тим, що вона зображає.
+ * The plugin's mark multiplied damage by a constant — i.e. it was just an expensive 8-second
+ * buff. Deduction does not work that way: a conclusion does not arrive ready-made, it is
+ * **assembled from observations**. So the bonus grows by [BASE_STEP_PERCENT] % per hit and caps
+ * at [MAX_STACKS] — and whoever landed all five blows on one target gets more than the plugin's
+ * number, while whoever poked once and ran gets less. The mechanic now matches what it depicts.
  *
- * ## Мітка світиться, і це навмисно двосторонньо
+ * ## The mark glows, and that is deliberately two-sided
  *
- * `setGlowingTag` малює контур крізь стіни — **всім**, не лише кастеру. У плагіні цього
- * не було зовсім: жертва дізнавалась про розбір хіба з того, що почала швидше вмирати.
- * Тут позначений бачить, що його вивчають, і має чим на це відповісти. Ціна питання —
- * один ванільний виклик.
+ * `setGlowingTag` draws an outline through walls — for **everyone**, not just the caster. In the
+ * plugin this was absent entirely: the victim learned they were being analysed only from starting
+ * to die faster. Here the marked one sees they are being studied and has something to answer
+ * with. The price is one vanilla call.
  */
 class Deduction : ActiveAbility(AbilityIdentity.of("whitetower_deduction")) {
 
@@ -65,8 +64,9 @@ class Deduction : ActiveAbility(AbilityIdentity.of("whitetower_deduction")) {
         val casterId = context.caster.uuid
         val targetId = target.uuid
         val level = context.level
-        // У обробник їде сервіс, а не контекст: контекст несе особу кастера й живе
-        // один виклик, `Messaging` не тримає нічиєї особи й живе стільки, скільки сервер.
+        // The service goes into the handler, not the context: the context carries the caster's
+        // identity and lives one call, while `Messaging` holds nobody's identity and lives as long
+        // as the server.
         val messaging = context.messaging
 
         var hits = 0
@@ -80,8 +80,9 @@ class Deduction : ActiveAbility(AbilityIdentity.of("whitetower_deduction")) {
             messaging.actionBar(casterId, Component.literal("Розбір: +${step * hits}%"))
         }
 
-        // Сесія тут не за тактом, а за прибиранням: перекаст по новій цілі мусить
-        // погасити стару мітку разом із її підпискою, і саме це реєстр сесій робить сам.
+        // The session here is not about ticking but about cleanup: a recast on a new target must
+        // put out the old mark together with its subscription, and that is exactly what the
+        // session registry does by itself.
         target.setGlowingTag(true)
         context.session {
             try {
@@ -97,7 +98,7 @@ class Deduction : ActiveAbility(AbilityIdentity.of("whitetower_deduction")) {
         return AbilityOutcome.done("Ви взялись за розбір: ${target.name.string}")
     }
 
-    /** Мить касту: погляд ліг на ціль. Покрив тримається рівно стільки, скільки мітка. */
+    /** The moment of the cast: the gaze settled on the target. The aura holds exactly as long as the mark. */
     private fun study(context: CastContext, target: LivingEntity) {
         context.effects.bodyAura(target, markTicks(context.sequence))
         context.level.playSound(
@@ -106,7 +107,7 @@ class Deduction : ActiveAbility(AbilityIdentity.of("whitetower_deduction")) {
         )
     }
 
-    /** Висновок підтвердився — влучання лягло туди, куди прораховано. */
+    /** The conclusion was confirmed — the hit landed where it had been worked out. */
     private fun deduce(level: ServerLevel, target: LivingEntity) {
         level.sendParticles(
             ParticleTypes.ENCHANT,
@@ -125,7 +126,7 @@ class Deduction : ActiveAbility(AbilityIdentity.of("whitetower_deduction")) {
         const val RANGE = 20.0
         const val COOLDOWN_SECONDS = 30
         const val BASE_MARK_SECONDS = 8
-        /** +10 % за влучання на Посл. 9; п'ять влучань — половина шкоди зверху. */
+        /** +10 % per hit at Seq. 9; five hits is half the damage again on top. */
         const val BASE_STEP_PERCENT = 10
         const val MAX_STACKS = 5
     }

@@ -23,28 +23,28 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * Sun, Посл. 9 (Бард): **Спів**.
+ * Sun, Seq. 9 (Bard): **Singing**.
  *
- * Бард співає — і поки він співає, світло збирається навколо тих, хто слухає. Пісня
- * триває [SONG_TICKS] тіків і має кінець: підсилення дістається тим, хто **достояв до
- * останньої ноти**, а не тим, хто випадково пробіг повз на початку.
+ * The Bard sings — and while they sing, light gathers around those who listen. The song lasts
+ * [SONG_TICKS] ticks and has an end: the boost goes to those who **stood to the last note**, not
+ * to those who happened to run past at the start.
  *
- * ## Чому пісня, а не миттєвий баф
+ * ## Why a song rather than an instant buff
  *
- * Плагінна версія була сплеском: каст — і всі в радіусі восьми блоків отримали ефект.
- * Це працює, але «Спів» там був лише назвою: нічого не співало, і слухати не було чого.
+ * The plugin's version was a burst: cast, and everyone within eight blocks got the effect. That
+ * works, but "Singing" was only a name there: nothing sang, and there was nothing to listen to.
  *
- * Тут пісня — сесія на чотири секунди з висхідним рядом нот
- * (`NOTE_BLOCK_CHIME`, півтони [SCALE]), і саме тому вона має **умову**: стій поруч,
- * доки не доспівано. Бард платить не лише духовністю, а й тим, що чотири секунди
- * стоїть на місці й голосно позначає себе.
+ * Here the song is a four-second session with a rising row of notes (`NOTE_BLOCK_CHIME`,
+ * semitones [SCALE]), and that is exactly why it has a **condition**: stand nearby until it is
+ * finished. The Bard pays not only with spirituality but with standing still for four seconds and
+ * loudly marking themselves.
  *
- * ## Хто чує, той і отримує
+ * ## Whoever hears is whoever gets it
  *
- * Слухачі рахуються **в мить останньої ноти**, не на початку: сесія їх не запам'ятовує
- * взагалі. Список, зібраний на старті, довелось би тримати в полі здібності — а
- * екземпляр здібності один на весь сервер, тож два барди, що заспівали одночасно,
- * писали б у той самий список.
+ * The listeners are counted **at the moment of the last note**, not at the start: the session
+ * does not remember them at all. A list gathered at the start would have to be kept in an ability
+ * field — and there is one ability instance for the whole server, so two bards singing at once
+ * would write into the same list.
  */
 class Singing : ActiveAbility(AbilityIdentity.of("sun_singing")) {
 
@@ -61,7 +61,7 @@ class Singing : ActiveAbility(AbilityIdentity.of("sun_singing")) {
             "▪ Отримає лише той, хто дослухав до кінця — вас зокрема",
     )
 
-    /** Другий спів поверх першого — це вже не спів. */
+    /** A second song on top of the first is no longer singing. */
     override fun canCast(context: CastContext): Boolean = !context.sessionRunning
 
     override fun cast(context: CastContext): AbilityOutcome {
@@ -69,7 +69,7 @@ class Singing : ActiveAbility(AbilityIdentity.of("sun_singing")) {
         val radius = range(context.sequence)
         val boonTicks = boonSeconds(context.sequence) * TICKS_PER_SECOND
         val mote = ModParticles.mote(context.effects.pathwayColor)
-        // У сесію їде сервіс, не контекст: `Messaging` не тримає нічиєї особи.
+        // The service goes into the session, not the context: `Messaging` holds nobody's identity.
         val messaging = context.messaging
 
         context.session {
@@ -91,7 +91,7 @@ class Singing : ActiveAbility(AbilityIdentity.of("sun_singing")) {
         return AbilityOutcome.Awaiting(Component.literal("Ви заспівали"))
     }
 
-    /** Одна нота: звук плюс кільце порошинок, що позначає, кого пісня дістає. */
+    /** One note: a sound plus a ring of motes marking whom the song reaches. */
     private fun sing(bard: ServerPlayer, mote: ParticleOptions, radius: Double, note: Int) {
         val level = bard.level() as? ServerLevel ?: return
         level.playSound(
@@ -109,7 +109,7 @@ class Singing : ActiveAbility(AbilityIdentity.of("sun_singing")) {
         }
     }
 
-    /** Останній акорд — його чути далі за саму пісню. */
+    /** The final chord — it carries further than the song itself. */
     private fun chord(bard: ServerPlayer) {
         val level = bard.level() as? ServerLevel ?: return
         level.playSound(
@@ -118,7 +118,7 @@ class Singing : ActiveAbility(AbilityIdentity.of("sun_singing")) {
         )
     }
 
-    /** Слухачі — гравці в радіусі, включно з самим бардом. */
+    /** The listeners are players within the radius, the bard included. */
     private fun audience(bard: ServerPlayer, radius: Double): List<ServerPlayer> {
         val level = bard.level() as? ServerLevel ?: return listOf(bard)
         return level.getEntitiesOfClass(
@@ -150,7 +150,7 @@ class Singing : ActiveAbility(AbilityIdentity.of("sun_singing")) {
         const val COOLDOWN_SECONDS = 20
 
         const val SONG_TICKS = 4 * TICKS_PER_SECOND
-        /** Висхідний ряд у півтонах від основного тону — ванільний нотний блок бере 0..24. */
+        /** A rising row in semitones from the root — a vanilla note block takes 0..24. */
         val SCALE = intArrayOf(0, 4, 7, 11, 12, 16)
         const val RING_POINTS = 14
         const val RING_TURN = 0.11
@@ -158,6 +158,6 @@ class Singing : ActiveAbility(AbilityIdentity.of("sun_singing")) {
     }
 }
 
-/** Ванільна формула нотного блоку: висота = 2^((нота − 12) / 12). */
+/** The vanilla note block formula: pitch = 2^((note − 12) / 12). */
 private fun pitchOf(semitone: Int): Float =
     Math.pow(2.0, (semitone - 12) / 12.0).toFloat()

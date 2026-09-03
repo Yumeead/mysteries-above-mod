@@ -9,14 +9,14 @@ import net.minecraft.resources.Identifier
 import net.minecraft.server.level.ServerPlayer
 
 /**
- * Пакет разом зі своїм напрямком.
+ * A packet together with its direction.
  *
- * Напрямок тут — частина типу, а не домовленість у голові. Надіслати клієнтський
- * пакет із сервера неможливо: `sendTo(player)` є лише на [ClientboundChannel], а
- * `sendToServer()` — лише на [ServerboundChannel] і лише в клієнтському source set.
- * Це той самий прийом, що й межа `core`: інваріант стереже компілятор.
+ * The direction here is part of the type, not an agreement in someone's head. Sending a
+ * clientbound packet from the server is impossible: `sendTo(player)` exists only on
+ * [ClientboundChannel], and `sendToServer()` only on [ServerboundChannel] and only in the
+ * client source set. The same trick as the `core` boundary: the compiler guards the invariant.
  *
- * Канали не створюються тут вручну — усі вони оголошені в [ModChannels].
+ * Channels are never created here by hand — they are all declared in [ModChannels].
  */
 sealed class Channel<T : CustomPacketPayload>(
     val type: CustomPacketPayload.Type<T>,
@@ -25,13 +25,13 @@ sealed class Channel<T : CustomPacketPayload>(
 
     val id: Identifier get() = type.id()
 
-    /** Реєструє тип у ванільному реєстрі. Викликає лише [ModChannels]. */
+    /** Registers the type in the vanilla registry. Only [ModChannels] calls this. */
     internal abstract fun registerType()
 
     override fun toString(): String = "${this::class.simpleName}($id)"
 }
 
-/** Сервер → клієнт. */
+/** Server → client. */
 class ClientboundChannel<T : CustomPacketPayload> internal constructor(
     type: CustomPacketPayload.Type<T>,
     codec: StreamCodec<RegistryFriendlyByteBuf, T>,
@@ -46,15 +46,15 @@ class ClientboundChannel<T : CustomPacketPayload> internal constructor(
     }
 
     /**
-     * Мовчки пропускає тих, хто не вміє приймати цей канал: ванільний клієнт на
-     * сервері — нормальна ситуація, а не помилка.
+     * Silently skips those who cannot receive this channel: a vanilla client on the server is a
+     * normal situation, not an error.
      */
     fun sendTo(players: Iterable<ServerPlayer>, payload: T) {
         players.forEach { if (ServerPlayNetworking.canSend(it, type)) sendTo(it, payload) }
     }
 }
 
-/** Клієнт → сервер. */
+/** Client → server. */
 class ServerboundChannel<T : CustomPacketPayload> internal constructor(
     type: CustomPacketPayload.Type<T>,
     codec: StreamCodec<RegistryFriendlyByteBuf, T>,
@@ -65,8 +65,8 @@ class ServerboundChannel<T : CustomPacketPayload> internal constructor(
     }
 
     /**
-     * Обробник виконується на головному потоці сервера — Fabric сам його туди
-     * переносить, тож усередині можна чіпати світ і гравця напряму.
+     * The handler runs on the server's main thread — Fabric moves it there itself, so the world
+     * and the player can be touched directly inside.
      */
     fun receiveOnServer(handler: (T, ServerPlayNetworking.Context) -> Unit) {
         ServerPlayNetworking.registerGlobalReceiver(type) { payload, context -> handler(payload, context) }

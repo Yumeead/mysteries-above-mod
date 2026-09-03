@@ -15,60 +15,61 @@ import kotlin.math.max
 import kotlin.math.sin
 
 /**
- * Спільний шар шляху Дверей: **сама двері**.
+ * The Door pathway's shared layer: **the door itself**.
  *
- * Просять її двоє — `DoorOpening` (обидва кінці проходу крізь стіну) і `TravellersDoor`
- * (вхід у простір).
+ * Two ask for it — `DoorOpening` (both ends of a passage through a wall) and `TravellersDoor`
+ * (the entrance into space).
  *
- * ## Що з неї прибрано і чому
+ * ## What was removed from it and why
  *
- * Друга редакція намагалась зробити двері помітними, додаючи шари: рама в два шари
- * завглибшки, вир із трьох рукавів, ванільні `PORTAL`, що падають до центру, `END_ROD`
- * по порогу, `REVERSE_PORTAL` з-під нього. Помітною вона стала, стильною — ні:
+ * The second revision tried to make the door noticeable by adding layers: a frame two layers
+ * deep, a vortex of three arms, vanilla `PORTAL`s falling towards the centre, `END_ROD` along the
+ * threshold, `REVERSE_PORTAL` from under it. Noticeable it became; stylish it did not:
  *
- * | що прибрано | чому |
+ * | what was removed | why |
  * |---|---|
- * | другий шар рами | дві площини одного синього читались як **дві** рами, а не як товщина |
- * | вир із трьох рукавів | у полотні крутилось те, що ні на що не вказує |
- * | `PORTAL` і `REVERSE_PORTAL` | ванільний фіолетовий не має нічого спільного з кольором шляху |
- * | `END_ROD` по порогу | білий там само: одна яскрава пляма з чужої палітри псує решту |
+ * | the second frame layer | two planes of one blue read as **two** frames, not as thickness |
+ * | the three-armed vortex | something spun in the pane that pointed at nothing |
+ * | `PORTAL` and `REVERSE_PORTAL` | vanilla purple has nothing in common with the pathway colour |
+ * | `END_ROD` along the threshold | white, likewise: one bright blot from another palette spoils the rest |
  *
- * Лишилась **одна арка** й **одне полотно**, і обидва — в кольорі шляху.
+ * What is left is **one arch** and **one pane**, both in the pathway's colour.
  *
- * ## Двері не з'являються, а **вимальовуються**
+ * ## A door does not appear, it is **drawn**
  *
- * Друга редакція масштабувала готову арку від нуля: двері виростали з підлоги, як
- * повзунок. Тут інакше — лінія **тече** від обох кутів порога вгору стійками й далі по
- * дузі, доки половинки не зійдуться на вершині. Це та сама тривалість, але читається
- * як «щось креслить двері», а не як «щось збільшується».
+ * The second revision scaled a finished arch from zero: the door grew out of the floor like a
+ * slider. Here it is different — the line **flows** from both corners of the threshold up the
+ * posts and on along the arc until the halves meet at the top. It is the same duration, but it
+ * reads as "something is drawing a door" rather than "something is getting bigger".
  *
- * Крива [progress] — `1 − (1−t)²`: початок швидкий, зустріч на вершині повільна.
- * Зачинення дзеркальне, тож двері згасають від порога, а вершина тримається довше за все.
+ * The [progress] curve is `1 − (1−t)²`: a fast start, a slow meeting at the top. Closing is
+ * mirrored, so the door fades from the threshold and the top holds the longest.
  *
- * ## Колір — палітра, а не один синій
+ * ## The colour is a palette, not one blue
  *
- * `RgbColor.shades` дає п'ять світлостей **одного** відтінку, і арка розкладає їх по
- * висоті: біля порога темніше, на вершині світліше. Це не декор — це те, що робить
- * плоский контур об'ємним, і працює однаково для будь-якого з 22 шляхів.
+ * `RgbColor.shades` gives five lightnesses of **one** hue, and the arch lays them out by height:
+ * darker near the threshold, lighter at the top. This is not decoration — it is what makes a flat
+ * outline three-dimensional, and it works the same for any of the 22 pathways.
  *
- * ## І рама, і полотно — знак, не іскра
+ * ## Both the frame and the pane are glyphs, not sparks
  *
- * Обидва малює [ModParticles.SPIRIT_GLYPH]: фіксоване коротке життя, нуль фізики. Рух,
- * який видно — хвиля світлості в рамі, повільне осідання в полотні — рахується самим
- * кодом, кадр за кадром, а не фізикою частинки: `SPIRIT_MOTE` тут не годиться, бо
- * ванільний конструктор із ненульовою швидкістю домішує ±0,4 бл./тік випадкового
- * розкиду до будь-якого вектора (CLAUDE.md, пастка 6), і кероване падіння в ньому б
- * потонуло.
+ * Both are drawn with [ModParticles.SPIRIT_GLYPH]: a fixed short lifetime, zero physics. The
+ * motion that is visible — a wave of lightness along the frame, a slow settling in the pane — is
+ * computed by the code itself, frame by frame, rather than by particle physics: `SPIRIT_MOTE`
+ * will not do here, because the vanilla constructor with a non-zero velocity mixes ±0.4
+ * blocks/tick of random spread into any vector (CLAUDE.md, trap 6), and a controlled fall would
+ * drown in it.
  *
- * ⚠ Знак чіпляється до гравця, якщо в пакеті ненульовий зсув (див. `SpiritGlyphParticle`).
- * Двері ставлять його формою `count = 1` з нульовими дельтами — це фігура світу.
+ * ⚠ A glyph latches onto a player if the packet carries a non-zero offset (see
+ * `SpiritGlyphParticle`). The door places it with the `count = 1` form and zero deltas — it is a
+ * shape of the world.
  */
 internal fun doorway(
     scheduling: Scheduling,
     level: ServerLevel,
-    /** Точка на підлозі під дверима. */
+    /** The point on the floor under the door. */
     footing: Vec3,
-    /** Горизонтальний напрямок «крізь двері»; довжина не має значення. */
+    /** The horizontal direction "through the door"; the length does not matter. */
     facing: Vec3,
     durationTicks: Int,
     color: RgbColor,
@@ -76,13 +77,13 @@ internal fun doorway(
     require(durationTicks > 0) { "Двері мусять простояти хоч тік: $durationTicks" }
 
     val forward = horizontal(facing)
-    // Вектор уздовж полотна: рама малюється в площині, перпендикулярній до проходу.
+    // The vector along the pane: the frame is drawn in the plane perpendicular to the passage.
     val across = forward.cross(UP).normalize()
     val palette = color.shades(SHADES, SHADE_SPREAD).map(ModParticles::glyph)
-    // Полотно — теж знак, не іскра: власна фізика мотика домішує ±0,4 бл./тік
-    // випадкового розкиду до будь-якої швидкості, яку йому дати (це і читалось як
-    // «частинки вилітають» — CLAUDE.md, пастка 6), тож падіння малюється самим
-    // розкладом точок у [pane], а не фізикою частинки.
+    // The pane is a glyph too, not a spark: a mote's own physics mixes ±0.4 blocks/tick of random
+    // spread into any velocity it is given (that is what read as "the particles are flying off" —
+    // CLAUDE.md, trap 6), so the fall is drawn by the very layout of the points in [pane] rather
+    // than by particle physics.
     val veil = ModParticles.glyph(color.shade(VEIL_SHADE))
 
     val frames = max(1, durationTicks / PERIOD_TICKS)
@@ -94,13 +95,13 @@ internal fun doorway(
 
         val drawn = progress(step, frames)
         outline(level, palette, footing, across, drawn, step)
-        // М'який поріг замість різкого «є/нема»: полотно розжарюється й гасне разом
-        // із контуром, а не клацає в мить, коли drawn перетнув VEIL_FROM.
+        // A soft threshold instead of a hard "there/not there": the pane heats up and fades
+        // together with the outline rather than snapping on the moment drawn crossed VEIL_FROM.
         val veilStrength = ((drawn - VEIL_FROM) / (1.0 - VEIL_FROM)).coerceIn(0.0, 1.0)
         if (veilStrength > 0.0) pane(level, veil, footing, across, step, veilStrength)
 
-        // Три ноти на все відчинення: дзвін позначає, що лінія пішла, а не супроводжує
-        // кожен її крок.
+        // Three notes for the whole opening: the chime marks that the line has set off, it does
+        // not accompany every step of it.
         if (step < OPEN_FRAMES && step % CHIME_EVERY == 0) {
             level.playSound(
                 null, footing.x, footing.y + 1.0, footing.z,
@@ -113,17 +114,17 @@ internal fun doorway(
     }
 }
 
-/** Горизонтальна складова напрямку; вироджений випадок дивиться на північ. */
+/** The horizontal component of a direction; the degenerate case faces north. */
 internal fun horizontal(direction: Vec3): Vec3 = Vec3(direction.x, 0.0, direction.z).let {
     if (it.lengthSqr() < 1.0e-6) Vec3(0.0, 0.0, 1.0) else it.normalize()
 }
 
 /**
- * Скільки контуру вже накреслено: 0 — нічого, 1 — половинки зійшлись на вершині.
+ * How much of the outline is already drawn: 0 — nothing, 1 — the halves have met at the top.
  *
- * `1 − (1−t)²` на відчиненні: лінія зривається з порога швидко й доводить вершину
- * повільно. На зачиненні та сама крива в зворотному напрямку, тож остання зникає
- * вершина — двері складаються туди, звідки постали.
+ * `1 − (1−t)²` on opening: the line breaks away from the threshold fast and finishes the top
+ * slowly. On closing it is the same curve in reverse, so the top disappears last — the door folds
+ * back into where it rose from.
  */
 private fun progress(step: Int, frames: Int): Double {
     val left = frames - step
@@ -137,14 +138,15 @@ private fun progress(step: Int, frames: Int): Double {
 }
 
 /**
- * Контур: стійки, далі дуга — обидві половинки течуть назустріч одна одній.
+ * The outline: the posts, then the arc — both halves flowing towards each other.
  *
- * Точки розкладені за **довжиною контуру**, а не за висотою: інакше дуга, де крок по
- * висоті малий, а по дузі великий, виходила б удвічі рідшою за стійки.
+ * The points are laid out by **outline length**, not by height: otherwise the arc, where the
+ * step in height is small but the step along the arc is large, would come out twice as sparse as
+ * the posts.
  *
- * Поки двері стоять відчинені, контур не застигає: повільна хвиля світлості біжить
- * уздовж лінії ([WAVE_SPEED] тримає її неспішною), зсуваючи, яку з п'яти світлостей
- * бере точка. Самі точки не рухаються — рухається лише те, наскільки вони світяться.
+ * While the door stands open the outline does not freeze: a slow wave of lightness runs along the
+ * line ([WAVE_SPEED] keeps it unhurried), shifting which of the five lightnesses a point takes.
+ * The points themselves do not move — only how brightly they shine does.
  */
 private fun outline(
     level: ServerLevel,
@@ -168,9 +170,9 @@ private fun outline(
             HALF_WIDTH * cos(angle) to SPRING + ARCH_RISE * sin(angle)
         }
 
-        // Палітра розкладається по висоті: біля порога глибше, під вершиною світліше.
-        // Хвиля домішує невеликий зсув по довжині контуру — те саме число, що й
-        // висота, тільки живе.
+        // The palette is laid out by height: deeper near the threshold, lighter under the top.
+        // The wave mixes in a small shift along the outline's length — the same number as the
+        // height, only alive.
         val wave = sin(travelled * WAVE_LENGTH - step * WAVE_SPEED) * WAVE_AMPLITUDE
         val shade = ((up / HEIGHT) * (palette.size - 1) + wave).toInt().coerceIn(palette.indices)
         val glyph = palette[shade]
@@ -181,18 +183,19 @@ private fun outline(
 }
 
 /**
- * Полотно: кілька порошинок, що повільно осідають усередині рами.
+ * The pane: a few motes slowly settling inside the frame.
  *
- * Не вир і не заповнення — саме **натяк**: рівно стільки, щоб отвір не читався порожнім.
+ * Not a vortex and not a fill — precisely a **hint**: just enough that the opening does not read
+ * as empty.
  *
- * Малюється [ModParticles.SPIRIT_GLYPH], не [ModParticles.SPIRIT_MOTE]: ванільний
- * конструктор частинки з ненульовою швидкістю домішує ±0,4 бл./тік випадкового
- * розкиду до будь-якого вектора, який йому дати (CLAUDE.md, пастка 6) — тому мотик
- * тут не годиться, розкид на його тлі топив би будь-яке кероване падіння. Знак же
- * ставиться там, де сказано, без фізики, тож «падіння» — це сам розклад точок:
- * кожна віртуальна порошинка (індекс [i]) має власну фазу в [FALL_CYCLE] кадрів і
- * рівномірно опускається від вершини рами до порога, після чого починає знову
- * зверху — це й читається як повільне осідання, кероване рівно двома константами.
+ * Drawn with [ModParticles.SPIRIT_GLYPH], not [ModParticles.SPIRIT_MOTE]: the vanilla particle
+ * constructor with a non-zero velocity mixes ±0.4 blocks/tick of random spread into any vector it
+ * is given (CLAUDE.md, trap 6) — so a mote will not do here, the spread would drown any
+ * controlled fall. A glyph, on the other hand, is placed where it is told with no physics, so the
+ * "falling" is the layout of the points itself: each virtual mote (index [i]) has its own phase
+ * within [FALL_CYCLE] frames and descends evenly from the top of the frame to the threshold,
+ * after which it starts again from the top — and that is what reads as slow settling, governed by
+ * exactly two constants.
  */
 private fun pane(
     level: ServerLevel,
@@ -203,9 +206,9 @@ private fun pane(
     strength: Double,
 ) {
     val radiusX = HALF_WIDTH * PANE_WIDTH * strength
-    // Вертикальний розмах теж стягується до центру разом зі strength, а не лишається
-    // на всю висоту: інакше при strength → 0 полотно ставало б тонкою вертикальною
-    // рискою замість того, щоб зникнути в точку.
+    // The vertical span is drawn in towards the centre along with strength rather than staying
+    // full height: otherwise at strength → 0 the pane would become a thin vertical stroke instead
+    // of vanishing into a point.
     val centre = HEIGHT * (PANE_TOP + PANE_BOTTOM) / 2.0
     val top = centre + (HEIGHT * PANE_TOP - centre) * strength
     val bottom = centre - (centre - HEIGHT * PANE_BOTTOM) * strength
@@ -231,44 +234,44 @@ private fun put(level: ServerLevel, particle: ParticleOptions, point: Vec3) {
 private val UP = Vec3(0.0, 1.0, 0.0)
 private const val TAU = 2.0 * PI
 
-/** Знак живе чотири тіки; кожні два — два покоління, тож лінія не блимає на стику. */
+/** A glyph lives four ticks; every two of them give two generations, so the line does not blink at the seam. */
 private const val PERIOD_TICKS = 2
 
-// ── Арка ────────────────────────────────────────────────────────────────────────
+// ── The arch ────────────────────────────────────────────────────────────────────
 private const val HALF_WIDTH = 0.58
-/** Висота, з якої починається дуга: нижче — прямі стійки. */
+/** The height the arc starts at: below it the posts are straight. */
 private const val SPRING = 1.25
 private const val ARCH_RISE = 0.72
 private const val HEIGHT = SPRING + ARCH_RISE
-/** Крок між точками контуру: менший — рама щільніша, знаки лягають один на одного. */
+/** The step between outline points: smaller means a denser frame, with glyphs lying on top of each other. */
 private const val SPACING = 0.09
 private const val SHADES = 5
 private const val SHADE_SPREAD = 0.42
 
-/** Довжина хвилі світлості вздовж контуру: скільки блоків контуру на один її період. */
+/** The wavelength of the lightness wave along the outline: how many blocks of outline to one period. */
 private const val WAVE_LENGTH = 1.6
-/** Швидкість хвилі: мала — щоб контур відчувався живим, а не миготів. */
+/** The wave's speed: small — so the outline feels alive rather than flickering. */
 private const val WAVE_SPEED = 0.22
-/** Розмах хвилі в кроках палітри: біля одного відтінку туди-сюди. */
+/** The wave's span in palette steps: back and forth around a single shade. */
 private const val WAVE_AMPLITUDE = 1.1
 
-// ── Полотно ─────────────────────────────────────────────────────────────────────
+// ── The pane ────────────────────────────────────────────────────────────────────
 private const val PANE_WIDTH = 0.72
 private const val PANE_MOTES = 3
 private const val PANE_INNER = 0.35
 private const val PANE_PHASE = 0.37
-/** Верх і низ полотна: порошинки осідають між ними, а не спалахують і гаснуть. */
+/** The pane's top and bottom: motes settle between them rather than flaring and dying. */
 private const val PANE_TOP = 0.92
 private const val PANE_BOTTOM = 0.08
-/** Скільки кадрів на повне осідання зверху вниз: більше — повільніше й спокійніше. */
+/** How many frames a full settling from top to bottom takes: more means slower and calmer. */
 private const val FALL_CYCLE = 40
-/** Поки контур не пройшов дві третини, полотна немає: воно висіло б у порожнечі. */
+/** Until the outline is two thirds done there is no pane: it would hang in emptiness. */
 private const val VEIL_FROM = 0.66
 private const val VEIL_SHADE = -0.25
 
-// ── Відчинення ──────────────────────────────────────────────────────────────────
+// ── Opening ─────────────────────────────────────────────────────────────────────
 private const val OPEN_FRAMES = 9
-/** Зачинення повільніше за відчинення: різке зникнення читалось як клацання, не згасання. */
+/** Closing is slower than opening: an abrupt disappearance read as a snap rather than a fade. */
 private const val CLOSE_FRAMES = 12
 private const val CHIME_EVERY = 3
 private const val OPEN_PITCH = 1.15f

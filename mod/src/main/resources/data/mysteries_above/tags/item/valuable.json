@@ -1,0 +1,16 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:diamond",
+    "minecraft:emerald",
+    "minecraft:netherite_ingot",
+    "minecraft:netherite_scrap",
+    "minecraft:echo_shard",
+    "minecraft:elytra",
+    "minecraft:totem_of_undying",
+    "minecraft:enchanted_golden_apple",
+    "minecraft:nether_star",
+    "minecraft:heart_of_the_sea",
+    "minecraft:ancient_debris"
+  ]
+}

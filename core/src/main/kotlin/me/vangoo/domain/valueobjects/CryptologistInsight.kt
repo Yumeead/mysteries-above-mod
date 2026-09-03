@@ -7,56 +7,56 @@ import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
 /**
- * Балансні числа Послідовності 7 шляху Помилки (Криптолог).
+ * Balance numbers for Sequence 7 of the Error pathway (Cryptologist).
  *
- * Одне джерело правди для Дешифрування та для тіру доказів у Вищій спостережливості.
- * Чиста математика — без платформи; ефекти живуть у `pathways.error.abilities`.
+ * One source of truth for Decryption and for the evidence tier of Superior Observation.
+ * Pure math — no platform; the effects live in `pathways.error.abilities`.
  *
- * Ключове правило вікі: Дешифрування — не ворожіння. Глибина відповіді залежить від
- * того, скільки слідів реально існує ([depthFor]), а не від удачі каста.
+ * The key rule from the wiki: Decryption is not divination. The depth of the answer
+ * depends on how many traces actually exist ([depthFor]), not on the luck of the cast.
  */
 object CryptologistInsight {
 
-    /** Послідовність, на якій здібність з'являється; усі базові числа задані для неї. */
+    /** The Sequence the ability appears at; every base number is stated for it. */
     private const val BASE_SEQUENCE = 7
 
-    // --- Вартість і дальності ---
+    // --- Cost and ranges ---
     const val DECRYPTION_COST = 110
     const val DECRYPTION_COOLDOWN_SECONDS = 45
     private const val DECRYPTION_COOLDOWN_FLOOR_SECONDS = 20L
 
-    /** Дальність пошуку цілі/блока в прицілі (режими A і B). */
+    /** Range for finding the aimed-at target/block (modes A and B). */
     const val CROSSHAIR_RANGE = 20.0
 
-    /** Радіус сканування містицизму (режим D). */
+    /** Mysticism scan radius (mode D). */
     const val ZONE_RADIUS = 24.0
 
-    /** Радіус і вікно (сек) запиту історії CoreProtect. */
+    /** Radius and window (sec) of the CoreProtect history query. */
     const val TRACE_LOOKUP_RADIUS = 8
     const val TRACE_LOOKUP_WINDOW_SECONDS = 600
 
-    /** Пасивне маркування доказів (Seq 7 тір Вищої спостережливості). */
+    /** Passive evidence marking (Seq 7 tier of Superior Observation). */
     const val EVIDENCE_MARK_RADIUS = 8.0
     const val EVIDENCE_MARK_INTERVAL_SECONDS = 15
 
-    /** Тривалість замовляння з режиму C (сек). */
+    /** Duration of the mode C incantation (sec). */
     const val INCANTATION_DURATION_SECONDS = 180
 
-    /** Скільки слідів потрібно для глибини 1/2/3 на Seq 7. */
+    /** How many traces are needed for depth 1/2/3 at Seq 7. */
     private val DEPTH_BASE_THRESHOLDS = intArrayOf(2, 5, 9)
 
-    /** Втрата глузду за глибину 1/2/3 на Seq 7. */
+    /** Sanity loss per depth 1/2/3 at Seq 7. */
     private val DEPTH_BASE_SANITY = intArrayOf(0, 2, 5)
 
-    /** Кулдаун (сек): Seq 7 = 45, коротшає MODERATE, не нижче підлоги. */
+    /** Cooldown (sec): Seq 7 = 45, shortens MODERATE, never below the floor. */
     fun decryptionCooldownSeconds(sequence: Sequence): Int {
         val seconds = DECRYPTION_COOLDOWN_SECONDS * relative(sequence, ScalingStrategy.MODERATE)
         return max(DECRYPTION_COOLDOWN_FLOOR_SECONDS, seconds.roundToLong()).toInt()
     }
 
     /**
-     * Скільки слідів треба, щоб дістати глибину [depth] (1..3).
-     * Пороги падають, коли Криптолог сильнішає.
+     * How many traces it takes to reach depth [depth] (1..3).
+     * The thresholds fall as the Cryptologist grows stronger.
      */
     fun depthThreshold(depth: Int, sequence: Sequence): Int {
         requireDepth(depth)
@@ -69,7 +69,7 @@ object CryptologistInsight {
         return max(depth, base - (easier * base * 0.06).roundToInt())
     }
 
-    /** Глибина відповіді за наявними доказами: 0 = нічого не вичитати, 3 = вся правда. */
+    /** Answer depth from the available evidence: 0 = nothing to read, 3 = the whole truth. */
     fun depthFor(evidenceCount: Int, sequence: Sequence): Int {
         for (depth in 3 downTo 1) {
             if (evidenceCount >= depthThreshold(depth, sequence)) {
@@ -79,7 +79,7 @@ object CryptologistInsight {
         return 0
     }
 
-    /** Втрата глузду за глибоке читання: d1 = 0, d2 = 2, d3 = 5 на Seq 7, росте WEAK. */
+    /** Sanity loss for deep reading: d1 = 0, d2 = 2, d3 = 5 at Seq 7, grows WEAK. */
     fun sanityLoss(depth: Int, sequence: Sequence): Int {
         if (depth <= 0) {
             return 0
@@ -89,11 +89,11 @@ object CryptologistInsight {
         return (base / relative(sequence, ScalingStrategy.WEAK)).roundToInt()
     }
 
-    /** Множник шкоди від замовляння (режим C, глибина 3): Seq 7 = 1.20, росте WEAK. */
+    /** Damage multiplier of the incantation (mode C, depth 3): Seq 7 = 1.20, grows WEAK. */
     fun incantationDamageMultiplier(sequence: Sequence): Double =
         1.0 + 0.20 / relative(sequence, ScalingStrategy.WEAK)
 
-    /** Відношення сили на Seq 7 до сили на заданій Послідовності (менше 1.0 для сильніших). */
+    /** Ratio of power at Seq 7 to power at the given Sequence (below 1.0 for stronger ones). */
     private fun relative(sequence: Sequence, strategy: ScalingStrategy): Double =
         SequenceScaler.calculateMultiplier(BASE_SEQUENCE, strategy) /
             SequenceScaler.calculateMultiplier(sequence.level, strategy)

@@ -16,81 +16,84 @@ import net.minecraft.util.RandomSource
 import net.minecraft.world.phys.Vec3
 
 /**
- * Знак духу: та сама текстура, що в [SpiritMoteParticle], але **стала** — і, якщо його
- * поставили на гравця, така, що **їде разом із ним**.
+ * The spirit glyph: the same texture as in [SpiritMoteParticle], but **steady** — and, if it
+ * was placed on a player, one that **travels with them**.
  *
- * ## Чому іскра не годиться для фігури
+ * ## Why a spark will not do for a shape
  *
- * Порошинка духу навмисно жива: випадкове життя (16–28 тіків), випадковий розмір, спалах
- * на початку, згасання в кінці, від'ємна гравітація. Розсипу, покриву й сліду це потрібно
- * — вони й мусять мерехтіти. Сталій фігурі це заважає: німб із мотів читався як хмара,
- * що зринає.
+ * The spirit mote is deliberately alive: a random lifetime (16–28 ticks), a random size, a
+ * flare at the start, a fade at the end, negative gravity. A scatter, an aura and a trail need
+ * that — they are supposed to shimmer. A steady shape is hurt by it: a halo made of motes read
+ * as a rising cloud.
  *
- * ## Розкид домішує сам конструктор — тож береться інший
+ * ## The constructor mixes in the spread itself — so a different one is used
  *
- * Ванільний `Particle(level, x, y, z, xd, yd, zd)` **не бере швидкість як є**: він
- * домішує випадковий розкид і перенормовує результат. Поруч є
- * `SingleQuadParticle(level, x, y, z, sprite)` — той самий батько **без** швидкості й без
- * розкиду. Знак будується через нього.
+ * The vanilla `Particle(level, x, y, z, xd, yd, zd)` **does not take the velocity as given**: it
+ * mixes in a random spread and renormalises the result. Beside it is
+ * `SingleQuadParticle(level, x, y, z, sprite)` — the same parent **without** velocity and
+ * without spread. The glyph is built through that one.
  *
- * ## Головне: знак чіпляється до власника
+ * ## The main point: the glyph latches onto its owner
  *
- * Порошинка статична **у світі**: поставлена, вона лишається де поставлена. Фігура над
- * головою від цього неминуче відстає, і жодне з двох очевидних лікувань не спрацювало:
+ * A mote is static **in the world**: once placed, it stays where it was placed. A shape above
+ * the head inevitably lags behind because of that, and neither of the two obvious cures worked:
  *
- * | спроба | чому не вийшло |
+ * | attempt | why it failed |
  * |---|---|
- * | коротше життя плюс перемальовування щотіку | слід став коротшим, але лишився |
- * | віддати порошинці швидкість гравця | пакет доходить із затримкою, тож кільце просто стало стабільно позаду голови |
+ * | a shorter lifetime plus redrawing every tick | the trail got shorter but stayed |
+ * | giving the mote the player's velocity | the packet arrives with a delay, so the ring simply settled steadily behind the head |
  *
- * Обидві лікували наслідок. Причина в тому, що фігура **належить сутності**, а не точці
- * світу, — тож знак і тримає сутність: щотіку він ставить себе туди, де власник **зараз**.
+ * Both treated the consequence. The cause is that the shape **belongs to an entity**, not to a
+ * point in the world — so the glyph holds the entity: every tick it puts itself where the owner
+ * is **now**.
  *
- * ## Зсув приїжджає в пакеті, а не рахується з позиції
+ * ## The offset arrives in the packet rather than being derived from the position
  *
- * І цього замало, якщо зсув виводити з місця народження: сервер надсилає координату, поки
- * пакет іде — гравець зрушив, і знак закріплюється зі зсувом, зміщеним рівно на пройдену
- * за цей час відстань. Кожне покоління закріплюється зі своїм, і замість кільця виходить
- * жменька кілець позаду — той самий слід, лише коротший.
+ * And even that is not enough if the offset is derived from the place of birth: the server sends
+ * a coordinate, and while the packet is in flight the player moves, so the glyph latches with an
+ * offset shifted by exactly the distance covered in that time. Every generation latches with its
+ * own, and instead of a ring one gets a handful of rings trailing behind — the same trail, only
+ * shorter.
  *
- * Тому зсув **передається явно**, полем швидкості пакета: у формі `count = 0` трійка
- * дельт доїжджає до клієнта незміненою, а рухати знак усе одно нічим — він не летить.
- * Позиція в пакеті після цього потрібна рівно для одного: знайти власника.
+ * So the offset is **passed explicitly**, in the packet's velocity field: in the `count = 0`
+ * form the three deltas reach the client unchanged, and there is nothing to move the glyph with
+ * anyway — it does not fly. After that the position in the packet is needed for exactly one
+ * thing: finding the owner.
  *
- * Результат — фігура, жорстко зчеплена з власником: затримка мережі на неї не впливає
- * взагалі, бо ніщо в ній не виражене у світових координатах.
+ * The result is a shape rigidly latched to its owner: network delay does not affect it at all,
+ * because nothing in it is expressed in world coordinates.
  *
- * ponytail: власник шукається як **найближчий гравець** у межах [LATCH_RANGE] бл. — це
- * однозначно для фігури, що обвиває голову (німб має радіус 0,28), і коштує нуль нових
- * пакетів. Якщо колись знадобиться фігура, що чіпляється до довільної сутності здалеку,
- * доведеться везти її ідентифікатор у власному типі опцій: `ColorParticleOption` місця
- * під це не має.
+ * ponytail: the owner is found as the **nearest player** within [LATCH_RANGE] blocks — this is
+ * unambiguous for a shape wrapping the head (a halo has a radius of 0.28) and costs zero new
+ * packets. If a shape latching onto an arbitrary entity from a distance is ever needed, its
+ * identifier will have to travel in an options type of our own: `ColorParticleOption` has no
+ * room for it.
  */
 class SpiritGlyphParticle private constructor(
     level: ClientLevel,
     x: Double,
     y: Double,
     z: Double,
-    /** Зсув від маківки власника. Приїхав у пакеті — не рахується з позиції. */
+    /** The offset from the owner's crown. It arrived in the packet — it is not derived from the position. */
     private val offset: Vec3,
     options: ColorParticleOption,
     sprite: TextureAtlasSprite,
-    // Конструктор **без** швидкості: саме він не домішує розкиду.
+    // The constructor **without** velocity: that is the one that mixes in no spread.
 ) : SingleQuadParticle(level, x, y, z, sprite) {
 
     /**
-     * Кого тримати. `null` — знак поставлено не на гравця, тож він просто стоїть.
+     * Whom to hold. `null` — the glyph was not placed on a player, so it simply stands still.
      *
-     * Міряється відстань до **маківки**, а не до `Entity.distanceToSqr`, яка рахує від
-     * **ніг**. На цьому й зірвалась перша редакція зчеплення: німб висить на ~2,1 бл.
-     * вище ніг, тобто далі за будь-яку розумну межу, і власник не знаходився ніколи —
-     * знак мовчки лишався статичним, а слід нікуди не дівався.
+     * The distance is measured to the **crown**, not with `Entity.distanceToSqr`, which counts
+     * from the **feet**. That is what the first revision of the latching broke on: a halo hangs
+     * ~2.1 blocks above the feet, i.e. beyond any sensible threshold, so the owner was never
+     * found — the glyph silently stayed static, and the trail went nowhere.
      */
     private val owner: AbstractClientPlayer? = level.players()
-        // Нульовий зсув означає «фігура стоїть у світі», а не «на маківці»: її ставлять
-        // формою `count = 1` з нульовими дельтами. Без цієї перевірки двері, намальовані
-        // за крок від гравця, мовчки чіплялись би йому на голову й їхали разом із ним —
-        // і виглядало б це не як помилка, а як «ефект чомусь не там».
+        // A zero offset means "the shape stands in the world", not "on the crown": those are
+        // placed with the `count = 1` form and zero deltas. Without this check a door drawn a
+        // step away from the player would silently latch onto their head and travel with them —
+        // and it would look not like a bug but like "the effect is somehow in the wrong place".
         .takeIf { offset != Vec3.ZERO }
         ?.minByOrNull { headOf(it).distanceToSqr(x, y, z) }
         ?.takeIf { headOf(it).distanceToSqr(x, y, z) <= LATCH_RANGE * LATCH_RANGE }
@@ -108,40 +111,41 @@ class SpiritGlyphParticle private constructor(
 
     override fun getLayer(): SingleQuadParticle.Layer = SingleQuadParticle.Layer.TRANSLUCENT
 
-    /** Світиться сам: фігура чужої сили не має темніти в тіні. */
+    /** Glows on its own: the shape of another's power must not darken in the shade. */
     override fun getLightCoords(partialTick: Float): Int = LightCoordsUtil.FULL_BRIGHT
 
-    /** Тільки вік: місце знака рахується в мить рендеру, а не тут. */
+    /** Age only: the glyph's place is computed at render time, not here. */
     override fun tick() {
         if (age++ >= lifetime || owner?.isRemoved == true) remove()
     }
 
     /**
-     * Місце знака рахується **в мить рендеру**, а не в такті.
+     * The glyph's place is computed **at render time**, not on the tick.
      *
-     * Це і був залишковий слід. Власник знаходився, зсув доїжджав точним, знак чесно
-     * ставив себе в такті туди, де власник **у цьому тіку**, — але частинки цокають
-     * окремо від руху гравця, тож знак стабільно відставав рівно на тік. При швидкості
-     * 0,2 бл./тік і двох поколіннях це й давало короткий шлейф, який не брало жодне
-     * лікування на боці такту.
+     * This was the residual trail. The owner was found, the offset arrived exact, the glyph
+     * honestly put itself on the tick where the owner was **in that tick** — but particles tick
+     * separately from the player's movement, so the glyph lagged steadily by exactly one tick.
+     * At a speed of 0.2 blocks/tick and two generations, that gave the short streak no cure on
+     * the tick side could take away.
      *
-     * Тут знак бере інтерпольовану маківку за тим самим [partialTick], яким рендериться
-     * сама модель гравця, і ставить `xo == x`, щоб лерп рендера не зсунув його назад.
-     * Після цього фігура рухається **кадр у кадр** із власником: відставати нема від чого.
+     * Here the glyph takes the interpolated crown with the same [partialTick] the player's model
+     * itself is rendered with, and sets `xo == x` so the render's lerp does not drag it back.
+     * After that the shape moves **frame for frame** with its owner: there is nothing left to lag
+     * behind.
      */
     override fun extract(state: QuadParticleRenderState, camera: Camera, partialTick: Float) {
         pin(partialTick)
         super.extract(state, camera, partialTick)
     }
 
-    /** Ставить знак на інтерпольовану маківку власника. Без власника — лишає, де є. */
+    /** Puts the glyph on the owner's interpolated crown. With no owner — leaves it where it is. */
     private fun pin(partialTick: Float) {
         val rider = owner ?: return
         val t = partialTick.toDouble()
         x = Mth.lerp(t, rider.xOld, rider.x) + offset.x
         y = Mth.lerp(t, rider.yOld, rider.y) + rider.bbHeight + offset.y
         z = Mth.lerp(t, rider.zOld, rider.z) + offset.z
-        // Без цього рендер лерпнув би від минулого місця — тобто знову назад.
+        // Without this the renderer would lerp from the previous place — that is, backwards again.
         xo = x
         yo = y
         zo = z
@@ -158,33 +162,33 @@ class SpiritGlyphParticle private constructor(
             yd: Double,
             zd: Double,
             random: RandomSource,
-            // Дельти в цій формі пакета — не швидкість, а **зсув від маківки**: знак
-            // нікуди не летить, тож поле вільне, а зсув мусить приїхати точним.
+            // The deltas in this packet form are not a velocity but the **offset from the crown**:
+            // the glyph flies nowhere, so the field is free, and the offset must arrive exact.
         ): Particle = SpiritGlyphParticle(level, x, y, z, Vec3(xd, yd, zd), options, sprites.get(random))
     }
 
     private companion object {
         /**
-         * Маківка власника — точка, від якої міряється зчеплення.
+         * The owner's crown — the point the latching distance is measured from.
          *
-         * `Entity.distanceToSqr` рахує від **ніг**, і саме на цьому зірвалась перша
-         * редакція зчеплення: німб висить на ~2,1 бл. вище, тобто далі за будь-яку
-         * розумну межу, тож власник не знаходився ніколи.
+         * `Entity.distanceToSqr` counts from the **feet**, and that is what the first revision of
+         * the latching broke on: a halo hangs ~2.1 blocks higher, i.e. beyond any sensible
+         * threshold, so the owner was never found.
          */
         fun headOf(player: AbstractClientPlayer): Vec3 =
             Vec3(player.x, player.y + player.bbHeight, player.z)
 
         /**
-         * Знак чіпляється до власника, тож довге життя вже не шкодить: сліду більше
-         * немає. Чотири тіки — два покоління при перемальовуванні раз на два тіки, щоб
-         * кільце не блимало на стику.
+         * The glyph latches onto its owner, so a long lifetime no longer hurts: there is no trail
+         * any more. Four ticks — two generations when redrawing once every two ticks, so the ring
+         * does not blink at the seam.
          */
         const val LIFETIME = 4
 
-        /** Сталий і трохи дрібніший за пікову іскру: форму дає кільце, а не пляма. */
+        /** Steady and a little smaller than a spark at its peak: the form comes from the ring, not the blob. */
         const val SIZE = 0.075f
 
-        /** Метр від маківки: фігура на голові, а не сусід, що проходив повз. */
+        /** A metre from the crown: a shape on the head, not a neighbour who happened to walk past. */
         const val LATCH_RANGE = 1.0
 
     }

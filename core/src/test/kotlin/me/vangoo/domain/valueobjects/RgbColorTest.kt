@@ -8,12 +8,12 @@ import org.junit.jupiter.api.Test
 import kotlin.math.abs
 
 /**
- * Палітра одного відтінку.
+ * A palette of one hue.
  *
- * Перевіряється тут рівно те, заради чого перетворення взагалі йде через HSV, а не
- * множенням каналів: **відтінок не рухається**. Побачити злам оком у грі майже
- * неможливо — синій, що поїхав у бірюзовий на світлому краю палітри, виглядає просто
- * як «трохи інший синій».
+ * What is checked here is exactly the reason the conversion goes through HSV rather than
+ * channel multiplication: **the hue does not move**. Spotting the break by eye in game is
+ * next to impossible — a blue that drifted into teal at the light end of the palette just
+ * looks like "a slightly different blue".
  */
 class RgbColorTest {
 
@@ -50,8 +50,8 @@ class RgbColorTest {
         val shades = PathwayBranding.liquidOf("Door").shades(5, spread = 0.4)
 
         assertEquals(5, shades.size)
-        // Саме впорядкованість робить палітру градієнтом, а не шумом: фігура кладе
-        // світле там, де в неї світло.
+        // The ordering is what makes the palette a gradient rather than noise: a shape puts
+        // the light where its light is.
         assertTrue(
             shades.zipWithNext().all { (darker, lighter) -> lighter.brightness() > darker.brightness() },
             "палітра не зростає за яскравістю: $shades",
@@ -69,7 +69,7 @@ class RgbColorTest {
 
     private fun RgbColor.brightness(): Int = maxOf(red, green, blue)
 
-    /** Відстань між відтінками по колу: 350° і 10° різняться на 20°, а не на 340°. */
+    /** Distance between hues around the circle: 350° and 10° differ by 20°, not by 340°. */
     private fun hueGap(first: RgbColor, second: RgbColor): Double {
         val gap = abs(hueOf(first) - hueOf(second))
         return minOf(gap, 360.0 - gap)
@@ -92,10 +92,11 @@ class RgbColorTest {
 
     private companion object {
         /**
-         * Усе, що лишається після HSV, — округлення до цілих каналів, і ціна його тим
-         * вища, чим блякліший колір: у сірувато-синього Помилки (`#6699A1`, насиченість
-         * ~0,37) розкид каналів малий, тож півкванта на канал важить більше за градус.
-         * Три градуси — стеля цього ефекту; злам моделі коштував би десятки.
+         * All that is left after HSV is the rounding to whole channels, and its price is the
+         * higher the paler the colour: in the Error's greyish blue (`#6699A1`, saturation
+         * ~0.37) the channel spread is small, so half a quantum per channel weighs more than
+         * a degree. Three degrees is the ceiling of this effect; breaking the model would
+         * cost tens.
          */
         const val HUE_TOLERANCE = 3.0
     }

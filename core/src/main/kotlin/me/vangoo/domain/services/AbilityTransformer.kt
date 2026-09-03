@@ -4,9 +4,9 @@ import me.vangoo.domain.abilities.AbilitySpec
 import me.vangoo.domain.valueobjects.AbilityIdentity
 
 /**
- * Зшиває старий список здібностей із набором нової Послідовності: та сама
- * ідентичність — заміщення сильнішою версією, нова ідентичність — доповнення.
- * Порядок старого списку зберігається, дублікатів на виході немає.
+ * Stitches the old ability list together with the new Sequence's set: the same identity means
+ * replacement by the stronger version, a new identity means an addition.
+ * The order of the old list is preserved and there are no duplicates on the way out.
  */
 object AbilityTransformer {
 
@@ -14,8 +14,8 @@ object AbilityTransformer {
         current: List<AbilitySpec>,
         incoming: List<AbilitySpec>,
     ): List<AbilitySpec> {
-        // Останній переможець: у наборі «усе до поточної Послідовності» сильніша
-        // версія йде пізніше, тож саме вона і має лишитись.
+        // Last one wins: in a set of "everything up to the current Sequence" the stronger
+        // version comes later, so that is exactly the one that must remain.
         val byIdentity: Map<AbilityIdentity, AbilitySpec> =
             incoming.associateBy { it.identity }
 

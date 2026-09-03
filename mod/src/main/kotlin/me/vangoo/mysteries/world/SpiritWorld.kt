@@ -15,25 +15,26 @@ import java.util.UUID
 import kotlin.math.floor
 
 /**
- * **Духовний світ** — перший із світів мода за межами трьох ванільних.
+ * The **spirit world** — the first of the mod's worlds beyond the three vanilla ones.
  *
- * Біле, беззвучне дзеркало реального світу: та сама сітка координат, але без жодного
- * його блока. Мандрівник заходить сюди дверима, перетинає білу рівнину пішки й виходить
- * там, де захотів, — і виходить **у ту саму точку X/Z**, з якої дивився б, стоячи тут.
+ * A white, soundless mirror of the real world: the same coordinate grid, but without a single
+ * one of its blocks. The Traveller enters through a door, crosses the white plain on foot and
+ * leaves wherever they chose — and leaves **at the very same X/Z** they would be looking at
+ * standing here.
  *
- * ## Світ — це дані, а не код
+ * ## A world is data, not code
  *
- * Усе, чим він є, лежить у `data/mysteries_above/`: `dimension_type` (біла імла, вічний
- * полудень, `coordinate_scale: 1.0` — та сама сітка), `dimension` (генератор і біом),
- * `worldgen/noise_settings` (кальцит під сніговою кіркою, поверхня хвилею ±4 бл. навколо
- * y = 64) і `worldgen/biome` (жодної фічі, жодного спавну). Коду тут рівно стільки,
- * скільки треба, щоб гравця сюди привести й повернути назад.
+ * Everything it is lies in `data/mysteries_above/`: `dimension_type` (white haze, an eternal
+ * noon, `coordinate_scale: 1.0` — the same grid), `dimension` (the generator and the biome),
+ * `worldgen/noise_settings` (calcite under a snow crust, the surface waving ±4 blocks around
+ * y = 64) and `worldgen/biome` (no features, no spawns). There is exactly as much code here as
+ * it takes to bring the player in and take them back.
  *
- * ## Співвідношення 1 до 1 — по X і Z, не по Y
+ * ## A 1-to-1 ratio — in X and Z, not in Y
  *
- * Вертикаль не дзеркалиться навмисно: реальна печера на y = -40 у білому світі
- * дорівнювала б порожнечі під його підлогою. Гравець стає на білу поверхню в тих самих
- * X/Z, а Y отримує заново — і так само отримує його назад, виходячи.
+ * The vertical is deliberately not mirrored: a real cave at y = -40 would be emptiness under the
+ * white world's floor. The player lands on the white surface at the same X/Z and gets a new Y —
+ * and gets it anew again on the way out.
  */
 object SpiritWorld {
 
@@ -44,14 +45,15 @@ object SpiritWorld {
     fun holds(player: ServerPlayer): Boolean = player.level().dimension() == LEVEL
 
     /**
-     * Веде гравця в біле: ті самі X/Z, поверхня замість висоти, невагоме тіло.
+     * Takes the player into the white: the same X/Z, the surface instead of the height, a
+     * weightless body.
      *
-     * Режим стає **пригодницьким**: духовне тіло не тримає інструмента й не мурує стін,
-     * а біле не належить нікому, щоб його розбирати. Попередній режим запам'ятовується
-     * тут же — інакше повертати гравця було б нікуди.
+     * The game mode becomes **adventure**: a spirit body holds no tool and builds no walls, and
+     * the white belongs to nobody to be taken apart. The previous mode is remembered right here
+     * — otherwise there would be nowhere to bring the player back to.
      *
-     * ⚠ Порядок обов'язковий: `setGameMode` **скидає** здібності під новий режим
-     * (`GameType.updatePlayerAbilities`), тож політ дається після нього, а не до.
+     * ⚠ The order is mandatory: `setGameMode` **resets** the abilities for the new mode
+     * (`GameType.updatePlayerAbilities`), so flight is granted after it, not before.
      */
     fun enter(player: ServerPlayer, spirit: ServerLevel) {
         modes.putIfAbsent(player.uuid, player.gameMode())
@@ -62,11 +64,11 @@ object SpiritWorld {
         player.onUpdateAbilities()
     }
 
-    /** Виводить гравця назад у [home] — знову в ті самі X/Z, у свій режим і свою вагу. */
+    /** Takes the player back to [home] — again to the same X/Z, in their own mode and their own weight. */
     fun leave(player: ServerPlayer, home: ServerLevel) {
         place(player, home)
-        // Режим сервера — запасний варіант рівно на один випадок: сервер перезапустили,
-        // поки гравець був у білому, і пам'ять про його режим не пережила цього.
+        // The server's mode is a fallback for exactly one case: the server was restarted while
+        // the player was in the white, and the memory of their mode did not survive it.
         player.setGameMode(modes.remove(player.uuid) ?: home.server.defaultGameType)
         player.abilities.flying = false
         player.abilities.setFlyingSpeed(VANILLA_FLY_SPEED)
@@ -74,11 +76,11 @@ object SpiritWorld {
     }
 
     /**
-     * Швидкість польоту за поділкою [notch] (0–8).
+     * Flight speed by the notch [notch] (0–8).
      *
-     * Коліщатко в духовному світі не має чим перемикати предмети, зате сервер бачить
-     * його як зміну активного слота — тож саме воно й керує швидкістю, як у режимі
-     * спостерігача. Своєї клавіші й свого пакета для цього не треба.
+     * In the spirit world the scroll wheel has nothing to switch items with, but the server sees
+     * it as a change of the active slot — so that is what controls the speed, as in spectator
+     * mode. No key and no packet of our own is needed for it.
      */
     fun drift(player: ServerPlayer, notch: Int) {
         val speed = flySpeed(notch)
@@ -91,13 +93,13 @@ object SpiritWorld {
         SLOWEST_FLY_SPEED + notch.coerceIn(0, NOTCHES - 1) * FLY_SPEED_STEP
 
     /**
-     * Перша вільна висота над ґрунтом у цій колонці.
+     * The first free height above the ground in this column.
      *
-     * ⚠ `Level.getHeight` питає heightmap **лише в завантаженого** чанку, а інакше мовчки
-     * віддає `sea_level + 1`. У духовному світі це y = 1, тобто дно під усією товщею
-     * кальциту: гравець з'являвся замурованим і задихався, і те саме траплялось на
-     * поверненні. Тому чанк спершу вантажиться (за потреби генерується) — телепорт усе
-     * одно завантажить його за мить, — і лише потім питається висота.
+     * ⚠ `Level.getHeight` queries the heightmap **only in a loaded** chunk, and otherwise
+     * silently returns `sea_level + 1`. In the spirit world that is y = 1, i.e. the bottom under
+     * the whole thickness of calcite: the player appeared walled in and suffocated, and the same
+     * happened on the way back. So the chunk is loaded first (generated if needed) — the
+     * teleport would load it a moment later anyway — and only then the height is asked for.
      */
     fun surface(level: ServerLevel, x: Double, z: Double): Double {
         val bx = floor(x).toInt()
@@ -107,7 +109,7 @@ object SpiritWorld {
         return roomFor(level, bx, top, bz).toDouble()
     }
 
-    /** Перше місце від [from] угору, де гравцеві вистачає двох клітин. */
+    /** The first place from [from] upwards where the player has two free cells. */
     private fun roomFor(level: ServerLevel, x: Int, from: Int, z: Int): Int {
         val cursor = BlockPos.MutableBlockPos()
         val ceiling = level.maxY - 2
@@ -122,8 +124,8 @@ object SpiritWorld {
     }
 
     /**
-     * Гравець, що вийшов із гри посеред подорожі, інакше лишився б у білому назавжди:
-     * сесія гасне разом із його з'єднанням, і повертати його вже нікому.
+     * A player who left the game mid-journey would otherwise stay in the white forever: the
+     * session goes out together with their connection, and there is nobody left to bring them back.
      */
     fun guardStranded() {
         ServerPlayConnectionEvents.JOIN.register { handler, _, server ->
@@ -139,14 +141,15 @@ object SpiritWorld {
     }
 
     /**
-     * Чий режим повернути, коли гравець вийде.
+     * Whose mode to restore when the player leaves.
      *
-     * Живе рівно в пам'яті сервера: подорож коротша за нього, а гравця, який вийшов
-     * із гри посеред неї, повертає [guardStranded] — уже режимом сервера.
+     * It lives purely in the server's memory: a journey is shorter than that, and a player who
+     * left the game in the middle of one is brought back by [guardStranded] — with the server's
+     * mode by then.
      */
     private val modes = HashMap<UUID, GameType>()
 
-    /** Скільки поділок швидкості дає коліщатко: рівно стільки, скільки слотів у поясі. */
+    /** How many speed notches the wheel gives: exactly as many as there are hotbar slots. */
     private const val NOTCHES = 9
     private const val DEFAULT_NOTCH = 2
     private const val SLOWEST_FLY_SPEED = 0.05f

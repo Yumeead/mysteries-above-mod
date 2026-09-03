@@ -1,9 +1,9 @@
 package me.vangoo.domain.valueobjects
 
 /**
- * НЕ data class: конструктор нормалізує межі (від'ємний minItems → 0, maxItems не менший
- * за minItems), а згенерований `copy()` пройшов би повз нормалізацію — та сама причина,
- * що й у [Mastery].
+ * NOT a data class: the constructor normalises the bounds (a negative minItems → 0, maxItems
+ * never below minItems), and the generated `copy()` would go around the normalisation — the
+ * same reason as in [Mastery].
  */
 class LootTableData(
     val items: List<LootItem>,
@@ -13,7 +13,7 @@ class LootTableData(
     val minItems: Int = maxOf(0, minItems)
     val maxItems: Int = maxOf(this.minItems, maxItems)
 
-    /** Підмножина таблиці лише з предметами дозволених тірів (зберігає minItems/maxItems). */
+    /** A subset of the table with items of the allowed tiers only (keeps minItems/maxItems). */
     fun filterByTier(allowed: Set<LootTier>): LootTableData =
         LootTableData(items.filter { it.tier in allowed }, minItems, maxItems)
 

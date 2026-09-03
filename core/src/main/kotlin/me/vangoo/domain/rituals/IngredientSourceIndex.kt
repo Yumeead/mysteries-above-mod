@@ -4,11 +4,11 @@ import me.vangoo.domain.creatures.CreatureDefinition
 import me.vangoo.domain.forage.ForageEntry
 
 /**
- * Звідки береться інгредієнт: із луту істоти чи з фореджу. Джерело Ритуалу одкровення
- * ([RitualType.BESTOWMENT]).
+ * Where an ingredient comes from: a creature's loot or foraging. The source for the Ritual of
+ * Revelation ([RitualType.BESTOWMENT]).
  *
- * Чистий домен: біоми лишаються сирими ключами, а текст натяку складає шар ефектів.
- * Індекс будується раз на старті.
+ * Pure domain: biomes stay raw keys, and the effect layer composes the hint text.
+ * The index is built once at startup.
  */
 class IngredientSourceIndex(
     creatures: Collection<CreatureDefinition>,
@@ -16,12 +16,12 @@ class IngredientSourceIndex(
 ) {
     enum class Kind { CREATURE, FORAGE }
 
-    /** Рід джерела + біоми, де його шукати (без дублікатів, у порядку конфіга). */
+    /** The kind of source + the biomes to look in (no duplicates, in config order). */
     data class Source(val kind: Kind, val biomes: List<String>)
 
     private val byIngredient: Map<String, Source> = buildMap {
-        // Форедж кладемо першим: істота його перекриває — якщо інгредієнт падає з моба,
-        // це головна підказка.
+        // Foraging goes first: a creature overrides it — if the ingredient drops from a mob,
+        // that is the main hint.
         putAll(index(Kind.FORAGE, forageBiomes.flatMap { (biome, entries) -> entries.map { it.ingredientId to biome } }))
         putAll(
             index(
@@ -35,11 +35,11 @@ class IngredientSourceIndex(
         )
     }
 
-    /** Порожньо для інгредієнта, який трапляється лише в скринях (глобальний лут без місця). */
+    /** Empty for an ingredient found only in chests (global loot with no place of its own). */
     fun sourceOf(ingredientId: String): Source? = byIngredient[ingredientId]
 
     private companion object {
-        /** Групує пари «інгредієнт → біом» у джерела, зберігаючи порядок і прибираючи дублікати. */
+        /** Groups "ingredient → biome" pairs into sources, keeping the order and dropping duplicates. */
         fun index(kind: Kind, pairs: List<Pair<String, String>>): Map<String, Source> =
             pairs.groupBy({ it.first }, { it.second })
                 .mapValues { (_, biomes) -> Source(kind, biomes.distinct()) }

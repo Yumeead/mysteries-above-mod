@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 
 /**
- * Баланс заклинань тестується без сервера — у плагіні `calculateStats` був замкнений
- * у GUI-класі `Spellcasting` і покрити його було неможливо.
+ * Spell balance is tested without a server — in the plugin `calculateStats` was locked inside
+ * the `Spellcasting` GUI class and could not be covered at all.
  */
 internal class SpellRecipeTest {
 
@@ -113,7 +113,7 @@ internal class SpellRecipeTest {
         )
 
         assertEquals(
-            listOf("Тип" to "Телепорт", "Радіус" to "15.0м"),
+            listOf("Тип" to "Телепорт", "Радіус" to "15.0 бл."),
             SpellCodec.describe(teleport),
         )
     }

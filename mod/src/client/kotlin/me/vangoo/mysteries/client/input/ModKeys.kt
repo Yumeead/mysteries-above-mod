@@ -13,28 +13,30 @@ import net.minecraft.client.KeyMapping
 import org.lwjgl.glfw.GLFW
 
 /**
- * Клавіші мода.
+ * The mod's keys.
  *
- * Одна клавіша, дві дії: **натиснув і відпустив — каст**, **затиснув — меню**. Так само
- * поводиться ванільний інвентар мобільної збірки й половина модів із колесом здібностей,
- * і причина та сама: у бою рука не має шукати другу клавішу, а меню в бою не потрібне.
+ * One key, two actions: **press and release — cast**, **hold — menu**. The vanilla inventory of
+ * the mobile build behaves the same way, as does half the mods with an ability wheel, and for
+ * the same reason: in a fight the hand must not go looking for a second key, and a menu is not
+ * wanted in a fight.
  *
- * ## Чому не «каст на R, меню на клавішу X»
+ * ## Why not "cast on R, menu on key X"
  *
- * Так і було, і саме з цього виросла вада: меню відкривалось **разом** із кастом. Не
- * через клавішу — через те, що серверний шлях касту слав `BEYONDER_STATUS`, а клієнт на
- * цей пакет відкриває екран. Клавіші тут лише половина виправлення; друга половина в
- * `AbilityRequests`, який більше не шле знімок статусу після кожного удару.
+ * That is how it was, and that is exactly what the flaw grew out of: the menu opened
+ * **together** with the cast. Not because of the key — because the server's cast path sent
+ * `BEYONDER_STATUS`, and the client opens a screen on that packet. The keys are only half the
+ * fix; the other half is in `AbilityRequests`, which no longer sends a status snapshot after
+ * every blow.
  *
- * ## Рішення ухвалюється на відпусканні, а не на натисканні
+ * ## The decision is made on release, not on press
  *
- * Інакше «затиснув» неможливо відрізнити від «натиснув»: у мить натискання ще невідомо,
- * чим воно стане. Тому каст іде на відпусканні, якщо клавішу тримали менше [HOLD_TICKS]
- * тіків — чверть секунди, тобто менше, ніж людина утримує навмисно, і більше, ніж триває
- * звичайний клац.
+ * Otherwise "held" cannot be told from "pressed": at the moment of the press it is not yet known
+ * which it will become. So the cast happens on release, if the key was held for less than
+ * [HOLD_TICKS] ticks — a quarter of a second, i.e. less than a person holds deliberately and
+ * more than an ordinary click lasts.
  *
- * На 26.2 категорія клавіш — не рядок, а `KeyMapping.Category` зі своїм `Identifier`;
- * її підпис береться з ключа `key.category.<namespace>.<path>`.
+ * On 26.2 a key category is not a string but a `KeyMapping.Category` with its own `Identifier`;
+ * its caption comes from the `key.category.<namespace>.<path>` key.
  */
 object ModKeys {
 
@@ -44,16 +46,16 @@ object ModKeys {
         KeyMapping("key.$MOD_ID.cast", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, CATEGORY),
     )
 
-    /** Скільки тіків клавіша вже втиснута. Нуль — відпущена. */
+    /** How many ticks the key has been held down. Zero — released. */
     private var heldTicks = 0
 
-    /** Меню вже відкрито цим утриманням: відпускання після нього не має кастувати. */
+    /** The menu has already been opened by this hold: releasing after it must not cast. */
     private var opened = false
 
     fun register() {
         ClientTickEvents.END_CLIENT_TICK.register {
-            // Чергу кліків треба вичерпувати, інакше вона копичиться й одного разу
-            // вихлюпне пачку кастів. Саме рішення ухвалюється по [heldTicks], не по ній.
+            // The click queue must be drained, otherwise it piles up and one day spills out a
+            // batch of casts. The decision itself is made from [heldTicks], not from the queue.
             @Suppress("ControlFlowWithEmptyBody")
             while (CAST.consumeClick()) { }
 
@@ -61,13 +63,13 @@ object ModKeys {
                 heldTicks++
                 if (heldTicks >= HOLD_TICKS && !opened) {
                     opened = true
-                    // Екран відкриває сервер у відповідь: тільки він знає ростер.
+                    // The server opens the screen in its reply: only it knows the roster.
                     ModChannels.STATUS_REQUEST.sendToServer(StatusRequestPayload)
                 }
                 return@register
             }
 
-            // Клавіша відпущена. Каст — лише якщо це був клац, а не утримання.
+            // The key was released. A cast only if this was a click, not a hold.
             if (heldTicks in 1 until HOLD_TICKS && !opened) {
                 ModChannels.CAST_REQUEST.sendToServer(CastRequestPayload.INSTANCE)
             }
@@ -76,6 +78,6 @@ object ModKeys {
         }
     }
 
-    /** Чверть секунди: довше за клац, коротше за навмисне утримання. */
+    /** A quarter of a second: longer than a click, shorter than a deliberate hold. */
     private const val HOLD_TICKS = 5
 }

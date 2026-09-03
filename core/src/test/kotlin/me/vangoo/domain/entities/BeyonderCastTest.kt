@@ -15,9 +15,9 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 /**
- * Життєвий цикл касту. У плагіні його тримав коментар «КРИТИЧНО: НЕ встановлювати
- * кулдаун якщо результат deferred» — тут це квиток, і саме цей файл стереже, що
- * невитрачений квиток нічого не коштує, а витрачений не витрачається вдруге.
+ * The lifecycle of a cast. In the plugin it was held together by the comment "CRITICAL: do NOT
+ * set the cooldown if the result is deferred" — here it is a ticket, and this very file guards
+ * that an unspent ticket costs nothing and a spent one is never spent twice.
  */
 class BeyonderCastTest {
 
@@ -56,7 +56,7 @@ class BeyonderCastTest {
         val before = b.spirituality.current
 
         val ticket = ticketFor(b, spell)
-        // Здібність відкрила меню й гравець його закрив: квиток просто зникає.
+        // The ability opened a menu and the player closed it: the ticket simply disappears.
 
         assertFalse(ticket.isSettled)
         assertEquals(before, b.spirituality.current)

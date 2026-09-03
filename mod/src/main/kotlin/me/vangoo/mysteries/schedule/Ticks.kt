@@ -2,20 +2,20 @@ package me.vangoo.mysteries.schedule
 
 import kotlin.math.max
 
-/** Тіків на секунду. Ванільна константа, але вписувати `20` по місцях не варто. */
+/** Ticks per second. A vanilla constant, but writing `20` all over the place is not worth it. */
 const val TICKS_PER_SECOND: Int = 20
 
-/** Мілісекунд на тік — курс, за яким `delay()` переводиться в тіки. */
+/** Milliseconds per tick — the rate `delay()` is converted into ticks at. */
 const val MILLIS_PER_TICK: Long = 50L
 
-/** Секунди в тіки. Від'ємне часу не займає. */
+/** Seconds into ticks. A negative value takes no time. */
 fun seconds(count: Int): Int = max(0, count) * TICKS_PER_SECOND
 
 /**
- * Мілісекунди в тіки, вгору.
+ * Milliseconds into ticks, rounding up.
  *
- * Округлення саме вгору: `delay(1)` мусить чекати тік, а не пройти наскрізь — інакше
- * `while (true) { delay(1) }` заклинить тік сервера намертво.
+ * Rounding up precisely: `delay(1)` must wait a tick rather than pass straight through —
+ * otherwise `while (true) { delay(1) }` would jam the server tick solid.
  */
 fun millisToTicks(millis: Long): Int = when {
     millis <= 0L -> 0

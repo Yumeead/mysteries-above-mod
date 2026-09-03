@@ -3,12 +3,13 @@ package me.vangoo.domain.creatures
 import java.util.UUID
 
 /**
- * Кандидат-магніт Закону Конвергенції: онлайн-Beyonder, до якого може тяжіти резонансне джерело.
+ * A magnet candidate for the Law of Convergence: an online Beyonder a resonant source may be
+ * drawn to.
  *
- * @property id UUID гравця
- * @property pathway назва шляху (порівняння без регістру)
- * @property group назва групи шляхів (для резонансу «сусід»)
- * @property sequenceLevel поточний рівень послідовності (9 = найслабший, 0 = найсильніший)
+ * @property id the player's UUID
+ * @property pathway the pathway name (compared case-insensitively)
+ * @property group the pathway group name (for "neighbour" resonance)
+ * @property sequenceLevel the current sequence level (9 = weakest, 0 = strongest)
  */
 data class ResonantBeyonder(
     val id: UUID,

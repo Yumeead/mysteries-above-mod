@@ -9,11 +9,11 @@ import net.minecraft.core.particles.ParticleOptions
 import net.minecraft.world.entity.LivingEntity
 
 /**
- * Фігури, налаштовані під одного кастера: звідси вони знають його колір шляху.
+ * Shapes tuned for one caster: this is where they learn their pathway colour.
  *
- * Самі фігури живуть у `mysteries/effect` і про контекст нічого не знають — цей клас
- * лише підставляє їм планувальник і типовий колір. Тому фігуру можна намалювати й
- * поза здібністю (ритуал, предмет, істота), не заводячи заради цього контексту.
+ * The shapes themselves live in `mysteries/effect` and know nothing about the context — this
+ * class only supplies them with a scheduler and a default colour. That is why a shape can be
+ * drawn outside an ability too (a ritual, an item, a creature) without setting up a context for it.
  */
 internal class LiveEffects(
     private val scheduling: Scheduling,

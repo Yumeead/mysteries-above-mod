@@ -9,27 +9,27 @@ import java.util.UUID
 import kotlin.reflect.KClass
 
 /**
- * Реєстр підписок: хто на що чекає й доки.
+ * The subscription registry: who is waiting for what, and until when.
  *
- * Спадкоємець плагінного `TemporaryEventManager`, але без його центральної механіки.
- * Там на кожен новий клас події реєструвався динамічний `Listener` через
- * `Bukkit.getPluginManager().registerEvent(...)` — рефлексія була **обов'язкова**, бо
- * події визначає платформа, і їх тисяча. Тут події визначає мод, їх видно у `GameEvent`,
- * і ключем слугує звичайний [KClass] у мапі.
+ * A descendant of the plugin's `TemporaryEventManager`, but without its central mechanism.
+ * There a dynamic `Listener` was registered for every new event class through
+ * `Bukkit.getPluginManager().registerEvent(...)` — reflection was **mandatory**, because the
+ * platform defines the events and there are a thousand of them. Here the mod defines the events,
+ * they are all visible in `GameEvent`, and an ordinary [KClass] serves as the map key.
  *
- * ## Три властивості, за які він відповідає
+ * ## The three properties it is responsible for
  *
- * 1. **Підписка не переживає свою здібність.** Ключ — пара «власник + здібність»,
- *    тож [forget] знімає рівно те, що належить одному з них, і ніколи чуже.
- * 2. **Строк спливає сам.** Годинник — [now], серверний тік: гра на паузі підписок не
- *    старить. Прибираються вони **ліниво**, під час розсилки, а не окремим завданням у
- *    планувальнику: підписка, чий строк вийшов, не спрацює в жодному разі, тож платити
- *    за неї тіком не треба.
- * 3. **Одна впала здібність не спиняє решту.** Той самий інваріант, що в `PassiveTicker`
- *    і `TickScheduler`, і та сама причина: подія шкоди прилітає всім одразу.
+ * 1. **A subscription does not outlive its ability.** The key is an "owner + ability" pair, so
+ *    [forget] removes exactly what belongs to one of them, and never anything foreign.
+ * 2. **A term expires by itself.** The clock is [now], the server tick: a paused game does not
+ *    age subscriptions. They are removed **lazily**, during dispatch rather than by a separate
+ *    scheduled job: a subscription whose term has run out will not fire in any case, so there is
+ *    no need to pay a tick for it.
+ * 3. **One fallen ability does not stop the rest.** The same invariant as in `PassiveTicker`
+ *    and `TickScheduler`, and for the same reason: a damage event arrives to everyone at once.
  *
- * Minecraft тут не потрібен — [GameEvent] платформних типів не має, тож реєстр
- * перевіряється звичайним юніт-тестом, як черга тіків і сесії.
+ * Minecraft is not needed here — [GameEvent] has no platform types, so the registry is checked
+ * by an ordinary unit test, like the tick queue and the sessions.
  */
 class EventHub(
     private val now: () -> Long,
@@ -56,7 +56,7 @@ class EventHub(
 
     private val byType = HashMap<KClass<out GameEvent>, MutableList<Entry>>()
 
-    // ── Підписка ────────────────────────────────────────────────────────────────
+    // ── Subscription ────────────────────────────────────────────────────────────
 
     fun <E : GameEvent> subscribe(
         owner: UUID,
@@ -76,7 +76,7 @@ class EventHub(
         return entry
     }
 
-    /** Погляд на реєстр очима однієї здібності одного гравця — те, що бачить контекст. */
+    /** A view of the registry through the eyes of one ability of one player — what the context sees. */
     fun scopeOf(owner: UUID, ability: AbilityIdentity): Events = Scope(owner, ability)
 
     private inner class Scope(
@@ -90,16 +90,16 @@ class EventHub(
         ): Subscription = this@EventHub.subscribe(owner, ability, type, durationTicks, handler)
     }
 
-    // ── Розсилка ────────────────────────────────────────────────────────────────
+    // ── Dispatch ────────────────────────────────────────────────────────────────
 
     /**
-     * Роздає подію всім, хто чекає саме на її тип.
+     * Hands the event to everyone waiting for exactly its type.
      *
-     * Ключ — точний клас події, без обходу ієрархії: `GameEvent` — плоский список
-     * фінальних типів, і підписка на «щось спільне» тут просто не має значення.
+     * The key is the exact event class, with no walk up the hierarchy: `GameEvent` is a flat
+     * list of final types, and subscribing to "something common" simply has no meaning here.
      *
-     * Обробник має право під час розсилки і відписатись, і підписатись — тому список
-     * обходиться знімком, а нові підписки цю ж подію вже не бачать.
+     * A handler may both unsubscribe and subscribe during dispatch — hence the list is walked
+     * over a snapshot, and new subscriptions do not see this same event.
      */
     fun publish(event: GameEvent) {
         val waiting = byType[event::class] ?: return
@@ -110,7 +110,7 @@ class EventHub(
             try {
                 entry.handler(event)
             } catch (error: Throwable) {
-                onError("Обробник події ${event::class.simpleName} впав: ${entry.ability}", error)
+                onError("Handler for ${event::class.simpleName} threw: ${entry.ability}", error)
                 entry.cancel()
             }
         }
@@ -119,19 +119,19 @@ class EventHub(
         if (waiting.isEmpty()) byType.remove(event::class)
     }
 
-    // ── Прибирання ──────────────────────────────────────────────────────────────
+    // ── Cleanup ─────────────────────────────────────────────────────────────────
 
-    /** Знімає підписки однієї здібності: активація наново, втрата здібності. */
+    /** Removes one ability's subscriptions: re-activation, losing the ability. */
     fun forget(owner: UUID, ability: AbilityIdentity) =
         drop { it.owner == owner && it.ability == ability }
 
-    /** Знімає всі підписки гравця: вихід зі світу, втрата статусу Потойбічного. */
+    /** Removes all of a player's subscriptions: leaving the world, losing Beyonder status. */
     fun forget(owner: UUID) = drop { it.owner == owner }
 
-    /** Зупинка сервера. Інтегрований сервер піднімається знову в тому самому процесі. */
+    /** Server shutdown. An integrated server comes up again inside the same process. */
     fun clear() = byType.clear()
 
-    /** Скільки підписок живе зараз — для діагностики й тестів. */
+    /** How many subscriptions are alive right now — for diagnostics and tests. */
     val live: Int get() = byType.values.sumOf { list -> list.count { it.isActive } }
 
     private fun drop(matches: (Entry) -> Boolean) {

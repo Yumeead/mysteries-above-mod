@@ -1,13 +1,13 @@
 package me.vangoo.domain.abilities
 
 enum class AbilityType {
-    /** Вимагає явної активації гравцем; коштує духовності й лишає кулдаун. */
+    /** Requires explicit activation by the player; costs spirituality and leaves a cooldown. */
     ACTIVE,
 
-    /** Пасивка з перемикачем — гравець вмикає й вимикає сам. */
+    /** A passive with a switch — the player turns it on and off. */
     TOGGLEABLE_PASSIVE,
 
-    /** Пасивка, що працює завжди, поки здібність є в Потойбічного. */
+    /** A passive that works at all times, as long as the Beyonder has the ability. */
     PERMANENT_PASSIVE,
     ;
 

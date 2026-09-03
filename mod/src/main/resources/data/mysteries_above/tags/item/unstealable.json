@@ -1,0 +1,20 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:elytra",
+    "minecraft:totem_of_undying",
+    "minecraft:nether_star",
+    "minecraft:netherite_ingot",
+    "minecraft:netherite_scrap",
+    "minecraft:netherite_sword",
+    "minecraft:netherite_axe",
+    "minecraft:netherite_pickaxe",
+    "minecraft:netherite_shovel",
+    "minecraft:netherite_hoe",
+    "minecraft:netherite_helmet",
+    "minecraft:netherite_chestplate",
+    "minecraft:netherite_leggings",
+    "minecraft:netherite_boots",
+    "minecraft:netherite_upgrade_smithing_template"
+  ]
+}

@@ -8,39 +8,39 @@ import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
 /**
- * Балансні числа Послідовності 7 шляху Смерті (Медіум Духів).
+ * Balance numbers for Sequence 7 of the Death pathway (Spirit Medium).
  *
- * Одне джерело правди для тіру: Сприйняття духів (пасивка), Прикликання духів (Ілюзорне око,
- * Морозна тінь, Земляний дух), Голос мертвих (дві гілки допиту) і Трупна личина. Чиста
- * математика — без платформи; ефекти живуть у `pathways.death.abilities`.
+ * One source of truth for the tier: Spirit Perception (passive), Spirit Summoning (Illusory
+ * Eye, Frost Shadow, Earth Spirit), Voice of the Dead (two interrogation branches) and the
+ * Corpse Guise. Pure math — no platform; the effects live in `pathways.death.abilities`.
  *
- * Посл. 7 — перша для цього тіру, тож усі базові числа задані саме для неї, а [growth]
- * лише піднімає їх для сильніших Послідовностей (на Посл. 7 множник рівно 1.0). Числа
- * слабших тірів живуть окремо, у [GravediggerLore] і [CorpseCollectorLore].
+ * Seq. 7 is the first of this tier, so every base number is stated for it and [growth] only
+ * raises them for stronger Sequences (at Seq. 7 the multiplier is exactly 1.0). The numbers
+ * of weaker tiers live separately, in [GravediggerLore] and [CorpseCollectorLore].
  */
 object SpiritMediumLore {
 
-    /** Послідовність, на якій тір з'являється; усі базові числа задані для неї. */
+    /** The Sequence the tier appears at; every base number is stated for it. */
     private const val BASE_SEQUENCE = 7
 
-    // --- Тіло медіума (PhysicalEnhancement, спільний identity "death_physique") ---
-    /** База бонусного HP. Свідомо мала надбавка понад Посл. 8 (6): вікі каже not significant. */
+    // --- Spirit medium body (PhysicalEnhancement, shared identity "death_physique") ---
+    /** Base bonus HP. A deliberately small step above Seq. 8 (6): the wiki says not significant. */
     const val PHYSIQUE_HP_BASE = 7
 
-    // --- Сприйняття духів (постійна пасивка, безкоштовна) ---
+    // --- Spirit Perception (permanent passive, free) ---
     private const val PERCEPTION_RADIUS = 24.0
     private const val PERCEPTION_RADIUS_CAP = 48.0
 
-    // --- Голос мертвих: душа, що затрималась на місці смерті ---
+    // --- Voice of the Dead: a soul lingering at the place of death ---
     /**
-     * Скільки душа висить на місці смерті (сек). Від Послідовності НЕ залежить: це строк самої
-     * душі, а не сила медіума. Не персиститься — рестарт її стирає.
+     * How long the soul hangs at the place of death (sec). It does NOT depend on the Sequence:
+     * this is the soul's own lifetime, not the medium's power. Not persisted — a restart wipes it.
      */
     const val SOUL_TTL_SECONDS = 30 * 60
 
-    // --- Прикликання духів: спільна ціна не задається, кожен дух має свою ---
+    // --- Spirit Summoning: no shared cost is set, each spirit has its own ---
 
-    // --- Ілюзорне око (розвідка) ---
+    // --- Illusory Eye (scouting) ---
     const val ILLUSORY_EYE_COST = 30
     private const val ILLUSORY_EYE_COOLDOWN_SECONDS = 40
     private const val ILLUSORY_EYE_COOLDOWN_FLOOR_SECONDS = 15
@@ -48,37 +48,37 @@ object SpiritMediumLore {
     private const val ILLUSORY_EYE_RADIUS = 48.0
     private const val ILLUSORY_EYE_RADIUS_CAP = 64.0
 
-    // --- Морозна тінь (домен холоду + крижаний обладунок + коса) ---
+    // --- Frost Shadow (a domain of cold + ice armour + scythe) ---
     const val FROST_SHADOW_COST = 90
     private const val FROST_COOLDOWN_SECONDS = 50
     private const val FROST_COOLDOWN_FLOOR_SECONDS = 30
     private const val FROST_DURATION_SECONDS = 12
 
-    /** Радіус домену росте MODERATE саме щоб дійти до вікіних 10-20 meter range. */
+    /** The domain radius grows MODERATE precisely to reach the wiki's 10-20 meter range. */
     private const val FROST_RADIUS = 10.0
     private const val FROST_RADIUS_CAP = 20.0
     private const val FROST_TICK_DAMAGE = 1.0
     private const val FROST_TICK_DAMAGE_CAP = 3.0
 
-    /** Надбавка до урону морозної коси понад 1.0: Посл. 7 = +40%. */
+    /** Damage bonus of the frost scythe above 1.0: Seq. 7 = +40%. */
     private const val SCYTHE_DAMAGE_BONUS = 0.4
     private const val SCYTHE_DAMAGE_MULTIPLIER_CAP = 2.5
 
-    // --- Земляний дух (затягування в землю; коштує крові) ---
+    // --- Earth Spirit (dragging into the ground; costs blood) ---
     const val EARTH_SPIRIT_COST = 80
 
-    /** Ціна кров'ю в HP (2 = серце). Стала: кров — це кров, сильнішому медіуму її не менше. */
+    /** Blood price in HP (2 = a heart). Constant: blood is blood, a stronger medium pays no less. */
     const val EARTH_SPIRIT_BLOOD_HP = 4
     private const val EARTH_COOLDOWN_SECONDS = 55
     private const val EARTH_COOLDOWN_FLOOR_SECONDS = 20
     private const val EARTH_HOLD_SECONDS = 5
 
-    /** Радіус болота навколо схопленого (блоки): сусіди грузнуть, але в землю не йдуть. */
+    /** Radius of the mire around the caught target (blocks): neighbours bog down but do not sink. */
     const val EARTH_SWAMP_RADIUS = 4.0
     private const val EARTH_RANGE = 12.0
     private const val EARTH_RANGE_CAP = 24.0
 
-    // --- Голос мертвих ---
+    // --- Voice of the Dead ---
     const val VOICE_COST = 100
     private const val VOICE_DEAD_COOLDOWN_SECONDS = 500
     private const val VOICE_DEAD_COOLDOWN_FLOOR_SECONDS = 40
@@ -89,88 +89,89 @@ object SpiritMediumLore {
     private const val VOICE_LIVING_RANGE = 16.0
     private const val VOICE_LIVING_RANGE_CAP = 32.0
 
-    /** Розсудок за кожну Послідовність переваги цілі; сильніша воля відбиває допит боляче. */
+    /** Sanity per Sequence of the target's advantage; a stronger will throws the interrogation back hard. */
     private const val VOICE_BACKLASH_PER_LEVEL = 8
     private const val VOICE_BACKLASH_CAP = 40
 
-    // --- Трупна личина (тогл) ---
+    // --- Corpse Guise (toggle) ---
     const val GUISE_ACTIVATION_COST = 10
 
-    /** Періодична ціна тогла за секунду; від Послідовності не залежить. */
+    /** Periodic upkeep of the toggle per second; independent of the Sequence. */
     const val GUISE_PERIODIC_COST = 10
 
-    /** Антиспам перемикача, не сила — тому стала. */
+    /** Anti-spam for the toggle, not power — hence constant. */
     const val GUISE_COOLDOWN_SECONDS = 5
 
-    /** Радіус Сприйняття духів (блоки): Посл. 7 = 24, росте WEAK до стелі 48. */
+    /** Spirit Perception radius (blocks): Seq. 7 = 24, grows WEAK up to a 48 ceiling. */
     fun perceptionRadius(sequence: Sequence): Double =
         min(PERCEPTION_RADIUS_CAP, PERCEPTION_RADIUS * growth(sequence, ScalingStrategy.WEAK))
 
-    /** Кулдаун Ілюзорного ока (сек): Посл. 7 = 45, коротшає WEAK, не нижче підлоги. */
+    /** Illusory Eye cooldown (sec): Seq. 7 = 45, shortens WEAK, never below the floor. */
     fun illusoryEyeCooldownSeconds(sequence: Sequence): Int =
         shrink(ILLUSORY_EYE_COOLDOWN_SECONDS, ILLUSORY_EYE_COOLDOWN_FLOOR_SECONDS, sequence)
 
-    /** Скільки око світить цілі (сек): Посл. 7 = 15, росте MODERATE. */
+    /** How long the eye lights the target (sec): Seq. 7 = 15, grows MODERATE. */
     fun illusoryEyeDurationSeconds(sequence: Sequence): Int =
         (ILLUSORY_EYE_DURATION_SECONDS * growth(sequence, ScalingStrategy.MODERATE)).roundToInt()
 
-    /** Радіус, у якому око підсвічує живе (блоки): Посл. 7 = 48, росте WEAK до стелі 64. */
+    /** Radius in which the eye highlights the living (blocks): Seq. 7 = 48, grows WEAK up to a 64 ceiling. */
     fun illusoryEyeRadius(sequence: Sequence): Double =
         min(ILLUSORY_EYE_RADIUS_CAP, ILLUSORY_EYE_RADIUS * growth(sequence, ScalingStrategy.WEAK))
 
-    /** Кулдаун Морозної тіні (сек): Посл. 7 = 90, коротшає WEAK, не нижче підлоги. */
+    /** Frost Shadow cooldown (sec): Seq. 7 = 90, shortens WEAK, never below the floor. */
     fun frostCooldownSeconds(sequence: Sequence): Int =
         shrink(FROST_COOLDOWN_SECONDS, FROST_COOLDOWN_FLOOR_SECONDS, sequence)
 
-    /** Скільки домен тримається (сек): Посл. 7 = 12, росте MODERATE. */
+    /** How long the domain holds (sec): Seq. 7 = 12, grows MODERATE. */
     fun frostDurationSeconds(sequence: Sequence): Int =
         (FROST_DURATION_SECONDS * growth(sequence, ScalingStrategy.MODERATE)).roundToInt()
 
-    /** Радіус мороженого домену (блоки): Посл. 7 = 10, росте MODERATE до вікіної стелі 20. */
+    /** Radius of the frozen domain (blocks): Seq. 7 = 10, grows MODERATE up to the wiki's 20 ceiling. */
     fun frostRadius(sequence: Sequence): Double =
         min(FROST_RADIUS_CAP, FROST_RADIUS * growth(sequence, ScalingStrategy.MODERATE))
 
-    /** Урон холоду за секунду в домені: Посл. 7 = 1.0 (пів серця), росте WEAK до стелі 3.0. */
+    /** Cold damage per second inside the domain: Seq. 7 = 1.0 (half a heart), grows WEAK up to a 3.0 ceiling. */
     fun frostTickDamage(sequence: Sequence): Double =
         min(FROST_TICK_DAMAGE_CAP, FROST_TICK_DAMAGE * growth(sequence, ScalingStrategy.WEAK))
 
-    /** Множник ближнього удару морозною косою: Посл. 7 = 1.4, надбавка росте WEAK до стелі 2.5. */
+    /** Melee multiplier of the frost scythe: Seq. 7 = 1.4, the bonus grows WEAK up to a 2.5 ceiling. */
     fun scytheDamageMultiplier(sequence: Sequence): Double {
         val bonus = SCYTHE_DAMAGE_BONUS * growth(sequence, ScalingStrategy.WEAK)
         return min(SCYTHE_DAMAGE_MULTIPLIER_CAP, 1.0 + bonus)
     }
 
-    /** Кулдаун Земляного духа (сек): Посл. 7 = 60, коротшає WEAK, не нижче підлоги. */
+    /** Earth Spirit cooldown (sec): Seq. 7 = 60, shortens WEAK, never below the floor. */
     fun earthCooldownSeconds(sequence: Sequence): Int =
         shrink(EARTH_COOLDOWN_SECONDS, EARTH_COOLDOWN_FLOOR_SECONDS, sequence)
 
-    /** Скільки ціль тримається в землі (сек): Посл. 7 = 5, росте MODERATE. */
+    /** How long the target is held in the ground (sec): Seq. 7 = 5, grows MODERATE. */
     fun earthHoldSeconds(sequence: Sequence): Int =
         (EARTH_HOLD_SECONDS * growth(sequence, ScalingStrategy.MODERATE)).roundToInt()
 
-    /** Дальність прицілу Земляного духа (блоки): Посл. 7 = 12, росте WEAK до стелі 24. */
+    /** Aim range of the Earth Spirit (blocks): Seq. 7 = 12, grows WEAK up to a 24 ceiling. */
     fun earthRange(sequence: Sequence): Double =
         min(EARTH_RANGE_CAP, EARTH_RANGE * growth(sequence, ScalingStrategy.WEAK))
 
-    /** Кулдаун допиту мертвого (сек): Посл. 7 = 120, коротшає WEAK, не нижче підлоги. */
+    /** Cooldown of interrogating the dead (sec): Seq. 7 = 120, shortens WEAK, never below the floor. */
     fun voiceDeadCooldownSeconds(sequence: Sequence): Int =
         shrink(VOICE_DEAD_COOLDOWN_SECONDS, VOICE_DEAD_COOLDOWN_FLOOR_SECONDS, sequence)
 
-    /** Радіус пошуку душі навколо медіума (блоки): Посл. 7 = 8, росте WEAK до стелі 16. */
+    /** Radius for finding a soul around the medium (blocks): Seq. 7 = 8, grows WEAK up to a 16 ceiling. */
     fun voiceDeadRadius(sequence: Sequence): Double =
         min(VOICE_DEAD_RADIUS_CAP, VOICE_DEAD_RADIUS * growth(sequence, ScalingStrategy.WEAK))
 
-    /** Кулдаун допиту живого (сек): Посл. 7 = 60, коротшає WEAK, не нижче підлоги. */
+    /** Cooldown of interrogating the living (sec): Seq. 7 = 60, shortens WEAK, never below the floor. */
     fun voiceLivingCooldownSeconds(sequence: Sequence): Int =
         shrink(VOICE_LIVING_COOLDOWN_SECONDS, VOICE_LIVING_COOLDOWN_FLOOR_SECONDS, sequence)
 
-    /** Дальність допиту живого (блоки): Посл. 7 = 16, росте WEAK до стелі 32. */
+    /** Range of interrogating the living (blocks): Seq. 7 = 16, grows WEAK up to a 32 ceiling. */
     fun voiceLivingRange(sequence: Sequence): Double =
         min(VOICE_LIVING_RANGE_CAP, VOICE_LIVING_RANGE * growth(sequence, ScalingStrategy.WEAK))
 
     /**
-     * Втрата розсудку, коли живу ціль допитати не вдалось: 8 за кожну Послідовність, на яку
-     * ціль сильніша за медіума, до стелі 40. Рівна чи слабша ціль відкату не дає (0).
+     * Sanity lost when a living target could not be interrogated: 8 for every Sequence the
+     * target is stronger than the medium, up to a 40 ceiling. An equal or weaker target
+     * costs nothing (0).
      */
     fun voiceBacklashSanity(caster: Sequence, target: Sequence): Int {
         val levelsStronger = caster.level - target.level
@@ -180,13 +181,13 @@ object SpiritMediumLore {
         return min(VOICE_BACKLASH_CAP, VOICE_BACKLASH_PER_LEVEL * levelsStronger)
     }
 
-    /** Кулдаун, що коротшає WEAK від бази до підлоги. */
+    /** A cooldown that shortens WEAK from the base down to the floor. */
     private fun shrink(baseSeconds: Int, floorSeconds: Int, sequence: Sequence): Int {
         val seconds = baseSeconds / growth(sequence, ScalingStrategy.WEAK)
         return max(floorSeconds.toLong(), seconds.roundToLong()).toInt()
     }
 
-    /** Наскільки сила на заданій Послідовності перевищує силу на Посл. 7 (там рівно 1.0). */
+    /** How far power at the given Sequence exceeds power at Seq. 7 (exactly 1.0 there). */
     private fun growth(sequence: Sequence, strategy: ScalingStrategy): Double =
         SequenceScaler.calculateMultiplier(sequence.level, strategy) /
             SequenceScaler.calculateMultiplier(BASE_SEQUENCE, strategy)

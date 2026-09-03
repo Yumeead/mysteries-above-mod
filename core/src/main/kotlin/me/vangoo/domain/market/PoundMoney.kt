@@ -3,8 +3,8 @@ package me.vangoo.domain.market
 import kotlin.math.ceil
 
 /**
- * Грошова сума підпільного ринку. Внутрішнє представлення — коппети.
- * 1 золотий фунт = [COPPETS_PER_POUND] коппетів.
+ * A money amount on the underground market. The internal representation is coppets.
+ * 1 gold pound = [COPPETS_PER_POUND] coppets.
  */
 data class PoundMoney(val coppets: Int) {
 
@@ -20,19 +20,19 @@ data class PoundMoney(val coppets: Int) {
 
     operator fun plus(other: PoundMoney): PoundMoney = PoundMoney(coppets + other.coppets)
 
-    /** Кидає [IllegalArgumentException], якщо результат від'ємний (через `init`). */
+    /** Throws [IllegalArgumentException] if the result is negative (through `init`). */
     operator fun minus(other: PoundMoney): PoundMoney = PoundMoney(coppets - other.coppets)
 
-    /** Множить суму на кількість одиниць (напр. ціна за одиницю × стак); [factor] не може бути від'ємним. */
+    /** Multiplies the amount by a unit count (e.g. unit price × stack); [factor] cannot be negative. */
     operator fun times(factor: Int): PoundMoney {
         require(factor >= 0) { "Множник не може бути від'ємним: $factor" }
         return PoundMoney(coppets * factor)
     }
 
-    /** Комісія організатора: ceil(coppets × rate). */
+    /** The organiser's commission: ceil(coppets × rate). */
     fun commission(rate: Double): PoundMoney = PoundMoney(ceil(coppets * rate).toInt())
 
-    /** «2 ф 15 к» / «2 ф» / «15 к» / «0 к». */
+    /** "2 ф 15 к" / "2 ф" / "15 к" / "0 к". */
     fun format(): String {
         val p = wholePounds
         val c = remainderCoppets

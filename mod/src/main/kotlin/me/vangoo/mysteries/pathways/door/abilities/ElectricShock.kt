@@ -13,14 +13,15 @@ import net.minecraft.sounds.SoundSource
 import net.minecraft.world.phys.Vec3
 
 /**
- * Door, Посл. 8 (Трюкач): **Електричний розряд**.
+ * Door, Seq. 8 (Trickster): **Electric Shock**.
  *
- * Єдина сила шляху, яка просто б'є. Вона тут потрібна: усе решта на Посл. 8 — втеча,
- * підпал і дим, тобто Трюкач без неї не має чим закінчити бійку, яку сам почав.
+ * The pathway's only power that simply strikes. It is needed here: everything else at Seq. 8 is
+ * escape, ignition and smoke, i.e. without it the Trickster has nothing to finish a fight they
+ * started themselves with.
  *
- * Розряд іде **зигзагом**: пряма лінія читалась би як промінь, а промінь у цього шляху
- * вже є в Сонця. Зигзаг малюється випадковим відхиленням від осі, а не фізикою — вона
- * тут нічого не додала б.
+ * The discharge goes in a **zigzag**: a straight line would read as a beam, and the Sun already
+ * has a beam on this pathway. The zigzag is drawn with a random deviation from the axis rather
+ * than by physics — physics would add nothing here.
  */
 class ElectricShock : ActiveAbility(AbilityIdentity.of("door_electric_shock")) {
 
@@ -33,7 +34,7 @@ class ElectricShock : ActiveAbility(AbilityIdentity.of("door_electric_shock")) {
     override fun description(sequence: Sequence): Component = Component.literal(
         "Розряд у живу істоту під прицілом.\n" +
             "▪ Шкода: ${damage(sequence)}\n" +
-            "▪ Дальність ${RANGE.toInt()} бл., перепочинок ${COOLDOWN_SECONDS} с",
+            "▪ Дальність ${RANGE.toInt()} бл., відкат ${COOLDOWN_SECONDS} с",
     )
 
     override fun cast(context: CastContext): AbilityOutcome {

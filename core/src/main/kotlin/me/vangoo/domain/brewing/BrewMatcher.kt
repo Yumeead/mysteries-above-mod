@@ -1,6 +1,6 @@
 package me.vangoo.domain.brewing
 
-/** Підбирає перший рецепт із набору, що збігається з наданими інгредієнтами. */
+/** Picks the first recipe in the set that matches the ingredients supplied. */
 class BrewMatcher {
 
     fun findMatch(recipes: Collection<BrewRecipe>, provided: Map<String, Int>): BrewRecipe? =

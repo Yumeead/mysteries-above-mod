@@ -1,13 +1,15 @@
 package me.vangoo.domain.valueobjects
 
 /**
- * Один слуга почту нежиті (Death, Посл. 6), достатньо описаний, щоб відновити його ефект-шаром
- * (`UndeadRetinue.spawnFromRecord`) після relog/рестарту чи показу з тіні.
+ * One servant of the undead retinue (Death, Seq. 6), described well enough for the effect
+ * layer (`UndeadRetinue.spawnFromRecord`) to restore it after a relog/restart or after being
+ * shown from the shadows.
  *
- * [typeOrTag] — ванільний `EntityType` (RESURRECTED/SUBJUGATED) або internal id
- * MythicMobs-істоти Світу Духів (PACT). `SUBJUGATED` живе в цьому переліку заради
- * приховання/показу в межах ОДНІЄЇ сесії — на диск (переживання relog/рестарту) такі записи
- * свідомо не пишуться, бо підкорена нежить — довільний ванільний моб без власної ідентичності.
+ * [typeOrTag] is a vanilla `EntityType` (RESURRECTED/SUBJUGATED) or the internal id of a
+ * MythicMobs creature of the Spirit World (PACT). `SUBJUGATED` lives in this list for the
+ * sake of hiding/showing within ONE session — such records are deliberately never written to
+ * disk (surviving a relog/restart), because subjugated undead is an arbitrary vanilla mob
+ * with no identity of its own.
  */
 data class RetinueServant(
     val kind: Kind,

@@ -1,11 +1,11 @@
 package me.vangoo.domain.creatures
 
 /**
- * Правила появи істоти. Природний спавн — заміна ванільного моба ([naturalReplaces]) у своєму
- * біомі; структурний — вага в лотереї «скриню відкрито» ([structureChance] > 0 означає
- * «трапляється біля структур»). Ключів лут-таблиць структурний спавн не має: працює БУДЬ-ЯКА
- * структура, а кого саме приведе — вирішує послідовність гравця
- * ([CreatureSelector.pickForStructure]).
+ * A creature's appearance rules. A natural spawn is a replacement of a vanilla mob
+ * ([naturalReplaces]) in its own biome; a structure spawn is a weight in the "a chest was
+ * opened" lottery ([structureChance] > 0 means "turns up near structures"). A structure spawn
+ * has no loot table keys: ANY structure works, and who exactly turns up is decided by the
+ * player's sequence ([CreatureSelector.pickForStructure]).
  */
 data class SpawnRule(
     val naturalBiomes: List<String>,

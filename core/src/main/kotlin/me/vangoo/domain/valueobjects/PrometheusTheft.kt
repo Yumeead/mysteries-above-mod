@@ -8,37 +8,37 @@ import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
 /**
- * Балансні числа Послідовності 6 шляху Помилки (Прометей).
+ * Balance numbers for Sequence 6 of the Error pathway (Prometheus).
  *
- * Одне джерело правди для Крадіжки сили, для Прометеєвого тіру Крадіжки матеріалів і
- * для тіру скарбів у Вищій спостережливості. Чиста математика — без платформи; ефекти
- * живуть у `pathways.error.abilities`.
+ * One source of truth for Power Theft, for Prometheus' tier of Material Theft and for the
+ * treasure tier of Superior Observation. Pure math — no platform; the effects live in
+ * `pathways.error.abilities`.
  *
- * Ключове правило вікі: чим краще розумієш ціль, тим легше вкрасти саме те, що треба.
- * Модельовано через [successChance] — розблоковані рецепти шляху жертви піднімають
- * шанс, сильніша жертва його опускає.
+ * The key rule from the wiki: the better you understand the target, the easier it is to steal
+ * exactly what you need. Modelled through [successChance] — unlocked recipes of the victim's
+ * pathway raise the chance, a stronger victim lowers it.
  */
 object PrometheusTheft {
 
-    /** Послідовність, на якій тір з'являється; усі базові числа задані для неї. */
+    /** The Sequence the tier appears at; every base number is stated for it. */
     private const val BASE_SEQUENCE = 6
 
-    // --- Крадіжка сили ---
+    // --- Power Theft ---
     const val POWER_THEFT_COST = 200
     const val POWER_THEFT_COOLDOWN_SECONDS = 200
     private const val POWER_THEFT_COOLDOWN_FLOOR_SECONDS = 120L
     const val POWER_THEFT_RANGE = 50.0
 
-    /** Скільки вкрадена здібність живе у злодія (реальний час). */
+    /** How long a stolen ability lives with the thief (real time). */
     const val STOLEN_DURATION_MILLIS = 10L * 60_000L
 
-    /** Скільки жертва не може кастувати вкрадену здібність (від моменту крадіжки). */
+    /** How long the victim cannot cast the stolen ability (from the moment of the theft). */
     const val SUPPRESSION_DURATION_MILLIS = 30L * 60_000L
 
-    /** Одна вкрадена здібність за раз — власний слот, незалежний від `Analysis`. */
+    /** One stolen ability at a time — its own slot, independent of `Analysis`. */
     const val MAX_CONCURRENT_STOLEN = 1
 
-    // --- Шанс успіху ---
+    // --- Success chance ---
     private const val BASE_CHANCE = 0.40
     private const val CHANCE_PER_RECIPE = 0.03
     private const val MAX_RECIPE_BONUS = 0.25
@@ -46,47 +46,47 @@ object PrometheusTheft {
     private const val MIN_CHANCE = 0.10
     private const val MAX_CHANCE = 0.95
 
-    // --- Прометеїв тір успадкованих здібностей ---
-    /** Дальність Крадіжки матеріалів на Seq 6 (проти 5 на Seq 8/7). */
+    // --- Prometheus' tier of inherited abilities ---
+    /** Material Theft range at Seq 6 (against 5 at Seq 8/7). */
     const val MATERIAL_THEFT_RANGE = 50.0
 
-    /** Радіус пошуку полум'я для крадіжки вогню (вікі 3b.1) — куб по блоках, тож малий. */
+    /** Search radius for a flame to steal fire from (wiki 3b.1) — a cube over blocks, hence small. */
     const val FIRE_THEFT_RADIUS = 10.0
 
-    /** Скільки секунд вогнетривкості дає вкрадене полум'я. */
+    /** How many seconds of fire resistance the stolen flame grants. */
     const val FIRE_THEFT_RESISTANCE_SECONDS = 20
 
-    /** Радіус чуття цінностей: контейнери, дропи, чужі інвентарі. */
+    /** Radius for sensing valuables: containers, drops, other people's inventories. */
     const val VALUABLES_RADIUS = 50.0
 
-    /** Радіус сканування руди (менший — це кубічний прохід по блоках). */
+    /** Ore scan radius (smaller — this is a cubic pass over blocks). */
     const val ORE_SCAN_RADIUS = 16.0
 
-    /** Від скількох цінних одиниць схованка вважається багатою. */
+    /** From how many valuable units a stash counts as rich. */
     const val TREASURE_RICH = 10
 
-    /** Від скількох — середньою; менше — дрібниця. */
+    /** From how many — as average; below that it is a trifle. */
     const val TREASURE_MEDIUM = 3
 
-    // --- Стійкість розуму ---
-    /** Скільки лишається від вхідної втрати глузду під Стійкістю розуму. */
+    // --- Mental Resilience ---
+    /** How much of the incoming sanity loss remains under Mental Resilience. */
     const val MENTAL_FORTITUDE_SANITY_MULTIPLIER = 0.5
 
-    /** Раз на стільки секунд Стійкість розуму сама відновлює 1 глузду. */
+    /** Once every this many seconds Mental Resilience restores 1 sanity on its own. */
     const val MENTAL_FORTITUDE_RECOVERY_SECONDS = 45
 
-    /** Кулдаун Крадіжки сили (сек): Seq 6 = 300, коротшає MODERATE, не нижче підлоги. */
+    /** Power Theft cooldown (sec): Seq 6 = 300, shortens MODERATE, never below the floor. */
     fun powerTheftCooldownSeconds(sequence: Sequence): Int {
         val seconds = POWER_THEFT_COOLDOWN_SECONDS * relative(sequence, ScalingStrategy.MODERATE)
         return max(POWER_THEFT_COOLDOWN_FLOOR_SECONDS, seconds.roundToLong()).toInt()
     }
 
     /**
-     * Шанс успішної крадіжки сили.
+     * The chance of a successful power theft.
      *
-     * @param unlockedVictimPathwayRecipes скільки рецептів шляху жертви злодій уже відкрив
-     * @param victimSequence               Послідовність жертви
-     * @return шанс у межах 0.10..0.95
+     * @param unlockedVictimPathwayRecipes how many recipes of the victim's pathway the thief has unlocked
+     * @param victimSequence               the victim's Sequence
+     * @return the chance within 0.10..0.95
      */
     fun successChance(unlockedVictimPathwayRecipes: Int, victimSequence: Sequence): Double {
         val knowledge = min(
@@ -98,15 +98,15 @@ object PrometheusTheft {
         return (BASE_CHANCE + knowledge - resistance).coerceIn(MIN_CHANCE, MAX_CHANCE)
     }
 
-    /** Чи покаже меню справжню назву здібності жертви (вікі 3a.2). */
+    /** Whether the menu will show the victim's real ability name (wiki 3a.2). */
     fun revealsAbilityNames(unlockedVictimPathwayRecipes: Int): Boolean =
         unlockedVictimPathwayRecipes > 0
 
-    /** Скільки глузду перетікає від жертви до злодія в слоті Божевілля: Seq 6 = 3, росте WEAK. */
+    /** How much sanity flows from the victim to the thief in the Madness slot: Seq 6 = 3, grows WEAK. */
     fun corruptionTransfer(sequence: Sequence): Int =
         (3.0 / relative(sequence, ScalingStrategy.WEAK)).roundToInt()
 
-    /** Відношення сили на Seq 6 до сили на заданій Послідовності (менше 1.0 для сильніших). */
+    /** Ratio of power at Seq 6 to power at the given Sequence (below 1.0 for stronger ones). */
     private fun relative(sequence: Sequence, strategy: ScalingStrategy): Double =
         SequenceScaler.calculateMultiplier(BASE_SEQUENCE, strategy) /
             SequenceScaler.calculateMultiplier(sequence.level, strategy)

@@ -19,31 +19,30 @@ import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 
 /**
- * Sun, Посл. 8 (Прохач Світла): **Нічне бачення**.
+ * Sun, Seq. 8 (Light Seeker): **Night Vision**.
  *
- * Два мініатюрних сонця в очах: темрява для Прохача не існує — ні звичайна, ні та,
- * яку насилають.
+ * Two miniature suns in the eyes: darkness does not exist for the Seeker — neither the ordinary
+ * kind nor the kind that is sent.
  *
- * ## Імунітет до `DARKNESS` — це і є суть
+ * ## Immunity to `DARKNESS` is the whole point
  *
- * Саме нічне бачення дає будь-яке зілля. Чого зілля не дає — це стійкості до ванільної
- * `DARKNESS` (сліпучі спалахи Стража): вона накладається поверх і гасить екран навіть
- * тому, хто бачить у темряві. Такт знімає її щосекунди, і **це** відрізняє силу від
- * пляшки.
+ * Night vision itself is what any potion gives. What a potion does not give is resistance to the
+ * vanilla `DARKNESS` (a Warden's blinding pulses): it is applied on top and blacks out the screen
+ * even for someone who can see in the dark. The tick removes it every second, and **that** is
+ * what tells the power from the bottle.
  */
 class NightVision : ActiveAbility(AbilityIdentity.of("sun_night_vision")) {
 
     override val displayName: Component = Component.literal("Нічне бачення")
 
-    /** Каст безкоштовний: ціна — утримання, і гасити очі має бути дарма. */
+    /** The cast is free: the price is the upkeep, and putting the eyes out must cost nothing. */
     override val spiritualityCost: Int = 0
 
     /**
-     * Ціна утримання росте з Послідовністю — і мусить, бо разом із нею росте
-     * **регенерація**: 2 очки/с на Посл. 8 проти 6 на Посл. 5 (і 9 при повному
-     * засвоєнні). Пласка ціна, взята з плагіна, на Посл. 5 виявилась нижчою за
-     * відновлення, тобто сила ставала безкоштовною, а смуга духовності повзла назад
-     * до стелі просто під час утримання.
+     * The upkeep grows with the Sequence — and it must, because **regeneration** grows with it
+     * too: 2 points/s at Seq. 8 against 6 at Seq. 5 (and 9 at full mastery). The flat price taken
+     * from the plugin turned out at Seq. 5 to be below the regeneration, i.e. the power became
+     * free and the spirituality bar crept back up to the ceiling while it was being sustained.
      */
     override fun periodicCost(sequence: Sequence): Int =
         scale(BASE_PERIODIC_COST, sequence, SequenceScaler.ScalingStrategy.MODERATE)
@@ -54,7 +53,7 @@ class NightVision : ActiveAbility(AbilityIdentity.of("sun_night_vision")) {
         "Два мініатюрних сонця у ваших очах.\n" +
             "▪ Нічне бачення, поки тримаєте\n" +
             "▪ Темрява вас не засліплює — навіть наслана\n" +
-            "▪ Утримання: ${periodicCost(sequence)} духовності/с; повторний каст гасить",
+            "▪ Витрата: ${periodicCost(sequence)} духовності/с; повторний каст вимикає",
     )
 
     override fun cast(context: CastContext): AbilityOutcome {
@@ -92,8 +91,8 @@ class NightVision : ActiveAbility(AbilityIdentity.of("sun_night_vision")) {
         const val BASE_PERIODIC_COST = 9
         const val COOLDOWN_SECONDS = 3
         /**
-         * Понад двадцять секунд — щоб клієнт не блимав затемненням: ванілька починає
-         * мерехтіти нічним баченням на останніх десяти секундах його тривалості.
+         * Over twenty seconds — so the client does not flicker with darkening: vanilla starts
+         * blinking night vision over the last ten seconds of its duration.
          */
         const val VISION_TICKS = 25 * TICKS_PER_SECOND
     }

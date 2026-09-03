@@ -15,7 +15,7 @@ data class Sequence(val level: Int) {
 
     fun canAdvance(): Boolean = level > MIN_SEQUENCE
 
-    /** Слабша послідовність (число росте); Посл. 9 — межа, слабшати нікуди. */
+    /** A weaker sequence (the number grows); Seq. 9 is the edge, there is nowhere weaker. */
     fun demote(): Sequence {
         check(canDemote()) { "Cannot demote from sequence $level" }
         return Sequence(level + 1)

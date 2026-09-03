@@ -26,7 +26,7 @@ internal class ConvergencePullTest {
 
     @Test
     fun nextNeededSequenceGivesStrongerStrengthThanOther() {
-        // Beyonder на посл. 8 потребує посл. 7 наступною.
+        // A Beyonder at seq. 8 needs seq. 7 next.
         val needed = ConvergenceSource("Fool", "LordOfMysteries", 7, 0.0, 0.0)
         val other = ConvergenceSource("Fool", "LordOfMysteries", 3, 0.0, 0.0)
         val beyonder = ResonantBeyonder(a, "Fool", "LordOfMysteries", 8, 5.0, 0.0)

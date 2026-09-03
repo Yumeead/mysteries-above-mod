@@ -3,11 +3,11 @@ package me.vangoo.domain.spells
 import kotlin.math.max
 
 /**
- * Рецепт згенерованого заклинання — ЛИШЕ дані + правила балансу.
+ * The recipe of a generated spell — data and balance rules ONLY.
  *
- * Жодного Minecraft: ні частинок, ні типів ефектів, ні позицій. Саме це серіалізується
- * ([SpellCodec]), валідовується і тестується без сервера. Хореографія ефектів (партикли,
- * урон, телепорт) живе окремо, у шарі поведінки.
+ * No Minecraft at all: no particles, no effect types, no positions. This is exactly what gets
+ * serialised ([SpellCodec]), validated and tested without a server. The choreography of the
+ * effects (particles, damage, teleport) lives separately, in the behaviour layer.
  */
 data class SpellRecipe(
     val name: String,
@@ -16,7 +16,7 @@ data class SpellRecipe(
     val radius: Double,
     val heal: Double,
     val durationTicks: Int,
-    /** null, якщо [shape] != [Shape.BUFF] */
+    /** null if [shape] != [Shape.BUFF] */
     val buff: Buff?,
     val buffAmplifier: Int,
     val spiritualityCost: Int,
@@ -24,7 +24,7 @@ data class SpellRecipe(
 ) {
     enum class Shape { PROJECTILE, AOE, SELF, BUFF, TELEPORT }
 
-    /** Доменне представлення баффів — НЕ тип ефекту Minecraft. Маппінг живе в раннері. */
+    /** The domain's representation of buffs — NOT a Minecraft effect type. The mapping lives in the runner. */
     enum class Buff { SPEED, STRENGTH, RESISTANCE, REGENERATION, FIRE_RESISTANCE }
 
     init {
@@ -39,9 +39,9 @@ data class SpellRecipe(
 
     companion object {
         /**
-         * Будує рецепт із вибору гравця в конструкторі заклинань.
-         * Це колишній `Spellcasting.calculateStats` — тепер чиста доменна функція,
-         * яку можна покрити юніт-тестами без сервера.
+         * Builds a recipe from the player's choices in the spell builder.
+         * This is the former `Spellcasting.calculateStats` — now a pure domain function that
+         * can be covered by unit tests without a server.
          */
         fun fromBlueprint(b: SpellBlueprint): SpellRecipe {
             var cooldown = max(1, 10 - b.cooldownLvl)

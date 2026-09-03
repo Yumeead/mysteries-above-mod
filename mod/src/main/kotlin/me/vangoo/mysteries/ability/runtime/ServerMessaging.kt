@@ -6,7 +6,7 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
 import java.util.UUID
 
-/** Адресує за UUID через список гравців сервера — у якому б вимірі ціль не була. */
+/** Addresses by UUID through the server's player list — whatever dimension the target is in. */
 class ServerMessaging(private val server: () -> MinecraftServer?) : Messaging {
 
     override fun tell(player: ServerPlayer, message: Component) {

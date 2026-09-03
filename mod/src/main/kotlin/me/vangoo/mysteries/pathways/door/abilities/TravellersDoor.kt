@@ -39,48 +39,48 @@ import java.util.UUID
 import kotlin.math.floor
 
 /**
- * Door, Посл. 5 (Мандрівник): **Двері Мандрівника**.
+ * Door, Seq. 5 (Traveller): **The Traveller's Door**.
  *
- * Головна сила шляху, і в ній два різні дієслова, розділені присіданням:
+ * The pathway's main power, and it holds two different verbs separated by sneaking:
  *
- * | як | що | ціна |
+ * | how | what | price |
  * |---|---|---|
- * | звичайний каст | двері в **духовний світ**: біла рівнина без стін і без відстані | каст + утримання |
- * | присівши, з компасом лодестона | двері **в точку**: миттєвий перехід до лодестона | каст |
+ * | an ordinary cast | a door into the **spirit world**: a white plain with no walls and no distance | the cast + upkeep |
+ * | sneaking, with a lodestone compass | a door **into a point**: an instant passage to the lodestone | the cast |
  *
- * ## Двері — це двері, а не кнопка
+ * ## A door is a door, not a button
  *
- * Каст нічого не переносить. Він **ставить двері** — вони стоять
- * [DOOR_TICKS] / [TICKS_PER_SECOND] с, і поки стоять, не сталось нічого: [AbilityOutcome.Awaiting]
- * тримає квиток непогашеним, тож Мандрівник, який передумав, не заплатив ані духовності,
- * ані перепочинку. Подорож починається в мить, коли він **увійшов**, — і рівно тоді
- * гаситься квиток.
+ * The cast moves nothing. It **places a door** — it stands for
+ * [DOOR_TICKS] / [TICKS_PER_SECOND] s, and while it stands nothing has happened:
+ * [AbilityOutcome.Awaiting] keeps the ticket unsettled, so a Traveller who changed their mind has
+ * paid neither spirituality nor a cooldown. The journey begins the moment they **step through** —
+ * and that is exactly when the ticket is settled.
  *
- * Перша редакція вмикала режим спостерігача просто в `cast`, і двері були декорацією
- * навколо телепорту. Тепер вони — сам перехід.
+ * The first revision switched on spectator mode right in `cast`, and the door was decoration
+ * around a teleport. Now it is the passage itself.
  *
- * ## Загін набирається поглядом, а не меню
+ * ## The party is gathered by gaze rather than by a menu
  *
- * Поки двері стоять, погляд на гравця дає підказку, а присідання бере його з собою
- * ([MARK_RANGE] бл. на погляд, [FELLOW_RADIUS] бл. на мить входу). Ті, кого взяли,
- * переходять разом із Мандрівником і повертаються разом із ним — своїх дверей у них
- * немає, вони пасажири.
+ * While the door stands, looking at a player gives a prompt, and sneaking takes them along
+ * ([MARK_RANGE] blocks to look, [FELLOW_RADIUS] blocks at the moment of entry). Those taken cross
+ * over with the Traveller and come back with them — they have no door of their own, they are
+ * passengers.
  *
- * ## Духовний світ — місце, а не режим
+ * ## The spirit world is a place, not a mode
  *
- * За дверима лежить [SpiritWorld]: біле, беззвучне дзеркало реального світу з тією
- * самою сіткою координат. Гравець іде по ньому сам — без стін, без гір, без води, —
- * і вийде саме там, де зупиниться.
+ * Behind the door lies [SpiritWorld]: a white, soundless mirror of the real world with the very
+ * same coordinate grid. The player walks it on foot — no walls, no mountains, no water — and comes
+ * out exactly where they stop.
  *
- * Вихід теж двері: удар рукою ставить їх перед собою, і **за ними стоїть сам реальний
- * світ** — його блоки, перенесені в біле в тих самих координатах (див. [carve]).
- * Мандрівник бачить, чи виходить він у поле, в океан чи в чиюсь вітальню, **до** того,
- * як вийде.
+ * The way out is a door too: a punch places it in front of them, and **the real world itself
+ * stands behind it** — its blocks, carried into the white at the same coordinates (see [carve]).
+ * The Traveller sees whether they are coming out into a field, into an ocean or into somebody's
+ * living room **before** they come out.
  *
- * Час у білому обмежений ([TRAVEL_TICKS] / [TICKS_PER_SECOND] с) і коштує
- * [UPKEEP_PER_SECOND] духовності за секунду. Скінчиться час, духовність, зв'язок або
- * сам сервер — `finally` виведе назад усіх, і це той самий один шлях повернення, який
- * у плагіні збирався з чотирьох статичних мап.
+ * The time in the white is limited ([TRAVEL_TICKS] / [TICKS_PER_SECOND] s) and costs
+ * [UPKEEP_PER_SECOND] spirituality per second. When the time, the spirituality, the connection or
+ * the server itself runs out, `finally` brings everyone back, and that is the same single return
+ * path that in the plugin was assembled from four static maps.
  */
 class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door")) {
 
@@ -101,12 +101,12 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
             "▪ У білому: ${TRAVEL_TICKS / TICKS_PER_SECOND} с, $UPKEEP_PER_SECOND духовності/с; " +
             "удар рукою відчиняє двері назад\n" +
             "▪ Присівши з компасом лодестона: перехід просто до нього\n" +
-            "▪ Перепочинок $COOLDOWN_SECONDS с",
+            "▪ Відкат $COOLDOWN_SECONDS с",
     )
 
     override fun cast(context: CastContext): AbilityOutcome {
-        // Повторний каст — це «зачинити», а не «відчинити другі». Платити за відмову
-        // від власної подорожі нема за що, тож це Failed, а не Done.
+        // A recast means "close", not "open a second one". There is nothing to pay for giving up
+        // one's own journey, so this is Failed rather than Done.
         if (context.sessionRunning) {
             context.stopSession()
             return AbilityOutcome.failed("Ви зачиняєте двері")
@@ -117,7 +117,7 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
         return if (context.caster.isShiftKeyDown) leap(context) else open(context)
     }
 
-    // ── Двері в точку ───────────────────────────────────────────────────────────
+    // ── A door into a point ─────────────────────────────────────────────────────
 
     private fun leap(context: CastContext): AbilityOutcome {
         val tracker = context.caster.mainHandItem.get(DataComponents.LODESTONE_TRACKER)
@@ -146,7 +146,7 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
         return AbilityOutcome.done("Двері вивели вас до лодестона")
     }
 
-    // ── Двері в духовний світ ───────────────────────────────────────────────────
+    // ── A door into the spirit world ────────────────────────────────────────────
 
     private fun open(context: CastContext): AbilityOutcome {
         val server = context.level.server
@@ -159,7 +159,8 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
         val color = context.effects.pathwayColor
         val scheduling = context.scheduling
         val messaging = context.messaging
-        // Єдине, що здібності дозволено пережити виклик `cast`. Гаситься в мить входу.
+        // The only thing an ability is allowed to outlive the `cast` call with. Settled at the
+        // moment of entry.
         val ticket = context.cast
 
         doorway(scheduling, context.level, footing, forward, DOOR_TICKS, color)
@@ -202,7 +203,7 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
         )
     }
 
-    /** Поки двері стоять: набір загону поглядом і чекання, доки Мандрівник переступить поріг. */
+    /** While the door stands: gathering the party by gaze and waiting for the Traveller to cross the threshold. */
     private suspend fun SessionScope.awaitEntry(
         footing: Vec3,
         fellowship: MutableSet<UUID>,
@@ -220,10 +221,10 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
     }
 
     /**
-     * Погляд питає, присідання відповідає.
+     * The gaze asks, the sneak answers.
      *
-     * Окремої клавіші тут немає навмисно: присідання сервер бачить сам
-     * (`isShiftKeyDown`), тож набір загону не коштує ні пакета, ні keybind'у.
+     * There is deliberately no separate key here: the server sees sneaking itself
+     * (`isShiftKeyDown`), so gathering a party costs neither a packet nor a keybind.
      */
     private fun mark(walker: ServerPlayer, fellowship: MutableSet<UUID>, messaging: Messaging) {
         val seen = LiveTargeting(walker).playerLookingAt(MARK_RANGE) ?: return
@@ -248,7 +249,7 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
         )
     }
 
-    /** Хто справді пішов: сам Мандрівник і ті з покликаних, хто в мить входу був поруч. */
+    /** Who actually went: the Traveller and those of the called who were nearby at the moment of entry. */
     private fun SessionScope.gather(server: MinecraftServer, fellowship: Set<UUID>): Set<UUID> {
         val walker = owner ?: return emptySet()
         val party = LinkedHashSet<UUID>()
@@ -262,7 +263,7 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
         return party
     }
 
-    /** Подорож білим: доки не скінчиться час, духовність — або доки не знайдуться двері назад. */
+    /** The journey through the white: until the time or the spirituality runs out — or until a door back is found. */
     private suspend fun SessionScope.wander(
         server: MinecraftServer,
         spirit: ServerLevel,
@@ -282,19 +283,19 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
             while (ticksAlive < deadline) {
                 val walker = owner ?: return
                 if (!SpiritWorld.holds(walker)) return
-                // Місцевість проступає **навколо** дверей, тобто й там, де стоїть сам
-                // загін: колонка сусіда може виявитись вищою за ту, у якій відчинено
-                // двері, і блок народжується просто в мандрівникові. У пригодницькому
-                // режимі це задуха, тож кожного, кого замурувало, виштовхує вгору.
+                // The terrain appears **around** the door, i.e. where the party is standing too: a
+                // neighbouring column may turn out higher than the one the door was opened in, and
+                // a block is born right inside a traveller. In adventure mode that is suffocation,
+                // so anyone walled in is pushed upwards.
                 party.forEach { id ->
                     val traveller = server.playerList.getPlayer(id) ?: return@forEach
                     if (SpiritWorld.holds(traveller) && traveller.isInWall) {
                         traveller.teleportTo(traveller.x, traveller.y + 1.0, traveller.z)
                     }
                 }
-                // Швидкість польоту — активний слот пояса: коліщатко в білому нічого
-                // не перемикає, зате сервер бачить його без жодного пакета від мода.
-                // Кожен із загону крутить своє.
+                // Flight speed is the active hotbar slot: the wheel switches nothing in the white,
+                // but the server sees it with no packet from the mod at all.
+                // Everyone in the party turns their own.
                 party.forEach { id ->
                     val traveller = server.playerList.getPlayer(id) ?: return@forEach
                     if (SpiritWorld.holds(traveller)) {
@@ -309,11 +310,11 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
 
                 val open = exit
                 if (open == null) {
-                    // Удар рукою, а не присідання: присідання в білому означало б, що
-                    // Мандрівник не може ні красти, ні ховатись, не відчинивши дверей.
-                    // Замах сервер бачить сам (`swinging` тримається кілька тіків після
-                    // пакета), тож своя клавіша тут не потрібна — а мобів, у яких можна
-                    // влучити випадково, у духовному світі немає.
+                    // A punch rather than sneaking: sneaking in the white would mean the Traveller
+                    // can neither sneak up nor hide without opening a door. The server sees the
+                    // swing itself (`swinging` holds for a few ticks after the packet), so no key
+                    // of our own is needed here — and there are no mobs in the spirit world to hit
+                    // by accident.
                     if (walker.swinging) {
                         exit = openExit(scheduling, spirit, back, walker, color)
                         exitCloses = ticksAlive + EXIT_TICKS
@@ -341,14 +342,14 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
             }
             messaging.actionBar(ownerId, Component.literal("Час у білому вийшов"))
         } finally {
-            // Проріз — це справжні блоки в справжньому світі. Не засипати його назад
-            // означає лишити дірку в білому після себе, і це єдина річ у цій здібності,
-            // яка переживає сервер.
+            // The cut-out is real blocks in a real world. Not filling it back in means leaving a
+            // hole in the white behind, and that is the only thing in this ability that outlives
+            // the server.
             exit?.close()
         }
     }
 
-    /** Відчинені двері назад: поріг, у який треба ступити, і проріз, який треба засипати. */
+    /** An opened door back: the threshold to step into, and the cut-out to fill back in. */
     private class Exit(val threshold: AABB, val close: () -> Unit)
 
     private fun openExit(
@@ -369,36 +370,35 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
     }
 
     /**
-     * **Проріз у білому**: за дверима стоїть не голограма, а справжній шматок реального
-     * світу — його блоки, вставлені в духовний світ у **тих самих координатах**.
+     * **A cut-out in the white**: behind the door stands not a hologram but a real piece of the
+     * real world — its blocks, inserted into the spirit world at **the very same coordinates**.
      *
-     * ## Чому не «портал»
+     * ## Why not a "portal"
      *
-     * Справжній портальний рендер — це другий світ у пам'яті клієнта, стрімінг його
-     * чанків і другий прохід камери з відсіканням по площині дверей: підсистема
-     * розміром з окремий мод. Перша редакція намагалась обійтись частинками
-     * (`BLOCK_MARKER` — текстура блока на клітину), і виглядало це рівно так, як і є:
-     * три голограми в рамі.
+     * Real portal rendering means a second world in the client's memory, streaming its chunks and
+     * a second camera pass clipped by the door's plane: a subsystem the size of a separate mod.
+     * The first revision tried to get by with particles (`BLOCK_MARKER` — a block texture per
+     * cell), and it looked exactly like what it was: three holograms in a frame.
      *
-     * Тут інша відповідь на те саме питання. Клієнт **уже** вміє малювати блоки того
-     * світу, у якому стоїть, — тож блоки туди й приносяться. Проріз має справжню
-     * геометрію, справжні текстури, справжню глибину й паралакс: голову вбік — і видно
-     * за косяк. Ціна — те, що це **копія**, знята в мить відчинення: без сутностей і без
-     * чужих змін.
+     * Here is a different answer to the same question. The client **already** knows how to draw
+     * the blocks of the world it is standing in — so the blocks are brought there. The cut-out has
+     * real geometry, real textures, real depth and parallax: lean your head aside and you see past
+     * the jamb. The price is that it is a **copy**, taken at the moment of opening: without
+     * entities and without anyone else's changes.
      *
-     * ## Коло, а не конус
+     * ## A circle, not a cone
      *
-     * Перша редакція копіювала конус видимості крізь раму — те, що видно з одного місця
-     * й в один бік. Але Мандрівникові треба не зазирнути в шпарину, а **впізнати
-     * місцевість**: куди він виходить, що поруч, чи це взагалі те місце. Тому копіюється
-     * коло радіусом [CARVE_RADIUS] навколо дверей — і воно проступає від дверей назовні,
-     * колонка за колонкою.
+     * The first revision copied the cone of visibility through the frame — what is visible from
+     * one spot and in one direction. But the Traveller needs not to peek through a crack but to
+     * **recognise the terrain**: where they are coming out, what is nearby, whether this is the
+     * place at all. So a circle of radius [CARVE_RADIUS] around the door is copied — and it
+     * appears from the door outwards, column by column.
      *
-     * Висоти беруть за землю реального світу: рівень [SpiritWorld.surface] лягає на
-     * поріг, тож те, що там стоїть на землі, тут стоїть на порозі.
+     * The heights are taken from the real world's ground: the [SpiritWorld.surface] level lands on
+     * the threshold, so what stands on the ground there stands on the threshold here.
      *
-     * Повертає те, чим проріз засипають назад. Викликати **обов'язково** — це єдине,
-     * що ця здібність лишає у світі після себе.
+     * Returns what the cut-out is filled back in with. Calling it is **mandatory** — this is the
+     * only thing this ability leaves behind in the world.
      */
     private fun carve(
         scheduling: Scheduling,
@@ -406,15 +406,15 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
         home: ServerLevel,
         footing: Vec3,
     ): () -> Unit {
-        // ponytail: читання чужого світу вантажить (і за потреби генерує) його чанки
-        // синхронно. Одна пауза на одні двері — і вона все одно сталася б за мить,
-        // коли гравець крізь них вийде.
+        // ponytail: reading another world loads (and generates if needed) its chunks
+        // synchronously. One pause for one door — and it would have happened a moment later
+        // anyway, when the player steps through.
         val ground = SpiritWorld.surface(home, footing.x, footing.z).toInt()
         val base = BlockPos(floor(footing.x).toInt(), floor(footing.y).toInt(), floor(footing.z).toInt())
         val saved = HashMap<BlockPos, BlockState>()
 
-        // Колонки за зростанням відстані: місцевість проступає від дверей назовні,
-        // а не лягає готовою плитою.
+        // Columns in order of increasing distance: the terrain appears from the door outwards
+        // rather than landing as a finished slab.
         val columns = buildList {
             for (dx in -CARVE_RADIUS..CARVE_RADIUS) {
                 for (dz in -CARVE_RADIUS..CARVE_RADIUS) {
@@ -425,9 +425,9 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
 
         var next = 0
         lateinit var handle: TaskHandle
-        // Колонками по тіках, а не одним махом: коло на 50 бл. — це сім на сім чанків
-        // реального світу, і згенерувати їх усі в одному тіку означає секунди
-        // застиглого сервера.
+        // Column by column across ticks, not all at once: a 50-block circle is seven by seven
+        // chunks of the real world, and generating them all in one tick means seconds of a frozen
+        // server.
         handle = scheduling.every(1, delayTicks = 0) {
             if (next >= columns.size) return@every handle.cancel()
             val until = minOf(next + COLUMNS_PER_TICK, columns.size)
@@ -444,15 +444,15 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
     }
 
     /**
-     * Одна колонка місцевості: шкіра реального рельєфу плюс проріз у білому над нею.
+     * One column of terrain: the skin of the real relief plus a cut-out in the white above it.
      *
-     * Копіюється не вся товща, а **шкіра** — від [SKIN_BELOW] блоків під ґрунтом до
-     * верхівки того, що в цій колонці стоїть (`WORLD_SURFACE` бере й дерево, і дах).
-     * Товщу копіювати нема сенсу: крізь власну поверхню її все одно не видно, а коштує
-     * вона стільки ж, скільки все інше разом.
+     * What is copied is not the whole thickness but the **skin** — from [SKIN_BELOW] blocks below
+     * the ground to the top of whatever stands in this column (`WORLD_SURFACE` catches both a tree
+     * and a roof). Copying the thickness makes no sense: it cannot be seen through its own surface
+     * anyway, and it costs as much as everything else put together.
      *
-     * Западину рельєфу білa плита накрила б згори, тож над шкірою прорізається стеля —
-     * до [CLEAR_CAP] блоків, доки не почнеться повітря.
+     * A dip in the relief would be covered from above by the white slab, so a ceiling is cut out
+     * over the skin — up to [CLEAR_CAP] blocks, until air begins.
      */
     private fun column(
         spirit: ServerLevel,
@@ -465,15 +465,15 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
     ) {
         val x = base.x + dx
         val z = base.z + dz
-        // Той самий чанк-перед-heightmap, що й у SpiritWorld.surface: незавантажений
-        // чанк віддає sea_level + 1, і вся колонка лягла б не туди.
+        // The same chunk-before-heightmap as in SpiritWorld.surface: an unloaded chunk returns
+        // sea_level + 1, and the whole column would land in the wrong place.
         home.getChunk(x shr 4, z shr 4)
         val top = home.getHeight(Heightmap.Types.WORLD_SURFACE, x, z)
         val solid = home.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z)
 
         for (ry in (solid - SKIN_BELOW) until top) {
             val state = home.getBlockState(BlockPos(x, ry, z))
-            // Скриня без своєї сутності — блок, який ламає все, що по ній ходить.
+            // A chest without its own entity is a block that breaks everything walking over it.
             if (state.hasBlockEntity()) continue
             put(spirit, BlockPos(x, base.y + (ry - ground), z), state, saved)
         }
@@ -488,7 +488,7 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
         }
     }
 
-    /** Кладе блок, запам'ятавши, що тут було до нього. Однакове не чіпає зовсім. */
+    /** Places a block, remembering what was here before it. Identical blocks are not touched at all. */
     private fun put(
         spirit: ServerLevel,
         spot: BlockPos,
@@ -496,13 +496,13 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
         saved: MutableMap<BlockPos, BlockState>,
     ) {
         val was = spirit.getBlockState(spot)
-        // Повітря над білою поверхнею вже повітря — а це більшість кола.
+        // Air above the white surface is already air — and that is most of the circle.
         if (was == state) return
         if (spot !in saved) saved[spot] = was
         spirit.setBlock(spot, state, CARVE_FLAGS)
     }
 
-    /** Поріг: об'єм, у який треба ступити, щоб двері спрацювали. */
+    /** The threshold: the volume one must step into for the door to fire. */
     private fun threshold(footing: Vec3): AABB =
         AABB.ofSize(
             footing.add(0.0, THRESHOLD_HEIGHT / 2.0, 0.0),
@@ -513,10 +513,10 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
         const val COOLDOWN_SECONDS = 50
         const val UPKEEP_PER_SECOND = 8
 
-        /** Скільки двері чекають на того, хто в них увійде. */
+        /** How long the door waits for whoever will step into it. */
         const val DOOR_TICKS = 10 * TICKS_PER_SECOND
         const val TRAVEL_TICKS = 60 * TICKS_PER_SECOND
-        /** Стільки стоять двері назад: коло проступає ~1,5 с, решта — щоб роздивитись. */
+        /** How long a door back stands: the circle appears in ~1.5 s, the rest is for looking around. */
         const val EXIT_TICKS = 15 * TICKS_PER_SECOND
         const val LEAP_DOOR_TICKS = 3 * TICKS_PER_SECOND
 
@@ -524,28 +524,28 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
         const val MARK_RANGE = 12.0
         const val FELLOW_RADIUS = 10.0
 
-        /** Крок уперед: двері мають стояти перед Мандрівником, а не на ньому. */
+        /** A step forward: the door must stand in front of the Traveller, not on them. */
         const val STEP_OUT = 1.6
         const val THRESHOLD_WIDTH = 1.3
         const val THRESHOLD_HEIGHT = 2.2
 
-        /** Радіус кола місцевості навколо дверей — навсібіч, а не лише вперед. */
+        /** The radius of the terrain circle around the door — all around, not only forwards. */
         const val CARVE_RADIUS = 50
-        /** Скільки колон за тік: коло проступає за ~26 тіків. */
+        /** How many columns per tick: the circle appears in ~26 ticks. */
         const val COLUMNS_PER_TICK = 300
-        /** Скільки ґрунту під поверхнею: рівно щоб край не читався як папір. */
+        /** How much ground below the surface: just enough that the edge does not read as paper. */
         const val SKIN_BELOW = 3
-        /** Наскільки прорізається біла стеля над западиною рельєфу. */
+        /** How far the white ceiling is cut out above a dip in the relief. */
         const val CLEAR_CAP = 16
 
         /**
          * `UPDATE_CLIENTS or UPDATE_SKIP_ALL_SIDEEFFECTS` (2 + 816).
          *
-         * Клієнт блок бачить, а світ його «появи» не помічає взагалі. Кожен доданок
-         * тут закриває свою поломку, і найдорожча — `UPDATE_SKIP_ON_PLACE` (512):
-         * без неї `LevelChunk.setBlockState` кличе `onPlace`, `LiquidBlock.onPlace`
-         * планує тік розтікання, і перенесена вода тече в клітини, яких немає в
-         * `saved`, — тобто лишається в білому **назавжди**.
+         * The client sees the block while the world does not notice its "appearance" at all. Each
+         * addend here closes its own failure, and the most expensive is `UPDATE_SKIP_ON_PLACE`
+         * (512): without it `LevelChunk.setBlockState` calls `onPlace`, `LiquidBlock.onPlace`
+         * schedules a spread tick, and carried water flows into cells that are not in `saved` —
+         * i.e. stays in the white **forever**.
          */
         const val CARVE_FLAGS = Block.UPDATE_CLIENTS or Block.UPDATE_SKIP_ALL_SIDEEFFECTS
     }

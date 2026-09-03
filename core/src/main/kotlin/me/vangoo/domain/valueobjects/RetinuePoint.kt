@@ -1,8 +1,8 @@
 package me.vangoo.domain.valueobjects
 
 /**
- * Позиція в світі для персистентного почту нежиті (Death, Посл. 6) — світ і координати
- * примітивами, як [Waypoint]; конвертацію в `Location` робить ефект-шар.
+ * A world position for the persistent undead retinue (Death, Seq. 6) — the world and the
+ * coordinates as primitives, like [Waypoint]; the effect layer converts them into a `Location`.
  */
 data class RetinuePoint(
     val world: String,

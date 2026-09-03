@@ -48,35 +48,35 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * Спільна здібність Посл. 9: **Ритуальна магія**.
+ * The shared Seq. 9 ability: **Ritual Magic**.
  *
- * Розставте навколо себе запалені свічки, покладіть на землю приношення, станьте в коло
- * й почніть обряд. Мод сам знайде, який саме обряд ви склали.
+ * Set lit candles around you, lay an offering on the ground, stand in the circle and begin the
+ * rite. The mod works out which rite you have put together.
  *
- * ## Вівтар — це справжній вівтар, а не скриня з іконками
+ * ## The altar is a real altar, not a chest full of icons
  *
- * У плагіні обряд починався з `context.ui().openChoiceMenu(...)`: гравець відкривав
- * шестирядкову скриню, тицяв іконку потрібного ритуалу, скриня зачинялась, і далі мод
- * перевіряв, чи є в **інвентарі** потрібні предмети. Свічки в тому коді теж були — але
- * лише як число, яке треба набрати; сам вівтар нічого не вирішував.
+ * In the plugin a rite began with `context.ui().openChoiceMenu(...)`: the player opened a
+ * six-row chest, clicked the icon of the ritual they wanted, the chest closed, and then the mod
+ * checked whether the required items were in the **inventory**. Candles were in that code too —
+ * but only as a number to reach; the altar itself decided nothing.
  *
- * Тут вирішує саме він. Обряд не обирають зі списку — його **складають**: скільки свічок
- * горить, що лежить на землі, що затиснуто в руці. З того, що вийшло, мод бере
- * найбагатший обряд, який цей вівтар витягує. Меню зникло не тому, що його нема чим
- * намалювати, а тому що воно було замість механіки.
+ * Here it is the altar that decides. A rite is not picked from a list — it is **assembled**: how
+ * many candles burn, what lies on the ground, what is held in hand. From what came out, the mod
+ * takes the richest rite that altar supports. The menu disappeared not because there was nothing
+ * to draw it with, but because it stood in place of a mechanic.
  *
- * Три наслідки, жоден з яких не коштував рядка коду:
+ * Three consequences, none of which cost a line of code:
  *
- * - **Вівтар видно.** Чужий обряд помітно здалеку — свічки горять, приношення лежить.
- * - **Приношення можна вкрасти.** Воно лежить на землі, а не в захищеному інвентарі.
- * - **Вівтар — це місце.** Його будують, до нього повертаються, його руйнують.
+ * - **The altar is visible.** Someone else's rite is noticeable from afar — the candles burn,
+ *   the offering lies there.
+ * - **The offering can be stolen.** It lies on the ground, not in a protected inventory.
+ * - **An altar is a place.** It is built, returned to, destroyed.
  *
- * ## Свічки рахуються по свічках, а не по блоках
+ * ## Candles are counted by candles, not by blocks
  *
- * Ванільний `CandleBlock` тримає від однієї до чотирьох свічок в одному блоці, тож
- * `CandleBlock.CANDLES` — це і є число, яке просить рецепт. Один блок із чотирма
- * свічками закриває обряд третього рівня; чотири окремі — теж. Форма вівтаря лишається
- * за гравцем.
+ * The vanilla `CandleBlock` holds one to four candles in a single block, so
+ * `CandleBlock.CANDLES` is the very number a recipe asks for. One block with four candles covers
+ * a third-tier rite; four separate ones do too. The shape of the altar is left to the player.
  */
 class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
 
@@ -94,7 +94,7 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
             "▪ Обряд триває ${RITE_TICKS / TICKS_PER_SECOND} с; відійдете — згасне",
     )
 
-    /** Другий обряд поверх першого — це не обряд. Сесія в гравця одна. */
+    /** A second rite on top of the first is not a rite. A player has one session. */
     override fun canCast(context: CastContext): Boolean = !context.sessionRunning
 
     override fun cast(context: CastContext): AbilityOutcome {
@@ -104,7 +104,7 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
         val candles = countCandles(level, centre)
         if (candles < MIN_CANDLES) {
             return AbilityOutcome.failed(
-                "Вівтар не складено: навколо вас має горіти щонайменше $MIN_CANDLES свічки (зараз $candles)",
+                "Вівтар не складено: навколо вас має горіти щонайменше $MIN_CANDLES свічок (зараз $candles)",
             )
         }
 
@@ -113,9 +113,9 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
         val recipe = choose(context.sequence, candles, offerings, hand)
             ?: return AbilityOutcome.failed(missingHint(context.sequence, candles))
 
-        // Усе, що обряду знадобиться після цього рядка, знімається зараз: контекст живе
-        // один виклик, а `ServerPlayer` — до найближчої смерті. Далі сесія бере гравця
-        // з `owner` щотакту, а решту — звідси.
+        // Everything the rite will need after this line is taken now: the context lives one call,
+        // and a `ServerPlayer` until the next death. Beyond this the session takes the player
+        // from `owner` every tick, and everything else from here.
         val rite = Rite(
             recipe = recipe,
             sequence = context.sequence,
@@ -151,8 +151,8 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
                 settled = true
                 perform(player, self, rite)
             } finally {
-                // Скасування (перекаст, вихід, зупинка сервера) теж гасить обряд —
-                // і квиток лишається непогашеним, тобто безкоштовним.
+                // Cancellation (a recast, leaving, a server shutdown) puts the rite out too —
+                // and the ticket stays unsettled, i.e. free.
                 if (!settled) rite.messaging.actionBar(ownerId, Component.literal("Обряд згас"))
             }
         }
@@ -164,36 +164,20 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
         return AbilityOutcome.Awaiting(Component.literal("Обряд почався: ${recipe.displayName}"))
     }
 
-    // ── Вівтар ──────────────────────────────────────────────────────────────────
+    // ── Altar ───────────────────────────────────────────────────────────────────
 
-    /** Скільки свічок горить навколо. Ванільний блок тримає до чотирьох — рахуємо їх. */
-    private fun countCandles(level: ServerLevel, centre: BlockPos): Int =
-        BlockPos.betweenClosed(
-            centre.offset(-ALTAR_RADIUS, -1, -ALTAR_RADIUS),
-            centre.offset(ALTAR_RADIUS, 2, ALTAR_RADIUS),
-        ).sumOf { pos ->
-            val state = level.getBlockState(pos)
-            when {
-                state.block !is AbstractCandleBlock -> 0
-                !AbstractCandleBlock.isLit(state) -> 0
-                state.hasProperty(CandleBlock.CANDLES) -> state.getValue(CandleBlock.CANDLES)
-                else -> 1
-            }
-        }
+    /** Both readings live in `Altar` since Error's disguise started asking the same questions. */
+    private fun countCandles(level: ServerLevel, centre: BlockPos): Int = Altar.candles(level, centre)
 
-    /** Приношення — те, що **лежить на землі** у колі, а не те, що сховано в інвентарі. */
     private fun offerings(level: ServerLevel, centre: BlockPos): List<ItemEntity> =
-        level.getEntitiesOfClass(
-            ItemEntity::class.java,
-            AABB.ofSize(Vec3.atCenterOf(centre), ALTAR_SPAN, ALTAR_HEIGHT, ALTAR_SPAN),
-        )
+        Altar.offerings(level, centre)
 
     /**
-     * Найбагатший обряд, який цей вівтар витягує.
+     * The richest rite this altar supports.
      *
-     * Сортування за числом свічок і довжиною списку інгредієнтів, а не за порядком у
-     * каталозі: гравець, що склав вівтар на п'ять свічок з аметистом, просив явно не
-     * молитву удачі. Дешеві обряди лишаються доступними — досить не класти зайвого.
+     * Sorted by the number of candles and the length of the ingredient list rather than by the
+     * order in the catalogue: a player who built a five-candle altar with amethyst was clearly
+     * not asking for a prayer of luck. Cheap rites stay available — just do not lay out extras.
      */
     private fun choose(
         sequence: Sequence,
@@ -207,12 +191,12 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
         .maxByOrNull { it.candlesRequired * 10 + it.ingredients.size }
 
     /**
-     * Обряди, які Потойбічний уже здатен провести.
+     * The rites a Beyonder is already able to perform.
      *
-     * ponytail: `BESTOWMENT` виключено — його відповідь це підказка, де шукати інгредієнт,
-     * а індекс джерел (`IngredientSourceIndex`) живиться означеннями істот і фореджу,
-     * тобто фазою 12 та її конфігом. Повернути — прибрати один рядок звідси, коли індекс
-     * буде чим наповнити.
+     * ponytail: `BESTOWMENT` is excluded — its answer is a hint about where to look for an
+     * ingredient, and the source index (`IngredientSourceIndex`) feeds on creature and forage
+     * definitions, i.e. on phase 12 and its config. To bring it back, remove one line here once
+     * the index has something to fill it with.
      */
     private fun available(sequence: Sequence): List<RitualRecipe> =
         RitualCatalog.availableFor(sequence.level).filter { it.type != RitualType.BESTOWMENT }
@@ -223,22 +207,22 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
         }
 
     /**
-     * Імена інгредієнтів приїхали з конфіга плагіна у вигляді `GOLD_INGOT` — це
-     * `org.bukkit.Material`, і збігається воно з ванільним ідентифікатором один в один,
-     * бо Bukkit будував свій перелік із нього ж. Тому перекладу немає, є регістр.
+     * The ingredient names arrived from the plugin's config in the form `GOLD_INGOT` — that is
+     * an `org.bukkit.Material`, and it matches the vanilla identifier one for one, because
+     * Bukkit built its own list from it. So there is no translation, only case.
      */
     private fun matches(stack: ItemStack, id: String): Boolean {
         val key = Identifier.tryParse(id.lowercase()) ?: return false
         return BuiltInRegistries.ITEM.getValue(key) === stack.item
     }
 
-    /** Відмова мусить навчати: вона перелічує, що саме цей вівтар уже прийняв би. */
+    /** A refusal must teach: it lists what this altar would already accept. */
     private fun missingHint(sequence: Sequence, candles: Int): String {
         val reachable = available(sequence).filter { it.candlesRequired <= candles }
         if (reachable.isEmpty()) {
             return "Свічок ($candles) замало для будь-якого відомого вам обряду"
         }
-        return "Приношення не збігається з жодним обрядом. Вівтар на $candles свічк(и) приймає: " +
+        return "Приношення не підходить до жодного обряду. Вівтар із $candles свічок прийме: " +
             reachable.joinToString("; ") { recipe ->
                 val what = recipe.ingredients.entries
                     .joinToString(", ") { "${it.key} ×${it.value}" }
@@ -247,9 +231,9 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
             }
     }
 
-    // ── Обряд ───────────────────────────────────────────────────────────────────
+    // ── The rite ────────────────────────────────────────────────────────────────
 
-    /** Полум'я тягнеться до центру: обряд видно тим, хто поруч, а не лише тому, хто веде. */
+    /** The flame reaches towards the centre: a rite is visible to those nearby, not only to whoever leads it. */
     private fun burn(level: ServerLevel, rite: Rite, step: Int) {
         val arms = rite.candles.coerceAtMost(MAX_ARMS)
         val progress = (step % ARM_STEPS).toDouble() / ARM_STEPS
@@ -268,7 +252,7 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
 
     private fun stray(player: ServerPlayer, rite: Rite) {
         rite.messaging.actionBar(player, Component.literal("Ви вийшли з кола — обряд обірвався"))
-        // «Зірваний ритуал накличе невдачу» — обіцянка з каталогу, і вона мусить справдитись.
+        // "A broken ritual brings misfortune" is a promise from the catalogue, and it must come true.
         if (rite.recipe.type == RitualType.LUCK_PRAYER) {
             player.addEffect(MobEffectInstance(MobEffects.UNLUCK, BACKLASH_TICKS, 0, false, true, true))
         }
@@ -278,7 +262,7 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
         )
     }
 
-    /** Приношення згорає рівно в тому обсязі, який просив рецепт: решта лишається лежати. */
+    /** The offering burns exactly in the amount the recipe asked for: the rest stays lying there. */
     private fun consume(player: ServerPlayer, rite: Rite) {
         rite.recipe.ingredients.forEach { (id, needed) ->
             var left = needed
@@ -329,7 +313,7 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
         rite.messaging.actionBar(player, Component.literal("Предмет освячено: +$repair міцності"))
     }
 
-    /** Предмет уже згорів у [consume] — оцінюється копія, знята в мить касту. */
+    /** The item has already burned in [consume] — what is appraised is a copy taken at cast time. */
     private fun burnOffering(player: ServerPlayer, self: Beyonder, rite: Rite) {
         val gain = SacrificeAppraiser.spiritualityFor(sacrificeKind(rite.sacrifice))
         self.setSpirituality(self.spirituality.increment(gain))
@@ -337,11 +321,12 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
     }
 
     /**
-     * Духи показують, хто поруч, — крізь стіни й на пів хвилини.
+     * The spirits show who is nearby — through walls and for half a minute.
      *
-     * Каталог обіцяє «розповідь про минулі події», але минулого мод не пише і не почне:
-     * журнал змін світу заради однієї здібності — саме те, від чого відмовилась
-     * `CrimeReconstruction`. Те, що духи знають без журналу, — хто **зараз** тут.
+     * The catalogue promises "a tale of past events", but the mod does not record the past and
+     * will not start: a world-change journal for the sake of one ability is exactly what
+     * `CrimeReconstruction` turned down. What the spirits know without a journal is who is
+     * **here now**.
      */
     private fun reveal(player: ServerPlayer, level: ServerLevel, rite: Rite) {
         val ticks = rite.scaled(RitualEffectMath.WALL_BASE_TICKS, SequenceScaler.ScalingStrategy.MODERATE)
@@ -351,8 +336,8 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
             .onEach { it.setGlowingTag(true) }
             .map { it.uuid }
 
-        // Гасити доводиться за ідентифікаторами: за пів хвилини половина показаних може
-        // померти, а мертвій сутності контур уже не знімеш.
+        // Clearing has to go by identifier: in half a minute half of those shown may be dead, and
+        // an outline cannot be taken off a dead entity.
         rite.scheduling.after(ticks) {
             seen.forEach { id -> (level.getEntityInAnyDimension(id) as? LivingEntity)?.setGlowingTag(false) }
         }
@@ -362,7 +347,7 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
         )
     }
 
-    /** Дзеркало показує не місце, а людей: хто в цьому світі носить силу і яку. */
+    /** The mirror shows not a place but people: who in this world carries power, and which. */
     private fun divine(player: ServerPlayer, rite: Rite) {
         val others = rite.beyonders.online.filter { it.playerId != player.uuid }
         if (others.isEmpty()) {
@@ -389,7 +374,7 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
         }
     }
 
-    /** Стіна духовності: коло навколо вівтаря тримає тих, хто в ньому, і його видно. */
+    /** The spirit wall: a circle around the altar holds those inside it, and it is visible. */
     private fun wall(player: ServerPlayer, level: ServerLevel, rite: Rite) {
         val ticks = rite.scaled(RitualEffectMath.WALL_BASE_TICKS, SequenceScaler.ScalingStrategy.MODERATE)
         val at = rite.anchor
@@ -418,7 +403,7 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
         rite.messaging.actionBar(player, Component.literal("Стіна духовності стоїть ${ticks / TICKS_PER_SECOND} с"))
     }
 
-    /** Ванільна рідкісність — готова шкала цінності; свого переліку матеріалів мод не тримає. */
+    /** Vanilla rarity is a ready-made scale of worth; the mod keeps no material list of its own. */
     private fun sacrificeKind(stack: ItemStack): SacrificeKind = when {
         stack.isEmpty -> SacrificeKind.TRIFLE
         stack.get(DataComponents.RARITY) == Rarity.EPIC -> SacrificeKind.PRECIOUS
@@ -428,10 +413,10 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
     }
 
     /**
-     * Усе, що обряд забирає з контексту в мить касту.
+     * Everything the rite takes from the context at cast time.
      *
-     * Контекст живе один виклик і несе особу кастера, тож у сесію він не їде — сюди
-     * переїжджають лише значення та служби, які контекст переживають.
+     * The context lives one call and carries the caster's identity, so it does not go into the
+     * session — only values and services that outlive the context move here.
      */
     private inner class Rite(
         val recipe: RitualRecipe,
@@ -439,7 +424,7 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
         val anchor: Vec3,
         val mote: ParticleOptions,
         val candles: Int,
-        /** Копія предмета з руки: до розрахунку жертви оригінал уже згорить. */
+        /** A copy of the item in hand: by the time the sacrifice is appraised the original has burned. */
         val sacrifice: ItemStack,
         val offerings: List<ItemEntity>,
         val scheduling: Scheduling,
@@ -459,7 +444,7 @@ class RitualMagic : ActiveAbility(AbilityIdentity.of("common_ritual_magic")) {
         const val RITE_TICKS = 8 * TICKS_PER_SECOND
         const val RITE_PERIOD_TICKS = 2
         const val STRAY_RANGE = 3.0
-        /** 20 с невдачі за зірвану молитву. */
+        /** 20 s of bad luck for a broken prayer. */
         const val BACKLASH_TICKS = 20 * TICKS_PER_SECOND
 
         const val MAX_ARMS = 8

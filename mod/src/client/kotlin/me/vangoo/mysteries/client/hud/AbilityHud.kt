@@ -21,29 +21,29 @@ import net.minecraft.network.chat.Component
 import net.minecraft.world.item.ItemStack
 
 /**
- * Тонка панель обраної здібності: іконка, назва, ціна й перепочинок.
+ * A thin panel for the selected ability: icon, name, cost and cooldown.
  *
- * Духовність тут не малюється — вона живе в [SpiritualityHud] угорі по центру, бо це
- * ресурс, за яким стежать постійно, а панель здібності лише довідка на мить. Побічний
- * наслідок розділення важливий: панель більше не прокидається на регенерацію духовності,
- * тож режим АВТО справді згасає за 5 секунд спокою.
+ * Spirituality is not drawn here — it lives in [SpiritualityHud] at the top centre, because it
+ * is a resource watched constantly while the ability panel is only a momentary reference. A
+ * side effect of the split matters: the panel no longer wakes up on spirituality regeneration,
+ * so the AUTO mode really does fade after 5 seconds of quiet.
  *
- * Малюється через `HudElementRegistry` — офіційний шлях Fabric на 26.2. Міксин у
- * ванільний HUD тут не потрібен: елемент стає в чергу перед чатом і живе за тими
- * самими правилами, що й ванільні бари.
+ * It is drawn through `HudElementRegistry` — the official Fabric way on 26.2. A mixin into the
+ * vanilla HUD is not needed here: the element queues up before the chat and lives by the same
+ * rules as the vanilla bars.
  *
- * **Рядки будуються в такті, а не в кадрі.** На 26.x рендер retained-mode:
- * [extractRenderState] кличеться щокадру й лише складає готове в чергу. Формувати там
- * [Component] означало б алокацію 60+ разів на секунду; тому панель перебудовується
- * в [tick], і навіть там — лише коли її вміст справді змінився. У кадрі лишається
- * арифметика над числами, які й так уже пораховані.
+ * **The lines are built on the tick, not in the frame.** On 26.x the renderer is retained-mode:
+ * [extractRenderState] is called every frame and only queues up what is ready. Composing a
+ * [Component] there would mean allocating 60+ times a second; so the panel is rebuilt in
+ * [tick], and even there only when its content actually changed. What is left in the frame is
+ * arithmetic over numbers that have already been computed.
  *
- * Клієнт нічого не вирішує: усі числа прийшли з сервера, а прозорість і режим — це
- * про те, як гравець їх бачить.
+ * The client decides nothing: every number came from the server, and the opacity and the mode
+ * are about how the player sees them.
  */
 object AbilityHud : HudElement {
 
-    /** Панель у зібраному вигляді: тексти й геометрія, пораховані один раз. */
+    /** The panel assembled: the texts and the geometry, computed once. */
     private class Panel(
         val entry: AbilityRosterPayload.Entry?,
         val icon: ItemStack?,
@@ -59,10 +59,11 @@ object AbilityHud : HudElement {
     )
 
     /**
-     * Усе, від чого залежить вміст панелі.
+     * Everything the panel's content depends on.
      *
-     * Порівняння знімка з попереднім відповідає одразу на два питання: чи перебудовувати
-     * тексти й чи вважати, що «щось сталось» — а саме на це прокидається режим АВТО.
+     * Comparing the snapshot with the previous one answers two questions at once: whether to
+     * rebuild the texts, and whether to consider that "something happened" — which is exactly
+     * what the AUTO mode wakes up on.
      */
     private data class Signature(
         val pathwayId: String,
@@ -70,7 +71,7 @@ object AbilityHud : HudElement {
         val remainingSeconds: Int,
         val toggled: Boolean,
         val sustaining: Boolean,
-        /** Не саме число духовності: панель показує лише, чи вистачає на обране. */
+        /** Not the spirituality number itself: the panel only shows whether it covers the selection. */
         val affordable: Boolean,
         val showCooldownNumbers: Boolean,
     )
@@ -78,7 +79,7 @@ object AbilityHud : HudElement {
     private var signature: Signature? = null
     private var panel: Panel? = null
 
-    /** Скільки тіків минуло без жодної зміни. Режим АВТО згасає, коли їх набралось 5 секунд. */
+    /** How many ticks passed with no change at all. The AUTO mode fades once they add up to 5 seconds. */
     private var idleTicks = IDLE_TICKS
 
     private var fade = 0f
@@ -89,14 +90,14 @@ object AbilityHud : HudElement {
         ClientTickEvents.END_CLIENT_TICK.register(::tick)
     }
 
-    // ── Такт ────────────────────────────────────────────────────────────────────
+    // ── Tick ────────────────────────────────────────────────────────────────────
 
     private fun tick(client: Minecraft) {
         previousFade = fade
 
-        // Вміст стежиться завжди, навіть поки панель не видно. Інакше повернення з
-        // меню виглядало б як зміна стану й будило б АВТО ні за що: досить було
-        // потикати Escape, щоб панель щоразу спалахувала на п'ять секунд.
+        // The content is watched always, even while the panel is not visible. Otherwise coming
+        // back from a menu would look like a state change and wake AUTO for nothing: tapping
+        // Escape would have been enough to make the panel flare up for five seconds every time.
         val fresh = signatureOf()
         if (fresh != signature) {
             signature = fresh
@@ -107,7 +108,7 @@ object AbilityHud : HudElement {
         }
 
         if (panel == null || !shouldShow(client)) {
-            // Не згасання, а зникнення: відкритий екран чи F1 забирають панель одразу.
+            // Not a fade but a disappearance: an open screen or F1 takes the panel away at once.
             fade = 0f
             previousFade = 0f
             return
@@ -161,7 +162,7 @@ object AbilityHud : HudElement {
             null
         }
 
-        // Ширина під довше з двох: назва або рядок ціни зі знаком стану.
+        // The width fits the longer of the two: the name, or the cost line with the status mark.
         val detailWidth = (price?.let { UiTheme.badgeWidth(font, it) } ?: 0) +
             (marker?.let { MARKER_GAP + font.width(it) } ?: 0)
         val content = (if (entry != null) ICON + GAP else 0) +
@@ -186,12 +187,12 @@ object AbilityHud : HudElement {
     }
 
     /**
-     * Ціна здібності — разова, утримання, або обидві.
+     * The ability's cost — one-off, upkeep, or both.
      *
-     * Утримання показувалось лише для тоглів, а сила, що гасне сама (сесія з `upkeep`),
-     * оголошена **активною** — і виходило «✦ 0» там, де насправді щосекунди списується
-     * два десятки. Тип здібності тут узагалі ні до чого: питання просто в тому, які з
-     * двох цін ненульові.
+     * The upkeep used to be shown only for toggles, while a power that goes out on its own (a
+     * session with `upkeep`) is declared **active** — and the result was "✦ 0" where two dozen
+     * points were in fact being spent every second. The ability type has nothing to do with it:
+     * the question is simply which of the two prices are non-zero.
      */
     private fun priceOf(entry: AbilityRosterPayload.Entry): Component? {
         val parts = buildList {
@@ -205,7 +206,7 @@ object AbilityHud : HudElement {
     private fun approach(current: Float, target: Float, step: Float): Float =
         if (current < target) minOf(current + step, target) else maxOf(current - step, target)
 
-    // ── Кадр ────────────────────────────────────────────────────────────────────
+    // ── Frame ───────────────────────────────────────────────────────────────────
 
     override fun extractRenderState(graphics: GuiGraphicsExtractor, delta: DeltaTracker) {
         val panel = panel ?: return
@@ -241,8 +242,8 @@ object AbilityHud : HudElement {
         UiTheme.panel(graphics, x, y, panel.width, panel.height, alpha)
         panel.icon?.let { graphics.item(it, left, y + PADDING) }
 
-        // Далі — усе, що мусить лягти поверх іконки. Предмети в retained-mode їдуть
-        // окремим проходом, тож тінь перепочинку без нового страту опинилась би під ними.
+        // Next comes everything that must lie on top of the icon. In retained-mode, items go in
+        // a separate pass, so without a new stratum the cooldown veil would end up beneath them.
         graphics.nextStratum()
 
         val textLeft = if (panel.icon != null) left + ICON + GAP else left
@@ -276,11 +277,11 @@ object AbilityHud : HudElement {
     private const val GAP = 4
     private const val MARKER_GAP = 3
 
-    /** Іконка (16) плюс рядок деталей під нею. */
+    /** The icon (16) plus the details line under it. */
     private const val ROW_HEIGHT = 20
     private const val DETAIL_OFFSET = 9
 
-    /** 250 мс проявлення й згасання; 5 с спокою — і АВТО ховає панель. */
+    /** 250 ms to appear and to fade; 5 s of quiet and AUTO hides the panel. */
     private const val FADE_TICKS = 5f
     private const val IDLE_TICKS = 100
 

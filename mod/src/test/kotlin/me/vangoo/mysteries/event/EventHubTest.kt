@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 /**
- * Реєстр підписок. Гри тут немає й не треба: [GameEvent] — власний тип мода, тож
- * подію можна оголосити прямо в тесті, а годинник — прокрутити рукою.
+ * The subscription registry. There is no game here and none is needed: [GameEvent] is the mod's
+ * own type, so an event can be declared right in the test and the clock wound on by hand.
  */
 class EventHubTest {
 
