@@ -66,7 +66,10 @@ object AbilityServices {
     /** Which ability the player holds under the key. Until phase 11 this is all the selection there is. */
     val selection = AbilitySelection()
 
-    val contexts: AbilityContexts = AbilityContexts(beyonders, cooldowns, messaging, scheduling, events)
+    /** A choice an ability is waiting on, until phase 11's real menus exist. */
+    val pendingChoices = PendingChoices()
+
+    val contexts: AbilityContexts = AbilityContexts(beyonders, cooldowns, messaging, scheduling, events, pendingChoices)
 
     val passives: PassiveTicker = PassiveTicker(beyonders, contexts, events, players, onError)
 
@@ -151,6 +154,7 @@ object AbilityServices {
             events.forget(player.uuid)
             scheduling.stopAll(player.uuid)
             selection.forget(player.uuid)
+            pendingChoices.forget(player.uuid)
             statePump.forget(player.uuid)
         }
     }
@@ -210,6 +214,7 @@ object AbilityServices {
             cooldowns.forget(id)
             passives.forget(id)
             selection.forget(id)
+            pendingChoices.forget(id)
             statePump.forget(id)
         }
         beyonders.online.toList().forEach { beyonders.forget(it.playerId) }

@@ -56,6 +56,12 @@ object MysteriesCommand {
                     ),
                 )
                 .then(
+                    Commands.literal("choose").then(
+                        Commands.argument("option", IntegerArgumentType.integer(1))
+                            .executes { context -> choose(context) },
+                    ),
+                )
+                .then(
                     Commands.literal("become").requires(OPERATOR).then(
                         pathwayArgument().then(
                             Commands.argument("sequence", IntegerArgumentType.integer(0, Pathway.SEQUENCE_COUNT - 1))
@@ -151,6 +157,20 @@ object MysteriesCommand {
             return fail(context, "У вас немає здібності «$identity»")
         }
         context.source.sendSuccess({ Component.literal("Обрано: $identity") }, false)
+        return 1
+    }
+
+    /**
+     * Answers whatever choice is pending for the player — the stand-in for a menu click until
+     * phase 11. `option` is 1-based (as printed in chat), [PendingChoices.choose] takes the
+     * 0-based index.
+     */
+    private fun choose(context: CommandContext<CommandSourceStack>): Int {
+        val player = context.source.playerOrException
+        val option = IntegerArgumentType.getInteger(context, "option")
+        if (!AbilityServices.pendingChoices.choose(player.uuid, option - 1)) {
+            return fail(context, "Немає на що відповідати")
+        }
         return 1
     }
 

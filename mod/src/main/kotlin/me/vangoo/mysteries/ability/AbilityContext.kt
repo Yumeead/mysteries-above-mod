@@ -10,6 +10,7 @@ import me.vangoo.mysteries.ability.context.Events
 import me.vangoo.mysteries.ability.context.Messaging
 import me.vangoo.mysteries.ability.context.Scheduling
 import me.vangoo.mysteries.ability.context.Targeting
+import me.vangoo.mysteries.ability.runtime.PendingChoices
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.phys.Vec3
@@ -54,6 +55,12 @@ import net.minecraft.world.phys.Vec3
  * |---|---|
  * | `ui` — choice screens and input | 11 |
  * | `summons` — data-driven creatures | 12 |
+ *
+ * [pendingChoices] arrived ahead of that table on purpose: `PsychicCue`, `Alteration` and
+ * `DreamTraversal` all need to offer a choice **now**, in phase 08, years before a screen exists
+ * to draw it. It is the same kind of stand-in [me.vangoo.mysteries.ability.runtime.AbilitySelection]
+ * already is for the ability wheel — a real service, not a placeholder, that phase 11 will
+ * replace by changing what the offering ability calls, not by growing the context further.
  */
 interface AbilityContext {
 
@@ -86,6 +93,7 @@ interface AbilityContext {
     val scheduling: Scheduling
     val events: Events
     val effects: Effects
+    val pendingChoices: PendingChoices
 }
 
 /**
