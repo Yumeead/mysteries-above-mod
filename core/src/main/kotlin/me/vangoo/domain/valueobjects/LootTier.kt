@@ -1,4 +1,4 @@
 package me.vangoo.domain.valueobjects
 
-/** Рівень рідкості предмета лута: base (звичайні скрині) / rare (данжі/спец-структури). */
+/** Loot item rarity: base (ordinary chests) / rare (dungeons, special structures). */
 enum class LootTier { BASE, RARE }

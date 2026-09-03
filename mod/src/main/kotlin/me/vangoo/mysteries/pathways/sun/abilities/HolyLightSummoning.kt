@@ -23,22 +23,22 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * Sun, Посл. 7 (Сонячний Первосвященник): **Святе світло**.
+ * Sun, Seq. 7 (Solar High Priest): **Holy Light**.
  *
- * Стовп святого вогню з неба в обрану точку. Найсильніший одиночний удар шляху — і
- * єдиний, який **не працює під дахом**.
+ * A pillar of holy fire from the sky into a chosen point. The pathway's strongest single strike —
+ * and the only one that **does not work under a roof**.
  *
- * ## Небо — це умова, а не оформлення
+ * ## The sky is a condition, not decoration
  *
- * Плагінна версія малювала стовп із частинок будь-де: у печері, у бункері, під водою.
- * Тут світло справді приходить згори, тож `canSeeSkyFromBelowWater` над ціллю —
- * обов'язкова умова, і відмова каже про це прямо.
+ * The plugin's version drew a pillar of particles anywhere: in a cave, in a bunker, underwater.
+ * Here the light really does come from above, so `canSeeSkyFromBelowWater` over the target is a
+ * mandatory condition, and the refusal says so outright.
  *
- * Це те, чого шляху бракувало: у Сонця було п'ять способів завдати шкоди й жодного
- * приводу подумати, **де** ти стоїш. Тепер найсильніший з них вимагає вийти під небо,
- * а супротивник має куди від нього сховатись.
+ * That is what the pathway lacked: the Sun had five ways of dealing damage and not one reason to
+ * think about **where** you are standing. Now the strongest of them requires going out under the
+ * sky, and an opponent has somewhere to hide from it.
  *
- * На 26.2 `Level.canSeeSky` більше немає — лишився `LevelReader.canSeeSkyFromBelowWater`.
+ * On 26.2 `Level.canSeeSky` is gone — only `LevelReader.canSeeSkyFromBelowWater` remains.
  */
 class HolyLightSummoning : ActiveAbility(AbilityIdentity.of("sun_holy_light_summoning")) {
 
@@ -50,8 +50,8 @@ class HolyLightSummoning : ActiveAbility(AbilityIdentity.of("sun_holy_light_summ
 
     override fun description(sequence: Sequence): Component = Component.literal(
         "Стовп святого вогню з неба в точку під прицілом.\n" +
-            "▪ Шкода: ${damage(sequence)} по скверні (радіус ${PILLAR_RADIUS} бл.), знижена по решті\n" +
-            "▪ Скверна горить ${FIRE_SECONDS} с\n" +
+            "▪ Шкода: ${damage(sequence)} по нечисті (радіус ${PILLAR_RADIUS} бл.), знижена по решті\n" +
+            "▪ Нечисть горить ${FIRE_SECONDS} с\n" +
             "▪ Потрібне відкрите небо над ціллю — під дахом не спрацює",
     )
 
@@ -88,10 +88,10 @@ class HolyLightSummoning : ActiveAbility(AbilityIdentity.of("sun_holy_light_summ
     }
 
     /**
-     * Стовп опускається згори вниз за [FALL_TICKS], а не з'являється цілим.
+     * The pillar comes down from above over [FALL_TICKS] rather than appearing whole.
      *
-     * Малюється власним завданням у планувальнику, не сесією: стовп не належить
-     * кастеру — він уже впав і догорить сам, навіть якщо той вийде з гри.
+     * It is drawn by its own job in the scheduler, not by a session: the pillar does not belong to
+     * the caster — it has already fallen and will burn out on its own, even if they leave the game.
      */
     private fun descend(context: CastContext, at: Vec3, mote: ParticleOptions) {
         val level = context.level

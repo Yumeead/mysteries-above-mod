@@ -3,13 +3,13 @@ package me.vangoo.domain.valueobjects
 /**
  * Domain Value Object: Represents a custom item definition.
  *
- * НЕ data class: конструктор нормалізує [lore] (null → порожній, інакше незмінна копія),
- * а `copy()` пройшов би повз нормалізацію — та сама причина, що й у [Mastery].
+ * NOT a data class: the constructor normalises [lore] (null → empty, otherwise an immutable
+ * copy), and `copy()` would go around the normalisation — the same reason as in [Mastery].
  */
 class CustomItem(
     val id: String,
     val displayName: String,
-    /** Ключ матеріалу рядком (напр. `MUSIC_DISC_FAR`) — VO лишається без залежності від платформи. */
+    /** Material key as a string (e.g. `MUSIC_DISC_FAR`) — the VO stays free of platform types. */
     val material: String,
     lore: List<String>?,
     val glow: Boolean,

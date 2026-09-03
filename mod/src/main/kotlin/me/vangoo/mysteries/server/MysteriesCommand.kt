@@ -26,18 +26,18 @@ import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 
 /**
- * `/mysteries` — уся взаємодія з модом до фази 11.
+ * `/mysteries` — all interaction with the mod until phase 11.
  *
- * Половина гілок — тимчасові: `cast` і `select` замінить колесо здібностей, `potion` і
- * `mastery` — варіння та справжнє засвоєння. Але поки їх немає, цикл «видав шлях →
- * випив зілля → скастував» треба чимось замкнути **в грі**, а не в тестах — це і є вся
- * суть фази 05.
+ * Half the branches are temporary: `cast` and `select` will be replaced by the ability wheel,
+ * `potion` and `mastery` by brewing and real mastery. But until those exist, the cycle "grant a
+ * pathway → drink a potion → cast" has to be closed with something **in the game**, not in the
+ * tests — and that is the whole point of phase 05.
  *
- * `status` і `abilities` лишаться: команда, що друкує стан, переживає будь-який UI.
+ * `status` and `abilities` will stay: a command that prints the state outlives any UI.
  */
 object MysteriesCommand {
 
-    /** Рівень оператора: гілки, що роздають силу, гравцям не належать. */
+    /** Operator level: the branches that hand out power do not belong to players. */
     private val OPERATOR = Commands.hasPermission<CommandSourceStack>(Commands.LEVEL_GAMEMASTERS)
 
     fun register(dispatcher: CommandDispatcher<CommandSourceStack>) {
@@ -87,16 +87,16 @@ object MysteriesCommand {
         )
     }
 
-    // ── Стан ────────────────────────────────────────────────────────────────────
+    // ── State ───────────────────────────────────────────────────────────────────
 
     private fun status(context: CommandContext<CommandSourceStack>): Int {
         val player = context.source.playerOrException
         BeyonderStatus.push(player)
-        // Повне перечитування: і рідкісний знімок, і частий. Дешевше надіслати зайвий
-        // пакет на явне прохання, ніж лишити клієнт із застарілим списком.
+        // A full re-read: both the rare snapshot and the frequent one. Sending one extra packet
+        // on an explicit request is cheaper than leaving the client with a stale list.
         BeyonderStatus.pushRoster(player)
         AbilityServices.statePump.pushNow(player.uuid)
-        context.source.sendSuccess({ Component.literal("Стан надіслано на клієнт.") }, false)
+        context.source.sendSuccess({ Component.literal("Стан надіслано клієнту.") }, false)
         return 1
     }
 
@@ -128,19 +128,19 @@ object MysteriesCommand {
         val marker = if (spec.identity == selected) "▶ " else "  "
         val remaining = AbilityServices.cooldowns.remainingSeconds(player.uuid, spec.identity)
         val state = when {
-            remaining > 0 -> "перепочинок ${remaining} с"
+            remaining > 0 -> "відкат ${remaining} с"
             spec.type == AbilityType.ACTIVE -> "готова · ${spec.spiritualityCost} духовності"
             else -> "пасивна"
         }
         return Component.literal("$marker$name [${spec.identity}] — $state")
     }
 
-    // ── Каст ────────────────────────────────────────────────────────────────────
+    // ── Cast ────────────────────────────────────────────────────────────────────
 
     private fun cast(context: CommandContext<CommandSourceStack>): Int {
         val player = context.source.playerOrException
         AbilityRequests.cast(player, identityArgument(context))
-        // Про наслідки касту гравцеві вже сказав виконавець — дублювати в чат нема потреби.
+        // The executor has already told the player what came of the cast — no need to repeat it in chat.
         return 1
     }
 
@@ -154,14 +154,14 @@ object MysteriesCommand {
         return 1
     }
 
-    // ── Оператор ────────────────────────────────────────────────────────────────
+    // ── Operator ────────────────────────────────────────────────────────────────
 
     /**
-     * Видає шлях і Послідовність одразу, без ланцюга зілль.
+     * Grants a pathway and a Sequence at once, without the potion chain.
      *
-     * Існує з тієї самої причини, що й `mastery`: пройти драбину чесно — це десяток
-     * команд на кожну Послідовність, а перевіряти здібність доводиться після кожної
-     * правки. Гравцеві цей шлях недоступний — гілка операторська.
+     * It exists for the same reason as `mastery`: walking the ladder honestly is a dozen
+     * commands per Sequence, and an ability has to be tested after every edit. This path is not
+     * available to a player — the branch is operator-only.
      */
     private fun become(context: CommandContext<CommandSourceStack>): Int {
         val player = context.source.playerOrException
@@ -202,10 +202,10 @@ object MysteriesCommand {
     }
 
     /**
-     * Виставляє засвоєння напряму.
+     * Sets the mastery directly.
      *
-     * Існує рівно тому, що засвоєння росте з кастів (`MasteryProgressionCalculator`), і
-     * добити його до 100 % ради перевірки піднесення — це десятки хвилин каста в порожнечу.
+     * It exists exactly because mastery grows from casts (`MasteryProgressionCalculator`), and
+     * topping it up to 100 % just to test an ascension is tens of minutes of casting into the void.
      */
     private fun mastery(context: CommandContext<CommandSourceStack>): Int {
         val player = context.source.playerOrException
@@ -213,7 +213,7 @@ object MysteriesCommand {
             ?: return fail(context, "Ви не Потойбічний")
 
         beyonder.setMastery(Mastery.of(DoubleArgumentType.getDouble(context, "percent")))
-        // Засвоєння рухає стелю духовності — це вже число зі знімка стану.
+        // Mastery moves the spirituality ceiling — that is already a number from the state snapshot.
         BeyonderStatus.push(player)
         AbilityServices.statePump.pushNow(player.uuid)
         context.source.sendSuccess({ Component.literal("Засвоєння: ${beyonder.mastery}") }, false)
@@ -221,10 +221,10 @@ object MysteriesCommand {
     }
 
     /**
-     * Виставляє розхитаність розуму напряму.
+     * Sets the sanity loss directly.
      *
-     * Існує з тієї ж причини, що й `mastery`: сама вона росте по два пункти за каст на
-     * порожньому баку, тож дійти до шепоту й екранного ланцюга «чесно» — це сотні кастів.
+     * It exists for the same reason as `mastery`: on its own it grows by two points per cast on
+     * an empty tank, so reaching the whisper and the screen chain "honestly" is hundreds of casts.
      */
     private fun sanity(context: CommandContext<CommandSourceStack>): Int {
         val player = context.source.playerOrException
@@ -232,12 +232,12 @@ object MysteriesCommand {
             ?: return fail(context, "Ви не Потойбічний")
 
         val wanted = SanityLoss.of(IntegerArgumentType.getInteger(context, "scale"))
-        // Прямого сеттера в домені немає навмисно: глузд рухається подіями, не присвоєнням.
+        // There is deliberately no direct setter in the domain: sanity moves through events, not assignment.
         val delta = wanted.scale - beyonder.sanityLoss.scale
         if (delta > 0) beyonder.increaseSanityLoss(delta) else beyonder.decreaseSanityLoss(-delta)
 
         AbilityServices.statePump.pushNow(player.uuid)
-        context.source.sendSuccess({ Component.literal("Глузд: ${beyonder.sanityLoss}") }, false)
+        context.source.sendSuccess({ Component.literal("Втрата глузду: ${beyonder.sanityLoss}") }, false)
         return 1
     }
 
@@ -251,7 +251,7 @@ object MysteriesCommand {
         return 1
     }
 
-    // ── Аргументи ───────────────────────────────────────────────────────────────
+    // ── Arguments ───────────────────────────────────────────────────────────────
 
     private fun abilityArgument() =
         Commands.argument("ability", StringArgumentType.word()).suggests { context, builder ->

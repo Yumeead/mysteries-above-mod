@@ -16,20 +16,20 @@ import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 
 /**
- * Sun, Посл. 7 (Сонячний Первосвященник): **Свята клятва**.
+ * Sun, Seq. 7 (Solar High Priest): **Holy Oath**.
  *
- * Первосвященник дає клятву — і поки вона тримається, він б'є сильніше, рухається
- * швидше, а кожен його удар підпалює.
+ * The High Priest swears an oath — and while it holds, they strike harder, move faster, and every
+ * blow of theirs sets the target alight.
  *
- * ## Клятва має ціну, і це не духовність
+ * ## The oath has a price, and it is not spirituality
  *
- * Плагінна версія була просто бафом на п'ятнадцять секунд. Клятва так не звучить:
- * обіцянка, з якої нічого не випливає, — не обіцянка. Тому разом із силою вона накладає
- * [MobEffects.GLOWING]: доки клятва тримається, Первосвященника **видно всім і крізь
- * стіни**. Сховатись із нею не вийде — ні від того, кому клявся, ні від решти.
+ * The plugin's version was simply a fifteen-second buff. An oath does not sound like that: a
+ * promise with nothing following from it is not a promise. So along with the power it applies
+ * [MobEffects.GLOWING]: while the oath holds, the High Priest is **visible to everyone and
+ * through walls**. There is no hiding with it — neither from the one sworn to nor from the rest.
  *
- * Механічно це той самий буст, але з ним не можна засідати в кущах: сила, що робить
- * тебе сильнішим, робить тебе й помітнішим.
+ * Mechanically it is the same boost, but you cannot lie in the bushes with it: a power that makes
+ * you stronger makes you more noticeable too.
  */
 class HolyOath : ActiveAbility(AbilityIdentity.of("sun_holy_oath")) {
 
@@ -54,7 +54,7 @@ class HolyOath : ActiveAbility(AbilityIdentity.of("sun_holy_oath")) {
 
         caster.addEffect(MobEffectInstance(MobEffects.STRENGTH, ticks, 0, false, true, true))
         caster.addEffect(MobEffectInstance(MobEffects.SPEED, ticks, 0, false, true, true))
-        // Видимість — це ціна, тож ефект показуємо: гравець мусить бачити, що з ним.
+        // The visibility is the price, so the effect is shown: the player must see what is on them.
         caster.addEffect(MobEffectInstance(MobEffects.GLOWING, ticks, 0, false, true, true))
 
         context.events.on<IncomingDamage>(durationTicks = ticks) { damage ->

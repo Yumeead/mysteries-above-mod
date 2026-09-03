@@ -21,37 +21,38 @@ import net.minecraft.network.chat.Component
 import net.minecraft.world.effect.MobEffects
 
 /**
- * Шлях Дверей — простір, відстань і чуже знання.
+ * The pathway of the Door — space, distance and other people's knowledge.
  *
- * Третій шлях фази 08. Сонце вирішувало задачу «багато сил, усі б'ють світлом», Двері —
- * протилежну: тут майже жодна сила не б'є, і розрізняти їх доводиться не силою удару, а
- * тим, **що саме вони скорочують**.
+ * The third pathway of phase 08. The Sun solved the problem of "many powers, all of them
+ * striking with light"; the Door has the opposite one: here almost no power strikes at all, and
+ * they have to be told apart not by the force of a blow but by **what exactly each of them
+ * shortens**.
  *
- * | Посл. | що скорочується |
+ * | Seq. | what is shortened |
  * |---|---|
- * | 9 | товщина стіни — `Відкриття дверей` |
- * | 8 | дистанція до втечі — `Флешка`, `Трюк зі зникненням` |
- * | 7 | відстань до чужого знання — `Мистецтво ворожіння`, `Духовне бачення` |
- * | 6 | відстань до чужої сили — `Запис здібності`, `Розшифровка патернів` |
- * | 5 | сама відстань — `Двері Мандрівника`, `Блимання` |
+ * | 9 | the thickness of a wall — `Відкриття дверей` |
+ * | 8 | the distance to an escape — `Спалах`, `Трюк зі зникненням` |
+ * | 7 | the distance to someone's knowledge — `Мистецтво ворожіння`, `Духовне бачення` |
+ * | 6 | the distance to someone's power — `Запис здібності`, `Розшифрування патернів` |
+ * | 5 | distance itself — `Двері Мандрівника`, `Миттєвий крок` |
  *
- * **Заповнено Посл. 9–5** — стільки ж, скільки заповнював плагін.
+ * **Filled for Seq. 9–5** — as much as the plugin filled.
  *
- * ## Чого тут немає навмисно
+ * ## What is deliberately absent
  *
- * Плагін вирішував **усі** питання вибору меню в скрині: `Мистецтво ворожіння`
- * відкривало п'ять підменю, `Запис` — список голів гравців поблизу, `Двері Мандрівника`
- * просили координати в чат. Меню тут немає жодного — і не тому, що екранів іще нема
- * (фаза 11), а тому, що кожен із трьох випадків має **предметну** відповідь: інструмент
- * у руці обирає спосіб ворожіння, погляд обирає ціль запису, а компас лодестона несе
- * координату, яку гравець уже заслужив. Той самий хід, що зробив `RitualMagic` зі
- * справжнім вівтарем замість `openChoiceMenu`.
+ * The plugin solved **every** question of choice with a chest menu: `Мистецтво ворожіння`
+ * opened five submenus, `Запис` a list of nearby players' heads, `Двері Мандрівника` asked for
+ * coordinates in chat. There is not a single menu here — and not because there are no screens
+ * yet (phase 11), but because each of the three cases has an answer **made of items**: the tool
+ * in hand chooses the way of divining, the gaze chooses the target to record, and a lodestone
+ * compass carries a coordinate the player has already earned. The same move `RitualMagic` made
+ * with a real altar instead of `openChoiceMenu`.
  */
 object Door {
 
     const val NAME: String = "Door"
 
-    /** Канон новели; індекс списку **дорівнює** Послідовності: 0 — Двері, 9 — Учень. */
+    /** The novel's canon; the list index **equals** the Sequence: 0 — Door, 9 — Apprentice. */
     private val SEQUENCE_NAMES = listOf(
         "Door", "Key of Stars", "Planeswalker", "Wanderer", "Secrets Sorcerer",
         "Traveler", "Scribe", "Astrologer", "Trickmaster", "Apprentice",

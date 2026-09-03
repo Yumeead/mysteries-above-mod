@@ -4,8 +4,8 @@ import me.vangoo.domain.valueobjects.Sequence
 
 object MasteryProgressionCalculator {
 
-    // Кількість духовності, необхідна для отримання 1.0 (одного цілого) пункту Mastery.
-    // Тобто 1% від повного засвоєння.
+    // The amount of spirituality needed to gain 1.0 (one whole) point of Mastery.
+    // That is, 1% of full mastery.
     private val SPIRITUALITY_PER_ONE_PERCENT = doubleArrayOf(
         10000.0, // Sequence 0 - God (hardest)
         5000.0,  // Sequence 1 - Angel
@@ -19,23 +19,23 @@ object MasteryProgressionCalculator {
         60.0     // Sequence 9
     )
 
-    /** Повертає вартість 1 пункту (1%) Mastery для вказаної послідовності. */
+    /** Returns the cost of 1 point (1%) of Mastery for the given sequence. */
     fun getSpiritualityPerOnePercent(sequence: Sequence): Double =
         SPIRITUALITY_PER_ONE_PERCENT[sequence.level.coerceIn(0, 9)]
 
     /**
-     * Розраховує приріст Mastery (у дробових числах) на основі витраченої духовності.
-     * Повертає double, наприклад 0.83, 1.5, 0.05 тощо.
+     * Computes the Mastery gain (as a fractional number) from the spirituality spent.
+     * Returns a double, for example 0.83, 1.5, 0.05 and so on.
      */
     fun calculateMasteryGain(spiritualitySpent: Int, sequence: Sequence): Double {
         if (spiritualitySpent <= 0) {
             return 0.0
         }
-        // Приклад: cost=60, spent=30 -> результат 0.5 (піввідсотка)
+        // Example: cost=60, spent=30 -> result 0.5 (half a percent)
         return spiritualitySpent / getSpiritualityPerOnePercent(sequence)
     }
 
-    /** Повертає загальну кількість духовності для проходження від 0 до 100%. */
+    /** Returns the total spirituality needed to go from 0 to 100%. */
     fun getTotalSpiritualityForFullMastery(sequence: Sequence): Double =
         getSpiritualityPerOnePercent(sequence) * 100.0
 }

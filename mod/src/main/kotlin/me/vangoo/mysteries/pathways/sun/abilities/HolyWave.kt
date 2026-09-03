@@ -22,22 +22,23 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * Sun, Посл. 5 (Священник Світла): **Хвиля святості**.
+ * Sun, Seq. 5 (Priest of Light): **Wave of Holiness**.
  *
- * Одна хвиля, що розходиться від Священника й **робить із кожним по його природі**:
- * скверну б'є й послаблює, решту зцілює і знімає з неї все шкідливе.
+ * One wave spreading out from the Priest that **treats everyone according to their nature**: it
+ * strikes and weakens the unclean, heals everyone else and clears everything harmful off them.
  *
- * ## Найдорожча сила шляху, і вона не про шкоду
+ * ## The pathway's most expensive power, and it is not about damage
  *
- * Шкода тут менша за стовп Первосвященника — бо хвиля не для того. Вона рятує загін:
- * знімає з усіх отруту, слабкість, кровотечу, підпал, доливає здоров'я — і водночас
- * розчищає навколо. Одна кнопка, яка перевертає бій, що вже програний.
+ * The damage here is smaller than the High Priest's pillar — because that is not what the wave is
+ * for. It saves the party: it clears poison, weakness, bleeding and fire off everyone, tops up
+ * health — and at the same time sweeps the surroundings. One button that turns a fight already
+ * lost.
  *
- * ## Хвиля справді розходиться
+ * ## The wave really does spread
  *
- * Ефект застосовується миттєво, а видно його [WAVE_TICKS] тіків: кільце йде від центру
- * до краю, і по ньому читається, кого зачепило. Малює його власне завдання в
- * планувальнику, не сесія: хвиля кастеру вже не належить.
+ * The effect is applied instantly, and it is visible for [WAVE_TICKS] ticks: a ring travels from
+ * the centre to the edge, and by it one reads who was caught. It is drawn by its own job in the
+ * scheduler, not by a session: the wave no longer belongs to the caster.
  */
 class HolyWave : ActiveAbility(AbilityIdentity.of("sun_holy_wave")) {
 
@@ -50,7 +51,7 @@ class HolyWave : ActiveAbility(AbilityIdentity.of("sun_holy_wave")) {
     override fun description(sequence: Sequence): Component = Component.literal(
         "Хвиля святого світла на ${RADIUS.toInt()} бл. навколо вас.\n" +
             "▪ Своїм: +${heal(sequence)} здоров'я і знято все шкідливе\n" +
-            "▪ Скверні: ${damage(sequence)} шкоди й Слабкість на " +
+            "▪ Нечисті: ${damage(sequence)} шкоди й Слабкість на " +
             "${WEAKNESS_TICKS / TICKS_PER_SECOND} с",
     )
 
@@ -67,8 +68,8 @@ class HolyWave : ActiveAbility(AbilityIdentity.of("sun_holy_wave")) {
                     target.addEffect(MobEffectInstance(MobEffects.WEAKNESS, WEAKNESS_TICKS, 0))
                     struck++
                 }
-                // Хвиля рятує загін, а не звіринець: крипер поруч не зцілюється лише
-                // тому, що він не нежить.
+                // The wave saves a party, not a menagerie: a creeper nearby is not healed just
+                // because it is not undead.
                 target === context.caster || target.isFaithful(context.beyonders) -> {
                     target.heal(heal(context.sequence).toFloat())
                     cleanse(target)
@@ -84,7 +85,7 @@ class HolyWave : ActiveAbility(AbilityIdentity.of("sun_holy_wave")) {
         return AbilityOutcome.done("Хвиля святості: $mended зцілено, $struck опалено")
     }
 
-    /** Кільце, що йде від центру до краю за [WAVE_TICKS] тіків. */
+    /** A ring travelling from the centre to the edge over [WAVE_TICKS] ticks. */
     private fun wave(context: CastContext, centre: Vec3, mote: ParticleOptions) {
         val level: ServerLevel = context.level
         var step = 0

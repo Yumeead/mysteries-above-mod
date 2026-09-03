@@ -3,9 +3,9 @@ package me.vangoo.domain.creatures
 import java.util.UUID
 
 /**
- * Результат правила тяжіння: до кого тяжіє джерело і наскільки сильно.
+ * The result of the pull rule: which magnet the source is drawn to and how strongly.
  *
- * @property targetId UUID обраного магніта
- * @property strength сила нуджа ∈ (0,1]
+ * @property targetId UUID of the chosen magnet
+ * @property strength nudge strength ∈ (0,1]
  */
 data class PullResult(val targetId: UUID, val strength: Double)

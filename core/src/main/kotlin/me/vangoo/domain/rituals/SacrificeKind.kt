@@ -1,6 +1,6 @@
 package me.vangoo.domain.rituals
 
-/** Категорія жертви для Жертвопринесення (класифікує шар поведінки). */
+/** The sacrifice category for the Sacrifice ritual (the behaviour layer classifies it). */
 enum class SacrificeKind {
     PATHWAY_INGREDIENT,
     PRECIOUS,

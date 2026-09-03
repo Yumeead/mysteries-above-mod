@@ -16,47 +16,46 @@ import java.util.UUID
 import kotlin.math.roundToInt
 
 /**
- * Door, Посл. 7 (Астролог): **Духовна інтуїція**.
+ * Door, Seq. 7 (Astrologer): **Spiritual Intuition**.
  *
- * Астролог відчуває **чужий намір** — не удар, а мить перед ним: моба, який його обрав,
- * і людину, яка не зводить із нього прицілу.
+ * The Astrologer feels **someone else's intent** — not the blow but the moment before it: a mob
+ * that has chosen them, and a person who will not take their aim off them.
  *
- * ## Чому не «хтось узяв здібність у руки»
+ * ## Why not "someone took an ability in hand"
  *
- * У плагіні інтуїція слухала `PlayerItemHeldEvent`: здібності там були предметами в
- * хотбарі, тож перемикання слота і було «замахом». У моді предметів-здібностей немає
- * взагалі — каст іде з клавіші, — тож той сигнал не просто важко відтворити, його не
- * існує. А відтворити його **пізнішим** сигналом (каст уже стався) означало б написати
- * `DecryptPatterns` удруге: та сама подія, той самий радіус, той самий рядок.
+ * In the plugin the intuition listened to `PlayerItemHeldEvent`: abilities there were items in the
+ * hotbar, so switching slots was the "wind-up". The mod has no ability items at all — a cast comes
+ * from a key — so that signal is not merely hard to reproduce, it does not exist. And reproducing
+ * it with a **later** signal (the cast has already happened) would mean writing `DecryptPatterns`
+ * twice: the same event, the same radius, the same line.
  *
- * Тому інтуїція взяла інший сигнал — той, який гра справді має раніше за удар:
+ * So the intuition took a different signal — one the game really does have before a blow:
  *
- * | джерело | ванільне питання |
+ * | source | the vanilla question |
  * |---|---|
- * | звір | [Mob.getTarget] — кого він уже обрав |
- * | людина | куди дивиться й наскільки точно ([AIM] — косинус кута) |
+ * | a beast | [Mob.getTarget] — whom it has already chosen |
+ * | a person | where they are looking and how precisely ([AIM] — the cosine of the angle) |
  *
- * Обидва відповідають на «на мене зараз полюють», і жодне з них не потребує ні події,
- * ні міксину: це опитування, і воно тут доречне — на «мене взяли на приціл» гачка немає
- * й бути не може.
+ * Both answer "I am being hunted right now", and neither needs an event or a mixin: this is
+ * polling, and it belongs here — there is no hook for "someone took aim at me" and there cannot be.
  *
- * ## Один запис стану на власника, не два виміри
+ * ## One state record per owner, not two dimensions
  *
- * Плагін вів `casterId → attackerId → (назва, час)` і чистив прострочене окремим
- * прибиральником у такті. Попередження, однак, читається одне за раз: гравцеві важливо
- * «на мене дивляться», а не список. Тому стан — це один тік останнього попередження на
- * власника, і застаріти йому нема як.
+ * The plugin kept `casterId → attackerId → (name, time)` and cleaned expired entries with a
+ * separate sweeper on the tick. A warning, however, is read one at a time: what matters to the
+ * player is "someone is looking at me", not a list. So the state is a single tick of the last
+ * warning per owner, and there is no way for it to go stale.
  */
 class SpiritualIntuition :
     ToggleablePassiveAbility(AbilityIdentity.of("door_spiritual_intuition")),
     Ticking {
 
-    /** Двічі на секунду: намір визріває повільніше за це. */
+    /** Twice a second: an intent ripens more slowly than that. */
     override val tickPeriodTicks: Int = 10
 
     override val displayName: Component = Component.literal("Духовна інтуїція")
 
-    /** Коли власника попередили востаннє — щоб не гудіти щотакту. */
+    /** When the owner was last warned — so as not to buzz every tick. */
     private val lastWarned = HashMap<UUID, Long>()
 
     override fun description(sequence: Sequence): Component = Component.literal(
@@ -96,7 +95,7 @@ class SpiritualIntuition :
             context.caster,
             Component.literal("⚠ ${threat.name.string} тримає вас на прицілі — $distance бл."),
         )
-        // Тихіше для далеких: інтуїція і є відчуттям відстані.
+        // Quieter for those far away: intuition is a sense of distance.
         val volume = (1.0 - distance / RANGE).coerceAtLeast(0.1).toFloat()
         val at = context.origin
         context.level.playSound(
@@ -106,11 +105,11 @@ class SpiritualIntuition :
     }
 
     /**
-     * Звір відповідає своєю ціллю, людина — напрямком погляду.
+     * A beast answers with its target, a person with their look direction.
      *
-     * Поріг [AIM] береться по косинусу, а не по градусах: `dot` двох одиничних векторів
-     * і **є** косинусом, тож `acos` тут був би арккосинусом заради того, щоб одразу
-     * порівняти назад.
+     * The [AIM] threshold is taken as a cosine rather than in degrees: the `dot` of two unit
+     * vectors **is** the cosine, so an `acos` here would be an arccosine done only to compare it
+     * straight back.
      */
     private fun aimsAt(threat: LivingEntity, context: AbilityContext): Boolean = when (threat) {
         is Mob -> threat.target === context.caster
@@ -124,7 +123,7 @@ class SpiritualIntuition :
     private companion object {
         const val RANGE = 30.0
         const val QUIET_TICKS = 3 * TICKS_PER_SECOND
-        /** ≈18°: ширший конус спрацьовував би на кожного, хто просто йде повз. */
+        /** ≈18°: a wider cone would fire on everyone who simply walks past. */
         const val AIM = 0.95
     }
 }

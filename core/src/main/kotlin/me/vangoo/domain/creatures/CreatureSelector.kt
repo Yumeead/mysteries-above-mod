@@ -1,9 +1,10 @@
 package me.vangoo.domain.creatures
 
 /**
- * Чисте правило вибору істоти для спавну (аналог `BrewMatcher`). Детерміноване при поданому roll.
- * Кожен кандидат займає сегмент `[cumulative, cumulative+chance)` на осі [0,1); roll за сумою
- * всіх шансів означає «спавну немає».
+ * The pure rule for picking a creature to spawn (the counterpart of `BrewMatcher`).
+ * Deterministic for a given roll. Each candidate occupies the segment
+ * `[cumulative, cumulative+chance)` on the [0,1) axis; a roll past the sum of all chances
+ * means "no spawn".
  */
 class CreatureSelector(creatures: Collection<CreatureDefinition>) {
 
@@ -25,7 +26,7 @@ class CreatureSelector(creatures: Collection<CreatureDefinition>) {
 
         val weights = candidates.map { it.spawn.naturalChance * multiplier(it, bias) }
         val sumWeights = weights.sum()
-        // Перенормовуємо так, щоб сегменти давали ту саму суму totalChance — P(спавну) незмінна.
+        // Renormalise so that the segments still sum to totalChance — P(spawn) is unchanged.
         val scale = if (sumWeights > 0.0) totalChance / sumWeights else 0.0
 
         var cumulative = 0.0
@@ -37,11 +38,11 @@ class CreatureSelector(creatures: Collection<CreatureDefinition>) {
     }
 
     /**
-     * Вибір істоти для ambient-спавну: серед усіх істот, чий natural-біом збігається з поточним,
-     * незалежно від шляху. Закон конвергенції лишається ВАГОВИМ ухилом (свій шлях і «наступна
-     * потрібна» послідовність важать більше через [multiplier]), а не жорстким фільтром.
-     * Без «порогу неспавну» — рішення «спавнити» вже прийняв планувальник; цей метод лише обирає,
-     * КОГО. [roll] у [0,1).
+     * Picking a creature for an ambient spawn: among all creatures whose natural biome matches
+     * the current one, regardless of pathway. The Law of Convergence stays a WEIGHTED bias
+     * (one's own pathway and the "next needed" sequence weigh more through [multiplier]),
+     * not a hard filter. There is no "no-spawn threshold" — the decision to spawn has already
+     * been made by the scheduler; this method only picks WHO. [roll] is in [0,1).
      */
     fun pickForAmbient(biome: String?, bias: ConvergenceBias?, roll: Double): CreatureDefinition? {
         if (bias == null) return null
@@ -50,17 +51,18 @@ class CreatureSelector(creatures: Collection<CreatureDefinition>) {
     }
 
     /**
-     * Вибір істоти для структурного спавну — тобто «скриню відкрито». Ключі лут-таблиць у виборі
-     * НЕ беруть участі: працює будь-яка структура (ванільна, датапакова, модова), бо інакше
-     * ванільні скрині не давали нікого, крім блукаючого духа.
+     * Picking a creature for a structure spawn — that is, "a chest was opened". Loot table keys
+     * take NO part in the choice: any structure works (vanilla, datapack, modded), because
+     * otherwise vanilla chests would yield nobody but a wandering spirit.
      *
-     * Пул — вікно з ДВОХ послідовностей навколо того, хто відкрив: його власна і наступна,
-     * сильніша (`seq` і `seq - 1`). Посл. 9 бачить 9–8, Посл. 8 — 8–7, …, Посл. 6 — 6–5. Це
-     * водночас замінює [ApexGate] на цьому шляху: Посл. 5 доступна лише гравцеві Посл. 6 або 5,
-     * тобто рівно те саме правило, тільки виражене вікном.
+     * The pool is a window of TWO sequences around the one who opened it: his own and the next,
+     * stronger one (`seq` and `seq - 1`). Seq. 9 sees 9–8, Seq. 8 sees 8–7, …, Seq. 6 sees 6–5.
+     * This also replaces [ApexGate] on this path: Seq. 5 is available only to a Seq. 6 or Seq. 5
+     * player, which is exactly the same rule, only expressed as a window.
      *
-     * Рішення «чи спавнити взагалі» приймає не цей метод, а виклична сторона за конфігом — тут
-     * лише КОГО, з ухилом Закону Конвергенції, як в ambient. [roll] у [0,1).
+     * The decision "whether to spawn at all" is not made by this method but by the caller from
+     * the config — here it is only WHO, with the Law of Convergence bias, as in ambient.
+     * [roll] is in [0,1).
      */
     fun pickForStructure(playerSequence: Int, bias: ConvergenceBias?, roll: Double): CreatureDefinition? {
         val candidates = creatures.filter {
@@ -81,8 +83,9 @@ class CreatureSelector(creatures: Collection<CreatureDefinition>) {
     }
 
     /**
-     * Ваговий вибір без «порогу неспавну»: рішення «спавнити» вже прийнято, лишилось обрати кого.
-     * Спільний для ambient і структур — різняться вони лише пулом і полем-вагою.
+     * A weighted pick with no "no-spawn threshold": the decision to spawn has been made, all
+     * that is left is choosing whom. Shared by ambient and structures — they differ only in
+     * the pool and the weight field.
      */
     private fun weightedPick(
         candidates: List<CreatureDefinition>,

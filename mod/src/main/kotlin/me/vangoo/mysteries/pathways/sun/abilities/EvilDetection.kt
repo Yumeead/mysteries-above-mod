@@ -12,27 +12,27 @@ import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 
 /**
- * Sun, Посл. 8 (Прохач Світла): **Виявлення зла**.
+ * Sun, Seq. 8 (Light Seeker): **Evil Detection**.
  *
- * Скверна поруч світиться крізь стіни. Пасивка не питає дозволу й не має вимикача:
- * Прохач бачить те, що бачить.
+ * The unclean nearby glow through walls. The passive asks no permission and has no switch: the
+ * Seeker sees what they see.
  *
- * ## Контур — ванільний ефект, а не власна книга обліку
+ * ## The outline is a vanilla effect, not a ledger of our own
  *
- * Найпряміший спосіб — `setGlowingTag(true)`, але він **не має строку**: увімкнувши
- * контур, довелось би пам'ятати, кому саме, щоб погасити його, коли ціль вийде з
- * радіуса. А пам'ятати нема де: екземпляр здібності один на весь сервер, тож поле в
- * ньому змішало б цілі всіх Прохачів одразу.
+ * The most direct way is `setGlowingTag(true)`, but it **has no term**: having switched the
+ * outline on, we would have to remember on whom, so as to switch it off when the target leaves
+ * the radius. And there is nowhere to remember: there is one ability instance for the whole
+ * server, so a field in it would mix up the targets of every Seeker at once.
  *
- * Ванільний [MobEffects.GLOWING] цю потребу знімає цілком: він **спливає сам**. Такт
- * поновлює його на [GLOW_TICKS], тобто трохи довше за свій період, і ціль, що вийшла
- * з радіуса, гасне за півтори секунди без жодного рядка обліку.
+ * The vanilla [MobEffects.GLOWING] removes that need entirely: it **expires by itself**. The tick
+ * refreshes it for [GLOW_TICKS], i.e. a little longer than its own period, and a target that has
+ * left the radius fades in a second and a half with not a line of bookkeeping.
  *
- * ## Ціна прозорості
+ * ## The price of transparency
  *
- * Контур бачать усі, не лише Прохач. Це свідомо: світло не показує **вам**, воно
- * **позначає** — і той, кого позначено, має право це помітити. Плагін тут тягнув
- * бібліотеку `glowingentities` заради приватного контуру; мод не тягне нічого.
+ * Everyone sees the outline, not only the Seeker. That is deliberate: light does not show
+ * **you**, it **marks** — and whoever is marked has the right to notice. The plugin dragged in
+ * the `glowingentities` library here for a private outline; the mod drags in nothing.
  */
 class EvilDetection :
     PermanentPassiveAbility(AbilityIdentity.of("sun_evil_detection")),
@@ -61,7 +61,7 @@ class EvilDetection :
 
     private companion object {
         const val BASE_RANGE = 20
-        /** Півтора такти: контур не блимає між скануваннями, але й не переживає вихід з радіуса. */
+        /** One and a half ticks' worth: the outline does not blink between scans, nor does it outlive leaving the radius. */
         const val GLOW_TICKS = 30
     }
 }

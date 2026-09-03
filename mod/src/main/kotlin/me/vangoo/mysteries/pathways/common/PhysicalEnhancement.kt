@@ -15,27 +15,27 @@ import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.entity.ai.attributes.Attributes
 
 /**
- * Спільна пасивка «сильне тіло»: більше здоров'я плюс, за потреби, кілька ванільних
- * ефектів. Одна на всі шляхи — параметризується назвою, описом і числом сердець.
+ * The shared "strong body" passive: more health plus, where needed, a few vanilla effects. One
+ * for every pathway — parameterised by name, description and the number of hearts.
  *
- * ## Здоров'я — атрибут, а не `HEALTH_BOOST`
+ * ## Health is an attribute, not a `HEALTH_BOOST`
  *
- * У плагіні це був `AttributeInstance.setBaseValue(20 + bonus)` плюс ручне відновлення
- * бази в `onDeactivate` — тобто **правка базового значення гравця**, яка запікається у
- * файл і переживає все, включно з видаленням мода. Досить одного падіння сервера між
- * `onActivate` і `onDeactivate`, щоб база лишилась піднятою назавжди.
+ * In the plugin this was `AttributeInstance.setBaseValue(20 + bonus)` plus restoring the base
+ * by hand in `onDeactivate` — that is, **editing the player's base value**, which is baked into
+ * the file and outlives everything, including removing the mod. One server crash between
+ * `onActivate` and `onDeactivate` is enough for the base to stay raised forever.
  *
- * Транзієнтний модифікатор такої властивості не має: його немає у файлі гравця взагалі,
- * тож «прибирання» після падіння сервера відбувається саме собою.
+ * A transient modifier has no such property: it is not in the player's file at all, so the
+ * "cleanup" after a crash happens by itself.
  *
- * Ефекти лишились ефектами — для `WATER_BREATHING` чи `NIGHT_VISION` атрибута не існує.
- * Але вони нескінченні й приховані, тож у списку зілль місця не займають.
+ * Effects stayed effects — there is no attribute for `WATER_BREATHING` or `NIGHT_VISION`. But
+ * they are infinite and hidden, so they take no room in the potion list.
  */
 open class PhysicalEnhancement(
     identity: AbilityIdentity,
     override val displayName: Component,
     private val flavour: String,
-    /** Скільки сердець додає на Посл. 9; далі росте з Послідовністю. */
+    /** How many hearts it adds at Seq. 9; beyond that it grows with the Sequence. */
     private val hearts: Int,
     private vararg val effects: Holder<MobEffect>,
 ) : PermanentPassiveAbility(identity) {
@@ -44,7 +44,7 @@ open class PhysicalEnhancement(
 
     override fun description(sequence: Sequence): Component = Component.literal(
         "$flavour\n▪ Здоров'я: +${bonusHealth(sequence) / 2.0} ❤" +
-            if (effects.isEmpty()) "" else "\n▪ Постійно: ${effects.size} ефект(и)",
+            if (effects.isEmpty()) "" else "\n▪ Постійних ефектів: ${effects.size}",
     )
 
     override fun onActivate(context: AbilityContext) {
@@ -59,7 +59,7 @@ open class PhysicalEnhancement(
         val player = context.caster
         player.revokeAttribute(Attributes.MAX_HEALTH, modifier)
         effects.forEach { player.removeEffect(it) }
-        // Максимум щойно впав — здоров'я вище за нього ванілька сама не підтягне.
+        // The maximum just dropped — vanilla will not pull health above it down by itself.
         if (player.health > player.maxHealth) player.health = player.maxHealth
     }
 
@@ -67,7 +67,7 @@ open class PhysicalEnhancement(
         scale(hearts * 2, sequence, SequenceScaler.ScalingStrategy.MODERATE)
 
     private companion object {
-        /** Ванільна позначка нескінченної тривалості. */
+        /** The vanilla marker for infinite duration. */
         const val INFINITE = -1
     }
 }

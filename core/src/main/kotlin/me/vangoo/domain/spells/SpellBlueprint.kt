@@ -1,23 +1,23 @@
 package me.vangoo.domain.spells
 
 /**
- * Те, що гравець «накликав» у конструкторі заклинань: вибір типу + рівні покращень (0–5).
- * Чистий запис без Minecraft — екран лише збирає його, а доменна математика
- * ([SpellRecipe.fromBlueprint]) перетворює його на готовий рецепт.
+ * What the player "called up" in the spell builder: the type choice + the upgrade levels (0–5).
+ * A pure record with no Minecraft — the screen only assembles it, and the domain math
+ * ([SpellRecipe.fromBlueprint]) turns it into a finished recipe.
  */
 data class SpellBlueprint(
     val name: String,
     val shape: SpellRecipe.Shape,
-    /** Шкода (PROJECTILE/AOE) */
+    /** Damage (PROJECTILE/AOE) */
     val powerLvl: Int,
-    /** Радіус / Дальність / Тривалість бафа */
+    /** Radius / Range / Buff duration */
     val areaLvl: Int,
-    /** Зцілення (SELF) / Рівень ефекту (BUFF) */
+    /** Healing (SELF) / Effect level (BUFF) */
     val healLvl: Int,
-    /** Зменшення кулдауну */
+    /** Cooldown reduction */
     val cooldownLvl: Int,
-    /** Оптимізація витрат духовності */
+    /** Spirituality cost optimisation */
     val costReductionLvl: Int,
-    /** лише для shape == BUFF */
+    /** only for shape == BUFF */
     val buff: SpellRecipe.Buff?,
 )

@@ -17,22 +17,23 @@ import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.network.chat.Component
 
 /**
- * Духовність: бар угорі по центру й числа під ним.
+ * Spirituality: a bar at the top centre and the numbers under it.
  *
- * Окремий елемент, а не рядок в [AbilityHud], бо в них різні правила видимості.
- * Панель здібності — довідка на мить: проявляється на зміну й згасає. Духовність —
- * ресурс, за яким гравець стежить постійно, як за здоров'ям; вона не згасає ніколи й
- * не ховається за відкритим екраном (зокрема за колесом, де ціна касту й вирішується).
- * Зникає лише на F1 і коли гравець не Потойбічний.
+ * A separate element rather than a line in [AbilityHud], because their visibility rules differ.
+ * The ability panel is a momentary reference: it appears on change and fades. Spirituality is a
+ * resource the player watches constantly, like health; it never fades and does not hide behind
+ * an open screen (the wheel in particular, where the cast cost is decided). It disappears only
+ * on F1 and when the player is not a Beyonder.
  *
- * Кольору шляху тут немає навмисно: він лишається за волоском під панеллю здібності.
+ * The pathway colour is deliberately absent here: it stays with the hairline under the ability
+ * panel.
  *
- * Числа будуються в такті — і лише коли справді змінились. У кадрі рахується
- * тільки частка бару.
+ * The numbers are built on the tick — and only when they really changed. In the frame only the
+ * bar's fraction is computed.
  */
 object SpiritualityHud : HudElement {
 
-    /** Ширина рахується разом із текстом: підпис довший за бар, і панель міряється по ньому. */
+    /** The width is measured with the text: the caption is longer than the bar, and the panel follows it. */
     private class Panel(val caption: Component, val critical: Boolean, val width: Int)
 
     private var shown: Pair<Int, Int>? = null
@@ -93,14 +94,14 @@ object SpiritualityHud : HudElement {
 
         UiTheme.panel(graphics, x, y, width, height, alpha)
 
-        // Бар вужчий за підпис, тож ставиться по центру панелі, а не від краю.
+        // The bar is narrower than the caption, so it is centred on the panel rather than set from the edge.
         val barX = x + (width - BAR_WIDTH) / 2
         val barY = y + PADDING
         val level = spirituality.current.toFloat() / spirituality.maximum
         val fill = if (panel.critical) UiTheme.CRITICAL else UiTheme.ACCENT
         UiTheme.bar(graphics, barX, barY, BAR_WIDTH, BAR_HEIGHT, level, fill, alpha)
 
-        // Ділянка, якої коштуватиме обрана здібність: видно наперед, що лишиться.
+        // The stretch the selected ability will cost: what will be left is visible in advance.
         costOfSelected()?.let { cost ->
             val after = (spirituality.current - cost).toFloat() / spirituality.maximum
             UiTheme.barSlice(graphics, barX, barY, BAR_WIDTH, BAR_HEIGHT, after, level, UiTheme.ACCENT_DEEP, alpha)
@@ -117,7 +118,7 @@ object SpiritualityHud : HudElement {
         graphics.pose().popMatrix()
     }
 
-    /** Ціна того, що зараз обрано, — або `null`, якщо платити нема за що чи нема чим. */
+    /** The price of what is selected now — or `null` if there is nothing to pay for or nothing to pay with. */
     private fun costOfSelected(): Int? {
         val entry = ClientAbilityState.selected?.let(ClientAbilityState::entry) ?: return null
         if (entry.type != AbilityType.ACTIVE || entry.cost <= 0) return null

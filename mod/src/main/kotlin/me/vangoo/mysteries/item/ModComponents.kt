@@ -6,25 +6,25 @@ import net.minecraft.core.component.DataComponentType
 import net.minecraft.core.registries.BuiltInRegistries
 
 /**
- * Компоненти даних мода — те, що предмет носить у собі.
+ * The mod's data components — what an item carries inside it.
  *
- * Той самий прийом, що й у `ModChannels`: оголошення тут **і є** реєстрацією, тож
- * компонента, оголошеного повз цей об'єкт, не буде в реєстрі, і предмет із ним не
- * збережеться мовчки — впаде на серіалізації.
+ * The same trick as in `ModChannels`: declaring them here **is** registering them, so a
+ * component declared past this object will not be in the registry, and an item carrying it will
+ * not fail to save silently — it will fail on serialisation.
  */
 object ModComponents {
 
-    /** Вміст потойбічного зілля: шлях і Послідовність. */
+    /** The contents of a Beyonder potion: the pathway and the Sequence. */
     val POTION_BREW: DataComponentType<PotionBrew> = register("potion_brew") {
         it.persistent(PotionBrew.CODEC).networkSynchronized(PotionBrew.STREAM_CODEC)
     }
 
     /**
-     * Торкається класу, змушуючи його ініціалізуватись.
+     * Touches the class, forcing it to initialise.
      *
-     * Kotlin ініціалізує `object` ліниво, а реєстри Minecraft закриваються після
-     * завантаження — компонент, оголошений тут і нікому досі не потрібний, потрапив би
-     * в реєстр надто пізно. Кличеться з entrypoint'у.
+     * Kotlin initialises an `object` lazily, while Minecraft's registries close after loading —
+     * a component declared here and needed by nobody so far would get into the registry too
+     * late. Called from the entrypoint.
      */
     fun register() = Unit
 

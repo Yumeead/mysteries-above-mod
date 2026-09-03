@@ -15,15 +15,15 @@ import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 
 /**
- * Sun, Посл. 7 (Сонячний Первосвященник): **Резистентність до жаху**.
+ * Sun, Seq. 7 (Solar High Priest): **Resistance to Horror**.
  *
- * Святе світло опирається страху: щосекунди зрізає по дві секунди з тривалості
- * ментальних дебафів, прискорюючи їхній сплив. Миттєво не знімає нічого —
- * повільність теж не захищена, вона тут вважається фізичним ефектом, не ментальним.
+ * Holy light resists fear: every second it cuts two seconds off the duration of mental debuffs,
+ * hurrying their expiry. It removes nothing instantly — slowness is not protected against either,
+ * as it counts here as a physical effect rather than a mental one.
  *
- * Такт тут доречний, на відміну від `IllusoryScales`: дебаф спливає **сам по собі**, і
- * події, на яку можна було б почекати, не існує взагалі. Саме тому `Ticking` тепер
- * дописується явно — пасивка оголошує, що їй потрібен годинник.
+ * A tick fits here, unlike in `IllusoryScales`: a debuff expires **on its own**, and there is no
+ * event at all one could wait for. That is exactly why `Ticking` is now written out explicitly —
+ * the passive declares that it needs a clock.
  */
 class ResistanceToHorror :
     PermanentPassiveAbility(AbilityIdentity.of("sun_resistance_to_horror")),
@@ -31,12 +31,12 @@ class ResistanceToHorror :
 
     override val tickPeriodTicks: Int = TICKS_PER_SECOND
 
-    override val displayName: Component = Component.literal("Резистентність до жаху")
+    override val displayName: Component = Component.literal("Стійкість до жаху")
 
     override fun description(sequence: Sequence): Component = Component.literal(
-        "Святе світло опирається страху: щосекунди зрізає по " +
-            "${REDUCTION_TICKS / TICKS_PER_SECOND} секунди з тривалості дебафів " +
-            "(Нудота, Сліпота, Слабкість, Темрява), прискорюючи їхній сплив.",
+        "Святе світло не дає страху вкоренитись.\n" +
+            "▪ Нудота, Сліпота, Слабкість і Темрява минають швидше: щосекунди " +
+            "вони коротшають ще на ${REDUCTION_TICKS / TICKS_PER_SECOND} с",
     )
 
     override fun tick(context: AbilityContext) {
@@ -44,11 +44,11 @@ class ResistanceToHorror :
     }
 
     /**
-     * Скорочує один дебаф на [REDUCTION_TICKS].
+     * Shortens one debuff by [REDUCTION_TICKS].
      *
-     * `addEffect` тут не годиться: ванільний `update` бере сильніше з двох, тож коротшу
-     * тривалість він просто проігнорує. `forceAddEffect` кладе екземпляр на місце
-     * попереднього і сам сповіщає клієнт — інакше іконка показувала б стару тривалість.
+     * `addEffect` will not do here: the vanilla `update` takes the stronger of the two, so it
+     * simply ignores a shorter duration. `forceAddEffect` puts the instance in place of the
+     * previous one and notifies the client itself — otherwise the icon would show the old duration.
      */
     private fun shorten(context: AbilityContext, effect: Holder<MobEffect>) {
         val player = context.caster
@@ -75,7 +75,7 @@ class ResistanceToHorror :
         )
     }
 
-    /** Дебаф догорів — світло видно. Поки він лише коротшає, пасивка мовчить. */
+    /** A debuff burned out — the light is visible. While it is only being shortened, the passive stays silent. */
     private fun burnOff(context: AbilityContext, player: ServerPlayer) {
         context.level.sendParticles(
             ParticleTypes.GLOW,
@@ -85,7 +85,7 @@ class ResistanceToHorror :
     }
 
     private companion object {
-        /** −2 с тривалості дебафу за спрацювання. */
+        /** −2 s of a debuff's duration per trigger. */
         const val REDUCTION_TICKS = 2 * TICKS_PER_SECOND
 
         val FEAR_EFFECTS: List<Holder<MobEffect>> = listOf(

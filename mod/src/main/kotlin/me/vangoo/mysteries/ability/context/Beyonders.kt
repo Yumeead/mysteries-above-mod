@@ -6,11 +6,11 @@ import net.minecraft.world.entity.Entity
 import java.util.UUID
 
 /**
- * Хто з присутніх — Потойбічний і який саме.
+ * Who among those present is a Beyonder, and which one.
  *
- * Реєстр живий: доменний [Beyonder] існує лише поки гравець у грі, а поза грою його
- * тримає сховище (фаза 09). Здібності ходять сюди по чужий стан — власний уже лежить
- * у контексті.
+ * The registry is live: the domain [Beyonder] exists only while the player is in the game, and
+ * outside it storage holds them (phase 09). Abilities come here for someone else's state —
+ * their own already lies in the context.
  */
 interface Beyonders {
 
@@ -21,15 +21,16 @@ interface Beyonders {
     fun isBeyonder(id: UUID): Boolean = of(id) != null
 
     /**
-     * Чи тримає гравець [id] увімкненим тогл [ability] **прямо зараз**.
+     * Whether the player [id] is holding the toggle [ability] on **right now**.
      *
-     * Потрібне тому, що тогл буває **щитом**: `AntiDivination` Дверей нічого не робить
-     * сам — він лише робить хибним чуже гадання. Без цього запиту опір довелося б
-     * оформити подією, яку публікує кожен, хто ворожить, і на яку підписується щит, —
-     * тобто двома точками замість однієї, і жодна з них не була б простішою.
+     * Needed because a toggle can be a **shield**: the Door's `AntiDivination` does nothing on
+     * its own — it merely makes someone else's divination fail. Without this query the
+     * resistance would have to be dressed up as an event published by everyone who divines and
+     * subscribed to by the shield — that is, two points instead of one, and neither of them
+     * simpler.
      *
-     * Реєстр тоглів живе в `PassiveTicker`; сюди він приїжджає лямбдою, бо той
-     * будується пізніше — контекст йому самому й потрібен.
+     * The toggle registry lives in `PassiveTicker`; it arrives here as a lambda, because that
+     * one is built later — it needs the context itself.
      */
     fun isToggled(id: UUID, ability: AbilityIdentity): Boolean
 

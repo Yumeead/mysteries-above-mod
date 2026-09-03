@@ -1,8 +1,8 @@
 package me.vangoo.domain.rituals
 
 /**
- * Типи ритуалів ритуальної магії (за вікі LOTM: молитви, жертви, дарування,
- * спіритизм, дзеркальне ворожіння, стіна духовності).
+ * The ritual types of ritual magic (per the LOTM wiki: prayers, sacrifices, bestowment,
+ * mediumship, mirror divination, spirit wall).
  */
 enum class RitualType {
     LUCK_PRAYER,

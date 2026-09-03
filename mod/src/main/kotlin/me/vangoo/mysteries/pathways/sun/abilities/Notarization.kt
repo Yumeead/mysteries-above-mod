@@ -15,24 +15,24 @@ import net.minecraft.sounds.SoundSource
 import net.minecraft.world.entity.LivingEntity
 
 /**
- * Sun, Посл. 6 (Нотаріус): **Нотаріальність**.
+ * Sun, Seq. 6 (Notary): **Notarization**.
  *
- * Нотаріус засвідчує факт — і факт стає обов'язковим. Присівши й дивлячись на ціль,
- * він або **нуліфікує** її (усі здібності на перепочинок), або **засвідчує** союзника
- * (посилення на час).
+ * The Notary certifies a fact — and the fact becomes binding. Sneaking and looking at a target,
+ * they either **annul** it (every ability on cooldown) or **certify** an ally (a boost for a time).
  *
- * ## Присідання обирає, кому й що
+ * ## Sneaking chooses whom and what
  *
- * Меню тут не потрібне: нотаріус або друг цілі, або ні, і це визначає сама ціль.
- * Скверна дістає нуліфікацію, решта — засвідчення. Один жест, дві дії, нуль інтерфейсу.
+ * No menu is needed here: the notary is either a friend of the target or not, and the target
+ * itself decides that. The unclean get the annulment, everyone else the certification. One
+ * gesture, two actions, zero interface.
  *
- * ## Нуліфікація — це `cooldowns.lockAll`, а не власний реєстр «замовчаних»
+ * ## The annulment is `cooldowns.lockAll`, not a registry of "silenced" players
  *
- * Плагін тримав власну мапу заглушених гравців і перевіряв її на початку кожного касту.
- * Мод має для цього готовий сервіс: [me.vangoo.mysteries.ability.context.Cooldowns.lockAll]
- * ставить перепочинок **на всі** здібності цілі одразу, а `AbilityExecutor` і так
- * перевіряє перепочинок перед кожним кастом. Отже, ні нового стану, ні нової перевірки:
- * механіка вже була, її просто не використали.
+ * The plugin kept its own map of silenced players and checked it at the start of every cast. The
+ * mod has a ready service for that: [me.vangoo.mysteries.ability.context.Cooldowns.lockAll] puts
+ * a cooldown on **all** of the target's abilities at once, and `AbilityExecutor` checks the
+ * cooldown before every cast anyway. So there is neither new state nor a new check: the mechanic
+ * was already there, it just had not been used.
  */
 class Notarization : ActiveAbility(AbilityIdentity.of("sun_notarization")) {
 
@@ -44,15 +44,15 @@ class Notarization : ActiveAbility(AbilityIdentity.of("sun_notarization")) {
 
     override fun description(sequence: Sequence): Component = Component.literal(
         "Присівши й дивлячись на ціль, засвідчуєте її стан.\n" +
-            "▪ Скверні — Нуліфікація: усі здібності на перепочинок ${silence(sequence)} с\n" +
+            "▪ Нечисті — Анулювання: усі її здібності йдуть у відкат на ${silence(sequence)} с\n" +
             "▪ Решті — Засвідчення: Сила й Опір на ${amplify(sequence)} с\n" +
             "▪ Потрібно присісти; дальність ${RANGE.toInt()} бл.",
     )
 
-    /** Жест — частина здібності: засвідчення не роблять мимохідь. */
+    /** The gesture is part of the ability: a certification is not done in passing. */
     override fun canCast(context: CastContext): Boolean = context.caster.isShiftKeyDown
 
-    /** Нуліфікація — сила проти Потойбічного, тож вона змагається за Послідовністю. */
+    /** The annulment is a power against a Beyonder, so it is contested by Sequence. */
     override fun contestedTarget(context: CastContext): LivingEntity? =
         context.targeting.lookingAt(RANGE)?.takeIf { it.isProfane(context.beyonders) }
 
@@ -70,9 +70,9 @@ class Notarization : ActiveAbility(AbilityIdentity.of("sun_notarization")) {
             context.cooldowns.lockAll(target.uuid, seconds)
             context.messaging.actionBar(
                 target.uuid,
-                Component.literal("Нуліфікація: ваші сили замовкли на $seconds с"),
+                Component.literal("Анулювання: ваші сили замовкли на $seconds с"),
             )
-            return AbilityOutcome.done("Нуліфіковано ${target.name.string} на $seconds с")
+            return AbilityOutcome.done("Сили ${target.name.string} замовкли на $seconds с")
         }
 
         val seconds = amplify(context.sequence)
@@ -92,7 +92,7 @@ class Notarization : ActiveAbility(AbilityIdentity.of("sun_notarization")) {
         return AbilityOutcome.done("Засвідчено ${target.name.string} на $seconds с")
     }
 
-    /** Печатка: коротке кільце довкола цілі й звук, який чути обом. */
+    /** The seal: a short ring around the target and a sound both of them hear. */
     private fun seal(context: CastContext, target: LivingEntity) {
         val mote = ModParticles.mote(context.effects.pathwayColor)
         val at = target.position().add(0.0, target.bbHeight * 0.5, 0.0)

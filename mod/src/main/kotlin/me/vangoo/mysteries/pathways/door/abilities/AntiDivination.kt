@@ -11,31 +11,30 @@ import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
 
 /**
- * Door, Посл. 7 (Астролог): **Протидія ворожінню**.
+ * Door, Seq. 7 (Astrologer): **Anti-Divination**.
  *
- * Єдина сила шляху, яка сама не робить нічого. Її ефект живе в чужому касті: поки щит
- * увімкнено, [DivinationArts] проти цього гравця кидає кубик замість того, щоб просто
- * спрацювати.
+ * The pathway's only power that does nothing by itself. Its effect lives inside someone else's
+ * cast: while the shield is on, [DivinationArts] against this player rolls a die instead of
+ * simply working.
  *
- * ## Чому щит — це тогл, а не постійна пасивка
+ * ## Why the shield is a toggle rather than a permanent passive
  *
- * Ворожіння відчувається. Астролог, який тримає щит увімкненим цілодобово, помітний
- * рівно тим, що об нього спотикаються, — тож вибір «зараз ховаюсь» проти «зараз мене
- * можна знайти» і є грою. Постійний щит зняв би цей вибір і не дав би натомість нічого.
+ * Divination can be felt. An Astrologer who keeps the shield on around the clock is noticeable
+ * for exactly that — people trip over it — so the choice between "I am hiding now" and "I can be
+ * found now" is the game. A permanent shield would take that choice away and give nothing back.
  *
- * ## Чому тут немає такту
+ * ## Why there is no tick here
  *
- * Плагінна версія цокала й сіяла по дві частинки раз на дві секунди — тобто платила
- * тіком за те, щоб гравець пам'ятав, що щит увімкнено. Про це вже каже HUD: тогл видно
- * у списку здібностей. Іскри лишились там, де вони щось означають, — у мить вмикання й
- * вимикання.
+ * The plugin's version ticked and sowed two particles once every two seconds — that is, it paid
+ * a tick so the player would remember the shield was on. The HUD already says that: a toggle is
+ * visible in the ability list. The sparks stayed where they mean something — at the moment of
+ * switching on and off.
  *
- * ## Чому ідентичність у `companion`
+ * ## Why the identity is in the `companion`
  *
- * `DivinationArts` мусить спитати про цей щит **чужого** гравця, тобто назвати його на
- * ім'я. У плагіні цієї константи не було, і роль виконували чотири рядки-здогадки поспіль
- * (`"Anti Divination"`, `"Anti-Divination"`, `"anti_divination"`, `"AntiDivination"`),
- * з яких три завжди були хибними.
+ * `DivinationArts` has to ask about **another** player's shield, i.e. to name it. The plugin had
+ * no such constant, and the role was played by four guessed strings in a row (`"Anti Divination"`,
+ * `"Anti-Divination"`, `"anti_divination"`, `"AntiDivination"`), three of which were always wrong.
  */
 class AntiDivination : ToggleablePassiveAbility(IDENTITY) {
 
@@ -73,8 +72,9 @@ class AntiDivination : ToggleablePassiveAbility(IDENTITY) {
         val IDENTITY: AbilityIdentity = AbilityIdentity.of("door_anti_divination")
 
         /**
-         * Нижче цієї Послідовності щит не тримає. Межа плагінна й не косметична: інакше
-         * Учень Посл. 9 із чужим щитом був би незнаходжуваним для Астролога Посл. 7.
+         * Below this Sequence the shield does not hold. The threshold is the plugin's and is not
+         * cosmetic: otherwise a Seq. 9 Apprentice with someone else's shield would be unfindable
+         * for a Seq. 7 Astrologer.
          */
         const val UNLOCK_SEQUENCE = 7
     }

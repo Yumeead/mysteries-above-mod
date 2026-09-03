@@ -1,8 +1,8 @@
 package me.vangoo.domain.rituals
 
 /**
- * Рядок Книги одкровення: як інгредієнт зветься і звідки береться.
- * [source] — null, якщо джерело невідоме (інгредієнт лише зі скринь).
+ * A line of the Book of Revelation: what the ingredient is called and where it comes from.
+ * [source] is null if the origin is unknown (an ingredient found only in chests).
  */
 data class IngredientHint(
     val displayName: String,

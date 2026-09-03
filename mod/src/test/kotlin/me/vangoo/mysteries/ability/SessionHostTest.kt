@@ -19,12 +19,12 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 /**
- * Семантика реєстру сесій — те, що в плагіні тримали 22 однакові `cancel()` і пункт
- * правил «перекаст замінює сесію».
+ * The semantics of the session registry — what the plugin held with 22 identical `cancel()`s
+ * and a line in the rules saying "a recast replaces the session".
  *
- * Гри тут немає: сесія, яка не чіпає світ, а лише чекає, платить і прибирає за собою,
- * перевіряється прокруткою [TickScheduler]. Те, що потребує живого `ServerPlayer`
- * (гілки [sustain] понад «власника немає»), лишається на ігрову перевірку фази 05.
+ * There is no game here: a session that does not touch the world but only waits, pays and cleans
+ * up after itself is checked by winding [TickScheduler] on. What needs a live `ServerPlayer`
+ * (the [sustain] branches beyond "the owner is gone") is left to the phase 05 in-game check.
  */
 class SessionHostTest {
 
@@ -72,7 +72,7 @@ class SessionHostTest {
             .also(roster::add)
     }
 
-    // ── Час ─────────────────────────────────────────────────────────────────────
+    // ── Time ────────────────────────────────────────────────────────────────────
 
     @Test
     fun `waitTicks resumes exactly on the asked tick`() {
@@ -87,12 +87,12 @@ class SessionHostTest {
 
         advance(6)
 
-        // Старт — на першому ж тіку, далі рівно +3 і +1. Зайвий тік на пробудження
-        // означав би, що продовження корутини поїхало в наступний тік замість поточного.
+        // The start is on the very first tick, then exactly +3 and +1. An extra tick for waking
+        // up would mean the coroutine's continuation went into the next tick instead of the current one.
         assertEquals(listOf(1L, 4L, 5L), woke)
     }
 
-    // ── Реєстр ──────────────────────────────────────────────────────────────────
+    // ── Registry ────────────────────────────────────────────────────────────────
 
     @Test
     fun `a finished session leaves the registry on its own`() {
@@ -169,17 +169,17 @@ class SessionHostTest {
         advance(2)
 
         host.stop(owner, wind.identity)
-        // Скасування знімає корутину з очікування, а розкрутка стека — це вже робота,
-        // і робота диспетчиться в чергу тіку. Тому прибирання відпрацьовує наступним
-        // тіком, а не в момент виклику: саме через це зупинка сервера робить іще один
-        // прощальний тік (див. AbilityServices.reset).
+        // Cancellation takes the coroutine out of its wait, and unwinding the stack is already
+        // work, and work is dispatched into the tick queue. That is why the cleanup runs on the
+        // next tick rather than at the moment of the call: this is exactly why a server shutdown
+        // does one more farewell tick (see AbilityServices.reset).
         advance(1)
 
         assertTrue(removedEffect, "прибирання в finally мусить відпрацювати на скасуванні")
         assertFalse(host.isRunning(owner, wind.identity))
     }
 
-    // ── Утримання ───────────────────────────────────────────────────────────────
+    // ── Upkeep ──────────────────────────────────────────────────────────────────
 
     @Test
     fun `a session drains spirituality until it runs out`() {
@@ -195,7 +195,7 @@ class SessionHostTest {
 
         advance(10)
 
-        // 25 духовності, ціна такту 10: двічі заплатив, на третьому не стало.
+        // 25 spirituality, 10 per tick: it paid twice, on the third there was not enough.
         assertEquals(2, paidBeats)
         assertEquals(5, beyonder.spirituality.current)
         assertFalse(host.isRunning(owner, wind.identity))
@@ -203,12 +203,12 @@ class SessionHostTest {
 
     @Test
     fun `утримання платиться за кожен період, а не раз на такт сесії`() {
-        // Такт `SunHalo` — 40 тіків, період оплати — 20: попередня редакція платила один
-        // раз за такт, тобто вдвічі менше за оголошене, і сила виходила майже безкоштовною.
+        // `SunHalo`'s tick is 40 ticks, the payment period is 20: the previous revision paid once
+        // per tick, i.e. half of what was declared, and the power came out almost free.
         assertEquals(2, upkeepDue(sinceUpkeep = 40, upkeepPeriodTicks = 20))
         assertEquals(1, upkeepDue(sinceUpkeep = 20, upkeepPeriodTicks = 20))
         assertEquals(0, upkeepDue(sinceUpkeep = 19, upkeepPeriodTicks = 20))
-        // Залишок не губиться: 25 тіків — це один період і п'ять тіків наперед.
+        // The remainder is not lost: 25 ticks is one period and five ticks in hand.
         assertEquals(1, upkeepDue(sinceUpkeep = 25, upkeepPeriodTicks = 20))
     }
 
@@ -224,7 +224,7 @@ class SessionHostTest {
         assertEquals(SessionEnd.OWNER_GONE, end)
     }
 
-    // ── Стійкість ───────────────────────────────────────────────────────────────
+    // ── Resilience ──────────────────────────────────────────────────────────────
 
     @Test
     fun `a session that throws does not take its neighbour with it`() {

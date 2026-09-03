@@ -10,29 +10,29 @@ import me.vangoo.mysteries.event.AbilityCast
 import net.minecraft.network.chat.Component
 
 /**
- * Door, Посл. 6 (Писар): **Розшифровка патернів**.
+ * Door, Seq. 6 (Scribe): **Decrypt Patterns**.
  *
- * Писар читає чужу силу, як читають почерк: не бачить самої дії, зате бачить, **що саме**
- * було застосовано й ким.
+ * The Scribe reads someone else's power the way one reads handwriting: they do not see the act
+ * itself, but they do see **what exactly** was used, and by whom.
  *
- * ## Перша здібність мода, що слухає власну подію мода
+ * ## The mod's first ability that listens to the mod's own event
  *
- * До неї шина везла лише шкоду, тобто те, що приходить із гри через міксин. [AbilityCast]
- * приходить із самого мода — з `AbilityExecutor`, — і саме тому подія варта існування:
- * без неї «хтось поруч скастував» довелось би опитувати, а опитати мить, що вже минула,
- * не можна взагалі.
+ * Before it the bus carried only damage, i.e. what comes from the game through a mixin.
+ * [AbilityCast] comes from the mod itself — from `AbilityExecutor` — and that is exactly why the
+ * event is worth its existence: without it "someone nearby cast something" would have to be
+ * polled, and polling a moment that has already passed is impossible.
  *
- * ## Чому власника шукаємо у **світі кастера**
+ * ## Why the owner is looked up in the **caster's world**
  *
- * Обробник живе довше за тік, тож `ServerPlayer` у ньому тримати не можна — після
- * респавну він уже не той гравець. Береться `uuid`, а сам гравець питається щоразу
- * наново — причому саме через `event.caster.level()`, бо «той самий світ» і є першою
- * умовою: патерн, застосований в іншому вимірі, не відчувається ніяк, і рахувати до
- * нього відстань було б безглуздо.
+ * The handler lives longer than a tick, so a `ServerPlayer` cannot be held in it — after a
+ * respawn it is no longer that player. A `uuid` is taken and the player is asked for anew each
+ * time — and specifically through `event.caster.level()`, because "the same world" is the first
+ * condition: a pattern used in another dimension is not felt at all, and measuring a distance to
+ * it would be meaningless.
  */
 class DecryptPatterns : PermanentPassiveAbility(AbilityIdentity.of("door_decrypt_patterns")) {
 
-    override val displayName: Component = Component.literal("Розшифровка патернів")
+    override val displayName: Component = Component.literal("Розшифрування патернів")
 
     override fun description(sequence: Sequence): Component = Component.literal(
         "Ви читаєте чужі сили, щойно їх застосували.\n" +

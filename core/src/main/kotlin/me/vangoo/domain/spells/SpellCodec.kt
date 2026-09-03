@@ -3,15 +3,17 @@ package me.vangoo.domain.spells
 import java.util.Locale
 
 /**
- * Єдине місце формату згенерованого заклинання: [SpellRecipe] ↔ рядок-ID + людський опис.
+ * The single home of the generated spell format: [SpellRecipe] ↔ an id string + a human
+ * description.
  *
- * Кодек чистий (0 Minecraft), бо рецепт оперує лише примітивами та доменними enum-ами.
+ * The codec is pure (0 Minecraft), because the recipe deals only in primitives and domain enums.
  *
- * Дві відмінності від плагіна, обидві дозволені рішенням «збережень не існує — міграції немає»:
- *  1. Слот частинки (поз. 1 у старому форматі) прибрано. Він був похідним від типу, ігнорувався
- *     при читанні й тягнув у домен таблицю назв частинок Bukkit.
- *  2. Назва більше не проходить через `_`→пробіл при читанні. У плагіні кодування не робило
- *     зворотної заміни, тож будь-яке підкреслення в назві губилося при round-trip.
+ * Two differences from the plugin, both allowed by the "there are no saves — there is no
+ * migration" decision:
+ *  1. The particle slot (position 1 in the old format) is gone. It was derived from the type,
+ *     ignored on reading, and dragged a table of Bukkit particle names into the domain.
+ *  2. The name no longer goes through `_`→space on reading. In the plugin the encoding did not
+ *     do the reverse substitution, so any underscore in a name was lost on a round trip.
  */
 object SpellCodec {
 
@@ -55,14 +57,15 @@ object SpellCodec {
     }
 
     /**
-     * Людський опис рецепта (колишній `generateDescription`) — пари «підпис → значення».
-     * Кольори й порядок рядків обирає шар представлення; домен їх не знає.
-     * Кулдаун і вартість додає система, тут їх навмисно немає.
+     * A human description of the recipe (formerly `generateDescription`) — "label → value"
+     * pairs. The presentation layer chooses the colours and the line order; the domain knows
+     * nothing about them. The cooldown and the cost are added by the system and are
+     * deliberately absent here.
      */
     fun describe(r: SpellRecipe): List<Pair<String, String>> = buildList {
         add("Тип" to typeNameUkrainian(r.shape))
         if (r.dealsDamage) add("Шкода" to format1(r.damage))
-        if (r.radius > 0) add("Радіус" to "${format1(r.radius)}м")
+        if (r.radius > 0) add("Радіус" to "${format1(r.radius)} бл.")
         if (r.heals) add("Зцілення" to format1(r.heal))
     }
 
@@ -82,7 +85,7 @@ object SpellCodec {
 
     private fun format1(value: Double): String = String.format(Locale.US, "%.1f", value)
 
-    /** Кома як десятковий роздільник трапляється в старих локалізованих записах. */
+    /** A comma as the decimal separator turns up in old localised records. */
     private fun parseDouble(raw: String): Double = raw.replace(",", ".").toDouble()
 
     private fun sanitizeName(name: String): String = name.replace(DELIMITER, "").replace("\n", " ")

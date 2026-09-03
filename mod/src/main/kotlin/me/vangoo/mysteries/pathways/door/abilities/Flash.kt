@@ -15,24 +15,24 @@ import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 
 /**
- * Door, Посл. 8 (Трюкач): **Флешка**.
+ * Door, Seq. 8 (Trickster): **Flash**.
  *
- * Спалах, після якого Трюкача просто немає. Не телепорт — сліпота плюс зникнення, тобто
- * рівно те, чим трюк ілюзіоніста і є.
+ * A flash, after which the Trickster is simply not there. Not a teleport — blindness plus a
+ * disappearance, which is exactly what an illusionist's trick is.
  *
- * ## Невидимість замість «сховати гравця від гравця»
+ * ## Invisibility instead of "hide a player from a player"
  *
- * У плагіні це були `hidePlayerFromTarget` / `showPlayerToTarget` на кожну ціль, плюс
- * відкладене завдання, щоб показати всіх назад, — і кожен вихід із гри між цими двома
- * точками лишав когось невидимим назавжди. Ванільна [MobEffects.INVISIBILITY] робить те
- * саме одним рядком, спливає сама й переживає що завгодно, включно з падінням сервера.
+ * In the plugin these were `hidePlayerFromTarget` / `showPlayerToTarget` per target, plus a
+ * deferred job to show everyone again — and every disconnect between those two points left
+ * somebody invisible forever. The vanilla [MobEffects.INVISIBILITY] does the same in one line,
+ * expires by itself and survives anything, including a server crash.
  *
- * Різниця в поведінці одна: невидимого зраджує броня й предмет у руці. Це не вада —
- * це те, що робить силу вибором, а не кнопкою «зникнути».
+ * There is one difference in behaviour: armour and the item in hand give an invisible player
+ * away. That is not a flaw — it is what makes the power a choice rather than a "vanish" button.
  */
 class Flash : ActiveAbility(AbilityIdentity.of("door_flash")) {
 
-    override val displayName: Component = Component.literal("Флешка")
+    override val displayName: Component = Component.literal("Спалах")
 
     override val spiritualityCost: Int = 50
 
@@ -42,7 +42,7 @@ class Flash : ActiveAbility(AbilityIdentity.of("door_flash")) {
         "Сліпучий спалах, під яким ви зникаєте.\n" +
             "▪ Осліплює всіх у ${radius(sequence).toInt()} бл. на ${DURATION_TICKS / TICKS_PER_SECOND} с\n" +
             "▪ Ви стаєте невидимим на той самий час\n" +
-            "▪ Перепочинок ${COOLDOWN_SECONDS} с",
+            "▪ Відкат ${COOLDOWN_SECONDS} с",
     )
 
     override fun cast(context: CastContext): AbilityOutcome {

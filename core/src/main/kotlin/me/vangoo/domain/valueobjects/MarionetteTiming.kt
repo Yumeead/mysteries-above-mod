@@ -4,25 +4,25 @@ import me.vangoo.domain.services.SequenceScaler
 import kotlin.math.roundToInt
 
 /**
- * Тайминги фаз Контролю Маріонетки (Seq 5 Маріонетника шляху Блазня).
+ * Phase timings of Marionette Control (Seq 5 Marionettist of the Fool pathway).
  *
- * Фаза 1 (фіксація ниток) — 5…20с залежно від засвоєння кастера. Фаза 2
- * (конверсія) — для гравця база 5 хв, сильно скейлиться з силою; для моба ~15с.
- * Чиста математика — без платформи.
+ * Phase 1 (fixing the strings) — 5…20s depending on the caster's mastery. Phase 2
+ * (conversion) — 5 min base for a player, scaling strongly with power; ~15s for a mob.
+ * Pure math — no platform.
  */
 object MarionetteTiming {
 
     private const val PHASE1_MAX_SECONDS = 20.0
     private const val PHASE1_MIN_SECONDS = 5.0
-    private const val PLAYER_CONVERT_BASE_TICKS = 6000 // 5 хв на Seq 9
-    private const val MOB_SWAP_BASE_TICKS = 300        // 15с на Seq 9
+    private const val PLAYER_CONVERT_BASE_TICKS = 6000 // 5 min at Seq 9
+    private const val MOB_SWAP_BASE_TICKS = 300        // 15s at Seq 9
 
-    /** Поріг разового урону по жертві, що збиває фіксацію. */
+    /** Single-hit damage threshold on the victim that breaks the fixation. */
     const val BREAK_DAMAGE_THRESHOLD = 6.0
 
     /**
-     * Тривалість фази фіксації в тіках за засвоєнням (0…100): 20с при 0%,
-     * лінійно до 5с при 100%.
+     * Duration of the fixation phase in ticks by mastery (0…100): 20s at 0%,
+     * linearly down to 5s at 100%.
      */
     fun phase1LockTicks(masteryPercent: Double): Int {
         val clamped = masteryPercent.coerceIn(0.0, 100.0)
@@ -31,7 +31,7 @@ object MarionetteTiming {
         return (seconds * 20).roundToInt()
     }
 
-    /** Тривалість фази конверсії гравця (тіки): база 5 хв, швидшає зі силою (STRONG). */
+    /** Duration of a player's conversion phase (ticks): 5 min base, speeds up with power (STRONG). */
     fun playerConvertTicks(sequence: Sequence): Int {
         val multiplier = SequenceScaler.calculateMultiplier(
             sequence.level, SequenceScaler.ScalingStrategy.STRONG,
@@ -39,7 +39,7 @@ object MarionetteTiming {
         return (PLAYER_CONVERT_BASE_TICKS / multiplier).roundToInt()
     }
 
-    /** Тривалість фази перетворення моба (тіки): ~15с, швидшає зі силою (WEAK). */
+    /** Duration of a mob's transformation phase (ticks): ~15s, speeds up with power (WEAK). */
     fun mobSwapTicks(sequence: Sequence): Int {
         val multiplier = SequenceScaler.calculateMultiplier(
             sequence.level, SequenceScaler.ScalingStrategy.WEAK,

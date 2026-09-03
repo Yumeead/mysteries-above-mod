@@ -11,50 +11,50 @@ import net.minecraft.network.codec.StreamCodec
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 
 /**
- * Єдине місце, де живуть пакети мода.
+ * The single place the mod's packets live in.
  *
- * Найпоширеніший клас багів у модах — сервер знає те, чого не знає клієнт, — росте
- * з ad-hoc повідомлень, розкиданих по фічах. Тут оголошення каналу і є його
- * реєстрацією: [clientbound]/[serverbound] одразу кладуть канал у [declared], а
- * [registerTypes] проходить по списку. Забути зареєструвати оголошений тут канал
- * неможливо; канал, зібраний повз цей об'єкт, впаде на першій же відправці —
- * ванільний реєстр не знає його типу.
+ * The most common class of bug in mods — the server knows something the client does not —
+ * grows out of ad-hoc messages scattered across features. Here declaring a channel is
+ * registering it: [clientbound]/[serverbound] put the channel straight into [declared], and
+ * [registerTypes] walks the list. Forgetting to register a channel declared here is impossible;
+ * a channel assembled past this object will fail on its very first send — the vanilla registry
+ * does not know its type.
  *
- * [registerTypes] викликається з головного entrypoint'у, тобто на обох сторонах.
+ * [registerTypes] is called from the main entrypoint, i.e. on both sides.
  */
 object ModChannels {
 
     private val declared = mutableListOf<Channel<*>>()
     private var registered = false
 
-    /** Сервер віддає клієнту стан Потойбічного. */
+    /** The server hands the Beyonder's state to the client. */
     val BEYONDER_STATUS: ClientboundChannel<BeyonderStatusPayload> =
         clientbound(BeyonderStatusPayload.TYPE, BeyonderStatusPayload.CODEC)
 
-    /** Клієнт просить сервер перечитати стан. */
+    /** The client asks the server to re-read the state. */
     val STATUS_REQUEST: ServerboundChannel<StatusRequestPayload> =
         serverbound(StatusRequestPayload.TYPE, StatusRequestPayload.CODEC)
 
-    /** Клавіша касту: клієнт натиснув спуск, здібність обирає сервер. */
+    /** The cast key: the client pulled the trigger, the server picks the ability. */
     val CAST_REQUEST: ServerboundChannel<CastRequestPayload> =
         serverbound(CastRequestPayload.TYPE, CastRequestPayload.CODEC)
 
     /**
-     * Рідкісний знімок: список здібностей, їхні описи, ціни й іконки.
-     * Летить лише на зміну самого списку — одиниці разів за сесію.
+     * The rare snapshot: the ability list, their descriptions, costs and icons.
+     * It flies only when the list itself changes — a handful of times per session.
      */
     val ABILITY_ROSTER: ClientboundChannel<AbilityRosterPayload> =
         clientbound(AbilityRosterPayload.TYPE, AbilityRosterPayload.CODEC)
 
-    /** Частий дрібний знімок: духовність, перепочинки, тоглі. Не частіше разу на секунду. */
+    /** The frequent small snapshot: spirituality, cooldowns, toggles. No more than once a second. */
     val ABILITY_STATE: ClientboundChannel<AbilityStatePayload> =
         clientbound(AbilityStatePayload.TYPE, AbilityStatePayload.CODEC)
 
-    /** Один намір гравця: обрати, кастувати, обрати й кастувати, перемкнути. */
+    /** One player intent: select, cast, select and cast, toggle. */
     val ABILITY_ACTION: ServerboundChannel<AbilityActionPayload> =
         serverbound(AbilityActionPayload.TYPE, AbilityActionPayload.CODEC)
 
-    /** Усі оголошені канали — для логів і тестів. */
+    /** Every declared channel — for logs and tests. */
     val all: List<Channel<*>> get() = declared.toList()
 
     fun registerTypes() {
@@ -74,9 +74,8 @@ object ModChannels {
     ): ServerboundChannel<T> = declare(ServerboundChannel(type, codec))
 
     /**
-     * Однакові id ловляться тут, під час ініціалізації класу, а не пізніше в
-     * ванільному реєстрі: копіпаст каналу — рівно та помилка, заради якої цей
-     * об'єкт існує.
+     * Identical ids are caught here, during class initialisation, rather than later in the
+     * vanilla registry: a copy-pasted channel is exactly the mistake this object exists for.
      */
     private fun <C : Channel<*>> declare(channel: C): C {
         require(declared.none { it.id == channel.id }) { "Канал ${channel.id} уже оголошено" }

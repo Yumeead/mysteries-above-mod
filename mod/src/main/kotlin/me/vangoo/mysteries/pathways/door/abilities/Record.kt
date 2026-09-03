@@ -22,29 +22,30 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 
 /**
- * Door, Посл. 6 (Писар): **Запис здібності**.
+ * Door, Seq. 6 (Scribe): **Record Ability**.
  *
- * Писар бере на приціл Потойбічного й чекає. Щойно той застосує силу — Писар запише її
- * собі, **на один раз**.
+ * The Scribe takes aim at a Beyonder and waits. The moment that Beyonder uses a power, the Scribe
+ * writes it down for themselves, **for one use**.
  *
- * ## Чекання замість меню, і чому це те саме
+ * ## Waiting instead of a menu, and why it is the same thing
  *
- * Плагін відкривав список голів гравців поблизу, а вже потім десять секунд чекав чужого
- * касту. Список тут не потрібен: ціль однаково мусить бути поруч, а «поруч і під
- * прицілом» — це вже вибір, зроблений руками. Той самий хід, що в `Analysis` Білої Вежі.
+ * The plugin opened a list of nearby players' heads and only then waited ten seconds for someone
+ * else's cast. The list is not needed here: the target has to be nearby anyway, and "nearby and in
+ * the crosshair" is already a choice made by hand. The same move as in the White Tower's `Analysis`.
  *
- * ## Один запис за раз
+ * ## One record at a time
  *
- * Плагін тримав до двадцяти записаних сил, рахував ліміт від Послідовності й засвоєння
- * (22 рядки) і мусив мати режим видалення, щоб гравець міг звільнити місце. Тут запис
- * один: новий витісняє попередній. Зникли ліміт, режим і питання «що з цим списком
- * робить збереження» — а сила лишилась тією самою: чужий прийом, який ти маєш витратити.
+ * The plugin kept up to twenty recorded powers, computed the limit from the Sequence and mastery
+ * (22 lines) and had to have a deletion mode so the player could free up room. Here there is one
+ * record: a new one displaces the previous. Gone are the limit, the mode and the question of
+ * "what does persistence do with that list" — and the power stayed the same: someone else's
+ * technique that you have to spend.
  *
- * ## Квиток гаситься на записі, не на касті
+ * ## The ticket is settled on the record, not on the cast
  *
- * Каст лише **починає** очікування, тож повертається [AbilityOutcome.Awaiting], а
- * духовність списується тоді, коли сила справді лягла в записник. Ціль, що так нічого й
- * не застосувала, не коштує Писареві нічого.
+ * The cast only **begins** the wait, so it returns [AbilityOutcome.Awaiting], and the spirituality
+ * is spent when a power actually lands in the notebook. A target that never used anything costs
+ * the Scribe nothing.
  */
 class Record : ActiveAbility(AbilityIdentity.of("door_record")) {
 
@@ -78,8 +79,8 @@ class Record : ActiveAbility(AbilityIdentity.of("door_record")) {
         val donorSequence = donor.sequenceLevel
         val mySequence = scribe.sequenceLevel
 
-        // Підписка мусить зняти себе першим влучанням, тобто обробник потребує посилання
-        // на неї, а вона — на нього. Розв'язується `lateinit`, як у `bodyAura`.
+        // The subscription must remove itself on the first hit, i.e. the handler needs a reference
+        // to it and it to the handler. Resolved with `lateinit`, as in `bodyAura`.
         lateinit var watch: Subscription
         watch = context.events.on<AbilityCast>(WATCH_TICKS) { event ->
             if (event.caster.uuid != donorId) return@on
@@ -99,7 +100,7 @@ class Record : ActiveAbility(AbilityIdentity.of("door_record")) {
                 return@on
             }
 
-            // Витісняємо попередній запис: місце в записнику одне.
+            // Displace the previous record: there is one place in the notebook.
             scribe.abilities.filterIsInstance<OneShot>().forEach { scribe.remove(it.identity) }
             val recorded = OneShot(spec as ActiveAbility)
             if (!scribe.grantOffPathway(recorded)) return@on
@@ -130,11 +131,12 @@ class Record : ActiveAbility(AbilityIdentity.of("door_record")) {
     }
 
     /**
-     * Записати можна тільки те, що **робиться** — тобто активну силу, і не рефлексивну.
+     * Only what is **done** can be recorded — that is, an active power, and not a reflexive one.
      *
-     * Заборона на `Аналіз`, `Створення заклинань` і сам `Запис` плагінна, і причина в
-     * усіх трьох одна: вони не мають власного ефекту, а лише поводяться з чужими силами.
-     * Записаний `Запис` дав би нескінченну сходинку, записаний `Аналіз` — другу таку саму.
+     * The ban on `Аналіз`, `Складене заклинання` and `Запис` itself comes from the plugin, and the
+     * reason for all three is one: they have no effect of their own but merely handle other
+     * people's powers. A recorded `Запис` would give an endless ladder, a recorded `Аналіз` a
+     * second one just like it.
      */
     private fun isRecordable(spec: AbilitySpec): Boolean =
         spec is ActiveAbility && spec.identity.id !in FORBIDDEN
@@ -143,11 +145,12 @@ class Record : ActiveAbility(AbilityIdentity.of("door_record")) {
         (spec as? Ability)?.displayName?.string ?: spec.identity.id
 
     /**
-     * Чужа сила, яка зникає після першого ж застосування.
+     * Someone else's power that disappears after its first use.
      *
-     * Обгортка, а не копія: ціна, перепочинок, опис і сам ефект лишаються донорові, а
-     * записник додає рівно одне — знімає себе, щойно спрацював. Ідентичність своя, бо
-     * інакше `grantOffPathway` побачив би її як ту саму силу, що в донора.
+     * A wrapper, not a copy: the cost, the cooldown, the description and the effect itself stay
+     * the donor's, and the notebook adds exactly one thing — it removes itself the moment it
+     * fires. The identity is its own, because otherwise `grantOffPathway` would see it as the same
+     * power the donor has.
      */
     private class OneShot(private val inner: ActiveAbility) :
         ActiveAbility(AbilityIdentity.of("door_recorded_${inner.identity.id}")) {
@@ -170,7 +173,7 @@ class Record : ActiveAbility(AbilityIdentity.of("door_record")) {
 
         override fun cast(context: CastContext): AbilityOutcome {
             val outcome = inner.cast(context)
-            // Зірваний каст сторінку не витрачає: платити нема за що, стирати нема чого.
+            // A failed cast does not spend the page: there is nothing to pay and nothing to erase.
             if (outcome is AbilityOutcome.Failed) return outcome
             context.beyonder.remove(identity)
             BeyonderStatus.pushRoster(context.caster)

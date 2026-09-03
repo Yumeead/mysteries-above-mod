@@ -3,10 +3,10 @@ package me.vangoo.domain.forage
 import java.util.Locale
 
 /**
- * Чисте правило мапінгу «оригінальний блок → блок-донор» фореджу. Донор — блок, якого немає
- * в Оверворлді природно; ресурспак малює його «зачарованим». Overrides перемагають дефолти;
- * дефолт обирається за класом цілі (рослина/листя). Імена блоків — рядки (без Minecraft);
- * їхню валідність перевіряє завантажувач конфіга.
+ * The pure "original block → donor block" mapping rule for foraging. The donor is a block that
+ * does not occur naturally in the Overworld; the resource pack draws it as "enchanted".
+ * Overrides beat defaults; the default is chosen by the target's class (plant/leaves). Block
+ * names are strings (no Minecraft); the config loader checks that they are valid.
  */
 class ForageDonorMap(
     defaultPlantDonor: String?,
@@ -18,7 +18,7 @@ class ForageDonorMap(
     private val overrides: Map<String, String> =
         overrides.entries.associate { (k, v) -> normalize(k) to normalize(v) }
 
-    /** Донор для оригінального блока; [leaves] — чи належить ціль до листя. */
+    /** The donor for the original block; [leaves] — whether the target belongs to leaves. */
     fun donorFor(originalMaterial: String?, leaves: Boolean): String =
         overrides[normalize(originalMaterial)]
             ?: if (leaves) defaultLeavesDonor else defaultPlantDonor

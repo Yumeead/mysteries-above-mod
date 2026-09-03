@@ -11,20 +11,20 @@ import net.minecraft.core.particles.ColorParticleOption
 import net.minecraft.util.RandomSource
 
 /**
- * Порошинка духу: спалахує, спливає й гасне.
+ * The spirit mote: it flares, floats up and fades.
  *
- * ## Що вона робить такого, чого не вміє ванільний `DUST`
+ * ## What it does that the vanilla `DUST` cannot
  *
- * | `DUST_COLOR_TRANSITION` | порошинка духу |
+ * | `DUST_COLOR_TRANSITION` | the spirit mote |
  * |---|---|
- * | розмитий квадрат — форма спільна для всіх модів | власний ромб із твердими краями |
- * | колір іде від A до B, яскравість стала | спалах на початку, згасання в кінці |
- * | розмір сталий | стягується, доки гасне |
- * | висить на місці, тільки дрейфує | має власний підйом і тертя |
+ * | a blurred square — a form shared by every mod | its own diamond with hard edges |
+ * | the colour goes from A to B, the brightness is constant | a flare at the start, a fade at the end |
+ * | a constant size | it draws in as it fades |
+ * | hangs in place, only drifts | it has its own rise and friction |
  *
- * Ванілька лишається там, де вона вже виглядає своєю: `SPLASH` для бризок,
- * `BUBBLE` для води. Своя частинка потрібна саме там, де мод говорить **своїм**
- * голосом — коли видно чужу силу.
+ * Vanilla stays where it already looks at home: `SPLASH` for spray, `BUBBLE` for water. A
+ * particle of our own is needed exactly where the mod speaks in **its own** voice — when someone
+ * else's power is on show.
  */
 class SpiritMoteParticle private constructor(
     level: ClientLevel,
@@ -38,7 +38,7 @@ class SpiritMoteParticle private constructor(
     sprite: TextureAtlasSprite,
 ) : SingleQuadParticle(level, x, y, z, xd, yd, zd, sprite) {
 
-    /** Розмір на піку спалаху: від нього рахується і поточний, бо він же й найбільший. */
+    /** The size at the peak of the flare: the current one is computed from it, as it is also the largest. */
     private val peakSize: Float
 
     init {
@@ -54,30 +54,30 @@ class SpiritMoteParticle private constructor(
 
     override fun getLayer(): SingleQuadParticle.Layer = SingleQuadParticle.Layer.TRANSLUCENT
 
-    /** Світиться сама: порошинка чужої сили не має темніти в тіні. */
+    /** Glows on its own: a mote of another's power must not darken in the shade. */
     override fun getLightCoords(partialTick: Float): Int = LightCoordsUtil.FULL_BRIGHT
 
     override fun tick() {
         super.tick()
         if (!isAlive) return
 
-        // Життя ділиться на спалах і згасання: сила проявилась, потім розтанула.
+        // The lifetime splits into a flare and a fade: the power showed itself, then melted away.
         val life = age.toFloat() / lifetime
         val flare = if (life < FLARE_SHARE) life / FLARE_SHARE else 1f - (life - FLARE_SHARE) / (1f - FLARE_SHARE)
 
         alpha = flare
-        // Розмір падає лише в другій половині: спалах росте яскравістю, не розміром.
+        // The size only falls in the second half: a flare grows in brightness, not in size.
         quadSize = peakSize * (MIN_SHARE + (1f - MIN_SHARE) * flare)
     }
 
     /**
-     * Один провайдер на всі кольори: колір приїжджає в [ColorParticleOption], а не
-     * в окремому зареєстрованому типі на кожен шлях.
+     * One provider for every colour: the colour arrives in a [ColorParticleOption] rather than
+     * in a separately registered type per pathway.
      *
-     * **Тримає набір, а не спрайт.** Провайдери реєструються в конструкторі
-     * `ParticleResources`, тобто **до** того, як атлас частинок зібрано: `SpriteSet` у цю
-     * мить порожній, і будь-який `first()` там падає `NullPointerException` ще на
-     * заставці. Спрайт береться в [createParticle] — коли атлас уже є.
+     * **It holds the set, not a sprite.** Providers are registered in the `ParticleResources`
+     * constructor, i.e. **before** the particle atlas is assembled: the `SpriteSet` is empty at
+     * that moment, and any `first()` there fails with a `NullPointerException` on the splash
+     * screen. The sprite is taken in [createParticle] — when the atlas is already there.
      */
     class Provider(private val sprites: SpriteSet) : ParticleProvider<ColorParticleOption> {
         override fun createParticle(
@@ -98,14 +98,14 @@ class SpiritMoteParticle private constructor(
         const val MAX_LIFETIME = 28
         const val BASE_SIZE = 0.09f
 
-        /** Від'ємна гравітація: речовина духу спливає, а не осідає. */
+        /** Negative gravity: spirit matter floats up rather than settling. */
         const val GRAVITY = -0.006f
         const val FRICTION = 0.92f
 
-        /** Частка життя на спалах. Коротка: сила проявляється швидше, ніж тане. */
+        /** The share of the lifetime spent on the flare. Short: a power shows itself faster than it melts. */
         const val FLARE_SHARE = 0.25f
 
-        /** Мінімальна частка розміру — щоб порошинка гасла, а не зникала в точку. */
+        /** The minimum size share — so that a mote fades rather than vanishing into a point. */
         const val MIN_SHARE = 0.35f
     }
 }

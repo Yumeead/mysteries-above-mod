@@ -1,8 +1,8 @@
 package me.vangoo.domain.valueobjects
 
 /**
- * Класифікація pathway як "темного/нежиті" для святого урону Sun.
- * Набір pathways — калібрувальна константа (тюнінг-важіль), не архітектурне рішення.
+ * Classifies a pathway as "dark/undead" for the Sun's holy damage.
+ * The set of pathways is a calibration constant (a tuning knob), not an architectural decision.
  */
 object HolyAffinity {
 
@@ -15,6 +15,6 @@ object HolyAffinity {
 
     fun damageMultiplier(pathwayName: String?): Double = damageMultiplier(isDark(pathwayName))
 
-    /** Для цілей поза pathway-класифікацією (ванільні нежить-моби) — класифікація на боці ефекту. */
+    /** For targets outside the pathway classification (vanilla undead mobs) — classified on the effect side. */
     fun damageMultiplier(dark: Boolean): Double = if (dark) DARK_MULTIPLIER else NEUTRAL_MULTIPLIER
 }

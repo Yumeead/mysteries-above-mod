@@ -17,29 +17,31 @@ import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.phys.Vec3
 
 /**
- * WhiteTower, Посл. 7 (Детектив): **Реконструкція**.
+ * WhiteTower, Seq. 7 (Detective): **Reconstruction**.
  *
- * Детектив зупиняє місце події й дивиться, що тут щойно сталось. У повітрі проступає
- * схема: від кожного, хто бив, до кожного, кого били, тягнеться нитка, і по нитці
- * біжить сам удар. Знизу — протокол: хто, кого, скільки секунд тому.
+ * The Detective freezes the scene and looks at what just happened here. A diagram appears in the
+ * air: from everyone who struck to everyone who was struck a thread is drawn, and the blow itself
+ * runs along it. Below is the record: who, whom, how many seconds ago.
  *
- * ## Чому не журнал змін блоків, як у плагіні
+ * ## Why not a block-change journal, as in the plugin
  *
- * Плагінна `MysticalReenactment` показувала історію поставлених і зламаних блоків за
- * останні п'ять хвилин, і платив за це весь сервер: щоб її було що показати, мод мусив
- * **постійно писати журнал** усіх змін світу, включно з чужими й тими, які ніхто ніколи
- * не запитає. Детектив там був споживачем підсистеми, яка існувала заради нього одного.
+ * The plugin's `MysticalReenactment` showed the history of blocks placed and broken over the last
+ * five minutes, and the whole server paid for it: for there to be anything to show, the mod had
+ * to **keep writing a journal** of every change in the world, including other people's and those
+ * nobody would ever ask about. The Detective there was the consumer of a subsystem that existed
+ * for them alone.
  *
- * Тут журналу немає взагалі. Гра **вже** зберігає, хто кого вдарив останнім і скільки
- * тіків тому — це ванільні `getLastHurtByMob` / `getLastHurtMob` з їхніми мітками часу,
- * потрібні мобам для агро. Детектив просто вміє це прочитати. Нуль записів, нуль
- * пам'яті, нуль впливу на тих, хто не Детектив — і сцена виходить точнішою, ніж список
- * зламаних блоків: бійка цікавіша за паркан.
+ * Here there is no journal at all. The game **already** stores who last struck whom and how many
+ * ticks ago — that is the vanilla `getLastHurtByMob` / `getLastHurtMob` with their timestamps,
+ * which mobs need for aggro. The Detective simply knows how to read it. Zero records, zero
+ * memory, zero effect on anyone who is not a Detective — and the scene comes out more accurate
+ * than a list of broken blocks: a fight is more interesting than a fence.
  *
- * ## Позиції знімаються в мить касту
+ * ## The positions are taken at cast time
  *
- * Схема не ходить за учасниками, і це не спрощення: реконструюється **минуле**. Нитка,
- * що тягнеться за тим, хто вже втік, показувала б не те, що сталось.
+ * The diagram does not follow the participants, and that is not a simplification: what is
+ * reconstructed is the **past**. A thread trailing after someone who has already run would show
+ * something other than what happened.
  */
 class CrimeReconstruction : ActiveAbility(AbilityIdentity.of("whitetower_crime_reconstruction")) {
 
@@ -83,15 +85,15 @@ class CrimeReconstruction : ActiveAbility(AbilityIdentity.of("whitetower_crime_r
             null, context.origin.x, context.origin.y, context.origin.z,
             SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0f, 0.6f,
         )
-        return AbilityOutcome.done("Реконструкція: ${scene.size} слід(и) на сцені")
+        return AbilityOutcome.done("Реконструкція: слідів на сцені — ${scene.size}")
     }
 
     /**
-     * Останній удар, який пам'ятає сама гра.
+     * The last blow the game itself remembers.
      *
-     * Мітка часу — це `tickCount` **потерпілого** в мить удару, тож і порівнюється вона
-     * з його ж лічильником, а не з годинником сервера: сутність, що прогрузилась пізніше,
-     * має власний вік.
+     * The timestamp is the **victim's** `tickCount` at the moment of the blow, so it is compared
+     * with that same counter rather than with the server's clock: an entity that loaded later has
+     * an age of its own.
      */
     private fun blow(victim: LivingEntity): Link? {
         val attacker = victim.lastHurtByMob ?: return null
@@ -102,10 +104,10 @@ class CrimeReconstruction : ActiveAbility(AbilityIdentity.of("whitetower_crime_r
     }
 
     /**
-     * Нитка від нападника до потерпілого, по якій біжить сам удар.
+     * A thread from the attacker to the victim, with the blow itself running along it.
      *
-     * Голова біжить лише в один бік — інакше нитка читалась би як зв'язок, а не як
-     * напрямок, а напрямок тут і є висновком.
+     * The head runs in one direction only — otherwise the thread would read as a connection
+     * rather than a direction, and the direction here is the conclusion.
      */
     private fun thread(context: CastContext, link: Link, mote: net.minecraft.core.particles.ParticleOptions) {
         val level = context.level
@@ -125,7 +127,8 @@ class CrimeReconstruction : ActiveAbility(AbilityIdentity.of("whitetower_crime_r
             step++
         }
 
-        // Кінці нитки позначені густіше: там стояли учасники, і саме туди дивиться гравець.
+        // The ends of the thread are marked more densely: that is where the participants stood,
+        // and that is exactly where the player looks.
         mark(level, from, mote)
         mark(level, to, mote)
     }
@@ -142,13 +145,13 @@ class CrimeReconstruction : ActiveAbility(AbilityIdentity.of("whitetower_crime_r
     private companion object {
         const val BASE_RADIUS = 16
         const val COOLDOWN_SECONDS = 45
-        /** Скільки секунд назад ще вважається «щойно». */
+        /** How many seconds back still counts as "just now". */
         const val WINDOW_SECONDS = 60
         const val MAX_LINKS = 8
 
         const val REPLAY_TICKS = 6 * TICKS_PER_SECOND
         const val PERIOD_TICKS = 2
-        /** Скільки нитки голова проходить за такт: повний пробіг ≈ 1,7 с. */
+        /** How much of the thread the head covers per tick: a full run ≈ 1.7 s. */
         const val HEAD_SPEED = 0.06
         const val DASHES = 5
     }

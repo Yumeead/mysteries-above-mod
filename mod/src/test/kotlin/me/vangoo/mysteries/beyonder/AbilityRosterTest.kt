@@ -21,19 +21,19 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 /**
- * Знімок ростера: світу не піднімає, реєстри — так.
+ * The roster snapshot: no world is brought up, the registries are.
  *
- * Доводиться одне: те, що поїде клієнту, — це той самий [Beyonder], а не його
- * переказ. Ціни, типи, перепочинки й **порядок** мусять збігтися поле в поле; будь-яке
- * розходження тут означало б меню, що показує не те, що спрацює.
+ * One thing is proven: what goes to the client is that very [Beyonder], not a retelling of it.
+ * The costs, the types, the cooldowns and the **order** must match field for field; any
+ * discrepancy here would mean a menu showing something other than what will happen.
  */
 class AbilityRosterTest {
 
     companion object {
-        /** Канали кольору без альфи: `DyedItemColor.getOrDefault` віддає ARGB. */
+        /** Colour channels without alpha: `DyedItemColor.getOrDefault` returns ARGB. */
         const val RGB = 0x00FFFFFF
 
-        /** Іконка — це `ItemStack`, тож потрібні ще й прив'язані компоненти предметів. */
+        /** An icon is an `ItemStack`, so bound item components are needed as well. */
         @JvmStatic
         @BeforeAll
         fun bootstrapRegistries() = GameRegistries.bootstrap()
@@ -63,7 +63,7 @@ class AbilityRosterTest {
         val entries = requireNotNull(BeyonderStatus.roster(beyonder).roster).entries
 
         assertEquals(beyonder.abilities.size, entries.size)
-        // Порядок теж частина відповіді: колесо розкладає картки саме в ньому.
+        // The order is part of the answer too: the wheel lays the cards out in exactly that order.
         assertEquals(beyonder.abilities.map { it.identity.id }, entries.map { it.identity })
 
         beyonder.abilities.zip(entries).forEach { (spec, entry) ->
@@ -78,8 +78,8 @@ class AbilityRosterTest {
     @Test
     @DisplayName("Опис порахований під Послідовність власника, а не під базову")
     fun descriptionScalesWithSequence() {
-        // Цілюща Вода називає тривалість у секундах, а та йде через `SequenceScaler`.
-        // Клієнт цих чисел не рахує й рахувати не має — вони приїжджають готовими.
+        // Restorative Water states its duration in seconds, and that goes through `SequenceScaler`.
+        // The client does not compute those numbers and is not meant to — they arrive ready.
         val seven = entry(at(7), "tyrant_restorative_water").description.string
         val five = entry(at(5), "tyrant_restorative_water").description.string
 
@@ -93,8 +93,8 @@ class AbilityRosterTest {
 
         assertEquals(AbilityType.PERMANENT_PASSIVE, scales.type)
         assertSame(Items.PRISMARINE_SHARD, scales.icon.item)
-        // Порівнюються самі канали кольору: `getOrDefault` віддає ARGB, тобто той самий
-        // відтінок плюс непрозора альфа.
+        // The colour channels themselves are compared: `getOrDefault` returns ARGB, i.e. the same
+        // shade plus an opaque alpha.
         assertEquals(
             PathwayBranding.liquidOf("Tyrant").packed and RGB,
             DyedItemColor.getOrDefault(scales.icon, 0) and RGB,
@@ -122,13 +122,13 @@ class AbilityRosterTest {
         )
     }
 
-    // ── Заготовки ───────────────────────────────────────────────────────────────
+    // ── Fixtures ────────────────────────────────────────────────────────────────
 
     private fun sailor(): Beyonder = Beyonder(UUID.randomUUID(), Sequence.starter(), Tyrant.create())
 
     private fun seafarer(): Beyonder = at(7)
 
-    /** Засвоєння скидається на кожному піднесенні, тож добираємо його щоразу. */
+    /** Mastery resets on every ascension, so it is topped up each time. */
     private fun at(level: Int): Beyonder = sailor().apply {
         repeat(Sequence.starter().level - level) {
             setMastery(Mastery.max())

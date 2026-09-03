@@ -6,11 +6,12 @@ import java.util.UUID
 import kotlin.math.ceil
 
 /**
- * Кулдауни в серверних тіках.
+ * Cooldowns in server ticks.
  *
- * Годинник — [now], лічильник тіків сервера, а не настінний час. Різниця видима:
- * поставлена на паузу одиночна гра стоїть, і кулдаун разом із нею. `System.currentTimeMillis`
- * цокав би далі, і сила, витрачена перед виходом у меню, поверталась би безкоштовно.
+ * The clock is [now], the server's tick counter, not wall time. The difference is visible: a
+ * paused single-player game stands still, and the cooldown with it.
+ * `System.currentTimeMillis` would keep ticking, and a power spent just before opening the menu
+ * would come back for free.
  */
 class CooldownTable(private val now: () -> Int) : Cooldowns {
 
@@ -23,14 +24,15 @@ class CooldownTable(private val now: () -> Int) : Cooldowns {
         toSeconds(readyTick(playerId, identity) - now())
 
     /**
-     * **Абсолютний** тік, коли здібність знову готова; `0` — готова зараз.
+     * The **absolute** tick at which the ability is ready again; `0` — ready now.
      *
-     * Те саме число, що й [remainingSeconds], але не поділене на 20 перед відправкою.
-     * Клієнту потрібне саме воно: залишок довелося б надсилати щосекунди, інакше він
-     * застигав би, а абсолютний тік летить один раз — далі клієнт відлічує сам.
+     * The same number as [remainingSeconds], only not divided by 20 before sending. This is
+     * exactly what the client needs: the remainder would have to be sent every second or it
+     * would freeze, whereas an absolute tick flies once — after that the client counts down
+     * itself.
      *
-     * Глобальне замикання ([lockAll]) виражається тут природно: усі здібності гравця
-     * повертають один і той самий тік.
+     * A global lock ([lockAll]) is expressed here naturally: every one of the player's abilities
+     * returns the same tick.
      */
     fun readyAtTick(playerId: UUID, identity: AbilityIdentity): Int {
         val tick = now()
@@ -38,7 +40,7 @@ class CooldownTable(private val now: () -> Int) : Cooldowns {
         return if (ready <= tick) 0 else ready
     }
 
-    /** Пізніший із двох таймерів — власного й глобального. Ніколи не раніший за «зараз». */
+    /** The later of the two timers — the ability's own and the global one. Never earlier than "now". */
     private fun readyTick(playerId: UUID, identity: AbilityIdentity): Int {
         val tick = now()
         return maxOf(readyAt[Key(playerId, identity)] ?: tick, lockedUntil[playerId] ?: tick)
@@ -64,14 +66,14 @@ class CooldownTable(private val now: () -> Int) : Cooldowns {
         lockedUntil.remove(playerId)
     }
 
-    /** Прибирає таймери, що вже спливли: інакше мапа росте на кожну здібність назавжди. */
+    /** Removes timers that have already expired: otherwise the map grows by one ability forever. */
     fun prune() {
         val tick = now()
         readyAt.values.removeIf { it <= tick }
         lockedUntil.values.removeIf { it <= tick }
     }
 
-    /** Округлення вгору: «лишилось 0 с» при ще не спливлому таймері збивало б із пантелику. */
+    /** Rounding up: "0 s left" on a timer that has not expired yet would be confusing. */
     private fun toSeconds(ticks: Int): Long =
         if (ticks <= 0) 0L else ceil(ticks.toDouble() / TICKS_PER_SECOND).toLong()
 

@@ -6,15 +6,15 @@ import net.minecraft.network.codec.StreamCodec
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 
 /**
- * Клієнт → сервер: «кастуй те, що я тримаю».
+ * Client → server: "cast what I am holding".
  *
- * Порожній навмисно. Ідентичність здібності клієнту **не довіряється**: він однаково не
- * знає ні списку здібностей гравця, ні того, чи вони ще в нього є, а пакет із чужим
- * ключем усередині довелося б перевіряти на сервері рівно тим самим пошуком, що й
- * порожній. Вибір живе на сервері (`AbilitySelection`), клавіша лише натискає спуск.
+ * Empty on purpose. The ability identity is **not trusted** to the client: it knows neither the
+ * player's ability list nor whether they still have them, and a packet with a foreign key
+ * inside would have to be checked on the server with exactly the same search as an empty one.
+ * The selection lives on the server (`AbilitySelection`), the key only pulls the trigger.
  *
- * Коли фаза 11 принесе колесо здібностей, вибір поїде тим самим шляхом — окремим
- * пакетом вибору, а не полем усередині цього.
+ * When phase 11 brings the ability wheel, the selection will travel the same way — as a
+ * separate selection packet, not as a field inside this one.
  */
 class CastRequestPayload private constructor() : CustomPacketPayload {
 

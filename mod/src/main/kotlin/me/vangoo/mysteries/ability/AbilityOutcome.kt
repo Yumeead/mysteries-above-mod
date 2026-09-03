@@ -3,24 +3,24 @@ package me.vangoo.mysteries.ability
 import net.minecraft.network.chat.Component
 
 /**
- * Що здібність зробила. Три стани замість плагінного `AbilityResult` з шістьма
- * прапорцями, з яких `deferred` доводилось не забути перевірити вручну.
+ * What the ability did. Three states instead of the plugin's `AbilityResult` with six flags,
+ * one of which — `deferred` — had to be remembered and checked by hand.
  */
 sealed interface AbilityOutcome {
 
     val message: Component?
 
-    /** Ефект стався. [AbilityExecutor] гасить квиток: духовність, засвоєння, кулдаун. */
+    /** The effect happened. [AbilityExecutor] settles the ticket: spirituality, mastery, cooldown. */
     data class Done(override val message: Component? = null) : AbilityOutcome
 
     /**
-     * Ефект почався й чекає на гравця — відкрилось меню, триває сесія. Квиток
-     * лишається непогашеним, і здібність гасить його сама, коли ефект справді стався.
-     * Не дочекалась — не гасить, і гравець нічого не заплатив.
+     * The effect began and is waiting for the player — a menu opened, a session is running.
+     * The ticket stays unsettled and the ability settles it itself once the effect really
+     * happens. If the wait comes to nothing it never settles, and the player paid nothing.
      */
     data class Awaiting(override val message: Component? = null) : AbilityOutcome
 
-    /** Не сталось нічого: немає цілі, не той світ, не той момент. Платити нема за що. */
+    /** Nothing happened: no target, the wrong world, the wrong moment. There is nothing to pay for. */
     data class Failed(override val message: Component) : AbilityOutcome
 
     companion object {

@@ -23,15 +23,15 @@ import net.minecraft.server.level.ServerPlayer
 import java.util.UUID
 
 /**
- * Реєстр живих сесій поверх [TickScheduler].
+ * The registry of live sessions on top of [TickScheduler].
  *
- * Одна сесія на пару «гравець + здібність». Новий каст тієї самої здібності гасить
- * попередню сесію **до** того, як запустить нову: у плагіні це був пункт правил
- * («перекаст замінює сесію: спершу зняти й скасувати стару»), і кожна з 22 сесій
- * виконувала його вручну — або не виконувала.
+ * One session per "player + ability" pair. A new cast of the same ability cancels the previous
+ * session **before** starting a new one: in the plugin this was a line in the rules ("a recast
+ * replaces the session: remove and cancel the old one first"), and each of the 22 sessions
+ * carried it out by hand — or did not.
  *
- * Скоуп — [SupervisorJob]: сесія, що впала з винятком, не тягне за собою решту. Виняток
- * логується як помилка одного гравця, а не як падіння всього шару.
+ * The scope is a [SupervisorJob]: a session that fell with an exception does not drag the rest
+ * down. The exception is logged as one player's error, not as the whole layer collapsing.
  */
 class SessionHost(
     private val scheduler: TickScheduler,
@@ -65,8 +65,8 @@ class SessionHost(
         sessions.remove(key)?.stop()
 
         val startedAt = scheduler.tick
-        // LAZY, бо тіло може добігти до кінця синхронно, і тоді знімати з реєстру
-        // довелось би те, чого туди ще не поклали.
+        // LAZY, because the body may run to completion synchronously, and then we would have to
+        // remove from the registry something that has not been put there yet.
         val job = scope.launch(start = CoroutineStart.LAZY) {
             LiveSessionScope(this, owner, ability, startedAt).block()
         }
@@ -75,7 +75,7 @@ class SessionHost(
         job.invokeOnCompletion { error ->
             if (sessions[key] === session) sessions.remove(key)
             if (error != null && error !is CancellationException) {
-                onError("Сесія ${ability.identity} гравця $owner впала", error)
+                onError("Session ${ability.identity} of player $owner threw", error)
             }
         }
         job.start()
@@ -101,11 +101,11 @@ class SessionHost(
     override val live: Collection<Session> get() = sessions.values.toList()
 
     /**
-     * Зупинка сервера: жодна сесія не має пережити світ, у якому почалась.
+     * Server shutdown: no session may outlive the world it started in.
      *
-     * Гасяться діти, а не сам скоуп: одиночна гра піднімає й гасить інтегрований сервер
-     * усередині того самого процесу, а скасований [SupervisorJob] більше ніколи не
-     * запустить корутину — наступний світ лишився б без сесій зовсім.
+     * The children are cancelled, not the scope itself: a single-player game brings the
+     * integrated server up and down inside the same process, and a cancelled [SupervisorJob]
+     * will never launch a coroutine again — the next world would be left with no sessions at all.
      */
     fun shutdown() {
         sessions.values.toList().forEach { it.stop() }

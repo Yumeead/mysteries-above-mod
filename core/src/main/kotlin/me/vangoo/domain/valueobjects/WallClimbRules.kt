@@ -4,22 +4,21 @@ import me.vangoo.domain.services.SequenceScaler
 import kotlin.math.min
 
 /**
- * Балансні числа лазіння по стінах (Seq 8 Клоуна шляху Блазня — акробатика).
+ * Balance numbers for wall climbing (Seq 8 Clown of the Fool pathway — acrobatics).
  *
- * Коли клоун притиснутий до вертикальної стіни й дивиться в неї, він
- * повільно дереться вгору. Швидкість підйому зростає зі силою. Чиста
- * математика — ефект (перевірка стіни, `setVelocity`) у
- * `pathways.fool.abilities.ClownAgility`.
+ * When the clown is pressed against a vertical wall and looking into it, he slowly
+ * climbs upwards. The climbing speed grows with power. Pure math — the effect
+ * (the wall check, `setVelocity`) lives in `pathways.fool.abilities.ClownAgility`.
  */
 object WallClimbRules {
 
-    /** Базова вертикальна швидкість лазіння (блоків/тік) на Seq 9. */
+    /** Base vertical climbing speed (blocks/tick) at Seq 9. */
     private const val BASE_CLIMB_SPEED = 0.18
 
-    /** Максимальна дистанція до стіни, щоб рахувати «притиснутий» (блоки). */
+    /** Maximum distance to the wall to count as "pressed against it" (blocks). */
     const val WALL_REACH = 0.9
 
-    /** Вертикальна швидкість підйому по стіні за поточною послідовністю (з м'якою стелею). */
+    /** Vertical climbing speed at the current Sequence (with a soft ceiling). */
     fun climbSpeed(sequence: Sequence): Double {
         val multiplier = SequenceScaler.calculateMultiplier(
             sequence.level, SequenceScaler.ScalingStrategy.WEAK,

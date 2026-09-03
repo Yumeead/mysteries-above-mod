@@ -1,6 +1,6 @@
 package me.vangoo.domain.rituals
 
-/** Оцінка жертви: скільки духовності повертає спалення предмета на вівтарі. */
+/** Appraising a sacrifice: how much spirituality burning an item on the altar returns. */
 object SacrificeAppraiser {
 
     fun spiritualityFor(kind: SacrificeKind): Int = when (kind) {

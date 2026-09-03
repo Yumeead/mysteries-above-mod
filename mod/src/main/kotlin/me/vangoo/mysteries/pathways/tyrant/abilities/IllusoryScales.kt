@@ -13,31 +13,33 @@ import net.minecraft.world.entity.LivingEntity
 import kotlin.math.roundToInt
 
 /**
- * Tyrant, Посл. 9 (Матрос): **Ілюзорна луска**.
+ * Tyrant, Seq. 9 (Sailor): **Illusory Scales**.
  *
- * Прихована під шкірою луска робить Матроса слизьким і твердим на дотик, мов риба.
- * Механічно — опір шкоді, але лише поки тіло у воді, де луска «оживає». На суші ефекту немає.
+ * Scales hidden under the skin make the Sailor slippery and hard to the touch, like a fish.
+ * Mechanically it is damage resistance, but only while the body is in water, where the scales
+ * "come alive". On land there is no effect.
  *
- * ## Перша здібність на подіях (фаза 06)
+ * ## The first ability built on events (phase 06)
  *
- * До появи шва луска була **опитуванням**: двічі на секунду перевіряла воду й накладала
- * ванільний `RESISTANCE`. Це давало три вади, і всі три зникли разом із тактом.
+ * Before the seam appeared, the scales were **polling**: twice a second they checked for water
+ * and applied a vanilla `RESISTANCE`. That gave three flaws, and all three went away with the tick.
  *
- * | було | стало |
+ * | before | after |
  * |---|---|
- * | ефект видно в списку зілль, і він знімався чужим молоком | нічого на гравця не кладеться |
- * | вихід із води встигав лишити опір на пів секунди | вода перевіряється в мить удару |
- * | `RESISTANCE I` — рівно 20 %, інших чисел ванілька не має | будь-яке число, ось [REDUCTION] |
+ * | the effect showed in the potion list and could be removed by someone else's milk | nothing is put on the player |
+ * | leaving the water still left the resistance up for half a second | the water is checked at the moment of the blow |
+ * | `RESISTANCE I` is exactly 20 %, vanilla has no other numbers | any number, here [REDUCTION] |
  *
- * Плюс зник цілий метод `removeOwnScales`: він існував лише щоб відрізнити **свій**
- * накладений опір від випитого гравцем зілля, бо плагін гасив ефект без розбору.
+ * A whole `removeOwnScales` method went away too: it existed only to tell **our own** applied
+ * resistance from a potion the player had drunk, because the plugin cleared the effect
+ * indiscriminately.
  *
- * ## Підписка тримає UUID, а не гравця
+ * ## The subscription holds a UUID, not a player
  *
- * Обробник живе довше за один такт, а `ServerPlayer` — ні: після смерті сервер створює
- * новий об'єкт. Тому з контексту береться лише [AbilityContext.caster]`.uuid`, а сам
- * потерпілий читається з події. Те саме правило, що й у `SessionScope.owner`, просто
- * тут воно виражається ще дешевше — жертву подія й так несе.
+ * The handler lives longer than one tick, and a `ServerPlayer` does not: after a death the
+ * server creates a new object. So only [AbilityContext.caster]`.uuid` is taken from the context,
+ * and the victim is read from the event. The same rule as in `SessionScope.owner`, only here it
+ * comes even cheaper — the event carries the victim anyway.
  */
 class IllusoryScales : PermanentPassiveAbility(AbilityIdentity.of("tyrant_illusory_scales")) {
 
@@ -54,8 +56,8 @@ class IllusoryScales : PermanentPassiveAbility(AbilityIdentity.of("tyrant_illuso
         context.events.on<IncomingDamage> { damage ->
             val victim = damage.victim
             if (victim.uuid != owner) return@on
-            // Луска «оживає» лише у воді — і перевіряється це в мить удару, а не в
-            // останньому такті до нього.
+            // The scales "come alive" only in water — and that is checked at the moment of the
+            // blow, not on the last tick before it.
             if (!victim.isInWater) return@on
 
             damage.scale(1.0 - REDUCTION)
@@ -63,7 +65,7 @@ class IllusoryScales : PermanentPassiveAbility(AbilityIdentity.of("tyrant_illuso
         }
     }
 
-    /** Луска блиснула, погасивши удар. Поки удару немає — її не видно взагалі. */
+    /** The scales flashed as they smothered a blow. While there is no blow, they are not seen at all. */
     private fun shimmer(victim: LivingEntity) {
         val level = victim.level() as? ServerLevel ?: return
         level.sendParticles(
@@ -75,11 +77,12 @@ class IllusoryScales : PermanentPassiveAbility(AbilityIdentity.of("tyrant_illuso
 
     private companion object {
         /**
-         * Частка зрізаної шкоди. Двадцять відсотків — рівно те, що давав ванільний
-         * `RESISTANCE I` у попередній редакції: механіку змінено, баланс — ні.
+         * The share of damage cut off. Twenty per cent is exactly what the vanilla
+         * `RESISTANCE I` gave in the previous revision: the mechanic changed, the balance did not.
          *
-         * Із Послідовністю не росте навмисно: у плагіні луска теж не росла, а Матрос,
-         * що піднявся, отримує сильніші версії стійкості окремими здібностями.
+         * It deliberately does not grow with the Sequence: in the plugin the scales did not grow
+         * either, and a Sailor who has risen gets stronger versions of the resistance as separate
+         * abilities.
          */
         const val REDUCTION = 0.20
     }

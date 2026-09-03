@@ -4,14 +4,14 @@ import me.vangoo.domain.valueobjects.AbilityIdentity
 import java.util.UUID
 
 /**
- * Яку здібність гравець зараз тримає «на руці».
+ * Which ability the player currently holds "in hand".
  *
- * Тимчасова форма вибору: справжній — колесо здібностей із фази 11. Але клавіша, що
- * кастує, мусить знати **що** кастувати вже зараз, і тримати цю відповідь на клієнті
- * не можна: клієнт не знає ні списку здібностей, ні того, чи вони ще є.
+ * A temporary form of selection: the real one is the ability wheel from phase 11. But the cast
+ * key must know **what** to cast right now, and this answer cannot be kept on the client: the
+ * client knows neither the list of abilities nor whether they are still there.
  *
- * Тільки пам'ять і тільки поки гравець у грі — вибір не переживає ні вихід, ні
- * піднесення (після нього список здібностей інший).
+ * Memory only and only while the player is in the game — the selection survives neither a
+ * disconnect nor an ascension (after which the ability list is different).
  */
 class AbilitySelection {
 

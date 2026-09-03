@@ -9,23 +9,24 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 /**
- * Перший міксин мода: дозволяє здібності <b>змінити</b> вхідну шкоду.
+ * The mod's first mixin: it lets an ability <b>change</b> incoming damage.
  *
- * Скасування сюди не входить — його вміє готовий {@code ALLOW_DAMAGE} з Fabric API,
- * і саме там воно й лишилось. Тут рівно те, чого готовий гачок дати не може: число.
+ * Cancellation is not part of this — the ready {@code ALLOW_DAMAGE} from the Fabric API can do
+ * that, and that is exactly where it stayed. Here is only what a ready hook cannot give: the
+ * number.
  *
- * <h2>Дисципліна міксинів</h2>
+ * <h2>Mixin discipline</h2>
  *
  * <ul>
- *   <li><b>Тільки межа методу.</b> {@code HEAD} і {@code RETURN}; ніяких
- *       {@code @Redirect}, {@code ordinal=}, {@code slice}. Гачок на межу переживає
- *       перепис тіла методу, гачок усередину — ні. {@code @ModifyVariable} з
- *       {@code argsOnly = true} — теж межа: він править <b>аргумент</b>, а не локальну
- *       змінну, і в {@code hurtServer} аргумент типу {@code float} рівно один, тож
- *       {@code ordinal} не потрібен.</li>
- *   <li><b>Обов'язковий {@code require = 1}.</b> Без нього промах ін'єкції тихий, і
- *       механіка просто мовчки не працює замість того, щоб не запуститись.</li>
- *   <li><b>Нуль логіки в тілі.</b> Один виклик у свою шину — див.
+ *   <li><b>Method boundaries only.</b> {@code HEAD} and {@code RETURN}; no
+ *       {@code @Redirect}, {@code ordinal=}, {@code slice}. A hook on a boundary survives a
+ *       rewrite of the method body, a hook inside it does not. {@code @ModifyVariable} with
+ *       {@code argsOnly = true} is a boundary too: it edits an <b>argument</b>, not a local
+ *       variable, and {@code hurtServer} has exactly one {@code float} argument, so
+ *       {@code ordinal} is not needed.</li>
+ *   <li><b>{@code require = 1} is mandatory.</b> Without it a missed injection is silent, and
+ *       the mechanic simply does not work instead of refusing to start.</li>
+ *   <li><b>Zero logic in the body.</b> One call into our own bus — see
  *       {@link GameEventBridge#beforeDamage}.</li>
  * </ul>
  */

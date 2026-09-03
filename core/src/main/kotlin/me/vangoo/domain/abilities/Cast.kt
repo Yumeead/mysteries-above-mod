@@ -4,20 +4,20 @@ import me.vangoo.domain.valueobjects.SanityPenalty
 import java.util.UUID
 
 /**
- * Життєвий цикл одного касту: **дозвіл → квиток → розрахунок**.
+ * The lifecycle of one cast: **authorize → ticket → settle**.
  *
- * У плагіні це був один метод `Beyonder.useAbility`, у якому ресурси списувались
- * одразу, а «відкладені» здібності (ті, що чекають вибору в меню) мусили цього
- * уникнути. Уникали коментарем:
+ * In the plugin this was a single `Beyonder.useAbility` method that spent the resources
+ * immediately, and "deferred" abilities (those waiting for a choice in a menu) had to dodge
+ * that. They dodged it with a comment:
  *
  * ```java
- * // КРИТИЧНО: НЕ встановлювати кулдаун якщо результат deferred!
+ * // CRITICAL: do NOT set the cooldown if the result is deferred!
  * ```
  *
- * Тут відкладеність — це просто **невитрачений квиток**. [CastTicket] видає лише
- * `Beyonder.authorize`, погашає лише `Beyonder.settle`, і рівно один раз. Здібність,
- * що чекає вводу, тримає квиток у себе; не дочекавшись — не гасить, і гравець нічого
- * не платить. Погасити двічі неможливо: це `check()`, а не дисципліна.
+ * Here deferral is simply an **unspent ticket**. A [CastTicket] is issued only by
+ * `Beyonder.authorize`, settled only by `Beyonder.settle`, and exactly once. An ability
+ * waiting for input keeps the ticket; if the input never comes it never settles, and the
+ * player pays nothing. Settling twice is impossible: that is a `check()`, not discipline.
  */
 sealed interface CastAuthorization {
 
@@ -26,21 +26,21 @@ sealed interface CastAuthorization {
     data class Refused(val reason: CastRefusal) : CastAuthorization
 }
 
-/** Чому `core` відмовив у касті. Кулдауни живуть у моді — їх тут навмисно немає. */
+/** Why `core` refused a cast. Cooldowns live in the mod — they are deliberately absent here. */
 sealed interface CastRefusal {
 
-    /** Здібності немає ні в шляху, ні серед позашляхових. */
+    /** The ability is neither in the pathway nor among the off-pathway ones. */
     data object NotOwned : CastRefusal
 
     data class InsufficientSpirituality(val required: Int, val available: Int) : CastRefusal
 
-    /** Пасивку не кастують — її вмикає менеджер пасивок. */
+    /** A passive is never cast — the passive manager switches it on. */
     data object NotCastable : CastRefusal
 }
 
 /**
- * Дозвіл на один каст. Створюється тільки з `Beyonder.authorize`, гаситься тільки
- * через `Beyonder.settle`.
+ * Permission for one cast. Created only by `Beyonder.authorize`, settled only through
+ * `Beyonder.settle`.
  */
 class CastTicket internal constructor(
     val spec: AbilitySpec,
@@ -59,8 +59,9 @@ class CastTicket internal constructor(
 }
 
 /**
- * Що саме списалось при погашенні квитка. [penalty] типу `SPIRITUALITY_LOSS` уже
- * застосовано до Потойбічного; `DAMAGE` та `EXTREME` — ефекти у світі, їх накладає мод.
+ * What exactly was spent when the ticket was settled. A [penalty] of type
+ * `SPIRITUALITY_LOSS` has already been applied to the Beyonder; `DAMAGE` and `EXTREME` are
+ * effects in the world and the mod applies them.
  */
 data class CastReceipt(
     val spentSpirituality: Int,

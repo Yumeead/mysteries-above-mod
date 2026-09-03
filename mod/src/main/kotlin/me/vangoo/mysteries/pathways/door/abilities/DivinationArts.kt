@@ -28,31 +28,32 @@ import net.minecraft.world.phys.Vec3
 import kotlin.math.roundToInt
 
 /**
- * Door, Посл. 7 (Астролог): **Мистецтво ворожіння**.
+ * Door, Seq. 7 (Astrologer): **The Arts of Divination**.
  *
- * Найбільша здібність плагіна на цьому шляху — 813 рядків — і майже вся вона була **меню**:
- * `openChoiceMenu` вибирав спосіб, друге меню — питання маятника, третє — що шукати лозою,
- * четверте — за ким підглядати. Механіки в цьому не було жодної.
+ * The plugin's largest ability on this pathway — 813 lines — and almost all of it was a **menu**:
+ * `openChoiceMenu` picked the method, a second menu the pendulum's question, a third what to
+ * dowse for, a fourth whom to spy on. There was not a single mechanic in it.
  *
- * ## Інструмент у руці замість меню
+ * ## The tool in hand instead of a menu
  *
- * Спосіб ворожіння обирає предмет у головній руці — той самий хід, що зробив `RitualMagic`
- * зі справжнім вівтарем. Це не обхід відсутніх екранів (фаза 11): у ворожбита **мусить**
- * бути інструмент, тож питати про нього окремим списком означало питати двічі.
+ * The way of divining is chosen by the item in the main hand — the same move `RitualMagic` made
+ * with a real altar. This is not a way around the missing screens (phase 11): a diviner **must**
+ * have a tool, so asking about it with a separate list would be asking twice.
  *
- * | інструмент | спосіб |
+ * | tool | method |
  * |---|---|
- * | далекогляд | астрологія — зірки віщують удачу або біду |
- * | залізний ланцюг | духовний маятник — відповідь «так» чи «ні» на те, що перед вами |
- * | палиця | лозошукання — веде до найціннішої руди, яку тягне ваша Послідовність |
- * | аметистова друза | кришталева куля — де хтось із живих і чого він вартий |
+ * | spyglass | astrology — the stars foretell luck or misfortune |
+ * | iron chain | the spiritual pendulum — a "yes" or "no" about what is in front of you |
+ * | stick | dowsing — leads to the most valuable ore your Sequence can reach |
+ * | amethyst cluster | the crystal ball — where one of the living is and what they are worth |
  *
- * ## Чого немає: сонного провидіння
+ * ## What is absent: dream scrying
  *
- * П'ятий спосіб плагіна саджав ворожбита в режим спостерігача над обраним гравцем. Це
- * рівно те, що робить `TravellersDoor` на Посл. 5, лише з двома Послідовностями фори —
- * тобто шлях мав би дві сили з тим самим дієсловом, а сильнішу отримував пізніше. Те,
- * що з нього справді цінне («дізнатись, де хтось і як він»), лишилось у кришталевій кулі.
+ * The plugin's fifth method put the diviner into spectator mode over a chosen player. That is
+ * exactly what `TravellersDoor` does at Seq. 5, only with two Sequences' head start — i.e. the
+ * pathway would have two powers with the same verb, and would get the stronger one later. What
+ * was genuinely valuable in it ("find out where someone is and how they are doing") stayed in
+ * the crystal ball.
  */
 class DivinationArts : ActiveAbility(AbilityIdentity.of("door_divination_arts")) {
 
@@ -70,7 +71,7 @@ class DivinationArts : ActiveAbility(AbilityIdentity.of("door_divination_arts"))
             "▪ Залізний ланцюг — маятник: «так» чи «ні» про те, що перед вами\n" +
             "▪ Палиця — лоза: веде до ${rodQuarry(sequence)?.name ?: "руди"} в ${ROD_RADIUS} бл.\n" +
             "▪ Аметистова друза — куля: де хтось із живих і чого він вартий\n" +
-            "▪ Перепочинок ${COOLDOWN_SECONDS} с",
+            "▪ Відкат ${COOLDOWN_SECONDS} с",
     )
 
     override fun cast(context: CastContext): AbilityOutcome =
@@ -84,12 +85,12 @@ class DivinationArts : ActiveAbility(AbilityIdentity.of("door_divination_arts"))
             )
         }
 
-    // ── Астрологія ──────────────────────────────────────────────────────────────
+    // ── Astrology ───────────────────────────────────────────────────────────────
 
     /**
-     * Чесна монета: половина на квапливість, половина на слабкість. Ставка тут не в
-     * силі ефекту, а в тому, що Астролог сам не знає, що витягне, — і платить за це
-     * повну ціну касту.
+     * An honest coin: half for haste, half for weakness. The wager here is not in the effect's
+     * strength but in the fact that the Astrologer does not know what they will draw — and pays
+     * the full cast price for it.
      */
     private fun astrology(context: CastContext): AbilityOutcome {
         val kind = context.level.random.nextBoolean()
@@ -113,15 +114,15 @@ class DivinationArts : ActiveAbility(AbilityIdentity.of("door_divination_arts"))
         )
     }
 
-    // ── Маятник ─────────────────────────────────────────────────────────────────
+    // ── The pendulum ────────────────────────────────────────────────────────────
 
     /**
-     * Питання маятника не вибирають — його задає те, на що дивиться ворожбит.
+     * The pendulum's question is not chosen — it is set by what the diviner is looking at.
      *
-     * Плагінних питань було шість, і чотири з них питали про підсистеми, яких у моді
-     * нема (журнал подій місця, рецепти зілля, готовність до ритуалу). Лишились дві, які
-     * гра здатна чесно перевірити, і саме вони й розрізняються поглядом: дивишся на
-     * когось — питаєш про нього, не дивишся — питаєш про околицю.
+     * The plugin had six questions, and four of them asked about subsystems the mod does not
+     * have (a journal of a place's events, potion recipes, readiness for a ritual). Two remain,
+     * the ones the game can honestly check, and it is precisely the gaze that tells them apart:
+     * look at someone and you ask about them, look at nothing and you ask about the surroundings.
      */
     private fun pendulum(context: CastContext): AbilityOutcome {
         chime(context)
@@ -152,14 +153,15 @@ class DivinationArts : ActiveAbility(AbilityIdentity.of("door_divination_arts"))
         )
     }
 
-    // ── Лозошукання ─────────────────────────────────────────────────────────────
+    // ── Dowsing ─────────────────────────────────────────────────────────────────
 
     /**
-     * Лоза шукає **найцінніше, що тягне Послідовність**, і веде до нього десять секунд.
+     * The rod looks for **the most valuable thing the Sequence can reach** and leads to it for
+     * ten seconds.
      *
-     * Плагінне меню з дев'яти цілей тут не потрібне з тієї ж причини, з якої не потрібне
-     * головне: вибір між «шукати вугілля» і «шукати алмази» — це не вибір. Лоза й так
-     * веде до кращого, а ростуть із Послідовністю саме межі того, що вона бачить.
+     * The plugin's nine-target menu is not needed here for the same reason the main one is not:
+     * a choice between "look for coal" and "look for diamonds" is not a choice. The rod leads to
+     * the better thing anyway, and what grows with the Sequence is the limits of what it can see.
      */
     private fun diviningRod(context: CastContext): AbilityOutcome {
         val quarry = rodQuarry(context.sequence)
@@ -199,20 +201,20 @@ class DivinationArts : ActiveAbility(AbilityIdentity.of("door_divination_arts"))
         return AbilityOutcome.done("Лоза веде до: ${quarry.name}")
     }
 
-    /** Найкраще, що ця Послідовність узагалі здатна відчути; `null` — жодного рівня не відкрито. */
+    /** The best this Sequence can sense at all; `null` — no tier is unlocked. */
     private fun rodQuarry(sequence: Sequence): Quarry? =
         QUARRIES.firstOrNull { sequence.level <= it.unlockSequence }
 
     /**
-     * Один прохід по кубу замість дев'яти.
+     * One pass over the cube instead of nine.
      *
-     * Плагін сканував радіус 50 **для кожного матеріалу цілі окремо** — тобто до
-     * мільйона читань блоку на матеріал. Тут прохід один, а «цінніше» вирішує номер
-     * рівня: перше входження з меншим номером витісняє знайдене, рівне за номером —
-     * лише якщо ближче.
+     * The plugin scanned a radius of 50 **separately for each target material** — that is, up to
+     * a million block reads per material. Here there is one pass, and "more valuable" is decided
+     * by the tier number: the first occurrence with a lower number displaces what was found, an
+     * equal number only if it is closer.
      *
-     * ponytail: суцільний скан куба 41³; якщо колись стане дорого, підказка — ходити
-     * по секціях чанка й пропускати ті, де потрібного блоку немає взагалі.
+     * ponytail: a solid 41³ cube scan; if it ever becomes expensive, the hint is to walk chunk
+     * sections and skip those with no relevant block at all.
      */
     private fun nearest(level: ServerLevel, from: BlockPos, sequence: Sequence): Pair<Quarry, BlockPos>? {
         val allowed = QUARRIES.filter { sequence.level <= it.unlockSequence }
@@ -242,14 +244,15 @@ class DivinationArts : ActiveAbility(AbilityIdentity.of("door_divination_arts"))
         return bestQuarry?.let { it to bestPos!! }
     }
 
-    // ── Кришталева куля ─────────────────────────────────────────────────────────
+    // ── The crystal ball ────────────────────────────────────────────────────────
 
     /**
-     * Куля показує **когось із живих**, а не обраного: обирає вона, не ворожбит. Саме
-     * тому вона й окрема від маятника — той питає про те, на що ти дивишся.
+     * The ball shows **one of the living**, not a chosen one: it chooses, the diviner does not.
+     * That is precisely why it is separate from the pendulum — that one asks about what you are
+     * looking at.
      *
-     * Опір ([AntiDivination]) кидається тут і тільки тут: решта способів ні на кого не
-     * дивиться, тож і опиратись їм нема кому.
+     * The resistance ([AntiDivination]) is rolled here and only here: the other methods look at
+     * nobody, so there is nobody to resist them.
      */
     private fun crystalBall(context: CastContext): AbilityOutcome {
         val others = context.level.server.playerList.players.filter { it.uuid != context.caster.uuid }
@@ -274,9 +277,9 @@ class DivinationArts : ActiveAbility(AbilityIdentity.of("door_divination_arts"))
     }
 
     /**
-     * `null` — ціль не опирається взагалі, і кидати нема чого.
+     * `null` — the target does not resist at all, and there is nothing to roll.
      *
-     * Дві умови, обидві плагінні: щит увімкнено **і** ціль доросла до нього
+     * Two conditions, both from the plugin: the shield is on **and** the target has grown into it
      * ([AntiDivination.UNLOCK_SEQUENCE]).
      */
     private fun resistance(context: CastContext, seen: ServerPlayer): DivinationOdds? {
@@ -295,7 +298,7 @@ class DivinationArts : ActiveAbility(AbilityIdentity.of("door_divination_arts"))
         return "${seen.name.string}: $where ${seen.blockX} ${seen.blockY} ${seen.blockZ} · $vitals$who"
     }
 
-    /** Куля мовчить про людей — тоді вона каже про небо. Дешева правда замість порожнечі. */
+    /** The ball says nothing about people — then it speaks of the sky. A cheap truth instead of emptiness. */
     private fun omen(context: CastContext): String {
         val day = context.level.gameTime / DAY_TICKS
         val sky = if (context.level.isRaining) "дощ" else "ясно"
@@ -315,8 +318,8 @@ class DivinationArts : ActiveAbility(AbilityIdentity.of("door_divination_arts"))
     }
 
     /**
-     * Що лоза вміє відчути. [rank] — цінність (0 — найцінніше), [unlockSequence] — найслабша
-     * Послідовність, якій це вже доступне.
+     * What the rod can sense. [rank] is the worth (0 — the most valuable), [unlockSequence] the
+     * weakest Sequence this is already available to.
      */
     private class Quarry(
         val name: String,
@@ -337,10 +340,10 @@ class DivinationArts : ActiveAbility(AbilityIdentity.of("door_divination_arts"))
         const val DAY_TICKS = 24_000L
 
         /**
-         * Від найціннішого до найдешевшого. Списки блоків тут руками, а не тегом:
-         * ванілька 26.2 має теги лише на три руди (`IRON_ORES`, `GOLD_ORES`,
-         * `COPPER_ORES`), тож половина рівнів однаково лишилась би переліком, а мішанина
-         * з тегів і списків читається гірше за просто список.
+         * From the most valuable to the cheapest. The block lists are here by hand rather than by
+         * tag: vanilla 26.2 has tags for only three ores (`IRON_ORES`, `GOLD_ORES`,
+         * `COPPER_ORES`), so half the tiers would remain a list anyway, and a mixture of tags and
+         * lists reads worse than just a list.
          */
         val QUARRIES = listOf(
             Quarry("Стародавні уламки", 0, 5, Blocks.ANCIENT_DEBRIS),

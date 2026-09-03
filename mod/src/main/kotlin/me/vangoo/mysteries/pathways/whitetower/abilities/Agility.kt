@@ -14,30 +14,30 @@ import net.minecraft.world.entity.ai.attributes.Attributes
 import kotlin.math.roundToInt
 
 /**
- * WhiteTower, Посл. 7 (Детектив): **Спритність**.
+ * WhiteTower, Seq. 7 (Detective): **Agility**.
  *
- * Тіло легшає: ви ходите швидше й перестаєте боятись висоти, з якої звичайна людина
- * ламає ноги.
+ * The body grows lighter: you walk faster and stop fearing a height that would break an ordinary
+ * person's legs.
  *
- * ## 149 рядків, від яких лишилось два виклики
+ * ## 149 lines that came down to two calls
  *
- * Плагінна `Agility` мусила виглядати так: такт що п'ять секунд поновлював
- * `PotionEffectType.SPEED` на шість (щоб ефект не блимав між тактами), плюс підписка
- * на `EntityDamageEvent` типу `FALL`, яка перераховувала шкоду за формулою «висота
- * мінус двадцять», плюс мапа `UUID → ключ підписки`, щоб чужий `unsubscribeAll` її не
- * зніс, плюс зняття ефекту в `onDeactivate`, яке заразом знімало випите гравцем зілля
- * швидкості.
+ * The plugin's `Agility` had to look like this: a tick every five seconds refreshed
+ * `PotionEffectType.SPEED` for six (so the effect would not blink between ticks), plus a
+ * subscription to `EntityDamageEvent` of type `FALL` that recomputed the damage by a "height
+ * minus twenty" formula, plus a `UUID → subscription key` map so that someone else's
+ * `unsubscribeAll` would not wipe it, plus removing the effect in `onDeactivate`, which also
+ * removed the speed potion the player had drunk.
  *
- * Обидві механіки у ванільці — атрибути:
+ * Both mechanics are attributes in vanilla:
  *
- * | що | атрибут | що зникло разом із ним |
+ * | what | attribute | what went away with it |
  * |---|---|---|
- * | швидкість | `MOVEMENT_SPEED`, `ADD_MULTIPLIED_BASE` | такт, поновлення, іконка зілля, крок у 20 % |
- * | висота падіння | `SAFE_FALL_DISTANCE` | підписка, формула, конфлікт із Пір'їстим падінням |
+ * | speed | `MOVEMENT_SPEED`, `ADD_MULTIPLIED_BASE` | the tick, the refresh, the potion icon, the 20 % step |
+ * | fall height | `SAFE_FALL_DISTANCE` | the subscription, the formula, the conflict with Feather Falling |
  *
- * `SAFE_FALL_DISTANCE` в Bukkit не існувало **взагалі** — саме тому плагін рахував
- * падіння руками. Це найчистіший приклад правила фази 08: форма плагінного коду була
- * продиктована відсутністю інструмента, а не дизайном.
+ * `SAFE_FALL_DISTANCE` did **not exist at all** in Bukkit — which is exactly why the plugin
+ * computed falls by hand. This is the cleanest example of the phase 08 rule: the shape of the
+ * plugin's code was dictated by a missing tool, not by design.
  */
 class Agility : PermanentPassiveAbility(AbilityIdentity.of("whitetower_agility")) {
 
@@ -76,11 +76,11 @@ class Agility : PermanentPassiveAbility(AbilityIdentity.of("whitetower_agility")
         scale(BASE_SAFE_FALL_BONUS, sequence, SequenceScaler.ScalingStrategy.MODERATE)
 
     private companion object {
-        /** +20 % на Посл. 9 — те саме, що давало ванільне `SPEED I`, лише без сходинки. */
+        /** +20 % at Seq. 9 — the same as the vanilla `SPEED I` gave, only without the step. */
         const val BASE_SPEED_PERCENT = 20
-        /** Ванільна межа безпечного падіння, від якої рахується бонус. */
+        /** The vanilla safe fall distance the bonus is measured from. */
         const val SAFE_FALL_BASE = 3
-        /** Посл. 7 виходить на плагінні 20 бл.; далі росте. */
+        /** Seq. 7 reaches the plugin's 20 blocks; beyond that it grows. */
         const val BASE_SAFE_FALL_BONUS = 13
     }
 }

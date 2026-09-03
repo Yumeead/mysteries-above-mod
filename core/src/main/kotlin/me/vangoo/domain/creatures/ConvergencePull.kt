@@ -3,13 +3,14 @@ package me.vangoo.domain.creatures
 import kotlin.math.sqrt
 
 /**
- * Чисте правило Закону Конвергенції (аналог [CreatureSelector]). Обирає, до якого резонансного
- * Beyonder'а тяжіє джерело, і з якою силою. Детерміноване, без стану.
+ * The pure rule of the Law of Convergence (the counterpart of [CreatureSelector]). Picks which
+ * resonant Beyonder a source is drawn to, and how strongly. Deterministic and stateless.
  *
- * Резонанс: той самий шлях (сильний) або та сама група шляхів (сусід). Магніт обирається за
- * вагою `resonanceWeight × seqMultiplier / (1 + distance)` (найбільша вага; тайбрейк — найближчий,
- * далі — менший UUID). Сила нуджа `strength = resonanceWeight × seqMultiplier / MAX_SCORE` ∈ (0,1]
- * і НЕ залежить від відстані — потрібна есенція тяжіє однаково відчутно на всьому радіусі.
+ * Resonance: the same pathway (strong) or the same pathway group (neighbour). The magnet is
+ * chosen by the weight `resonanceWeight × seqMultiplier / (1 + distance)` (the largest weight;
+ * ties broken by the closest, then by the smaller UUID). The nudge strength
+ * `strength = resonanceWeight × seqMultiplier / MAX_SCORE` ∈ (0,1] does NOT depend on the
+ * distance — a needed essence pulls just as noticeably across the whole radius.
  */
 class ConvergencePull {
 

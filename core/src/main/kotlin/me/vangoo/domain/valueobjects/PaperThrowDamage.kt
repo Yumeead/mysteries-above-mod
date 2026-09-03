@@ -4,21 +4,21 @@ import me.vangoo.domain.services.SequenceScaler
 import kotlin.math.ceil
 
 /**
- * Балансні числа пасивного кидка звичайного паперу (Seq 8 Клоуна шляху Блазня).
+ * Balance numbers for the passive plain-paper throw (Seq 8 Clown of the Fool pathway).
  *
- * Кидок нічого не коштує, має короткий кулдаун і завдає шкоди, що зростає
- * зі силою Beyonder'а. Чиста математика — без платформи; ефект кидка живе в
+ * The throw costs nothing, has a short cooldown and deals damage that grows with the
+ * Beyonder's power. Pure math — no platform; the throw effect lives in
  * `pathways.fool.abilities.PaperCutter` + `PaperThrowListener`.
  */
 object PaperThrowDamage {
 
-    /** Базова шкода кинджала на Seq 9 (до скейлу). */
+    /** Base damage of the dagger at Seq 9 (before scaling). */
     const val BASE_DAMAGE = 6
 
-    /** Кулдаун між кидками — 0.5с (10 тіків). */
+    /** Cooldown between throws — 0.5s (10 ticks). */
     const val THROW_COOLDOWN_TICKS = 10
 
-    /** Шкода одного паперового снаряда за поточною послідовністю. */
+    /** Damage of one paper projectile at the current Sequence. */
     fun damageFor(sequence: Sequence): Int {
         val multiplier = SequenceScaler.calculateMultiplier(
             sequence.level, SequenceScaler.ScalingStrategy.MODERATE,

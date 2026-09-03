@@ -62,6 +62,21 @@ Real failure this skill exists to prevent: an agent asked for "Sequence 7 Vision
    COMBAT-relevant abilities so they can be mirrored in one pass later.
 8. **Verify**: `./gradlew :mod:compileKotlin`. Report the result honestly.
 
+## Writing the player-facing text
+Full rules and the shared glossary live in `CLAUDE.md`, section «Мова». The short version:
+
+- **Comments in the file: English only.** The Ukrainian goes in `displayName`, `description()`
+  and player messages — nowhere else.
+- Ukrainian text is written for a player, never translated word-for-word from English.
+  Priority: clarity > naturalness > brevity > literal wording.
+- `description()` answers five things and stops: what it does, what happens on use, who it
+  hits, the one real limitation, what the player must know to use it. No sessions, ticks,
+  packets, services or class names — ever.
+- Shape: one or two short sentences, then `▪` fact lines. Not a paragraph.
+- Glossary, non-negotiable: cooldown = **відкат**, upkeep = **витрата** (`N духовності/с`),
+  undead/dark-pathway = **нечисть**, damage = **шкода**, distance = **бл.**, debuff =
+  **шкідливий ефект**. Never `(и)` plural hacks — rephrase so the number does not change the word.
+
 ## Balance heuristics
 - Cost/cooldown scale **down** as sequence strengthens: `base / SequenceScaler.calculateMultiplier(seq, ...)`.
 - Effect magnitude scales **up**: `scaleValue(base, seq, strategy)`. Signature powers → `DIVINE`/`STRONG`; utility → `WEAK`/`MODERATE`; drawbacks → `PENALTY_*`.
@@ -77,6 +92,8 @@ Jumping straight to a Kotlin file is the most common failure: it bakes in a wron
 - "Particles/sound are optional" → juice is the point; add cast + resolve effects and two-sided feedback.
 - "This is basically like \<existing ability\>" → that's a duplicate; pick another facet.
 - "I'll just write the class" → write the spec first and confirm.
+- A description that names a session, a tick, a packet or a service → rewrite it for the player.
+- A Ukrainian comment → English. A calqued Ukrainian description → rewrite, do not translate.
 - "The plugin does it this way, so I'll do the same" → the plugin is the **spec**, not the
   implementation. Copy what the ability *is*; rebuild what it *does* wherever Spigot's limit is
   the only reason it looked like that.

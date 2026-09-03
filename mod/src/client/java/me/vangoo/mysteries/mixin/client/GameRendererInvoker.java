@@ -6,19 +6,19 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 /**
- * Другий міксин мода: відкриває приватний {@code GameRenderer.setPostEffect}.
+ * The mod's second mixin: it opens up the private {@code GameRenderer.setPostEffect}.
  *
- * <p>Гасити ланцюг уміє публічний {@code clearPostEffect()}, ставити — ні: ванілька
- * ставить його лише сама, коли гравець дивиться очима крипера чи павука. Готового
- * гачка в Fabric API немає — ні в {@code fabric-rendering-v1}, ні деінде, — тож це
- * рівно той випадок, коли порядок пошуку доходить до останнього кроку.
+ * <p>The public {@code clearPostEffect()} can take a chain down, but not put one up: vanilla
+ * only sets it itself, when the player looks through a creeper's or a spider's eyes. There is
+ * no ready hook in the Fabric API — neither in {@code fabric-rendering-v1} nor anywhere else —
+ * so this is exactly the case where the search order reaches its last step.
  *
- * <h2>Чому це найдешевший різновид міксину</h2>
+ * <h2>Why this is the cheapest kind of mixin</h2>
  *
- * <p>{@code @Invoker} нічого не вставляє в тіло методу — він лише відкриває доступ до
- * вже наявного. Переписати тіло {@code setPostEffect} можна як завгодно: гачок не
- * помітить. Ламається він рівно тоді, коли метод перейменують або приберуть, і ламається
- * гучно, на завантаженні гри, а не тихо посеред гри.
+ * <p>{@code @Invoker} inserts nothing into a method body — it only opens access to what is
+ * already there. The body of {@code setPostEffect} may be rewritten however one likes: the hook
+ * will not notice. It breaks exactly when the method is renamed or removed, and it breaks
+ * loudly, while the game loads, rather than quietly in the middle of play.
  */
 @Mixin(GameRenderer.class)
 public interface GameRendererInvoker {

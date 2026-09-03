@@ -3,11 +3,11 @@ package me.vangoo.domain.valueobjects
 import kotlin.math.max
 
 /**
- * Балансні числа покращеної Інтуїції небезпеки (Seq 9 Провидця шляху Блазня).
+ * Balance numbers for the improved Danger Intuition (Seq 9 Seer of the Fool pathway).
  *
- * Усі значення зростають зі силою Beyonder'а (нижча послідовність = потужніше
- * передчуття). Чиста математика — без платформи, тестується юнітами. Ефекти
- * (партикли, glow, ривок) живуть у `pathways.fool.abilities.DangerIntuition`.
+ * Every value grows with the Beyonder's power (a lower Sequence means a stronger
+ * premonition). Pure math — no platform, covered by unit tests. The effects
+ * (particles, glow, dash) live in `pathways.fool.abilities.DangerIntuition`.
  */
 object DangerPremonition {
 
@@ -15,22 +15,22 @@ object DangerPremonition {
     private fun power(sequence: Sequence): Int = 9 - sequence.level
 
     /**
-     * Шанс автоматично ухилитися від удару, що був би смертельним.
-     * Seq 9 ≈ 12%, зростає до стелі 40% (ніколи не абсолютний щит).
+     * Chance to automatically dodge a blow that would have been lethal.
+     * Seq 9 ≈ 12%, rising to a 40% ceiling (never an absolute shield).
      */
     fun lethalDodgeChance(sequence: Sequence): Double =
         (0.12 + power(sequence) * 0.03).coerceIn(0.0, 0.40)
 
     /**
-     * Внутрішній кулдаун між авто-ухиленнями (мс). Сильніший Beyonder
-     * відновлює передчуття швидше: Seq 9 = 20с … не коротше 6с.
+     * Internal cooldown between auto-dodges (ms). A stronger Beyonder recovers the
+     * premonition faster: Seq 9 = 20s … never shorter than 6s.
      */
     fun lethalDodgeCooldownMillis(sequence: Sequence): Long =
         max(6_000L, 20_000L - power(sequence) * 1_500L)
 
     /**
-     * Шанс (за одну перевірку) показати натяк на наступну дію ворога,
-     * за яким спостерігає Beyonder. Рідкісний прояв: Seq 9 ≈ 4% … стеля 25%.
+     * Chance (per check) to show a hint about the next action of an enemy the Beyonder is
+     * watching. A rare manifestation: Seq 9 ≈ 4% … 25% ceiling.
      */
     fun actionPredictionChance(sequence: Sequence): Double =
         (0.04 + power(sequence) * 0.015).coerceIn(0.0, 0.25)

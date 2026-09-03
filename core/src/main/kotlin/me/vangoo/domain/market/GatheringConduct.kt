@@ -3,8 +3,8 @@ package me.vangoo.domain.market
 import java.util.UUID
 
 /**
- * Лічильник порушень спокою на зборах. Чистий домен: перше порушення — попередження,
- * наступні — вигнання. Санкцію виконує шар застосунку.
+ * A counter of breaches of the peace at a gathering. Pure domain: the first breach is a
+ * warning, the following ones an expulsion. The application layer carries out the sanction.
  */
 class GatheringConduct {
 

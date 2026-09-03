@@ -6,20 +6,20 @@ import me.vangoo.mysteries.pathways.tyrant.abilities.IllusoryScales
 import me.vangoo.mysteries.pathways.tyrant.abilities.RestorativeWater
 
 /**
- * Шлях Тирана — море, шторм і вітер.
+ * The pathway of the Tyrant — the sea, the storm and the wind.
  *
- * Не клас-нащадок `Pathway`, як у плагіні: там базовий конструктор кликав
- * перевизначений `initializeAbilities()`, тобто підклас наповнював поле, якого ще
- * не існує. Тут шлях — просто значення, а це — фабрика, що його складає.
+ * Not a subclass of `Pathway` as in the plugin: there the base constructor called the overridden
+ * `initializeAbilities()`, i.e. the subclass filled a field that did not exist yet. Here a
+ * pathway is simply a value, and this is the factory that assembles it.
  *
- * **Наповнений лише на фазу 05.** Із 30 здібностей Тирана перенесено дві — рівно ті,
- * що замикають цикл «випив зілля → скастував». Решта — фаза 08.
+ * **Filled only for phase 05.** Of the Tyrant's 30 abilities, two have been ported — exactly the
+ * ones that close the "drink a potion → cast" cycle. The rest is phase 08.
  */
 object Tyrant {
 
     const val NAME: String = "Tyrant"
 
-    /** Канон новели; індекс списку **дорівнює** Послідовності: 0 — Тиран, 9 — Матрос. */
+    /** The novel's canon; the list index **equals** the Sequence: 0 — Tyrant, 9 — Sailor. */
     private val SEQUENCE_NAMES = listOf(
         "Tyrant", "God of Thunder", "Calamity", "Sea King", "Calamity Patron",
         "Ocean Songster", "Wind-Blessed", "Seafarer", "Furious One", "Sailor",

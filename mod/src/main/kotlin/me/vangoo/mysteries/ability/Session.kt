@@ -10,24 +10,25 @@ import net.minecraft.server.level.ServerPlayer
 import java.util.UUID
 
 /**
- * Жива сесія: сила, що триває в часі й може згаснути.
+ * A live session: a power that lasts in time and may go out.
  *
- * ## Що це замінює
+ * ## What it replaces
  *
- * У плагіні таких класів було 22, і кожен ніс той самий каркас вручну: поле
- * `BukkitTask`, лічильник `runs`, ідемпотентний `cancel()`, зняття себе з мапи сесій і
- * `Bukkit.getPlayer(ownerId)` на початку кожного такту. Коментар «cancel ідемпотентний»
- * був справжнім інваріантом — його тримала дисципліна.
+ * The plugin had 22 such classes, and each carried the same scaffolding by hand: a
+ * `BukkitTask` field, a `runs` counter, an idempotent `cancel()`, removing itself from the
+ * session map and `Bukkit.getPlayer(ownerId)` at the start of every tick. The comment "cancel
+ * is idempotent" was a real invariant — held together by discipline.
  *
- * Тут це корутина. Такт — `waitTicks`, скасування — скасування джоби, прибирання —
- * `finally` в тілі. Написати сесію, яка при вимкненні не зніме накладений ефект, тепер
- * так само важко, як забути `finally` навколо відкритого файлу.
+ * Here it is a coroutine. The tick is `waitTicks`, cancellation is cancelling the job, cleanup
+ * is `finally` in the body. Writing a session that fails to remove its effect when switched off
+ * is now as hard as forgetting a `finally` around an open file.
  *
- * ## Ключ — власник плюс здібність
+ * ## The key is the owner plus the ability
  *
- * Реєстр [me.vangoo.mysteries.ability.context.Scheduling] тримає **одну** сесію на пару
- * «гравець + здібність»: повторний каст гасить попередню сам. Правило «перекаст замінює
- * сесію» в плагіні було пунктом документації, тепер це поведінка реєстру.
+ * The [me.vangoo.mysteries.ability.context.Scheduling] registry keeps **one** session per
+ * "player + ability" pair: recasting the same ability cancels the previous one itself. In the
+ * plugin the "a recast replaces the session" rule was a line in the docs; now it is the
+ * registry's behaviour.
  */
 class Session internal constructor(
     val owner: UUID,
@@ -37,7 +38,7 @@ class Session internal constructor(
 
     val isActive: Boolean get() = job.isActive
 
-    /** Гасить сесію. Ідемпотентно; тіло сесії добіжить свій `finally`. */
+    /** Cancels the session. Idempotent; the session body still runs its `finally`. */
     fun stop() {
         job.cancel()
     }
@@ -49,25 +50,25 @@ class Session internal constructor(
     override fun toString(): String = "Session($ability, owner=$owner, active=$isActive)"
 }
 
-/** Чому [sustain] віддав керування назад. Скасування сюди не потрапляє — воно не повертається. */
+/** Why [sustain] handed control back. Cancellation never lands here — it does not return. */
 enum class SessionEnd {
 
-    /** Власник вийшов зі світу або помер. */
+    /** The owner left the world or died. */
     OWNER_GONE,
 
-    /** Духовності на утримання не стало. */
+    /** There was no spirituality left for the upkeep. */
     EXHAUSTED,
 
-    /** Вийшов заявлений час. */
+    /** The declared time ran out. */
     EXPIRED,
 }
 
 /**
- * Те, що сесія бачить зсередини.
+ * What a session sees from inside.
  *
- * Контексту касту тут навмисно немає: [AbilityContext] несе живого `ServerPlayer` і
- * ідентичність одного виклику, а сесія переживає і респавн, і зміну виміру. Замість
- * збереженого гравця — [owner], який щоразу питає список сервера наново.
+ * The cast context is deliberately absent: [AbilityContext] carries a live `ServerPlayer` and
+ * the identity of one call, while a session outlives both a respawn and a dimension change.
+ * Instead of a stored player there is [owner], which asks the server's list anew every time.
  */
 interface SessionScope : CoroutineScope {
 
@@ -76,34 +77,35 @@ interface SessionScope : CoroutineScope {
     val ability: AbilitySpec
 
     /**
-     * Власник **зараз**. Між тактами не кешувати: після смерті чи переходу між вимірами
-     * сервер створює новий `ServerPlayer`, і старий об'єкт мовчки перестає бути тим гравцем.
-     * Це найтихіша з помилок цього шару, і саме тому гравця тут не видають назавжди.
+     * The owner **right now**. Do not cache between ticks: after a death or a dimension change
+     * the server creates a new `ServerPlayer`, and the old object quietly stops being that
+     * player. This is the quietest bug in this layer, and precisely why the player is never
+     * handed out for good.
      */
     val owner: ServerPlayer?
 
     val beyonder: Beyonder?
 
-    /** Скільки тіків сесія живе. */
+    /** How many ticks the session has been alive. */
     val ticksAlive: Long
 
-    /** Ціна утримання за такт із [AbilitySpec.periodicCost] для поточної Послідовності. */
+    /** The upkeep per tick from [AbilitySpec.periodicCost] for the current Sequence. */
     val periodicCost: Int
 
     suspend fun waitTicks(ticks: Int)
 
-    /** Списує утримання. `false` — духовності не стало, сесія має згаснути. */
+    /** Pays the upkeep. `false` — there was no spirituality left, the session must go out. */
     fun payUpkeep(amount: Int = periodicCost): Boolean
 }
 
 /**
- * Основний такт сесії — те, чим були всі 22 `BukkitRunnable` плагіна разом.
+ * The main loop of a session — what all 22 of the plugin's `BukkitRunnable`s were together.
  *
- * Цокає [body] раз на [periodTicks], тримає утримання й повертає керування, коли сила
- * має згаснути сама: власник пішов, духовність скінчилась або вийшов [durationTicks].
- * Скасування ззовні (перекаст, вихід із гри, зупинка сервера) сюди не повертається —
- * воно летить далі як `CancellationException`, тож **прибирання пишеться в `finally`**,
- * а не після виклику.
+ * Ticks [body] once every [periodTicks], keeps the upkeep going and hands control back when the
+ * power must go out on its own: the owner left, the spirituality ran out or [durationTicks]
+ * expired. Cancellation from the outside (a recast, leaving the game, the server stopping) does
+ * not return here — it flies on as a `CancellationException`, so **cleanup is written in
+ * `finally`**, not after the call.
  *
  * ```kotlin
  * context.session {
@@ -141,11 +143,11 @@ suspend fun SessionScope.sustain(
 
         sinceUpkeep += periodTicks
         if (upkeep > 0) {
-            // Платиться **за кожен** період, що минув, а не один раз за такт. Такт сесії
-            // буває довшим за період оплати (`SunHalo` б'є раз на дві секунди, а платить
-            // щосекунди) — і попередня редакція в такому разі тихо списувала вдвічі менше,
-            // ніж оголошено. Лічильник зменшується на сплачене, а не обнуляється: інакше
-            // залишок такту губився б.
+            // Paid **for every** period that has passed, not once per tick. A session's tick
+            // can be longer than the payment period (`SunHalo` strikes once every two seconds
+            // but pays every second) — and the previous revision quietly charged half of what
+            // was declared in that case. The counter is decreased by what was paid rather than
+            // zeroed: otherwise the remainder of the tick would be lost.
             val due = upkeepDue(sinceUpkeep, upkeepPeriodTicks)
             sinceUpkeep -= due * upkeepPeriodTicks
             repeat(due) {
@@ -156,11 +158,11 @@ suspend fun SessionScope.sustain(
 }
 
 /**
- * Скільки разів настала оплата утримання за [sinceUpkeep] накопичених тіків.
+ * How many times the upkeep came due over [sinceUpkeep] accumulated ticks.
  *
- * Окремою функцією саме тому, що тут була вада: `if (sinceUpkeep >= period)` платив рівно
- * один раз, скільки б періодів не вмістилось у такт сесії. Тепер це ділення — і його
- * можна перевірити без гри.
+ * A separate function precisely because there was a bug here: `if (sinceUpkeep >= period)` paid
+ * exactly once, however many periods fitted into the session's tick. Now it is a division — and
+ * it can be checked without the game.
  */
 internal fun upkeepDue(sinceUpkeep: Int, upkeepPeriodTicks: Int): Int =
     if (upkeepPeriodTicks <= 0) 0 else sinceUpkeep / upkeepPeriodTicks

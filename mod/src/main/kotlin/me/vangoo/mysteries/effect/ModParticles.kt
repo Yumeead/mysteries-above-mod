@@ -9,29 +9,29 @@ import net.minecraft.core.particles.ParticleType
 import net.minecraft.core.registries.BuiltInRegistries
 
 /**
- * Частинки мода. Оголошення тут — і є реєстрацією, як у `ModItems` та `ModChannels`.
+ * The mod's particles. Declaring them here **is** registering them, as in `ModItems` and
+ * `ModChannels`.
  *
- * ## Перша власна текстура мода
+ * ## The mod's first own texture
  *
- * До цієї фази мод не ніс жодної: зілля — ванільна пляшка з тінтом, іконки —
- * ванільні шарди. Порошинка духу її ламає, і навмисно: ванільний `DUST` — розмита
- * квадратна пляма, і двадцять два шляхи, розрізнені лише кольором цієї плями,
- * виглядали б однією силою в двадцяти двох відтінках.
+ * Until this phase the mod carried none: the potion is a vanilla bottle with a tint, the icons
+ * are vanilla shards. The spirit mote breaks that, and deliberately: the vanilla `DUST` is a
+ * blurred square blob, and twenty-two pathways told apart only by the colour of that blob would
+ * look like one power in twenty-two shades.
  *
- * ## Чому колір, а не `SimpleParticleType`
+ * ## Why a colour rather than a `SimpleParticleType`
  *
- * Увесь словник фігур побудований навколо кольору шляху, тож безбарвна частинка
- * була б у ньому нікому не потрібна. Носій кольору не пишеться: ванільний
- * [ColorParticleOption] уже є, і разом із ним — обидва кодеки. Свій клас опцій
- * додав би до цього рівно нуль.
+ * The whole vocabulary of shapes is built around the pathway colour, so a colourless particle
+ * would be of no use in it. No colour carrier needs writing: the vanilla [ColorParticleOption]
+ * already exists, and both codecs with it. An options class of our own would add exactly nothing.
  */
 object ModParticles {
 
     /**
-     * Порошинка духу: ромб із твердими краями, що спалахує й гасне.
+     * The spirit mote: a diamond with hard edges that flares and fades.
      *
-     * Форма загальна навмисно — «крихта живої речовини», — а чим вона є, каже колір:
-     * вода Мореплавця, світло Сонця, попіл Смерті.
+     * The form is generic on purpose — "a crumb of living matter" — and what it is, the colour
+     * says: the Sailor's water, the Sun's light, the Death's ash.
      */
     val SPIRIT_MOTE: ParticleType<ColorParticleOption> = FabricParticleTypes.complex(
         { type -> ColorParticleOption.codec(type) },
@@ -39,45 +39,45 @@ object ModParticles {
     )
 
     /**
-     * Знак духу: та сама текстура, але **стала** — не спалахує, не змінює розміру, не
-     * дрейфує й живе фіксовані кілька тіків.
+     * The spirit glyph: the same texture, but **steady** — it does not flare, does not change
+     * size, does not drift and lives a fixed handful of ticks.
      *
-     * ## Навіщо друга частинка, коли текстура одна
+     * ## Why a second particle when the texture is one
      *
-     * [SPIRIT_MOTE] спроєктована як **іскра**: випадкове життя, випадковий розмір,
-     * спалах і згасання, від'ємна гравітація. Це саме те, що потрібно розсипу, покриву
-     * й сліду — і саме те, що руйнує **сталу фігуру**. Німб із мотів читався як хмара,
-     * що зринає: у кожну мить у повітрі висіло п'ять-сім поколінь, кожне на своїй фазі
-     * спалаху й уже піднявшись.
+     * [SPIRIT_MOTE] is designed as a **spark**: random lifetime, random size, a flare and a
+     * fade, negative gravity. That is exactly what a scatter, an aura and a trail need — and
+     * exactly what destroys a **steady shape**. A halo made of motes read as a rising cloud: at
+     * any moment five to seven generations hung in the air, each at its own phase of the flare
+     * and already risen.
      *
-     * Ванілька цю потребу не закриває. `DUST` не рухається, але живе 20–100 тіків, тож
-     * фігура, що має **ходити за гравцем**, лишала б за ним слід із кілець.
+     * Vanilla does not cover this need. `DUST` does not move, but it lives 20–100 ticks, so a
+     * shape meant to **follow the player** would leave a trail of rings behind them.
      *
-     * Отже: коротке фіксоване життя (щоб не було сліду), нуль руху й нуль анімації (щоб
-     * була форма). Малюється така фігура частіше, ніж живе одна порошинка, і поколінь
-     * одночасно не більше двох.
+     * Hence: a short fixed lifetime (so there is no trail), zero motion and zero animation (so
+     * there is a form). Such a shape is drawn more often than a single mote lives, and there are
+     * never more than two generations at once.
      */
     val SPIRIT_GLYPH: ParticleType<ColorParticleOption> = FabricParticleTypes.complex(
         { type -> ColorParticleOption.codec(type) },
         { type -> ColorParticleOption.streamCodec(type) },
     )
 
-    /** Змушує клас ініціалізуватись до того, як реєстри закриються. */
+    /** Forces the class to initialise before the registries close. */
     fun register() {
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, modId("spirit_mote"), SPIRIT_MOTE)
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, modId("spirit_glyph"), SPIRIT_GLYPH)
     }
 
     /**
-     * Порошинка в заданому кольорі.
+     * A mote in the given colour.
      *
-     * Альфа виставляється тут: [RgbColor.packed] несе лише RGB, а нуль у старшому
-     * байті зробив би частинку прозорою — тобто невидимою, і без жодної помилки в лозі.
+     * The alpha is set here: [RgbColor.packed] carries only RGB, and a zero in the high byte
+     * would make the particle transparent — that is, invisible, and with no error in the log.
      */
     fun mote(color: RgbColor): ColorParticleOption =
         ColorParticleOption.create(SPIRIT_MOTE, OPAQUE or color.packed)
 
-    /** Стала порошинка для фігур, що мусять тримати форму. Альфа так само наша. */
+    /** A steady mote for shapes that must hold their form. The alpha is ours just the same. */
     fun glyph(color: RgbColor): ColorParticleOption =
         ColorParticleOption.create(SPIRIT_GLYPH, OPAQUE or color.packed)
 

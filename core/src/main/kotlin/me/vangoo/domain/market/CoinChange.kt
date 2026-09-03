@@ -3,17 +3,17 @@ package me.vangoo.domain.market
 import kotlin.math.min
 
 /**
- * Інструкція оплати фізичними монетами з розміном: скільки фунтів/коппетів зняти
- * і скільки здачі повернути коппетами. Жадібно: спершу коппети, потім фунти.
+ * A payment instruction with physical coins and change: how many pounds/coppets to take and
+ * how much change to give back in coppets. Greedy: coppets first, then pounds.
  */
 data class CoinChange(val takePounds: Int, val takeCoppets: Int, val changeCoppets: Int) {
 
-    /** Фактично сплачена вартість у коппетах (зняте мінус здача). */
+    /** The value actually paid, in coppets (taken minus change). */
     val paidCoppets: Int
         get() = takePounds * PoundMoney.COPPETS_PER_POUND + takeCoppets - changeCoppets
 
     companion object {
-        /** @return null, якщо в гаманці не вистачає на ціну. */
+        /** @return null if the wallet does not cover the price. */
         fun make(poundsHeld: Int, coppetsHeld: Int, price: PoundMoney): CoinChange? {
             require(poundsHeld >= 0 && coppetsHeld >= 0) { "Гаманець не може бути від'ємним" }
 

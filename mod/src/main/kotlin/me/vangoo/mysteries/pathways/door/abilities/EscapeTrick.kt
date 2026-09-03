@@ -20,22 +20,22 @@ import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
 
 /**
- * Door, Посл. 8 (Трюкач): **Трюк зі зникненням**.
+ * Door, Seq. 8 (Trickster): **Vanishing Trick**.
  *
- * Трюкача смикає назад, а на місці, де він щойно стояв, лишається завіса. Хто в неї
- * увійде — грузне.
+ * The Trickster is yanked backwards, and where they were standing a moment ago a veil remains.
+ * Whoever walks into it bogs down.
  *
- * ## Ривок — це швидкість, а не телепорт
+ * ## The dash is velocity, not a teleport
  *
- * [net.minecraft.world.entity.Entity.hurtMarked] — той самий прапорець, яким ванілька
- * штовхає гравця вибухом: без нього сервер змінив би швидкість у себе, а клієнт нічого
- * не помітив би й наступним тіком повернув гравця назад. Телепорт замість ривка з'їв би
- * головне: ривок можна перервати стіною, а телепорт — ні.
+ * [net.minecraft.world.entity.Entity.hurtMarked] is the same flag vanilla pushes a player with in
+ * an explosion: without it the server would change the velocity on its side while the client
+ * noticed nothing and pulled the player back on the next tick. A teleport instead of a dash would
+ * eat the main thing: a dash can be interrupted by a wall, a teleport cannot.
  *
- * ## Завіса лишається на місці, а не їде за Трюкачем
+ * ## The veil stays in place rather than travelling with the Trickster
  *
- * Тому центр запам'ятовується один раз, у мить касту, і сесія малює саме там. Завіса,
- * прив'язана до кастера, була б димом на комірі — тобто нічого не ховала б.
+ * That is why the centre is remembered once, at cast time, and the session draws exactly there. A
+ * veil tied to the caster would be smoke on their collar — i.e. it would hide nothing.
  */
 class EscapeTrick : ActiveAbility(AbilityIdentity.of("door_escape_trick")) {
 
@@ -49,15 +49,15 @@ class EscapeTrick : ActiveAbility(AbilityIdentity.of("door_escape_trick")) {
         "Вас смикає назад, а на вашому місці лишається завіса диму.\n" +
             "▪ Завіса тримається ${SMOKE_TICKS / TICKS_PER_SECOND} с у радіусі ${SMOKE_RADIUS} бл.\n" +
             "▪ Хто в ній — грузне (Сповільнення II)\n" +
-            "▪ Перепочинок ${COOLDOWN_SECONDS} с",
+            "▪ Відкат ${COOLDOWN_SECONDS} с",
     )
 
     override fun cast(context: CastContext): AbilityOutcome {
         val centre = context.origin.add(0.0, 1.0, 0.0)
         val level = context.level
 
-        // Ривок назад. Вертикальна складова невелика й стала: без неї гравець просто
-        // тертиме об землю, з великою — злітає й отримує шкоду від падіння.
+        // The dash backwards. The vertical component is small and constant: without it the player
+        // simply scrapes along the ground, with a large one they take off and take fall damage.
         val back = Vec3(-context.look.x, 0.0, -context.look.z).let {
             if (it.lengthSqr() < 1.0e-6) Vec3(0.0, 0.0, 0.0) else it.normalize().scale(PULL_STRENGTH)
         }
@@ -93,7 +93,7 @@ class EscapeTrick : ActiveAbility(AbilityIdentity.of("door_escape_trick")) {
         return AbilityOutcome.done("Вас там більше немає")
     }
 
-    /** Початковий вибух: чотири ванільні дими, бо один читається як багаття, а не завіса. */
+    /** The initial burst: four vanilla smokes, because one reads as a campfire rather than a veil. */
     private fun puff(level: ServerLevel, centre: Vec3) {
         level.sendParticles(ParticleTypes.LARGE_SMOKE, centre.x, centre.y, centre.z, 120, 1.2, 1.0, 1.2, 0.02)
         level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, centre.x, centre.y, centre.z, 80, 0.8, 1.5, 0.8, 0.01)
@@ -108,7 +108,7 @@ class EscapeTrick : ActiveAbility(AbilityIdentity.of("door_escape_trick")) {
         const val COOLDOWN_SECONDS = 10
         const val SMOKE_TICKS = 3 * TICKS_PER_SECOND
         const val SMOKE_PERIOD_TICKS = 5
-        /** Трохи довше за такт, щоб між тактами не відпускало. */
+        /** A little longer than the tick, so it does not let go between ticks. */
         const val MIRE_TICKS = 20
     }
 }

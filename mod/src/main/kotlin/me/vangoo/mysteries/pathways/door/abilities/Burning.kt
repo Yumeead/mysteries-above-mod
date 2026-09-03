@@ -15,16 +15,16 @@ import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.world.phys.HitResult
 
 /**
- * Door, Посл. 8 (Трюкач): **Підпал**.
+ * Door, Seq. 8 (Trickster): **Ignition**.
  *
- * Найдешевша сила шляху й єдина, що завдає шкоди без цілі: під прицілом істота — горить
- * вона, під прицілом стіна — горить стіна.
+ * The pathway's cheapest power and the only one that deals damage without a target: a creature
+ * in the crosshair burns, a wall in the crosshair burns.
  *
- * ## Вогонь ставиться ванільним станом, а не блоком
+ * ## The fire is placed as a vanilla state, not as a block
  *
- * [BaseFireBlock.getState] сама вибирає, який саме вогонь тут доречний — звичайний чи
- * душевний над душевним піском. Плагінне `fireBlock.setType(Material.FIRE)` цього не
- * знало й ставило звичайне полум'я всюди.
+ * [BaseFireBlock.getState] picks which fire belongs here — an ordinary one, or soul fire over
+ * soul sand. The plugin's `fireBlock.setType(Material.FIRE)` knew nothing of that and placed
+ * ordinary flame everywhere.
  */
 class Burning : ActiveAbility(AbilityIdentity.of("door_burning")) {
 
@@ -35,9 +35,9 @@ class Burning : ActiveAbility(AbilityIdentity.of("door_burning")) {
     override fun cooldownSeconds(sequence: Sequence): Int = COOLDOWN_SECONDS
 
     override fun description(sequence: Sequence): Component = Component.literal(
-        "Я люблю як воно палає, як горить...\n" +
+        "Я люблю, як воно палає, як горить…\n" +
             "▪ Ціль під прицілом горить ${FIRE_SECONDS} с; стіна займається\n" +
-            "▪ Дальність ${RANGE.toInt()} бл., перепочинок ${COOLDOWN_SECONDS} с",
+            "▪ Дальність ${RANGE.toInt()} бл., відкат ${COOLDOWN_SECONDS} с",
     )
 
     override fun cast(context: CastContext): AbilityOutcome {

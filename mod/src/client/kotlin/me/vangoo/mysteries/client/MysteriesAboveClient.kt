@@ -19,23 +19,23 @@ import net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry
 import org.slf4j.LoggerFactory
 
 /**
- * Клієнтський entrypoint. Усе, чого нема на виділеному сервері, вантажиться
- * звідси — і компілюється лише в source set `client`.
+ * The client entrypoint. Everything absent on a dedicated server is loaded from here — and
+ * compiles only in the `client` source set.
  */
 object MysteriesAboveClient : ClientModInitializer {
 
     private val log = LoggerFactory.getLogger("$MOD_ID/client")
 
     override fun onInitializeClient() {
-        // Перше, що робиться: далі і HUD, і клавіші читають налаштування як уже наявні.
+        // The first thing done: after this both the HUD and the keys read the settings as
+        // something that already exists.
         ClientOptions.load()
 
         ModChannels.BEYONDER_STATUS.receiveOnClient { payload, context ->
-            // Свіжий стан оновлює відкритий екран на місці; якщо екрана нема —
-            // відкриває його. Так одна відповідь обслуговує і `/mysteries status`,
-            // і кнопку «Оновити».
-            // На 26.2 поточний екран живе на Gui, а не на Minecraft:
-            // Minecraft.screen прибрано, лишились gui.screen()/gui.setScreen().
+            // Fresh state updates an open screen in place; if there is no screen, it opens one.
+            // That way a single response serves both `/mysteries status` and the "Оновити" button.
+            // On 26.2 the current screen lives on Gui rather than on Minecraft:
+            // Minecraft.screen is gone, only gui.screen()/gui.setScreen() remain.
             val gui = context.client().gui
             when (val screen = gui.screen()) {
                 is BeyonderStatusScreen -> screen.update(payload)
@@ -43,31 +43,31 @@ object MysteriesAboveClient : ClientModInitializer {
             }
         }
 
-        // Обидва знімки лягають у клієнтське сховище й більше нікуди: малює з нього
-        // HUD, а з M4 — і колесо.
+        // Both snapshots land in the client store and nowhere else: the HUD draws from it, and
+        // from M4 the wheel will too.
         ModChannels.ABILITY_ROSTER.receiveOnClient { payload, _ -> ClientAbilityState.accept(payload) }
         ModChannels.ABILITY_STATE.receiveOnClient { payload, _ -> ClientAbilityState.accept(payload) }
 
-        // Годинник кулдаунів. Тік клієнта, а не настінний час: одиночна гра на паузі
-        // стоїть — і сервер, і відлік разом із нею.
+        // The cooldown clock. The client tick, not wall time: a paused single-player game stands
+        // still — the server and the countdown along with it.
         ClientTickEvents.END_CLIENT_TICK.register {
             ClientAbilityState.tick()
-            // Шепіт і екранний ланцюг — похідні від щойно оновленого стану, тож ідуть
-            // одразу за ним, а не окремою підпискою з невизначеним порядком.
+            // The whisper and the screen chain are derived from the state just updated, so they
+            // come right after it rather than as a separate subscription with an undefined order.
             SanityAmbience.tick()
         }
 
-        // Рух і згасання порошинки — клієнтські: сервер шле лише «де і якого кольору».
+        // A mote's motion and fade are the client's: the server only sends "where and what colour".
         ParticleProviderRegistry.getInstance().register(ModParticles.SPIRIT_MOTE) { sprites ->
-            // Набір, а не спрайт: атлас частинок у цю мить іще не зібрано, і `first()`
-            // тут падає `NullPointerException` на заставці гри.
+            // The set, not the sprite: the particle atlas has not been assembled at this moment,
+            // and `first()` here fails with a `NullPointerException` on the game's splash screen.
             SpiritMoteParticle.Provider(sprites)
         }
         ParticleProviderRegistry.getInstance().register(ModParticles.SPIRIT_GLYPH) { sprites ->
             SpiritGlyphParticle.Provider(sprites)
         }
 
-        // Наступний світ починає з чистого аркуша: чужий ростер малювати нічим і нема чого.
+        // The next world starts with a clean slate: someone else's roster is neither drawable nor wanted.
         ClientPlayConnectionEvents.DISCONNECT.register { _, _ ->
             ClientAbilityState.clear()
             SanityAmbience.clear()
@@ -77,6 +77,6 @@ object MysteriesAboveClient : ClientModInitializer {
         AbilityHud.register()
         ModKeys.register()
 
-        log.info("Mysteries Above: клієнтська частина піднялась")
+        log.info("Mysteries Above: client side is up")
     }
 }

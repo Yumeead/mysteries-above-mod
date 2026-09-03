@@ -4,8 +4,9 @@ import me.vangoo.domain.valueobjects.AbilityIdentity
 import me.vangoo.domain.valueobjects.Sequence
 
 /**
- * Мінімальна здібність для тестів `core`. Реальні здібності живуть у моді й тягнуть
- * Minecraft — сюди їх не занести, та й не треба: правилам достатньо ціни й типу.
+ * A minimal ability for the `core` tests. Real abilities live in the mod and pull in
+ * Minecraft — they cannot be brought here, and there is no need: the rules only care about
+ * the cost and the type.
  */
 data class TestAbilitySpec(
     override val identity: AbilityIdentity,

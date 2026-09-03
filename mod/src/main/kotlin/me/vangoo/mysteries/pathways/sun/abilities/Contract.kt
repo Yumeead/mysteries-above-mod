@@ -23,34 +23,35 @@ import net.minecraft.world.phys.Vec3
 import me.vangoo.domain.contracts.Contract as DomainContract
 
 /**
- * Sun, Посл. 6 (Нотаріус): **Магічне засвідчення**.
+ * Sun, Seq. 6 (Notary): **Magic Notarization**.
  *
- * Нотаріус пропонує гравцеві мир — і мир набуває чинності лише тоді, коли той
- * **вклониться у відповідь**: присяде й подивиться на Нотаріуса протягом
- * [OFFER_SECONDS] с. Поки контракт діє, жоден із двох не може зашкодити іншому.
+ * The Notary offers a player peace — and the peace only takes effect when that player **bows
+ * back**: sneaks and looks at the Notary for [OFFER_SECONDS] s. While the contract holds,
+ * neither of the two can harm the other.
  *
- * ## Уклін замість меню
+ * ## A bow instead of a menu
  *
- * Плагінний `ContractMenu` — 437 рядків: скриня з іконками «Мир», «Обмін», «Борг»,
- * друга сторінка з підтвердженням, третя з предметом обміну. Меню там існувало не тому,
- * що угода складна, а тому що іншого способу спитати «згоден?» на Spigot не було.
+ * The plugin's `ContractMenu` is 437 lines: a chest with "Peace", "Trade", "Debt" icons, a second
+ * page with a confirmation, a third with the item to trade. The menu existed there not because
+ * the deal is complicated but because on Spigot there was no other way to ask "do you agree?".
  *
- * Спосіб є, і він у грі з першого дня: **два гравці дивляться один на одного і
- * присідають**. Це той самий жест, яким гравці Minecraft вітаються двадцять років — і
- * він, на відміну від скрині, видимий збоку, не паузить нікого й не потребує клієнта.
+ * There is a way, and it has been in the game since day one: **two players look at each other and
+ * sneak**. It is the same gesture Minecraft players have greeted each other with for twenty
+ * years — and, unlike a chest, it is visible from the outside, pauses nobody and needs no client.
  *
- * ## Обіцянка виконується, а не карається
+ * ## The promise is kept rather than punished
  *
- * Мир не «забороняє» шкоду штрафом за порушення — він її **скасовує**
- * (`IncomingDamage.cancel`). Порушити контракт неможливо, тож ні стану «BREACHED», ні
- * покарання, ні перевірки не потрібно. Обіцянка тримається сама, і саме це робить її
- * вартою Посл. 6.
+ * Peace does not "forbid" damage with a penalty for breaking it — it **cancels** it
+ * (`IncomingDamage.cancel`). Breaking the contract is impossible, so no "BREACHED" state, no
+ * punishment and no check are needed. The promise holds itself, and that is exactly what makes
+ * it worth Seq. 6.
  *
- * ## Чому лише `PEACE`
+ * ## Why only `PEACE`
  *
- * `ContractTerm` має ще `DEBT` — і саме він потребує того, чого в моді ще немає:
- * борг, від якого можна втекти виходом із гри, це не борг. `DEBT` увімкнеться разом із
- * фазою 09, коли контракти буде де зберігати; тут для нього нема сховища, а не задуму.
+ * `ContractTerm` also has `DEBT` — and that is the one that needs what the mod does not yet have:
+ * a debt you can escape by leaving the game is not a debt. `DEBT` will switch on together with
+ * phase 09, when there is somewhere to store contracts; what is missing here is storage, not
+ * intent.
  */
 class Contract : ActiveAbility(AbilityIdentity.of("sun_contract")) {
 
@@ -67,7 +68,7 @@ class Contract : ActiveAbility(AbilityIdentity.of("sun_contract")) {
             "▪ Відмова не коштує нічого",
     )
 
-    /** Друга пропозиція поверх першої — сесія в гравця одна. */
+    /** A second offer on top of the first — a player has one session. */
     override fun canCast(context: CastContext): Boolean = !context.sessionRunning
 
     override fun cast(context: CastContext): AbilityOutcome {
@@ -95,8 +96,8 @@ class Contract : ActiveAbility(AbilityIdentity.of("sun_contract")) {
                 scroll(self, guest, mote)
 
                 if (bowsTo(guest, self)) {
-                    // Домен уже вміє контракт — тут він потрібен рівно для того, щоб угода
-                    // мала ім'я, стан і термін, а не була анонімною підпискою.
+                    // The domain already knows contracts — it is needed here exactly so that the
+                    // deal has a name, a state and a term rather than being an anonymous subscription.
                     val contract = DomainContract.propose(notary, party, ContractTerm.PEACE, emptyMap())
                     contract.sign()
 
@@ -118,7 +119,7 @@ class Contract : ActiveAbility(AbilityIdentity.of("sun_contract")) {
                 }
                 waitTicks(POLL_TICKS)
             }
-            // Квиток лишився непогашеним — відмова справді нічого не коштує.
+            // The ticket stayed unsettled — a refusal really does cost nothing.
             messaging.actionBar(notary, Component.literal("Сувій згорнувся: відповіді не було"))
         }
 
@@ -126,10 +127,10 @@ class Contract : ActiveAbility(AbilityIdentity.of("sun_contract")) {
     }
 
     /**
-     * Уклін: присів і дивиться на Нотаріуса.
+     * The bow: sneaking and looking at the Notary.
      *
-     * Погляд перевіряється скалярним добутком, а не «чи в перехресті» — уклін це жест,
-     * а не постріл, і вимагати від гравця точності прицілу тут було б знущанням.
+     * The gaze is checked with a dot product rather than "is it in the crosshair" — a bow is a
+     * gesture, not a shot, and demanding aiming precision from the player here would be cruel.
      */
     private fun bowsTo(guest: ServerPlayer, notary: ServerPlayer): Boolean {
         if (!guest.isShiftKeyDown) return false
@@ -138,7 +139,7 @@ class Contract : ActiveAbility(AbilityIdentity.of("sun_contract")) {
         return guest.getViewVector(1.0f).dot(toNotary.normalize()) >= FACING_DOT
     }
 
-    /** Сувій між двома: нитка порошинок, поки пропозиція жива. */
+    /** The scroll between the two: a thread of motes while the offer is alive. */
     private fun scroll(notary: ServerPlayer, guest: ServerPlayer, mote: ParticleOptions) {
         val level = notary.level() as? ServerLevel ?: return
         val from = notary.eyePosition
@@ -150,7 +151,7 @@ class Contract : ActiveAbility(AbilityIdentity.of("sun_contract")) {
         }
     }
 
-    /** Печатка — обом, і в один і той самий момент. */
+    /** The seal — to both, and at one and the same moment. */
     private fun seal(notary: ServerPlayer, guest: ServerPlayer) {
         val level = notary.level() as? ServerLevel ?: return
         listOf(notary, guest).forEach { party ->
@@ -175,7 +176,7 @@ class Contract : ActiveAbility(AbilityIdentity.of("sun_contract")) {
         const val OFFER_SECONDS = 15
         const val BASE_PEACE_SECONDS = 60
         const val POLL_TICKS = 4
-        /** ~66° конус: уклін, а не приціл. */
+        /** A ~66° cone: a bow, not an aim. */
         const val FACING_DOT = 0.4
         const val STEP = 0.4
         const val MAX_STEPS = 60

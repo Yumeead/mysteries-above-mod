@@ -3,13 +3,14 @@ package me.vangoo.domain.creatures
 import kotlin.random.Random
 
 /**
- * Правило темпу кастів істоти: глобальний кулдаун (ГКД) між будь-якими двома кастами
- * + власний кулдаун кожної здібності. Коли готові кілька — вибір ЗВАЖЕНО-ВИПАДКОВИЙ
- * серед готових: вага = позиція у списку (перша — найважча; фірмову здібність найнижчої
- * послідовності ставлять першою). Випадковість дає різноманітну ротацію замість
- * детермінованого циклу, де топ-здібність монополізує кожне вікно ГКД.
+ * The pacing rule for a creature's casts: a global cooldown (GCD) between any two casts plus
+ * each ability's own cooldown. When several are ready, the choice is WEIGHTED-RANDOM among
+ * them: the weight is the position in the list (the first is the heaviest; the signature
+ * ability of the lowest sequence goes first). Randomness gives a varied rotation instead of a
+ * deterministic cycle where the top ability monopolises every GCD window.
  *
- * Одиниці часу довільні (тіки/мс) — [now][pickNext] і кулдауни мають бути в одних одиницях.
+ * The time units are arbitrary (ticks/ms) — [now][pickNext] and the cooldowns must be in the
+ * same units.
  */
 class AbilityCastPlanner internal constructor(
     kit: List<KitEntry>,
@@ -46,6 +47,6 @@ class AbilityCastPlanner internal constructor(
         return chosen.skillName
     }
 
-    /** Вага за позицією: перша у списку (фірмова) — найважча, остання — 1. */
+    /** Weight by position: the first in the list (the signature one) is the heaviest, the last is 1. */
     private fun weightOf(index: Int): Int = kit.size - index
 }

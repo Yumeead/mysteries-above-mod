@@ -25,7 +25,7 @@ internal class CreatureSelectorTest {
 
     private fun structure(chance: Double) = SpawnRule(emptyList(), emptyList(), 0.0, chance)
 
-    /** Усе, кого може віддати вікно послідовності playerSequence, за 1000 рівномірних roll'ів. */
+    /** Everyone the sequence window of playerSequence can yield, over 1000 uniform rolls. */
     private fun structurePool(s: CreatureSelector, playerSequence: Int): Set<String> =
         (0 until 1000).mapNotNull { s.pickForStructure(playerSequence, null, it / 1000.0)?.id }.toSet()
 
@@ -89,7 +89,7 @@ internal class CreatureSelectorTest {
 
     @Test
     fun structureIgnoresBiomeAndReplaceRules() {
-        // натуральні правила порожні — структурний спавн на них не дивиться
+        // the natural rules are empty — a structure spawn does not look at them
         val s = CreatureSelector(listOf(def("a", structure(0.5), "visionary", 9)))
         assertEquals(setOf("a"), structurePool(s, 9))
     }
@@ -119,7 +119,7 @@ internal class CreatureSelectorTest {
 
     @Test
     fun structureEveryCandidateInWindowIsReachable() {
-        // 12 кандидатів однієї послідовності: жоден не мусить лишитись за межею сегментів
+        // 12 candidates of one sequence: none may be left outside the segments
         val all = (0 until 12).map { def("c$it", structure(0.12), "visionary", 9) }
         assertEquals(12, structurePool(CreatureSelector(all), 9).size)
     }
@@ -142,13 +142,13 @@ internal class CreatureSelectorTest {
 
     @Test
     fun convergencePreservesTotalSpawnProbability() {
-        // два visionary-кандидати, посл. 9 і 8, базовий шанс 0.2 кожен -> сума 0.4
+        // two visionary candidates, seq. 9 and 8, base chance 0.2 each -> sum 0.4
         val s = CreatureSelector(
             listOf(def("a", natural(0.2), "visionary", 9), def("b", natural(0.2), "visionary", 8)),
         )
         val bias = ConvergenceBias("Visionary", 9) // next-needed = 8 (x4), current = 9 (x2)
 
-        // загальна ймовірність спавну незмінна: roll трохи менший за 0.4 спавнить, 0.4 — ні
+        // the overall spawn probability is unchanged: a roll just under 0.4 spawns, 0.4 does not
         assertNotNull(s.pickForBiome("OCEAN", "GUARDIAN", 0.399, bias))
         assertNull(s.pickForBiome("OCEAN", "GUARDIAN", 0.4, bias))
     }
@@ -162,7 +162,7 @@ internal class CreatureSelectorTest {
             ),
         )
         val bias = ConvergenceBias("Visionary", 9)
-        // ваги: a=0.4, b=0.8, сума=1.2, scale=0.4/1.2 -> a=0.1333, b=0.2667
+        // weights: a=0.4, b=0.8, sum=1.2, scale=0.4/1.2 -> a=0.1333, b=0.2667
         assertEquals("a", s.pickForBiome("OCEAN", "GUARDIAN", 0.10, bias)?.id)
         assertEquals("b", s.pickForBiome("OCEAN", "GUARDIAN", 0.20, bias)?.id)
         assertEquals("b", s.pickForBiome("OCEAN", "GUARDIAN", 0.39, bias)?.id)
@@ -174,7 +174,7 @@ internal class CreatureSelectorTest {
             listOf(def("a", natural(0.2), "visionary", 9), def("b", natural(0.2), "visionary", 8)),
         )
         val unrelated = ConvergenceBias("Error", 5)
-        // жоден кандидат не збігається -> ті самі сегменти, що й без ухилу
+        // no candidate matches -> the same segments as with no bias
         assertEquals("a", s.pickForBiome("OCEAN", "GUARDIAN", 0.10, unrelated)?.id)
         assertEquals("b", s.pickForBiome("OCEAN", "GUARDIAN", 0.30, unrelated)?.id)
         assertNull(s.pickForBiome("OCEAN", "GUARDIAN", 0.40, unrelated))
@@ -195,7 +195,7 @@ internal class CreatureSelectorTest {
     @Test
     fun ambientIncludesOtherPathways() {
         val s = CreatureSelector(listOf(def("a", natural(0.2), "visionary", 9)))
-        // істота чужого шляху придатна, бо збігається біом
+        // a creature of another pathway qualifies, because the biome matches
         assertEquals("a", s.pickForAmbient("OCEAN", ConvergenceBias("Error", 5), 0.5)?.id)
     }
 
@@ -203,12 +203,12 @@ internal class CreatureSelectorTest {
     fun ambientMixesPathwaysOwnFavored() {
         val s = CreatureSelector(
             listOf(
-                def("own", natural(0.2), "visionary", 8), // next-needed для ухилу посл. 9 -> x4
-                def("other", natural(0.2), "error", 8), // чужий шлях -> x1
+                def("own", natural(0.2), "visionary", 8), // next-needed for the seq. 9 bias -> x4
+                def("other", natural(0.2), "error", 8), // another pathway -> x1
             ),
         )
         val bias = ConvergenceBias("Visionary", 9)
-        // ваги: own = 0.8, other = 0.2, сума = 1.0; own у [0,0.8), other у [0.8,1.0)
+        // weights: own = 0.8, other = 0.2, sum = 1.0; own in [0,0.8), other in [0.8,1.0)
         assertEquals("own", s.pickForAmbient("OCEAN", bias, 0.5)?.id)
         assertEquals("other", s.pickForAmbient("OCEAN", bias, 0.9)?.id)
     }
@@ -234,7 +234,7 @@ internal class CreatureSelectorTest {
             ),
         )
         val bias = ConvergenceBias("Visionary", 9)
-        // ваги a=0.4, b=0.8, сума=1.2; target = roll*1.2; a у [0,0.4), b у [0.4,1.2)
+        // weights a=0.4, b=0.8, sum=1.2; target = roll*1.2; a in [0,0.4), b in [0.4,1.2)
         assertEquals("a", s.pickForAmbient("OCEAN", bias, 0.1)?.id)
         assertEquals("b", s.pickForAmbient("OCEAN", bias, 0.5)?.id)
         assertEquals("b", s.pickForAmbient("OCEAN", bias, 0.99)?.id)

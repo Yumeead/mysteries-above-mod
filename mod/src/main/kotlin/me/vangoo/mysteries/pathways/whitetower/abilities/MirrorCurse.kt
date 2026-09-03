@@ -18,23 +18,23 @@ import net.minecraft.world.phys.Vec3
 import kotlin.math.roundToInt
 
 /**
- * WhiteTower, Посл. 5 (Магістр містицизму): **Дзеркальне прокляття**.
+ * WhiteTower, Seq. 5 (Master of Mysticism): **Mirror Curse**.
  *
- * Між вами й ціллю стає латунне дзеркало — і показує їй те, що вона вже собі зробила.
- * Чим більше ціль устигла втратити, тим важче їй дивитись у власне відображення.
+ * A brass mirror stands between you and the target — and shows it what it has already done to
+ * itself. The more the target has managed to lose, the harder it is to look at its own reflection.
  *
- * ## Здібність, що карає за поранення, а не за живучість
+ * ## An ability that punishes being wounded rather than being tough
  *
- * Шкода тут — [BASE_DAMAGE] плюс [MISSING_HEALTH_FACTOR] від **уже втраченого**
- * здоров'я. Проти повного здоров'я це майже нічого; проти того, кого щойно збили з ніг,
- * це добивання. Механіка навмисно не універсальна: Магістр не б'є першим, він завершує.
+ * The damage here is [BASE_DAMAGE] plus [MISSING_HEALTH_FACTOR] of the health **already lost**.
+ * Against full health it is almost nothing; against someone just knocked down it is a finisher.
+ * The mechanic is deliberately not universal: the Master does not strike first, they finish.
  *
- * ## Дзеркало — справжня площина, а не хмарка
+ * ## The mirror is a real plane, not a puff
  *
- * Плагін умів надіслати частинку в точку, тож «дзеркало» там було розсипом крапель
- * навколо цілі. Тут площина рахується від напрямку погляду: нормаль — лінія до цілі,
- * і сітка порошинок стоїть до кастера **лицем**. Обійти дзеркало збоку означає побачити
- * його з ребра — так, як і мусить виглядати дзеркало.
+ * The plugin could send a particle to a point, so the "mirror" there was a scatter of droplets
+ * around the target. Here the plane is computed from the look direction: the normal is the line
+ * to the target, and the grid of motes stands **facing** the caster. Walking around the mirror
+ * means seeing it edge-on — exactly how a mirror should look.
  */
 class MirrorCurse : ActiveAbility(AbilityIdentity.of("whitetower_mirror_curse")) {
 
@@ -72,15 +72,15 @@ class MirrorCurse : ActiveAbility(AbilityIdentity.of("whitetower_mirror_curse"))
         return AbilityOutcome.done("Дзеркало показало ${target.name.string} його рани (${damage} шкоди)")
     }
 
-    /** Сітка порошинок на півдорозі до цілі, розвернута до кастера лицем. Потім — тріскає. */
+    /** A grid of motes halfway to the target, turned to face the caster. Then it cracks. */
     private fun mirror(context: CastContext, target: LivingEntity) {
         val level = context.level
         val from = context.eye
         val to = target.position().add(0.0, target.bbHeight * 0.5, 0.0)
         val normal = to.subtract(from).normalize()
-        // Вертикаль світу як опора: горизонтальне ребро дзеркала завжди горизонтальне,
-        // навіть коли Магістр дивиться вгору. Погляд точно вздовж осі Y тут неможливий —
-        // ціль стоїть на землі, а кастер дивиться на неї.
+        // The world's vertical as the anchor: the mirror's horizontal edge is always horizontal,
+        // even when the Master looks upwards. A gaze exactly along the Y axis is impossible here —
+        // the target stands on the ground and the caster looks at it.
         val right = normal.cross(UP).normalize()
         val up = right.cross(normal).normalize()
         val centre = from.lerp(to, 0.5)
@@ -110,14 +110,14 @@ class MirrorCurse : ActiveAbility(AbilityIdentity.of("whitetower_mirror_curse"))
     private companion object {
         const val RANGE = 15.0
         const val COOLDOWN_SECONDS = 25
-        /** 2 серця на Посл. 9 — але сама здібність з'являється лише на 5-й. */
+        /** 2 hearts at Seq. 9 — but the ability itself only appears at the 5th. */
         const val BASE_DAMAGE = 4
         const val MISSING_HEALTH_FACTOR = 0.35
-        /** Пів серця: інакше «поранений» означало б будь-яку подряпину. */
+        /** Half a heart: otherwise "wounded" would mean any scratch. */
         const val MIN_WOUND = 1.0f
 
         val UP: Vec3 = Vec3(0.0, 1.0, 0.0)
-        /** Дзеркало 5×5 порошинок із кроком 0,22 бл. — приблизно на зріст гравця. */
+        /** A 5×5 mirror of motes with a 0.22-block step — roughly a player's height. */
         const val HALF = 2
         const val CELL = 0.22
     }

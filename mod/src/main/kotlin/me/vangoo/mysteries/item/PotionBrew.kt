@@ -10,14 +10,15 @@ import net.minecraft.network.codec.ByteBufCodecs
 import net.minecraft.network.codec.StreamCodec
 
 /**
- * Що саме налито в пляшку: шлях і Послідовність.
+ * What exactly is poured into the bottle: the pathway and the Sequence.
  *
- * Формат вибрано під мод, а не під плагін: збережень плагіна не існує, мігрувати нема
- * чого (рішення 2). Шлях їде **іменем**, а не порядковим номером — імена стабільні й
- * читаються в `/data get`, а порядок шляхів у реєстрі змінюється щофази.
+ * The format is chosen for the mod, not for the plugin: the plugin's saves do not exist and
+ * there is nothing to migrate (decision 2). The pathway travels **by name**, not by ordinal —
+ * names are stable and readable in `/data get`, while the order of pathways in the registry
+ * changes every phase.
  *
- * Живе як компонент предмета, тож проходить і через збереження світу
- * ([CODEC]), і через мережу ([STREAM_CODEC]).
+ * It lives as an item component, so it goes both through world saving ([CODEC]) and through the
+ * network ([STREAM_CODEC]).
  */
 data class PotionBrew(val pathway: String, val sequence: Int) {
 
@@ -28,7 +29,7 @@ data class PotionBrew(val pathway: String, val sequence: Int) {
         }
     }
 
-    /** `null` — шлях іще не перенесено (13 заглушок і решта фази 08). */
+    /** `null` — the pathway has not been ported yet (13 stubs and the rest of phase 08). */
     fun resolvePathway(): Pathway? = ModPathways.byName(pathway)
 
     fun asSequence(): Sequence = Sequence(sequence)

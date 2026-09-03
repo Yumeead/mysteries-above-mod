@@ -4,11 +4,11 @@ import kotlin.math.min
 import kotlin.math.roundToLong
 
 /**
- * Засвоєння зілля, 0..100 %.
+ * Potion mastery, 0..100 %.
  *
- * НЕ data class навмисно: конструктор округлює вхідне значення до 2 знаків, а data-клас
- * дав би публічний `copy()`, який пройшов би повз округлення. Тут краще дописати три
- * методи вручну, ніж лишити дірку в інваріанті.
+ * Deliberately NOT a data class: the constructor rounds the input to 2 decimals, and a data
+ * class would hand out a public `copy()` that goes around the rounding. Writing three methods
+ * by hand beats leaving a hole in the invariant.
  */
 class Mastery(raw: Double) {
 

@@ -8,47 +8,48 @@ import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
 import kotlin.math.ceil
 
 /**
- * Усе, що клієнт знає про здібності гравця.
+ * Everything the client knows about the player's abilities.
  *
- * Кеш останніх двох пакетів плюс власний лічильник тіків. Потрібен саме кеш: малювати
- * доводиться 60+ разів на секунду, а пакети приходять щонайбільше раз на секунду —
- * щось мусить тримати між ними, і донині на клієнті не тримало нічого.
+ * A cache of the last two packets plus a tick counter of its own. A cache is exactly what is
+ * needed: drawing happens 60+ times a second while packets arrive at most once a second —
+ * something has to hold on in between, and until now nothing on the client did.
  *
- * **Нічого не рахує з правил гри.** Ні духовності, ні дозволів, ні того, чи каст
- * можливий: усе це сервер уже вирішив і надіслав. Єдина арифметика тут — відлік
- * кулдауну між пакетами, і та є похідною від надісланого тіку кінця.
+ * **It computes nothing from the game rules.** Neither spirituality, nor permissions, nor
+ * whether a cast is possible: the server has already decided all that and sent it. The only
+ * arithmetic here is counting a cooldown down between packets, and even that is derived from
+ * the end tick that was sent.
  *
- * Стан глобальний, бо глобальний і сам клієнт: гравець тут рівно один.
+ * The state is global because the client itself is: there is exactly one player here.
  */
 object ClientAbilityState {
 
     /**
-     * Монотонний лічильник клієнтських тіків.
+     * A monotonic counter of client ticks.
      *
-     * Настінний час не годиться: одиночна гра на паузі стоїть — і сервер, і кулдауни
-     * разом із нею, — а `System.currentTimeMillis` цокав би далі й показував готовність
-     * раніше, ніж вона настане.
+     * Wall time will not do: a paused single-player game stands still — the server and the
+     * cooldowns with it — while `System.currentTimeMillis` would keep going and show readiness
+     * before it arrives.
      */
     private var clientTick = 0
 
-    /** Тік клієнта й тік сервера на момент останнього пакета стану. */
+    /** The client tick and the server tick at the moment of the last state packet. */
     private var anchorClientTick = 0
     private var anchorServerTick = 0
     private var anchored = false
 
-    /** `null` — гравець не Потойбічний. */
+    /** `null` — the player is not a Beyonder. */
     var roster: AbilityRosterPayload.Roster? = null
         private set
 
-    /** `null` — стану ще не надсилали (або гравець не Потойбічний). */
+    /** `null` — no state has been sent yet (or the player is not a Beyonder). */
     var spirituality: Spirituality? = null
         private set
 
-    /** Розхитаність розуму. Поза Потойбічним — [SanityLoss.none]: нема чому хитатись. */
+    /** Sanity loss. For a non-Beyonder it is [SanityLoss.none]: there is nothing to shake. */
     var sanityLoss: SanityLoss = SanityLoss.none()
         private set
 
-    /** Ідентичність обраної здібності; вибір тримає сервер, тут лише його відлуння. */
+    /** The identity of the selected ability; the server holds the selection, this is only its echo. */
     var selected: String? = null
         private set
 
@@ -56,14 +57,14 @@ object ClientAbilityState {
 
     val isBeyonder: Boolean get() = roster != null
 
-    /** Порядок — той самий, що в `Beyonder.abilities`: стабільний, під м'язову пам'ять. */
+    /** The order is the same as in `Beyonder.abilities`: stable, made for muscle memory. */
     val entries: List<AbilityRosterPayload.Entry> get() = roster?.entries.orEmpty()
 
     fun entry(identity: String): AbilityRosterPayload.Entry? = entries.firstOrNull { it.identity == identity }
 
-    // ── Вхідні пакети ───────────────────────────────────────────────────────────
+    // ── Incoming packets ────────────────────────────────────────────────────────
 
-    /** Кличеться з клієнтського такту; єдине місце, де цокає [clientTick]. */
+    /** Called from the client tick; the only place [clientTick] advances. */
     fun tick() {
         clientTick++
     }
@@ -72,13 +73,13 @@ object ClientAbilityState {
         val fresh = payload.roster
         roster = fresh
         if (fresh == null) {
-            // Гравець перестав бути Потойбічним: стану більше не буде, а лишений
-            // показував би кулдауни сили, якої вже нема.
+            // The player stopped being a Beyonder: there will be no more state, and what was
+            // left would show cooldowns of a power that is gone.
             resetState()
             return
         }
-        // Здібність могла зникнути разом зі зміною списку — її запис у [live] інакше
-        // висів би до виходу зі світу.
+        // An ability could have disappeared along with a change of the list — otherwise its
+        // entry in [live] would hang around until the player left the world.
         val known = fresh.entries.mapTo(HashSet()) { it.identity }
         live.keys.retainAll(known)
         val chosen = selected
@@ -86,7 +87,7 @@ object ClientAbilityState {
     }
 
     fun accept(payload: AbilityStatePayload) {
-        // Перезаякорення на кожному пакеті: дрейф лічильника не накопичується.
+        // Re-anchoring on every packet: the counter's drift does not accumulate.
         anchorServerTick = payload.serverTick
         anchorClientTick = clientTick
         anchored = true
@@ -95,13 +96,13 @@ object ClientAbilityState {
         sanityLoss = payload.sanityLoss
         selected = payload.selected
 
-        // Знімок повний за задумом: у пакеті лише ті, у кого є що сказати, тож
-        // відсутність запису означає «готова, вимкнена, не триває».
+        // The snapshot is complete by design: the packet holds only those with something to say,
+        // so a missing entry means "ready, switched off, not running".
         live.clear()
         payload.live.associateByTo(live) { it.identity }
     }
 
-    /** Вихід зі світу. Наступний світ почне з чистого аркуша. */
+    /** Leaving the world. The next world starts with a clean slate. */
     fun clear() {
         roster = null
         resetState()
@@ -115,16 +116,16 @@ object ClientAbilityState {
         anchored = false
     }
 
-    // ── Похідні числа ───────────────────────────────────────────────────────────
+    // ── Derived numbers ─────────────────────────────────────────────────────────
 
-    /** Тік сервера, яким він має бути зараз: якір плюс те, що клієнт відцокав сам. */
+    /** The server tick as it should be now: the anchor plus what the client counted itself. */
     fun estimatedServerTick(): Int = anchorServerTick + (clientTick - anchorClientTick)
 
     fun isToggled(identity: String): Boolean = live[identity]?.toggled == true
 
     fun isSustaining(identity: String): Boolean = live[identity]?.sustaining == true
 
-    /** Скільки тіків лишилось перепочивати; `0` — здібність готова. */
+    /** How many ticks of cooldown are left; `0` — the ability is ready. */
     fun remainingTicks(identity: String): Int {
         if (!anchored) return 0
         val readyAt = live[identity]?.readyAtTick ?: return 0
@@ -133,8 +134,8 @@ object ClientAbilityState {
     }
 
     /**
-     * Округлення вгору — те саме правило, що й у серверній `CooldownTable`:
-     * «лишилось 0 с» при ще не спливлому таймері збиває з пантелику.
+     * Rounding up — the same rule as in the server's `CooldownTable`:
+     * "0 s left" on a timer that has not expired yet is confusing.
      */
     fun remainingSeconds(identity: String): Int {
         val ticks = remainingTicks(identity)
@@ -142,10 +143,10 @@ object ClientAbilityState {
     }
 
     /**
-     * Частка перепочинку, що вже минула: `0` — щойно почався, `1` — готова.
+     * The share of the cooldown that has already passed: `0` — it just started, `1` — ready.
      *
-     * Повну тривалість приносить ростер, тож пропорція чесна, а не вгадана з першого
-     * побаченого залишку.
+     * The roster brings the full duration, so the proportion is honest rather than guessed from
+     * the first remainder seen.
      */
     fun cooldownProgress(entry: AbilityRosterPayload.Entry): Float {
         val total = entry.cooldownSeconds * TICKS_PER_SECOND
@@ -154,7 +155,7 @@ object ClientAbilityState {
         return (1f - remaining.toFloat() / total).coerceIn(0f, 1f)
     }
 
-    /** Підказка, а не заборона: натиснути можна завжди, відмовляє сервер. */
+    /** A hint, not a ban: the key can always be pressed, the server is what refuses. */
     fun canAfford(entry: AbilityRosterPayload.Entry): Boolean =
         spirituality?.hasSufficient(entry.cost) ?: true
 }

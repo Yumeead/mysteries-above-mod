@@ -3,9 +3,8 @@ package me.vangoo.domain
 import kotlin.random.Random
 
 /**
- * Заздалегідь записані кидки. Потрібен там, де перевіряється саме сходинка
- * ймовірності, а не поведінка «в середньому»: сходинок штрафу глузду шість, і кожна
- * має бути перевірена окремо.
+ * Pre-recorded rolls. Needed wherever a specific probability step is under test rather than
+ * "average" behaviour: the sanity penalty has six steps, and each must be checked on its own.
  */
 class ScriptedRandom(
     doubles: List<Double> = emptyList(),

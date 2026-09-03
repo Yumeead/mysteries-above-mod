@@ -5,6 +5,6 @@ data class LootItem(
     val weight: Int,
     val minAmount: Int,
     val maxAmount: Int,
-    /** Без указаного тіру предмет = BASE. */
+    /** With no tier given, the item is BASE. */
     val tier: LootTier = LootTier.BASE,
 )

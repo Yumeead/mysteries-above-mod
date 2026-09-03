@@ -1,6 +1,6 @@
 package me.vangoo.domain.entities
 
-/** Божество на вершині групи шляхів; усередині групи шляхи взаємозамінні при піднесенні. */
+/** The deity at the top of a pathway group; inside a group pathways are interchangeable on ascension. */
 enum class PathwayGroup(val displayName: String) {
     LordOfMysteries("Володар Таємниць"),
     DemonOfKnowledge("Демон Знання"),

@@ -6,35 +6,36 @@ import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.sounds.SoundEvent
 
 /**
- * Звуки мода. Оголошення тут — і є реєстрацією, як у `ModParticles` та `ModChannels`.
+ * The mod's sounds. Declaring them here **is** registering them, as in `ModParticles` and
+ * `ModChannels`.
  *
- * ## Чому власна подія, а не `SoundEvents.AMBIENT_CAVE`
+ * ## Why an event of our own rather than `SoundEvents.AMBIENT_CAVE`
  *
- * Ванільна подія — це не лише файл, а й гучність, висота, набір варіантів і субтитр.
- * Шепіт — це печерна атмосфера, стишена вчетверо й опущена на терцію; поклич ванільну
- * подію напряму, і гравець почує звичайну печеру, а субтитр скаже «Моторошний шум».
- * Власна подія дає моду і мікс, і власний субтитр, а `sounds.json` лишає його
- * налаштовуваним даними.
+ * A vanilla event is not just a file but also a volume, a pitch, a set of variants and a
+ * subtitle. The whisper is a cave ambience quieted fourfold and dropped by a third; call the
+ * vanilla event directly and the player hears an ordinary cave while the subtitle says
+ * "Моторошний шум". An event of our own gives the mod both the mix and its own subtitle, and
+ * `sounds.json` leaves it configurable from data.
  *
- * ## Чому `sounds.json` показує на ванільні файли
+ * ## Why `sounds.json` points at vanilla files
  *
- * Своїх `.ogg` мод поки не несе, і це навмисно: композиція вже своя (набір варіантів,
- * гучності, висоти), а замінити джерело на власний файл — це один рядок у
- * `sounds.json` і нуль рядків коду. Та сама лінія, що вже проведена зіллям, де мод
- * бере ванільну модель і фарбує її своїм кольором.
+ * The mod carries no `.ogg` of its own yet, and that is deliberate: the composition is already
+ * ours (the set of variants, the volumes, the pitches), and replacing the source with a file of
+ * our own is one line in `sounds.json` and zero lines of code. The same line already drawn by
+ * the potion, where the mod takes a vanilla model and paints it in its own colour.
  */
 object ModSounds {
 
-    /** Порядок ініціалізації: список мусить існувати раніше за першу подію. */
+    /** Initialisation order: the list must exist before the first event. */
     private val declared = mutableListOf<SoundEvent>()
 
-    /** Шепіт на низькому глузді: голоси, яких немає. */
+    /** A whisper at low sanity: voices that are not there. */
     val WHISPER: SoundEvent = event("whisper")
 
-    /** Серцебиття на межі: чутно власне тіло, бо більше не чутно нічого. */
+    /** A heartbeat at the edge: you hear your own body because there is nothing else left to hear. */
     val HEARTBEAT: SoundEvent = event("heartbeat")
 
-    /** Змушує клас ініціалізуватись до того, як реєстри закриються. */
+    /** Forces the class to initialise before the registries close. */
     fun register() {
         declared.forEach { Registry.register(BuiltInRegistries.SOUND_EVENT, it.location(), it) }
     }

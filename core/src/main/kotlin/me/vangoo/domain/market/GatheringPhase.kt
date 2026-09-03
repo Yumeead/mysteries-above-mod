@@ -1,6 +1,6 @@
 package me.vangoo.domain.market
 
-/** Фази події-збору. Єдиний дозволений цикл: IDLE → ANNOUNCED → OPEN → CLOSING → IDLE. */
+/** The phases of a gathering event. The only allowed cycle: IDLE → ANNOUNCED → OPEN → CLOSING → IDLE. */
 enum class GatheringPhase {
     IDLE,
     ANNOUNCED,
@@ -9,7 +9,7 @@ enum class GatheringPhase {
 
     fun canTransitionTo(next: GatheringPhase): Boolean = when (this) {
         IDLE -> next == ANNOUNCED
-        // ANNOUNCED → IDLE: скасування, якщо ніхто не погодився прийти
+        // ANNOUNCED → IDLE: cancellation if nobody agreed to come
         ANNOUNCED -> next == OPEN || next == IDLE
         OPEN -> next == CLOSING
         CLOSING -> next == IDLE

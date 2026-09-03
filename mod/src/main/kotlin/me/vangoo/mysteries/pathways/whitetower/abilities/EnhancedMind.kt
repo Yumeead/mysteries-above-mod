@@ -17,39 +17,38 @@ import net.minecraft.world.phys.HitResult
 import kotlin.math.roundToInt
 
 /**
- * WhiteTower, Посл. 9 (Читач): **Загострений розум**.
+ * WhiteTower, Seq. 9 (Reader): **Enhanced Mind**.
  *
- * Читач не може дивитись, не читаючи. Досить придивитись (присісти) — і те, на що
- * впав погляд, саме розповідає про себе: скільки в нього життя й броні, чи він
- * Потойбічний і чийого шляху, скільки в цього каменю міцності й чи він світиться.
+ * A Reader cannot look without reading. Take a closer look (sneak) — and whatever the gaze fell
+ * on tells about itself: how much health and armour it has, whether it is a Beyonder and of which
+ * pathway, how much hardness this stone has and whether it glows.
  *
- * ## Чому це замінює `EnhancedMentalAttributes` (547 рядків)
+ * ## Why this replaces `EnhancedMentalAttributes` (547 lines)
  *
- * Плагінна пасивка була мішком з-під усього: множник досвіду, шанс покращити
- * зачарування, дублікат зілля біля стійки, «чуття скарбів», «аналіз», «слід». Шість
- * механік, жодної видимої, і чотири окремі такти на них — 5, 10, 40 і 600 тіків.
- * Гравець не бачив нічого, крім чисел, які іноді ставали кращими.
+ * The plugin's passive was a bag of everything: an experience multiplier, a chance to improve an
+ * enchantment, duplicating a potion at a brewing stand, a "treasure sense", an "analysis", a
+ * "trace". Six mechanics, none of them visible, and four separate ticks for them — 5, 10, 40 and
+ * 600 ticks. The player saw nothing but numbers that occasionally got better.
  *
- * Читач має **одну** механіку, і вона показує рівно те, чим Читач є: він знає більше
- * за інших про те, на що дивиться. Знання про чужий шлях і Послідовність — не дрібниця,
- * а найцінніша розвідка в грі, де сила залежить від того й того.
+ * The Reader has **one** mechanic, and it shows exactly what a Reader is: they know more than
+ * others about whatever they are looking at. Knowing someone's pathway and Sequence is no trifle
+ * but the most valuable intelligence in a game where power depends on both.
  *
- * Із мішка вижив один пункт, і саме той, що виражається в грі одним рядком: ванільна
- * [Attributes.LUCK] — «уважний знаходить краще», і працює це в кожній таблиці здобичі
- * гри без жодного обробника.
+ * One item survived the bag, and precisely the one expressible in the game in a single line: the
+ * vanilla [Attributes.LUCK] — "the attentive find better", and it works in every loot table in
+ * the game with no handler at all.
  *
- * ## Чому такт, а не подія
+ * ## Why a tick rather than an event
  *
- * Погляд нікуди не «прилітає»: події «гравець подивився на щось» у грі не існує й
- * існувати не може. Це той самий випадок, що й `ResistanceToHorror` — годинник тут
- * доречний. Але цокає він лише під присідання, тож у звичайній грі коштує одного
- * порівняння двічі на секунду.
+ * A gaze does not "arrive" anywhere: an event "the player looked at something" does not exist in
+ * the game and cannot. This is the same case as `ResistanceToHorror` — a clock fits here. But it
+ * only ticks while sneaking, so in ordinary play it costs one comparison twice a second.
  */
 class EnhancedMind :
     PermanentPassiveAbility(AbilityIdentity.of("whitetower_enhanced_mind")),
     Ticking {
 
-    /** Двічі на секунду: рядок над хотбаром висить довше, тож частіше не треба. */
+    /** Twice a second: the line above the hotbar hangs longer, so more often is unnecessary. */
     override val tickPeriodTicks: Int = 10
 
     override val displayName: Component = Component.literal("Загострений розум")
@@ -72,13 +71,14 @@ class EnhancedMind :
     }
 
     override fun tick(context: AbilityContext) {
-        // Читання — вибір гравця, а не фон: інакше рядок над хотбаром зайнятий завжди.
+        // Reading is the player's choice rather than a background: otherwise the line above the
+        // hotbar is occupied at all times.
         if (!context.caster.isShiftKeyDown) return
         val note = read(context) ?: return
         context.messaging.actionBar(context.caster, note)
     }
 
-    /** Спершу жива ціль: камінь за нею цікавить менше, ніж вона сама. */
+    /** A living target first: the stone behind it is less interesting than it is. */
     private fun read(context: AbilityContext): Component? =
         context.targeting.lookingAt(RANGE)?.let { creature(context, it) } ?: block(context)
 
@@ -112,7 +112,7 @@ class EnhancedMind :
 
     private companion object {
         const val RANGE = 24.0
-        /** +1 на Посл. 9, +2 біля вершини: удача у ванільці — величина груба. */
+        /** +1 at Seq. 9, +2 near the top: luck in vanilla is a coarse quantity. */
         const val BASE_LUCK = 1
     }
 }

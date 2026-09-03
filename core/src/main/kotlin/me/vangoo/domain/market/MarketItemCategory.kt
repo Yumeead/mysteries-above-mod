@@ -1,6 +1,6 @@
 package me.vangoo.domain.market
 
-/** Категорії потойбічних речей, дозволені на ринку (зілля свідомо НЕ дозволені). */
+/** The categories of Beyonder goods allowed on the market (potions are deliberately NOT allowed). */
 enum class MarketItemCategory {
     INGREDIENT,
     CHARACTERISTIC,

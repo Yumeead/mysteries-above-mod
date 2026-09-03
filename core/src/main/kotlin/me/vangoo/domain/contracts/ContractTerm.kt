@@ -1,15 +1,15 @@
 package me.vangoo.domain.contracts
 
-/** Умова контракту Sun (Seq 6, «Магічне засвідчення»). Параметри кожної умови — див. [Contract]. */
+/** A term of a Sun contract (Seq 6, "Magic Notarization"). The parameters of each term — see [Contract]. */
 enum class ContractTerm {
-    /** Сторони не атакують одна одну. Порушник карається Божественною карою. */
+    /** The parties do not attack each other. A breaker is punished by Divine Retribution. */
     PEACE,
 
     /**
-     * `partyB` зобов'язується виконати дію (напр. доставити предмети) до дедлайну.
-     * У UI — «Клятва»; параметри `amount`/`deadlineEpochMillis` (+ опційний опис `item`).
-     * Виявлення виконання — майбутня квест-інтеграція; наразі порушення настає лише
-     * по спливанню дедлайну.
+     * `partyB` undertakes to perform an action (e.g. deliver items) before a deadline.
+     * In the UI it is "Клятва"; the parameters are `amount`/`deadlineEpochMillis` (+ an
+     * optional `item` description). Detecting fulfilment is a future quest integration; for
+     * now a breach only happens when the deadline passes.
      */
     DEBT,
 }

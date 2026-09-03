@@ -12,15 +12,16 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 /**
- * Формат вмісту пляшки. Гри не піднімає: кодек — чистий DFU, реєстри йому не потрібні.
+ * The format of a bottle's contents. No game is brought up: the codec is pure DFU and needs no
+ * registries.
  *
- * Перевіряється саме **збережений** вигляд, а не лише кільце туди-назад: цей JSON
- * лежатиме у світах гравців, і мовчазна зміна імен полів зіпсує кожну вже налиту пляшку.
+ * What is checked is the **saved** shape, not merely a round trip: this JSON will lie in
+ * players' worlds, and a silent change of field names would spoil every bottle already poured.
  */
 class PotionBrewTest {
 
     companion object {
-        /** Лише останній тест: `resolvePathway` будує шляхи, а ті — здібності. */
+        /** Only the last test: `resolvePathway` builds pathways, and those build abilities. */
         @JvmStatic
         @BeforeAll
         fun bootstrapRegistries() {
@@ -64,7 +65,7 @@ class PotionBrewTest {
     @Test
     @DisplayName("Шлях, якого ще немає в моді, розпізнається як відсутній, а не падає")
     fun unknownPathwayResolvesToNull() {
-        // Тринадцять шляхів-заглушок і решта фази 08: зілля може існувати раніше за шлях.
+        // Thirteen stub pathways and the rest of phase 08: a potion may exist before its pathway.
         assertNull(PotionBrew("Fool", 9).resolvePathway())
         assertNotNull(PotionBrew("Tyrant", 9).resolvePathway())
     }

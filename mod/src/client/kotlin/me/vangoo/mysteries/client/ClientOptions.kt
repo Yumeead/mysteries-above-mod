@@ -11,27 +11,26 @@ import java.nio.file.Path
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-/** Коли HUD здібностей видно. */
+/** When the ability HUD is visible. */
 enum class HudMode { ALWAYS, AUTO, NEVER }
 
-/** До якого краю екрана притулений HUD. */
+/** Which screen edge the HUD is attached to. */
 enum class HudAnchor { LEFT_CENTER, RIGHT_CENTER, LEFT_TOP, RIGHT_TOP }
 
 /**
- * Клієнтські налаштування — і швидкі слоти разом із ними.
+ * Client settings — and the quick slots along with them.
  *
- * Конфігурації в проєкті не було жодної, тож перевикористовувати нема чого. Це
- * найменше, що покриває вимогу: один файл `config/mysteries_above_client.json`,
- * Gson (уже на класпасі разом із грою), читання на старті, запис на зміну.
+ * There was no configuration in the project at all, so there is nothing to reuse. This is the
+ * least that covers the requirement: one `config/mysteries_above_client.json` file, Gson
+ * (already on the classpath with the game), reading at startup, writing on change.
  *
- * **Тут немає нічого про правила гри.** Усе, що лежить нижче, — про те, як гравець
- * бачить і чим користується, а не про те, що йому дозволено. Мапа слотів живе саме
- * тут, а не на сервері, з однієї причини: слот мусить пережити вихід із гри, а
- * серверне сховище приїде лише у фазі 09. Слот — це ярлик до ідентичності, а не
- * право її кастувати: сервер перевіряє надіслану ідентичність тим самим шляхом, що
- * й будь-яку іншу.
+ * **There is nothing about game rules here.** Everything below is about how the player sees
+ * things and what they use, not about what they are allowed to do. The slot map lives here
+ * rather than on the server for one reason: a slot must survive leaving the game, and server
+ * storage only arrives in phase 09. A slot is a shortcut to an identity, not a right to cast
+ * it: the server verifies the identity it is sent the same way it would any other.
  *
- * Екран налаштувань — не в цій фазі (M7); поки що файл і клавіші.
+ * The settings screen is not part of this phase (M7); for now there is the file and the keys.
  */
 object ClientOptions {
 
@@ -39,7 +38,7 @@ object ClientOptions {
 
     private val gson = GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create()
 
-    /** `true`, поки триває читання файла: інакше кожне присвоєння писало б його назад. */
+    /** `true` while the file is being read: otherwise every assignment would write it back. */
     private var loading = false
 
     private val file: Path
@@ -49,16 +48,16 @@ object ClientOptions {
 
     var anchor: HudAnchor by persisted(HudAnchor.LEFT_CENTER)
 
-    /** Множник поверх ванільного `guiScale`. */
+    /** A multiplier on top of the vanilla `guiScale`. */
     var hudScale: Float by persisted(1.0f) { it.coerceIn(MIN_SCALE, MAX_SCALE) }
 
-    /** Непрозорість панелей: 0 — невидимі, 1 — суцільні. */
+    /** Panel opacity: 0 — invisible, 1 — solid. */
     var opacity: Float by persisted(0.78f) { it.coerceIn(MIN_OPACITY, 1.0f) }
 
-    /** Скільки тримати клавішу касту, поки відкриється колесо (M4). */
+    /** How long to hold the cast key before the wheel opens (M4). */
     var wheelHoldMillis: Int by persisted(180) { it.coerceIn(60, 600) }
 
-    /** Частка радіуса колеса, що не кастує нічого (M4). */
+    /** The share of the wheel's radius that casts nothing (M4). */
     var wheelDeadZoneRatio: Float by persisted(0.28f) { it.coerceIn(0.05f, 0.6f) }
 
     var showCooldownNumbers: Boolean by persisted(true)
@@ -71,17 +70,17 @@ object ClientOptions {
 
     private val bindings = LinkedHashMap<Int, String>()
 
-    /** Швидкий слот → ідентичність здібності. Порожня, поки гравець нічого не призначив. */
+    /** Quick slot → ability identity. Empty until the player assigns anything. */
     val slots: Map<Int, String> get() = bindings
 
-    /** Ідентичність у слоті, або `null`, якщо слот вільний. */
+    /** The identity in the slot, or `null` if the slot is free. */
     fun slot(number: Int): String? = bindings[number]
 
     /**
-     * Записати слот; `null` — звільнити його.
+     * Write a slot; `null` frees it.
      *
-     * Це сховище, а не правила: «перевісити», «зняти», «здібності більше немає» —
-     * робота `AbilitySlots` (M5), який і кличе цей метод.
+     * This is storage, not rules: "rebind", "clear", "the ability is gone" are the job of
+     * `AbilitySlots` (M5), which is what calls this method.
      */
     fun bindSlot(number: Int, identity: String?) {
         require(number in SLOT_RANGE) { "Слота $number не існує" }
@@ -94,13 +93,13 @@ object ClientOptions {
         if (changed) save()
     }
 
-    // ── Файл ────────────────────────────────────────────────────────────────────
+    // ── File ────────────────────────────────────────────────────────────────────
 
-    /** Кличеться один раз на старті клієнта. Відсутній чи побитий файл — типові значення. */
+    /** Called once at client startup. A missing or broken file means the defaults. */
     fun load() {
         val path = file
         if (!Files.exists(path)) {
-            // Файла, якого не існує, гравець не відредагує. Перший запуск його й створює.
+            // A file that does not exist is one the player will not edit. The first run creates it.
             save()
             return
         }
@@ -108,10 +107,10 @@ object ClientOptions {
         val dto = try {
             gson.fromJson(Files.readString(path), Dto::class.java)
         } catch (failure: IOException) {
-            log.warn("Не вдалось прочитати {}: {}", path, failure.message)
+            log.warn("Could not read {}: {}", path, failure.message)
             null
         } catch (failure: JsonParseException) {
-            log.warn("Пошкоджений {}: {}", path, failure.message)
+            log.warn("Corrupt {}: {}", path, failure.message)
             null
         } ?: return
 
@@ -138,7 +137,7 @@ object ClientOptions {
         }
     }
 
-    /** Запис на зміну. Файл дрібний, а змін за сесію — одиниці. */
+    /** Written on change. The file is tiny and there are only a handful of changes per session. */
     fun save() {
         if (loading) return
 
@@ -161,7 +160,7 @@ object ClientOptions {
             Files.createDirectories(path.parent)
             Files.writeString(path, gson.toJson(dto))
         } catch (failure: IOException) {
-            log.warn("Не вдалось записати {}: {}", path, failure.message)
+            log.warn("Could not write {}: {}", path, failure.message)
         }
     }
 
@@ -172,10 +171,10 @@ object ClientOptions {
         Persisted(initial, sanitize)
 
     /**
-     * Властивість, яка сама себе зберігає.
+     * A property that saves itself.
      *
-     * Десять полів з однаковим «нормалізуй, порівняй, запиши» — це десять місць, де
-     * можна забути `save()`. Делегат лишає одне.
+     * Ten fields with the same "normalise, compare, write" is ten places where `save()` can be
+     * forgotten. The delegate leaves one.
      */
     private class Persisted<T>(initial: T, private val sanitize: ((T) -> T)?) : ReadWriteProperty<Any?, T> {
 
@@ -192,11 +191,11 @@ object ClientOptions {
     }
 
     /**
-     * Форма файла для Gson — усі поля необов'язкові.
+     * The file's shape for Gson — every field optional.
      *
-     * Gson будує об'єкт повз конструктор, тож `data class` із непорожніми типами тут
-     * збрехав би: відсутнє поле стало б `null` у полі, оголошеному не-нульовим.
-     * Замість того — нульові поля й нормалізація при читанні.
+     * Gson builds the object past the constructor, so a `data class` with non-nullable types
+     * would lie here: a missing field would become `null` in a field declared non-null.
+     * Instead — nullable fields and normalisation on reading.
      */
     private class Dto {
         var hud: String? = null
@@ -212,7 +211,7 @@ object ClientOptions {
         var slots: Map<String, String>? = null
     }
 
-    /** Шість слотів — рівно стільки прив'язок зареєструє `ModKeys` (M5). */
+    /** Six slots — exactly as many bindings as `ModKeys` will register (M5). */
     val SLOT_RANGE: IntRange = 1..6
 
     private const val MIN_SCALE = 0.5f

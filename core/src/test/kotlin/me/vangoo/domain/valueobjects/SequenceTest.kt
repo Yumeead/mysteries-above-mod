@@ -17,7 +17,7 @@ internal class SequenceTest {
     fun cannotDemotePastWeakestSequence() {
         val weakest = Sequence.of(9)
         assertFalse(weakest.canDemote())
-        // Kotlin's check() кидає IllegalStateException — той самий тип, що й у Java-версії.
+        // Kotlin's check() throws IllegalStateException — the same type as in the Java version.
         assertThrows(IllegalStateException::class.java) { weakest.demote() }
     }
 

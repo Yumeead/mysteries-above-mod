@@ -16,15 +16,15 @@ import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.LivingEntity
 
 /**
- * Tyrant, Посл. 7 (Мореплавець): **Цілюща Вода**.
+ * Tyrant, Seq. 7 (Seafarer): **Restorative Water**.
  *
- * Мореплавець огортає себе чи союзника, на якого дивиться, живлющою водою — слабка
- * регенерація. Навмисно слабша за зілля, зате миттєва й безкоштовна для матеріалів
- * підтримка в бою.
+ * The Seafarer wraps themselves or the ally they are looking at in living water — a weak
+ * regeneration. Deliberately weaker than a potion, but instant and free of materials as support
+ * in a fight.
  */
 class RestorativeWater : ActiveAbility(AbilityIdentity.of("tyrant_restorative_water")) {
 
-    override val displayName: Component = Component.literal("Цілюща Вода")
+    override val displayName: Component = Component.literal("Цілюща вода")
 
     override val spiritualityCost: Int = 35
 
@@ -37,14 +37,16 @@ class RestorativeWater : ActiveAbility(AbilityIdentity.of("tyrant_restorative_wa
 
     override fun cast(context: CastContext): AbilityOutcome {
         val caster = context.caster
-        // Ціль — союзник на лінії зору, інакше сам кастер: промах не має коштувати касту.
+        // The target is an ally on the line of sight, otherwise the caster themselves: a miss must
+        // not cost a cast.
         val target: LivingEntity = context.targeting.playerLookingAt(MAX_RANGE) ?: caster
         val ticks = durationTicks(context.sequence)
 
         target.addEffect(MobEffectInstance(MobEffects.REGENERATION, ticks, 0, false, true, true))
 
-        // Покрив тримається рівно стільки, скільки діє вода, і ходить із ціллю: колір
-        // шляху й планувальник має сам сервіс. Бризки — зустрічний рух до пасм.
+        // The aura holds exactly as long as the water works and travels with the target: the
+        // service itself has the pathway colour and the scheduler. The spray is the counter-flow
+        // to the strands.
         context.effects.bodyAura(target, ticks, counterFlow = ParticleTypes.SPLASH)
         splash(context, target)
 
@@ -62,11 +64,11 @@ class RestorativeWater : ActiveAbility(AbilityIdentity.of("tyrant_restorative_wa
         scale(BASE_DURATION_TICKS, sequence, SequenceScaler.ScalingStrategy.MODERATE)
 
     /**
-     * Сплеск у мить касту: без нього покрив «проявляється», замість початись.
+     * A splash at the moment of the cast: without it the aura "fades in" instead of starting.
      *
-     * Лишається тут, а не в `context.effects`, і це та сама межа: два ванільні виклики
-     * без тривалості й без повтору. У словник фігур потрапляє те, що триває або що
-     * попросила друга здібність, а не все, що видно.
+     * It stays here rather than in `context.effects`, and that is the same boundary: two vanilla
+     * calls with no duration and no repetition. What gets into the vocabulary of shapes is what
+     * lasts or what a second ability asked for, not everything that is visible.
      */
     private fun splash(context: CastContext, target: LivingEntity) {
         val eye = target.eyePosition
@@ -78,7 +80,7 @@ class RestorativeWater : ActiveAbility(AbilityIdentity.of("tyrant_restorative_wa
     }
 
     private companion object {
-        /** ~4 с регенерації I на Посл. 7; росте з Послідовністю. */
+        /** ~4 s of Regeneration I at Seq. 7; it grows with the Sequence. */
         const val BASE_DURATION_TICKS = 80
         const val MAX_RANGE = 20.0
         const val COOLDOWN_SECONDS = 20

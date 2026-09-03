@@ -12,38 +12,37 @@ import net.minecraft.world.item.Items
 import kotlin.math.ceil
 
 /**
- * Здібність: те, чим вона **є** (успадковано від [AbilitySpec], живе в `core`), плюс
- * те, що вона **робить** (усе решта тут).
+ * An ability: what it **is** (inherited from [AbilitySpec], living in `core`) plus
+ * what it **does** (everything else here).
  *
- * Порядок виконання касту тримає [AbilityExecutor], а не базовий клас. У плагіні це
- * був `final Ability.execute()` з чергою хуків `canExecute → preExecution → roll →
- * performExecution → postExecution`; половина з них — оркестрація, яка здібності не
- * належить. Тут здібність відповідає лише на два питання: «чи можу зараз» і «що
- * зробити».
+ * The order of a cast is held by [AbilityExecutor], not by the base class. In the plugin this
+ * was a `final Ability.execute()` with a chain of hooks `canExecute → preExecution → roll →
+ * performExecution → postExecution`; half of them were orchestration that does not belong to
+ * an ability. Here an ability answers only two questions: "can I right now" and "what to do".
  */
 abstract class Ability(
     override val identity: AbilityIdentity,
     override val type: AbilityType,
 ) : AbilitySpec {
 
-    /** Назва для гравця — українською. */
+    /** The name shown to the player — in Ukrainian. */
     abstract val displayName: Component
 
-    /** Опис для меню; залежить від Послідовності, бо від неї залежать числа. */
+    /** The description for the menu; it depends on the Sequence, because the numbers do. */
     abstract fun description(sequence: Sequence): Component
 
     /**
-     * Іконка для меню — звичайний [ItemStack].
+     * The menu icon — an ordinary [ItemStack].
      *
-     * Найдешевше, що лишає двері відчиненими: мод і далі не несе жодної власної
-     * текстури (та сама лінія, що вже проведена зіллям — ванільна пляшка з тінтом
-     * замість 220 моделей), по дроту стек їде готовим `ItemStack.STREAM_CODEC`, а
-     * малюється одним ванільним викликом.
+     * The cheapest thing that leaves the door open: the mod still carries no texture of its
+     * own (the same line already drawn by the potion — a vanilla bottle with a tint instead of
+     * 220 models), the stack travels the wire with a ready-made `ItemStack.STREAM_CODEC`, and
+     * it is drawn by a single vanilla call.
      *
-     * Типова іконка — за типом здібності; перекривається однорядково. Колір шляху
-     * накладає збирач ростера, якщо здібність не оголосила власного `DYED_COLOR`.
+     * The default icon comes from the ability type; it is overridden in one line. The roster
+     * builder applies the pathway colour unless the ability declared its own `DYED_COLOR`.
      *
-     * Кожен виклик має віддавати **свій** стек: збирач ростера його фарбує.
+     * Every call must return **its own** stack: the roster builder dyes it.
      */
     open val icon: ItemStack get() = when (type) {
         AbilityType.ACTIVE -> ItemStack(Items.AMETHYST_SHARD)
@@ -55,25 +54,27 @@ abstract class Ability(
 
     override fun cooldownSeconds(sequence: Sequence): Int = 0
 
-    /** Додаткова умова касту понад володіння, кулдаун і духовність. */
+    /** An extra cast condition on top of ownership, cooldown and spirituality. */
     open fun canCast(context: CastContext): Boolean = true
 
     /**
-     * Ціль, чий опір за Послідовністю треба перекинути перед ефектом. `null` — здібність
-     * не змагається (більшість). Опір рахується тільки проти інших Потойбічних.
+     * The target whose Sequence-based resistance must be overcome before the effect. `null` —
+     * the ability is not contested (most are not). Resistance is only rolled against other
+     * Beyonders.
      */
     open fun contestedTarget(context: CastContext): LivingEntity? = null
 
     /**
-     * Втрата здібності або вимкнення мода: прибрати те, що лишилось у світі.
+     * Losing the ability or shutting the mod down: clean up whatever is left in the world.
      *
-     * **Сесії гасити не треба** — реєстр гасить їх сам (вихід гравця, зупинка сервера,
-     * перекаст), а прибирання за сесією живе в її `finally`. Сюди йде тільки те, що
-     * пережило б і скасовану сесію: прикликані істоти, змінені блоки, запечатані предмети.
+     * **Sessions need no cancelling** — the registry cancels them itself (the player leaving,
+     * the server stopping, a recast), and cleanup after a session lives in its `finally`. Only
+     * what would outlive a cancelled session goes here: summoned creatures, changed blocks,
+     * sealed items.
      */
     open fun cleanUp() {}
 
-    /** Скейлінг сили від Послідовності. Власних множників не писати. */
+    /** Power scaling by Sequence. Do not write multipliers of your own. */
     protected fun scale(
         base: Int,
         sequence: Sequence,
@@ -88,60 +89,60 @@ abstract class Ability(
     override fun toString(): String = "${this::class.simpleName}($identity)"
 }
 
-/** Здібність, яку гравець вмикає явно: коштує духовності й лишає кулдаун. */
+/** An ability the player switches on explicitly: it costs spirituality and leaves a cooldown. */
 abstract class ActiveAbility(identity: AbilityIdentity) : Ability(identity, AbilityType.ACTIVE) {
 
     abstract fun cast(context: CastContext): AbilityOutcome
 }
 
 /**
- * Те, що цокає власним тактом.
+ * Something that ticks on a clock of its own.
  *
- * Не `sealed`: відколи такт став вибором пасивки, а не її обов'язком, оголошувати
- * `Ticking` доводиться в пакеті самої здібності — а `sealed` дозволяє реалізацію лише
- * у своєму.
+ * Not `sealed`: ever since ticking became a passive's choice rather than its duty, `Ticking`
+ * has to be declared in the ability's own package — and `sealed` only allows implementations
+ * inside its own.
  *
- * [tickPeriodTicks] — головна відмінність від плагіна. Там `PassiveAbilityScheduler`
- * кликав `tick()` усім і кожен тік, а пасивка, якій вистачало разу на секунду, сама
- * рахувала `if (++runs % 20 == 0)`. Лічильник у полі здібності — це стан, який
- * розсинхронізується з перезаходом гравця; оголошений період — просто число.
+ * [tickPeriodTicks] is the main difference from the plugin. There `PassiveAbilityScheduler`
+ * called `tick()` on everything every tick, and a passive that only needed a second's cadence
+ * counted `if (++runs % 20 == 0)` itself. A counter in an ability field is state that goes out
+ * of sync when the player relogs; a declared period is just a number.
  *
- * **Пасивка цього не успадковує.** Відколи вона вміє чекати на подію (фаза 06), такт
- * для неї — вибір, а не обов'язок: опір, що спрацьовує на удар, опитувати світ двадцять
- * разів на секунду не мусить. Хто хоче цокати — дописує `, Ticking` до свого заголовка.
+ * **A passive does not inherit this.** Ever since it learned to wait for an event (phase 06),
+ * ticking is a choice for it, not a duty: a resistance that fires on a hit need not poll the
+ * world twenty times a second. Whoever wants to tick adds `, Ticking` to their own header.
  */
 interface Ticking {
 
-    /** Період такту в тіках. 1 — щотік, 20 — раз на секунду. */
+    /** The tick period in ticks. 1 — every tick, 20 — once a second. */
     val tickPeriodTicks: Int get() = 1
 
     fun tick(context: AbilityContext)
 }
 
-/** Пасивка, що працює завжди, поки здібність є в Потойбічного. */
+/** A passive that works at all times, as long as the Beyonder has the ability. */
 abstract class PermanentPassiveAbility(
     identity: AbilityIdentity,
 ) : Ability(identity, AbilityType.PERMANENT_PASSIVE) {
 
     /**
-     * Вхід у гру, респавн або отримання здібності при піднесенні.
+     * Joining the game, respawning, or gaining the ability on ascension.
      *
-     * Місце для підписки на події: реєстр знімає попередні підписки цієї здібності
-     * **перед** кожним викликом, тож активація вдруге не подвоює нічого.
+     * The place to subscribe to events: the registry removes this ability's previous
+     * subscriptions **before** every call, so activating twice doubles nothing.
      */
     open fun onActivate(context: AbilityContext) {}
 
-    /** Вихід із гри або втрата здібності. Підписки знімає реєстр, не здібність. */
+    /** Leaving the game or losing the ability. The registry removes subscriptions, not the ability. */
     open fun onDeactivate(context: AbilityContext) {}
 }
 
 /**
- * Пасивка з перемикачем, який тримає гравець.
+ * A passive with a switch the player holds.
  *
- * Якщо сила має гаснути **сама** — вичерпалась духовність, скінчився час, — це не
- * сюди: перемикач лежить поза здібністю, і дотягнутись до нього зсередини не вийде.
- * Такі беруться [ActiveAbility] плюс сесія: тіло сесії саме вирішує, коли згаснути,
- * а `finally` знімає накладене.
+ * If a power must go out **on its own** — spirituality ran out, the time expired — this is not
+ * the place: the switch lives outside the ability and cannot be reached from inside. Such
+ * powers are an [ActiveAbility] plus a session: the session body decides when to go out, and
+ * its `finally` removes whatever it applied.
  */
 abstract class ToggleablePassiveAbility(
     identity: AbilityIdentity,

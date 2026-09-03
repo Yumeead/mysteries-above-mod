@@ -4,21 +4,21 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 
 /**
- * Колір як спакований RGB. Існує, щоб `core` міг тримати брендинг шляхів, не знаючи
- * ні про `net.minecraft.util.ARGB`, ні про `TextColor` — мод розпаковує на своєму боці.
+ * A colour as packed RGB. It exists so that `core` can hold pathway branding without knowing
+ * about `net.minecraft.util.ARGB` or `TextColor` — the mod unpacks it on its own side.
  *
- * ## Відтінок — один, світлість — різна
+ * ## One hue, different lightness
  *
- * Фігура, намальована **одним** кольором шляху, читається як пляма фарби: двадцять
- * порошинок однакового синього не мають ні глибини, ні форми. Тому в кольору є
- * [shade] — «той самий колір, трохи темніший або світліший», — і фігури беруть із
- * нього палітру ([shades]) замість того, щоб підмішувати білий чи чорний руками.
+ * A shape drawn in a **single** pathway colour reads as a blob of paint: twenty motes of the
+ * same blue have neither depth nor form. Hence the colour has [shade] — "the same colour, a
+ * little darker or lighter" — and shapes take a palette from it ([shades]) instead of mixing
+ * in white or black by hand.
  *
- * Працює це для будь-якого шляху, а не лише для синіх Дверей: перетворення йде через
- * **HSV**, тобто відтінок лишається тим самим числом, а рухається лише яскравість
- * (і, у бік світлого, насиченість). Множення каналів RGB, яке напрошується першим,
- * так не вміє: воно годиться, щоб затемнити, але «освітлити» ним означає впертись у
- * межу 255 різними каналами в різний момент — і колір поїде у відтінку.
+ * This works for any pathway, not just the blue Door: the conversion goes through **HSV**,
+ * so the hue stays the same number and only the value moves (and, towards light, the
+ * saturation). Multiplying the RGB channels, the first thing that suggests itself, cannot do
+ * this: it is fine for darkening, but "lightening" that way means hitting the 255 ceiling in
+ * different channels at different moments — and the hue drifts.
  */
 @JvmInline
 value class RgbColor(val packed: Int) {
@@ -32,9 +32,9 @@ value class RgbColor(val packed: Int) {
     val blue: Int get() = packed and 0xFF
 
     /**
-     * Той самий відтінок, інша світлість.
+     * The same hue, a different lightness.
      *
-     * @param amount −1 — до чорного, 0 — цей самий колір, +1 — до білого.
+     * @param amount −1 — towards black, 0 — this very colour, +1 — towards white.
      */
     fun shade(amount: Double): RgbColor {
         require(amount in -1.0..1.0) { "Зсув світлості поза межами [-1, 1]: $amount" }
@@ -48,23 +48,23 @@ value class RgbColor(val packed: Int) {
 
         val saturation = if (top == 0.0) 0.0 else (top - bottom) / top
         return if (amount < 0) {
-            // Темніше — це лише менша яскравість: відтінок і насиченість не рухаються.
+            // Darker is just a lower value: hue and saturation do not move.
             fromHsv(hueOf(r, g, b, top, bottom), saturation, top * (1 + amount))
         } else {
-            // Світліше — це шлях до білого, а білий у HSV має нульову насиченість.
+            // Lighter is the road to white, and white has zero saturation in HSV.
             fromHsv(hueOf(r, g, b, top, bottom), saturation * (1 - amount), top + (1 - top) * amount)
         }
     }
 
     /**
-     * Палітра одного відтінку: [count] кольорів від темнішого до світлішого.
+     * A palette of one hue: [count] colours from darker to lighter.
      *
-     * Саме палітра, а не випадковий зсув на кожну частинку: випадковість дає шум, а
-     * впорядкований список дозволяє фігурі покласти світле там, де в неї «світло»
-     * (вершина арки, край хвилі), і темне там, де тінь. Різниця між шумом і
-     * градієнтом — це різниця між строкатим і об'ємним.
+     * A palette, not a random offset per particle: randomness gives noise, while an ordered
+     * list lets a shape put the light where its "light" is (the top of an arc, the crest of a
+     * wave) and the dark where the shadow is. The difference between noise and a gradient is
+     * the difference between mottled and three-dimensional.
      *
-     * @param spread наскільки далеко розходяться краї палітри від цього кольору
+     * @param spread how far the edges of the palette spread out from this colour
      */
     fun shades(count: Int, spread: Double = 0.35): List<RgbColor> {
         require(count > 0) { "Палітра не може бути порожньою" }
@@ -80,7 +80,7 @@ value class RgbColor(val packed: Int) {
             return RgbColor((r shl 16) or (g shl 8) or b)
         }
 
-        /** Відтінок у градусах [0, 360). Сірий відтінку не має — для нього нуль. */
+        /** Hue in degrees [0, 360). Grey has no hue — zero for it. */
         private fun hueOf(r: Double, g: Double, b: Double, top: Double, bottom: Double): Double {
             val span = top - bottom
             if (span < 1.0e-9) return 0.0

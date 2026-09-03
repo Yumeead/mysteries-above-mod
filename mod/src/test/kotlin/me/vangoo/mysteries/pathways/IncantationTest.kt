@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 /**
- * Розбір замовляння — єдине місце фази 08, де логіка не зводиться до виклику ванільки.
- * Перевіряється саме те, заради чого корені й узято: відмінок.
+ * Parsing an incantation — the one place in phase 08 where the logic is not just a vanilla call.
+ * What is checked is exactly what the stems were taken for: grammatical case.
  */
 class IncantationTest {
 
@@ -15,7 +15,7 @@ class IncantationTest {
     fun `слова сили читаються у відмінках і серед іншого тексту`() {
         val spell = Spellcasting.Incantation.read("Хай промінь вогню вдарить далеко і сильно")
 
-        // 60 (промінь) + 30 (стихія) + 25 (сильно) + 25 (далеко)
+        // 60 (beam) + 30 (element) + 25 (strong) + 25 (far)
         assertEquals("Промінь · вогонь · сильно ×1 · далеко ×1 · 140 духовності", spell?.summary())
     }
 
@@ -23,7 +23,7 @@ class IncantationTest {
     fun `повторення підсилює, але не нескінченно`() {
         val spell = Spellcasting.Incantation.read("вибух сильно сильно сильно сильно сильно")
 
-        // Ціна росте до трьох повторів: 90 + 3 × 25.
+        // The cost grows up to three repetitions: 90 + 3 × 25.
         assertEquals("Вибух · сильно ×3 · 165 духовності", spell?.summary())
     }
 

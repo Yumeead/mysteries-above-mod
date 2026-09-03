@@ -3,12 +3,12 @@ package me.vangoo.domain
 import me.vangoo.domain.valueobjects.RgbColor
 
 /**
- * Єдине джерело правди для кольору шляху: рідина зілля і колір назви.
+ * The single source of truth for a pathway's colour: the potion liquid and the name colour.
  *
- * У плагіні колір тексту був `ChatColor` — одним із 16 легасі-кольорів. Тут це
- * звичайний RGB: 26.2 фарбує `Style` повним `TextColor`, тож обмеження в 16 відтінків
- * більше нічого не купує. Значення успадковані від легасі-палітри, щоб брендинг
- * лишився тим самим, що гравці вже бачили.
+ * In the plugin the text colour was a `ChatColor` — one of the 16 legacy colours. Here it is
+ * plain RGB: 26.2 paints a `Style` with a full `TextColor`, so a 16-shade limit buys nothing
+ * any more. The values are inherited from the legacy palette so that the branding stays the
+ * one players have already seen.
  */
 object PathwayBranding {
 
@@ -45,7 +45,7 @@ object PathwayBranding {
         put("WheelOfFortune", 161, 206, 215, Legacy.GRAY)
     }
 
-    /** Імена всіх 22 шляхів — включно з 13 заглушками без здібностей. */
+    /** Names of all 22 pathways — including the 13 stubs with no abilities. */
     val names: Set<String> = table.keys
 
     fun of(pathwayName: String?): Branding = table[pathwayName] ?: FALLBACK
@@ -54,7 +54,7 @@ object PathwayBranding {
 
     fun textOf(pathwayName: String?): RgbColor = of(pathwayName).text
 
-    /** RGB легасі-кольорів чату — щоб таблиця вище читалась так само, як у плагіні. */
+    /** RGB of the legacy chat colours — so the table above reads the same as in the plugin. */
     private object Legacy {
         val BLACK = RgbColor(0x000000)
         val DARK_BLUE = RgbColor(0x0000AA)

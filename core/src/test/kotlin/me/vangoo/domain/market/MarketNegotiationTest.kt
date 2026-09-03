@@ -45,14 +45,14 @@ internal class MarketNegotiationTest {
     fun turnAlternatesAndOnlyReceiverAccepts() {
         val orderId = session.placeOrder(buyer, "custom:crimson_star", 1, KNOWN)
         val negId = session.offerOnOrder(sellerA, orderId, coppets(20))
-        // Продавець назвав ціну → хід покупця; продавець прийняти не може
+        // The seller named a price → the buyer's move; the seller cannot accept
         assertThrows(MarketException::class.java) { session.accept(sellerA, negId, 99, 99) }
-        // Покупець дає зустрічну → хід продавця; покупець прийняти не може
+        // The buyer counters → the seller's move; the buyer cannot accept
         session.counter(buyer, negId, coppets(14))
         assertThrows(MarketException::class.java) { session.accept(buyer, negId, 99, 99) }
         assertThrows(MarketException::class.java) { session.counter(buyer, negId, coppets(1)) }
-        // Продавець приймає зустрічну; платить ЗАВЖДИ покупець
-        val s = session.accept(sellerA, negId, 1, 0).settlement // гаманець ПОКУПЦЯ: 1 фунт
+        // The seller accepts the counter; the buyer ALWAYS pays
+        val s = session.accept(sellerA, negId, 1, 0).settlement // the BUYER's wallet: 1 pound
         assertEquals(buyer, s.payerId)
         assertEquals(sellerA, s.payeeId)
         assertEquals(14, s.price.money.coppets)
@@ -90,9 +90,9 @@ internal class MarketNegotiationTest {
         val negA = session.offerOnOrder(sellerA, orderId, coppets(20))
         val negB = session.offerOnOrder(sellerB, orderId, coppets(18))
         val result = session.accept(buyer, negB, 1, 0)
-        // Паралельний торг A автоматично скасовано з поверненням його ескроу
+        // The parallel negotiation A is cancelled automatically and its escrow returned
         assertEquals(listOf(Refund(sellerA, negA)), result.releasedEscrows)
-        // Другий accept по мертвому торгу неможливий
+        // A second accept on a dead negotiation is impossible
         assertThrows(MarketException::class.java) { session.accept(buyer, negA, 9, 9) }
         assertThrows(MarketException::class.java) { session.offerOnOrder(sellerA, orderId, coppets(5)) }
     }
@@ -102,7 +102,7 @@ internal class MarketNegotiationTest {
         val orderId = session.placeOrder(buyer, "custom:crimson_star", 1, KNOWN)
         val negId = session.offerOnOrder(sellerA, orderId, coppets(30))
         assertThrows(MarketException::class.java) { session.accept(buyer, negId, 1, 5) } // 25 < 30
-        // торг живий — покупець може торгуватись далі
+        // the negotiation is alive — the buyer may keep bargaining
         session.counter(buyer, negId, coppets(25))
     }
 
@@ -130,7 +130,7 @@ internal class MarketNegotiationTest {
         assertTrue(Refund(sellerA, lotId) in refunds)
         assertTrue(Refund(sellerB, negId) in refunds)
         assertEquals(2, refunds.size)
-        // після закриття всі операції відхиляються
+        // after closing, every operation is rejected
         assertThrows(MarketException::class.java) {
             session.listLot(sellerA, "custom:crimson_star", 1, coppets(1))
         }
@@ -140,13 +140,13 @@ internal class MarketNegotiationTest {
     fun closeIsIdempotentAndNeverRefundsLotTwice() {
         val lotId = session.listLot(sellerA, "custom:crimson_star", 1, coppets(10))
         assertEquals(listOf(Refund(sellerA, lotId)), session.close())
-        // Другий close (напр. плановий кінець + шлях вимкнення) не повертає лот удруге
+        // A second close (e.g. the scheduled end + the shutdown path) does not return the lot twice
         assertTrue(session.close().isEmpty())
     }
 
     /**
-     * Інваріант збереження: після довільного сценарію «зайшло = видано + повернено»
-     * і для ескроу-предметів, і для грошей (сплачено = виручка + комісія).
+     * The conservation invariant: after any scenario, "what came in = what was handed out +
+     * what was returned", both for escrowed items and for money (paid = proceeds + commission).
      */
     @Test
     fun conservationInvariantHolds() {
@@ -154,18 +154,18 @@ internal class MarketNegotiationTest {
         val orderId = session.placeOrder(buyer, "custom:dimensional_wanderer_eye", 1, KNOWN)
         val negA = session.offerOnOrder(sellerA, orderId, coppets(20))
         val negB = session.offerOnOrder(sellerB, orderId, coppets(25))
-        // ескроу зайшло: lotId, negA, negB
+        // escrow came in: lotId, negA, negB
         val lotSale = session.buyLot(buyer, lotId, 2, 0)
         val acceptA = session.accept(buyer, negA, 1, 0)
         val closeRefunds = session.close()
 
-        // Предмети: кожен із 3 ескроу має рівно один вихід
+        // Items: each of the 3 escrows has exactly one way out
         val settled = setOf(lotSale.escrowRef, acceptA.settlement.escrowRef)
         val refunded = (acceptA.releasedEscrows + closeRefunds).map { it.escrowRef }.toSet()
         assertEquals(setOf(lotId, negA), settled)
         assertEquals(setOf(negB), refunded)
 
-        // Гроші: сплачене покупцем = виручка продавців + комісія
+        // Money: what the buyer paid = the sellers' proceeds + the commission
         for (s: Settlement in listOf(lotSale, acceptA.settlement)) {
             assertEquals(s.price.money.coppets, s.sellerProceeds.coppets + s.commissionPaid.coppets)
             assertEquals(s.price.money.coppets, s.payerCharge.paidCoppets)
@@ -177,7 +177,7 @@ internal class MarketNegotiationTest {
         val demand = Consideration.ItemDemand("characteristic:Door:7", 1)
         val orderId = session.placeOrder(buyer, "custom:crimson_star", 1, KNOWN)
         val negId = session.offerOnOrder(sellerA, orderId, Consideration.of(demand, PoundMoney.ofCoppets(0)))
-        val s = session.accept(buyer, negId, 0, 0).settlement // чистий бартер грошей не потребує
+        val s = session.accept(buyer, negId, 0, 0).settlement // a pure barter needs no money
         assertTrue(s.price.isBarter)
         assertEquals(demand, s.price.item)
         assertEquals(0, s.commissionPaid.coppets)
@@ -192,10 +192,10 @@ internal class MarketNegotiationTest {
             sellerA, "custom:dimensional_wanderer_eye", 1,
             Consideration.of(demand, PoundMoney.ofCoppets(40)),
         )
-        val s = session.buyLot(buyer, lotId, 2, 0) // 2 фунти = 40 коппетів бусту
+        val s = session.buyLot(buyer, lotId, 2, 0) // 2 pounds = 40 coppets of boot
         assertTrue(s.price.isBarter)
-        assertEquals(0, s.commissionPaid.coppets) // бартер: комісії немає навіть із бусту
-        assertEquals(40, s.sellerProceeds.coppets) // весь буст продавцеві
+        assertEquals(0, s.commissionPaid.coppets) // barter: no commission even on the boot
+        assertEquals(40, s.sellerProceeds.coppets) // the whole boot goes to the seller
         assertEquals(40, s.payerCharge.paidCoppets)
     }
 

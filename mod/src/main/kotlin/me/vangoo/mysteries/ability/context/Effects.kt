@@ -5,42 +5,43 @@ import net.minecraft.core.particles.ParticleOptions
 import net.minecraft.world.entity.LivingEntity
 
 /**
- * Словник фігур: те, що видно, коли здібність спрацювала.
+ * The vocabulary of shapes: what is seen when an ability fires.
  *
- * ## Чому це таки сервіс, попри правило про фасад
+ * ## Why this is a service after all, despite the rule about facades
  *
- * Правило фази 03 — «метод потрапляє в контекст, лише якщо додає щось понад один
- * ванільний виклик». Фігури його проходять, і не ледве:
+ * The phase 03 rule — "a method gets into the context only if it adds something beyond a single
+ * vanilla call". Shapes pass it, and not narrowly:
  *
- * - вони **тривають**, тобто мусять планувати себе — а планувальник є лише в моді;
- * - вони знають **колір шляху кастера** ([pathwayColor]), тож здібності не доводиться
- *   тягнути `PathwayBranding` і власний шлях у кожен виклик;
- * - їх **перевикористовують**: у плагіні на 20 фігур припадало 869 місць виклику, і
- *   саме тому фігури там жили в одному місці, а не в класах здібностей.
+ * - they **last**, i.e. they must schedule themselves — and the scheduler exists only in the mod;
+ * - they know the **caster's pathway colour** ([pathwayColor]), so an ability need not drag
+ *   `PathwayBranding` and its own pathway into every call;
+ * - they are **reused**: in the plugin 20 shapes accounted for 869 call sites, and that is
+ *   exactly why the shapes lived in one place there rather than in ability classes.
  *
- * Хмарку частинок у мить касту сюди класти **не треба** — це один `sendParticles`,
- * і він лишається на місці виклику. Межа проходить по тривалості й повторюваності,
- * а не по слову «візуал».
+ * A puff of particles at the moment of a cast does **not** belong here — that is one
+ * `sendParticles`, and it stays at the call site. The boundary runs along duration and reuse,
+ * not along the word "visual".
  *
- * ## Чому не порт `IVisualEffectsContext`
+ * ## Why this is not a port of `IVisualEffectsContext`
  *
- * У плагіні тут було 14 методів (`playCircleEffect`, `playVortexEffect`, `playCubeEffect`…),
- * і список диктувало те, що Spigot узагалі вміє малювати: коло й спіраль доводилось
- * *наближати* розсипом крапель. Половина того словника — фігури на землі, від яких мод
- * відмовився свідомо. Тому словник збирається **з написаних ефектів**, а не з чужого
- * переліку: фігура потрапляє сюди, коли її просить друга здібність.
+ * In the plugin there were 14 methods here (`playCircleEffect`, `playVortexEffect`,
+ * `playCubeEffect`…), and the list was dictated by what Spigot could draw at all: a circle and
+ * a spiral had to be *approximated* with a scatter of droplets. Half of that vocabulary was
+ * ground decals, which the mod dropped deliberately. So the vocabulary is assembled **from the
+ * effects that were written**, not from someone else's list: a shape gets here when a second
+ * ability asks for it.
  */
 interface Effects {
 
-    /** Колір шляху кастера. Типовий для будь-якої його фігури; `null` в аргументі означає саме його. */
+    /** The caster's pathway colour. The default for any of their shapes; `null` in an argument means exactly it. */
     val pathwayColor: RgbColor
 
     /**
-     * Покрив на тілі [target]: пасма, що зринають від ніг до плечей і ходять разом
-     * із ціллю. Планує себе сам і гасне за [durationTicks] — сесія для нього не потрібна.
+     * An aura on [target]'s body: strands rising from the feet to the shoulders and travelling
+     * with the target. It schedules itself and fades after [durationTicks] — no session needed.
      *
-     * [counterFlow] — необов'язкова частинка, що зривається вниз, поки пасма йдуть
-     * угору (для води це бризки). Без зустрічного руху покрив читається як обертання.
+     * [counterFlow] is an optional particle that falls downwards while the strands go up (for
+     * water it is spray). Without a counter-flow the aura reads as rotation.
      */
     fun bodyAura(
         target: LivingEntity,

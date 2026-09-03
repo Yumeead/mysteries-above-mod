@@ -36,7 +36,7 @@ internal class PoundMoneyTest {
 
     @Test
     fun commissionIsCeiled() {
-        // 10% від 55 к = 5.5 → 6 к
+        // 10% of 55 c = 5.5 → 6 c
         assertEquals(6, PoundMoney.ofCoppets(55).commission(0.10).coppets)
         assertEquals(0, PoundMoney.ofCoppets(0).commission(0.10).coppets)
     }
@@ -62,11 +62,11 @@ internal class PoundMoneyTest {
         assertThrows(IllegalArgumentException::class.java) { PoundMoney.ofCoppets(20) * -1 }
     }
 
-    // --- CoinChange (жадібний розмін: спершу коппети, потім фунти) ---
+    // --- CoinChange (greedy change: coppets first, then pounds) ---
 
     @Test
     fun paysExactlyWithCoppetsFirst() {
-        // ціна 30 к; у гаманці 2 ф + 12 к → зняти 12 к + 1 ф, здача 2 к
+        // price 30 c; the wallet holds 2 p + 12 c → take 12 c + 1 p, change 2 c
         val change = CoinChange.make(2, 12, PoundMoney.ofCoppets(30))!!
         assertEquals(1, change.takePounds)
         assertEquals(12, change.takeCoppets)
@@ -84,7 +84,7 @@ internal class PoundMoneyTest {
 
     @Test
     fun poundsOnlyWalletGetsChange() {
-        // ціна 30 к; лише 2 фунти → зняти 2 ф (40 к), здача 10 к
+        // price 30 c; only 2 pounds → take 2 p (40 c), change 10 c
         val change = CoinChange.make(2, 0, PoundMoney.ofCoppets(30))!!
         assertEquals(2, change.takePounds)
         assertEquals(0, change.takeCoppets)

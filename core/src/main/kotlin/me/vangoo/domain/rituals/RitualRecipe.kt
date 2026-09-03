@@ -1,9 +1,9 @@
 package me.vangoo.domain.rituals
 
 /**
- * Чистий рецепт ритуалу: вимоги до вівтаря й інгредієнтів + гейт послідовності.
- * Інгредієнти — рядкові ключі предметів (домен не імпортує Minecraft); резолвить їх
- * шар поведінки.
+ * A pure ritual recipe: the altar and ingredient requirements + the sequence gate.
+ * Ingredients are string item keys (the domain does not import Minecraft); the behaviour layer
+ * resolves them.
  */
 data class RitualRecipe(
     val type: RitualType,

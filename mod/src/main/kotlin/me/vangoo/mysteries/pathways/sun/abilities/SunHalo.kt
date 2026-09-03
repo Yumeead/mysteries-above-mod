@@ -24,36 +24,36 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * Sun, Посл. 7 (Сонячний Первосвященник): **Німб Сонця**.
+ * Sun, Seq. 7 (Solar High Priest): **Halo of the Sun**.
  *
- * Німб не світить рівно — він **б'є пульсом**. Кожні [PULSE_PERIOD_TICKS] тіків від
- * Первосвященника розходиться кільце, і скверна, яку воно наздогнало, дістає удар.
+ * The halo does not shine steadily — it **strikes in pulses**. Every [PULSE_PERIOD_TICKS] ticks a
+ * ring spreads out from the High Priest, and any unclean it catches takes a blow.
  *
- * ## Чим відрізняється від Благословення
+ * ## How it differs from Blessing
  *
- * Обидві сили утримувані й обидві світять навколо, тож різницю довелось зробити
- * механічною, а не описовою:
+ * Both powers are sustained and both shine around, so the difference had to be made mechanical
+ * rather than descriptive:
  *
- * | | Благословення (Посл. 8) | Німб (Посл. 7) |
+ * | | Blessing (Seq. 8) | Halo (Seq. 7) |
  * |---|---|---|
- * | кому | союзникам — зцілення | скверні — шкода |
- * | як | рівно, щосекунди потроху | пульсом раз на дві секунди, сильно |
- * | активація | нічого | миттєве очищення від дебафів |
+ * | to whom | allies — healing | the unclean — damage |
+ * | how | evenly, a little every second | in a pulse once every two seconds, hard |
+ * | on activation | nothing | an instant cleanse of debuffs |
  *
- * Рівний потік проти пульсу — це різне відчуття в бою: під Благословенням стоять, під
- * Німбом наступають між ударами кільця.
+ * An even flow against a pulse feels different in a fight: under a Blessing you stand, under a
+ * Halo you advance between the ring's beats.
  */
 class SunHalo : ActiveAbility(AbilityIdentity.of("sun_halo")) {
 
     override val displayName: Component = Component.literal("Німб Сонця")
 
-    /** Каст безкоштовний: ціна — утримання, і гасити німб має бути дарма. */
+    /** The cast is free: the price is the upkeep, and putting the halo out must cost nothing. */
     override val spiritualityCost: Int = 0
 
     /**
-     * Ціна утримання росте з Послідовністю — і мусить, бо разом із нею росте
-     * **регенерація**: 3 очки/с на Посл. 7 проти 6 на Посл. 5 (і 9 при повному
-     * засвоєнні). Пласка ціна робила б німб безкоштовним нагорі.
+     * The upkeep grows with the Sequence — and it must, because **regeneration** grows with it
+     * too: 3 points/s at Seq. 7 against 6 at Seq. 5 (and 9 at full mastery). A flat price would
+     * make the halo free at the top.
      */
     override fun periodicCost(sequence: Sequence): Int =
         scale(BASE_PERIODIC_COST, sequence, SequenceScaler.ScalingStrategy.MODERATE)
@@ -64,8 +64,8 @@ class SunHalo : ActiveAbility(AbilityIdentity.of("sun_halo")) {
         "Німб святого світла: при активації миттєво знімає з вас усе шкідливе, далі " +
             "б'є пульсом.\n" +
             "▪ Радіус: ${range(sequence).toInt()} бл.\n" +
-            "▪ Пульс раз на ${PULSE_PERIOD_TICKS / TICKS_PER_SECOND} с: ${pulseDamage(sequence)} по скверні\n" +
-            "▪ Утримання: ${periodicCost(sequence)} духовності/с; повторний каст гасить",
+            "▪ Пульс раз на ${PULSE_PERIOD_TICKS / TICKS_PER_SECOND} с: ${pulseDamage(sequence)} по нечисті\n" +
+            "▪ Витрата: ${periodicCost(sequence)} духовності/с; повторний каст вимикає",
     )
 
     override fun cast(context: CastContext): AbilityOutcome {
@@ -74,20 +74,21 @@ class SunHalo : ActiveAbility(AbilityIdentity.of("sun_halo")) {
             return AbilityOutcome.done("Німб згас")
         }
 
-        // Активація очищує — це те, за що німб беруть у мить, коли вже погано.
+        // Activation cleanses — that is what the halo is taken for at the moment things are
+        // already bad.
         val cleaned = cleanse(context.caster)
 
         val radius = range(context.sequence)
         val hit = pulseDamage(context.sequence)
         val mote = ModParticles.mote(context.effects.pathwayColor)
-        // Німб — стала фігура, тож і порошинка стала: іскра мерехтить і спливає, і кільце
-        // з неї читалось хмарою. Див. `SpiritGlyphParticle`.
+        // The halo is a steady shape, so the mote is steady too: a spark shimmers and floats up,
+        // and a ring made of them read as a cloud. See `SpiritGlyphParticle`.
         val glyph = ModParticles.glyph(context.effects.pathwayColor)
         val messaging = context.messaging
         val beyonders = context.beyonders
 
-        // Такт частий — ним живе сам німб; пульс відлічується в тактах, а утримання
-        // лишається посекундним (`sustain` бере його з `upkeepPeriodTicks`).
+        // The tick is frequent — the halo itself lives by it; the pulse is counted in ticks while
+        // the upkeep stays per second (`sustain` takes it from `upkeepPeriodTicks`).
         var beat = 0
 
         context.session {
@@ -121,38 +122,39 @@ class SunHalo : ActiveAbility(AbilityIdentity.of("sun_halo")) {
         }
 
         return AbilityOutcome.done(
-            if (cleaned > 0) "Німб спалахнув і зняв $cleaned дебаф(и)" else "Німб спалахнув",
+            if (cleaned > 0) "Німб спалахнув, знято шкідливих ефектів: $cleaned" else "Німб спалахнув",
         )
     }
 
     /**
-     * **Німб** — кільце над головою, яке тримає форму.
+     * The **halo** — a ring above the head that holds its shape.
      *
-     * ## Чому воно розліталось угору
+     * ## Why it used to scatter upwards
      *
-     * Порошинка духу має від'ємну гравітацію (`SpiritMoteParticle.GRAVITY` — речовина
-     * духу спливає) і живе 16–28 тіків. Кільце ж перемальовувалось щочотири тіки з
-     * новим кутом і новою висотою коливання — тобто в кожну мить у повітрі висіло
-     * п'ять-сім кілець, кожне під своїм кутом, на своїй висоті й уже піднявшись. Разом
-     * це читалось як хмара, що зринає, а не як німб.
+     * The spirit mote has negative gravity (`SpiritMoteParticle.GRAVITY` — spirit matter floats
+     * up) and lives 16–28 ticks. The ring, meanwhile, was redrawn every four ticks at a new angle
+     * and a new bob height — i.e. at any moment five to seven rings hung in the air, each at its
+     * own angle, its own height and already risen. Together that read as a cloud floating up
+     * rather than as a halo.
      *
-     * Виправлено трьома речами, і всі три про **сталість**:
+     * Fixed by three things, and all three are about **steadiness**:
      *
-     * 1. Порошинка народжується з невеликою швидкістю **вниз** ([HALO_SINK]), яка гасить
-     *    її власне спливання. Форма `sendParticles` із `count = 0` саме для цього й
-     *    існує: тоді трійка дельт — це не розкид, а **швидкість**.
-     * 2. Коливання по висоті прибрано зовсім: німб висить, а не гойдається.
-     * 3. Обертання вповільнено втричі, щоб за час життя порошинки кільце не встигало
-     *    змазатись у кільцевий сектор.
+     * 1. A mote is born with a small **downward** velocity ([HALO_SINK]) that cancels its own
+     *    floating. The `sendParticles` form with `count = 0` exists exactly for this: then the
+     *    three deltas are not a spread but a **velocity**.
+     * 2. The height bobbing was removed entirely: a halo hangs, it does not sway.
+     * 3. The rotation was slowed threefold so that the ring does not smear into an arc within a
+     *    mote's lifetime.
      *
-     * Точки при цьому щоразу ті самі, тож перемальовування **підсилює** те саме коло,
-     * замість малювати поруч нове.
+     * The points are then the same each time, so redrawing **reinforces** the same circle instead
+     * of drawing a new one beside it.
      */
     private fun halo(priest: ServerPlayer, glyph: ParticleOptions, beat: Int) {
         val level = priest.level()
         val spin = beat * HALO_SPIN
-        // Позиція в пакеті — сама маківка: по ній знак знаходить власника. Де саме стати,
-        // каже **зсув**, і він їде окремо, тож затримка мережі кільця не зміщує.
+        // The position in the packet is the crown itself: by it the glyph finds its owner. Where
+        // exactly to stand is said by the **offset**, and that travels separately, so network
+        // delay does not shift the ring.
         val head = priest.y + priest.bbHeight
 
         repeat(HALO_POINTS) { i ->
@@ -160,23 +162,23 @@ class SunHalo : ActiveAbility(AbilityIdentity.of("sun_halo")) {
             level.sendParticles(
                 glyph,
                 priest.x, head, priest.z,
-                // count = 0 — точка без розкиду; трійка дельт доїжджає незміненою і є
-                // зсувом від маківки, а не швидкістю (див. `SpiritGlyphParticle`).
+                // count = 0 — a point with no spread; the three deltas arrive unchanged and are
+                // the offset from the crown rather than a velocity (see `SpiritGlyphParticle`).
                 0, HALO_RADIUS * cos(angle), HALO_LIFT, HALO_RADIUS * sin(angle), 1.0,
             )
         }
     }
 
     /**
-     * Удар пульсу — **тільки дзвін**.
+     * A pulse strike — **the chime only**.
      *
-     * Кола по землі звідси прибрано першими: той самий почерк уже має `Благословення`, і
-     * дві утримувані сили Сонця виглядали однаково. Друге, ширше кільце над головою,
-     * яким їх замінили, виявилось не кращим: на дзвін довкола німба спалахував другий
-     * обідок, і замість удару це читалось як збій.
+     * Circles on the ground were the first thing removed from here: `Blessing` already has that
+     * same handwriting, and the Sun's two sustained powers looked identical. The second, wider
+     * ring above the head that replaced them turned out no better: on the chime a second rim
+     * flashed around the halo, and instead of a strike it read as a glitch.
      *
-     * Німб лишається одним кільцем **завжди**. Про удар каже звук, а про його наслідки —
-     * те, що ціль втрачає здоров'я; малювати це вдруге не треба.
+     * The halo stays a single ring **always**. The strike is announced by the sound and its
+     * consequences by the target losing health; there is no need to draw it a second time.
      */
     private fun pulse(priest: ServerPlayer) {
         priest.level().playSound(
@@ -199,22 +201,22 @@ class SunHalo : ActiveAbility(AbilityIdentity.of("sun_halo")) {
         const val PULSE_PERIOD_TICKS = 2 * TICKS_PER_SECOND
 
         /**
-         * Раз на два тіки — і цього досить, відколи знак **їде на власнику**.
+         * Once every two ticks — and that is enough, ever since the glyph **rides its owner**.
          *
-         * Поки фігура була статичною в світі, такт доводилось тримати щотіковим, аби
-         * кільце не стрибало, і це коштувало десяти частинок на тік. Тепер плавність дає
-         * не частота, а те, що знак чіпляється до голови: такт лишився тільки для того,
-         * щоб покоління змінювались раніше, ніж закінчиться їхнє життя.
+         * While the shape was static in the world, the tick had to be kept every-tick so the ring
+         * would not jump, and that cost ten particles a tick. Now the smoothness comes not from
+         * the frequency but from the glyph latching onto the head: the tick is left only so that
+         * generations change before their lifetime runs out.
          */
         const val HALO_PERIOD_TICKS = 2
         const val BEATS_PER_PULSE = PULSE_PERIOD_TICKS / HALO_PERIOD_TICKS
 
-        /** Над маківкою, а не на ній: німб має висіти. */
+        /** Above the crown rather than on it: a halo is supposed to hang. */
         const val HALO_LIFT = 0.30
-        /** Трохи ширший за голову, і не більше: німб, а не обруч навколо плечей. */
+        /** A little wider than the head, and no more: a halo, not a hoop around the shoulders. */
         const val HALO_RADIUS = 0.28
         const val HALO_POINTS = 10
-        /** Повільно: за два тіки життя знака кільце не має змазатись у сектор. */
+        /** Slowly: the ring must not smear into an arc within the glyph's two-tick lifetime. */
         const val HALO_SPIN = 0.03
         const val TAU = 2.0 * Math.PI
     }

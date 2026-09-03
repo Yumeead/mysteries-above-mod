@@ -23,20 +23,20 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 
 /**
- * Round-trip трьох пакетів: реєстри піднімаються, світ — ні.
+ * A round trip of three packets: the registries come up, the world does not.
  *
- * Розсинхрон запису й читання — найтихіший клас багів у модах: він не падає, він
- * зсуває решту буфера й віддає сміття полем нижче. Тут кожен пакет проїжджає туди й
- * назад, включно з двома формами, на яких найлегше помилитись: **порожній ростер**
- * (гравець не Потойбічний) та `identity == null` («те, що вже обрано»).
+ * A write/read desync is the quietest class of bug in mods: it does not crash, it shifts the
+ * rest of the buffer and hands back rubbish a field lower. Here every packet travels there and
+ * back, including the two forms easiest to get wrong: an **empty roster** (the player is not a
+ * Beyonder) and `identity == null` ("whatever is already selected").
  *
- * Буфер порожній наприкінці — така сама частина перевірки, як і збіг полів: пакет,
- * що прочитав менше, ніж записав, у грі з'їв би наступний.
+ * The buffer being empty at the end is as much a part of the check as the fields matching: a
+ * packet that read less than it wrote would eat the next one in the game.
  */
 class AbilityPayloadCodecTest {
 
     companion object {
-        /** `ItemStack.STREAM_CODEC` пише предмет за реєстром — без нього ростер не проїде. */
+        /** `ItemStack.STREAM_CODEC` writes an item by registry — without it the roster will not travel. */
         @JvmStatic
         @BeforeAll
         fun bootstrapRegistries() = GameRegistries.bootstrap()
@@ -95,7 +95,7 @@ class AbilityPayloadCodecTest {
             assertEquals(before.cost, after.cost)
             assertEquals(before.upkeep, after.upkeep)
             assertEquals(before.cooldownSeconds, after.cooldownSeconds)
-            // `ItemStack` не має структурного `equals` — порівнюється вмістом.
+            // `ItemStack` has no structural `equals` — it is compared by contents.
             assertTrue(ItemStack.matches(before.icon, after.icon), "іконка ${before.identity}")
         }
     }
@@ -126,7 +126,7 @@ class AbilityPayloadCodecTest {
             ),
         )
 
-        // Стан — плоскі числа й рядки, тож звичайна рівність тут працює.
+        // The state is flat numbers and strings, so plain equality works here.
         assertEquals(payload, roundTrip(payload, AbilityStatePayload.CODEC))
     }
 
@@ -164,7 +164,7 @@ class AbilityPayloadCodecTest {
         }
     }
 
-    // ── Заготовки ───────────────────────────────────────────────────────────────
+    // ── Fixtures ────────────────────────────────────────────────────────────────
 
     private fun entry(
         identity: String,

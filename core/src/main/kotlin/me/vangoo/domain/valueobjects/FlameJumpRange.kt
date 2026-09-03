@@ -5,8 +5,8 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 
 /**
- * Дальність телепорту «Стрибок крізь полум'я» (Seq 7 Фокусника шляху Блазня).
- * База 30 блоків, зростає зі силою. Чиста математика — без платформи.
+ * Teleport range of "Jump Through Flame" (Seq 7 Magician of the Fool pathway).
+ * 30 blocks base, grows with power. Pure math — no platform.
  */
 object FlameJumpRange {
 

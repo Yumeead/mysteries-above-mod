@@ -6,17 +6,17 @@ import me.vangoo.mysteries.ability.context.Beyonders
 import java.util.UUID
 
 /**
- * Потойбічні, що зараз у грі.
+ * The Beyonders currently in the game.
  *
- * Тільки пам'ять: сховище приходить у фазі 09, і саме воно наповнюватиме реєстр на
- * вхід гравця. До того сюди кладе команда — цього досить, щоб хребет касту працював
- * у грі, а не лише в тестах.
+ * Memory only: storage arrives in phase 09, and it is what will fill the registry when a player
+ * joins. Until then the command puts them here — enough for the cast backbone to work in the
+ * game rather than only in tests.
  */
 class BeyonderRegistry(
     /**
-     * Стан тоглів. Лямбдою, а не посиланням на `PassiveTicker`: той будується **після**
-     * реєстру (йому потрібні контексти, яким потрібен реєстр), тож пряме поле замкнуло б
-     * коло ініціалізації.
+     * The toggles' state. As a lambda rather than a reference to `PassiveTicker`: that one is
+     * built **after** the registry (it needs the contexts, which need the registry), so a direct
+     * field would close an initialisation cycle.
      */
     private val toggles: (UUID, AbilityIdentity) -> Boolean = { _, _ -> false },
 ) : Beyonders {

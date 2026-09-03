@@ -1,11 +1,11 @@
 package me.vangoo.domain.valueobjects
 
 /**
- * Види зброї, яку Фокусник створює з паперу (Seq 7 — «Папір як зброя»,
- * еволюція Паперового різака). Вартість у папері 32…64 залежно від сили.
+ * Kinds of weapon the Magician makes out of paper (Seq 7 — "Paper as a weapon",
+ * the evolution of the Paper Cutter). Paper cost 32…64 depending on power.
  *
- * Чистий VO: лише числа й український підпис. Мапінг на матеріал,
- * ефекти удару та статус-ефекти живуть у шарі pathways.
+ * A pure VO: numbers and a Ukrainian label only. The mapping onto a material,
+ * the hit effects and the status effects live in the pathways layer.
  */
 enum class PaperWeaponType(
     val displayName: String,
@@ -13,15 +13,15 @@ enum class PaperWeaponType(
     val bonusDamage: Int,
     val knockback: Double,
     val slowTicks: Int,
-    /** Скільки ударів витримує предмет, перш ніж розсипатись. */
+    /** How many blows the item survives before falling apart. */
     val uses: Int,
 ) {
-    /** Бита — сильний нокбек, помірний бонус-урон. */
+    /** Bat — strong knockback, moderate bonus damage. */
     BAT("Паперова бита", 32, 3, 1.4, 0, 8),
 
-    /** Тростина — сповільнює ціль при ударі. */
+    /** Cane — slows the target on hit. */
     CANE("Паперова тростина", 48, 4, 0.2, 100, 6),
 
-    /** Цегла — важкий разовий урон. */
+    /** Brick — heavy one-off damage. */
     BRICK("Паперова цегла", 64, 8, 0.4, 0, 4),
 }

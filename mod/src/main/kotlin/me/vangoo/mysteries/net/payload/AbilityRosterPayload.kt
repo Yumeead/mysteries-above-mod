@@ -13,49 +13,48 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.world.item.ItemStack
 
 /**
- * Сервер → клієнт: **рідкісний** знімок — те, що змінюється лише разом зі списком
- * здібностей.
+ * Server → client: the **rare** snapshot — what changes only together with the ability list.
  *
- * Летить на вхід у світ, зілля, піднесення, демоцію й `/mysteries forget` — тобто
- * одиниці разів за сесію. Саме тому описи, ціни й іконки їдуть тут, а не в
- * [AbilityStatePayload]: той ходить раз на секунду, і злиття двох означало б слати
- * повний текст опису кожної здібності щосекунди.
+ * It flies on joining a world, a potion, an ascension, a demotion and `/mysteries forget` —
+ * that is, a handful of times per session. That is exactly why the descriptions, costs and
+ * icons travel here rather than in [AbilityStatePayload]: that one goes once a second, and
+ * merging the two would mean sending the full description text of every ability every second.
  *
- * `roster == null` — гравець не Потойбічний. Шлях, Послідовність і список або є разом,
- * або їх нема разом; формат не вміє виразити «список без шляху» — той самий прийом, що
- * вже в [BeyonderStatusPayload].
+ * `roster == null` — the player is not a Beyonder. The pathway, the Sequence and the list are
+ * either all there or all absent; the format cannot express "a list with no pathway" — the same
+ * trick already used in [BeyonderStatusPayload].
  */
 data class AbilityRosterPayload(val roster: Roster?) : CustomPacketPayload {
 
     data class Roster(
-        /** Ім'я шляху — ключ до `PathwayBranding` і заголовок меню. */
+        /** The pathway name — the key to `PathwayBranding` and the menu heading. */
         val pathwayId: String,
         val sequence: Sequence,
-        /** Канонічна назва Послідовності, напр. «Sailor». */
+        /** The canonical Sequence name, e.g. "Sailor". */
         val sequenceName: Component,
         val entries: List<Entry>,
     )
 
     /**
-     * Здібність такою, якою її малює меню.
+     * An ability as the menu draws it.
      *
-     * Числа вже пораховані **під Послідовність власника**: клієнт не має ні
-     * `SequenceScaler`, ні причин його мати.
+     * The numbers are already computed **for the owner's Sequence**: the client has no
+     * `SequenceScaler` and no reason to have one.
      *
-     * Порівнювати `Entry` рівністю не варто: [ItemStack] не має структурного `equals`,
-     * тож згенерований тут `equals` порівняє іконки за посиланням. Тести звіряють поля
-     * окремо, а іконку — через `ItemStack.matches`.
+     * Do not compare `Entry` by equality: [ItemStack] has no structural `equals`, so the
+     * `equals` generated here would compare icons by reference. The tests check the fields
+     * separately and the icon through `ItemStack.matches`.
      */
     data class Entry(
         val identity: String,
         val name: Component,
         val description: Component,
         val type: AbilityType,
-        /** Разова ціна касту. */
+        /** The one-off cast cost. */
         val cost: Int,
-        /** Ціна утримання за секунду; 0 — не утримується. */
+        /** The upkeep per second; 0 — nothing is held. */
         val upkeep: Int,
-        /** Повна тривалість перепочинку — з неї клієнт рахує пропорцію заливки. */
+        /** The full cooldown length — the client computes the fill proportion from it. */
         val cooldownSeconds: Int,
         val icon: ItemStack,
     )
@@ -64,7 +63,7 @@ data class AbilityRosterPayload(val roster: Roster?) : CustomPacketPayload {
 
     companion object {
 
-        /** Порожній ростер: гравець більше не Потойбічний. */
+        /** An empty roster: the player is no longer a Beyonder. */
         val NONE: AbilityRosterPayload = AbilityRosterPayload(null)
 
         val TYPE: CustomPacketPayload.Type<AbilityRosterPayload> =
@@ -120,7 +119,7 @@ data class AbilityRosterPayload(val roster: Roster?) : CustomPacketPayload {
             return AbilityRosterPayload(Roster(pathwayId, sequence, sequenceName, entries))
         }
 
-        /** Тип їде порядковим номером — обидві сторони з одного джара; чуже число ловиться тут. */
+        /** The type travels as an ordinal — both sides come from one jar; a foreign number is caught here. */
         private fun abilityType(ordinal: Int): AbilityType {
             val values = AbilityType.entries
             require(ordinal in values.indices) { "Невідомий тип здібності: $ordinal" }

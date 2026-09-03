@@ -23,19 +23,21 @@ import net.minecraft.world.phys.Vec3
 import java.util.UUID
 
 /**
- * Door, Посл. 9 (Учень): **Відкриття дверей**.
+ * Door, Seq. 9 (Apprentice): **Door Opening**.
  *
- * Перша й найдешевша сила шляху, і вже вона робить те, чим Двері є: скорочує відстань.
- * Учень підходить до стіни, і стіни на мить не стає — рівно на її товщину.
+ * The pathway's first and cheapest power, and already it does what the Door is: it shortens
+ * distance. The Apprentice steps up to a wall, and for a moment the wall is not there — exactly
+ * for its own thickness.
  *
- * ## Прохід не сам по собі, а **для загону**
+ * ## The passage is not for oneself but **for the party**
  *
- * З Посл. 7 прохід лишається відкритим п'ять секунд, і крізь нього проходить будь-хто,
- * хто підійде. Це та сама межа, що в плагіні, і вона того варта: сила, яка рятує лише
- * себе, і сила, яка виводить крізь стіну загін, — різні сили, а не одна сильніша.
+ * From Seq. 7 the passage stays open for five seconds, and anyone who comes up walks through it.
+ * That is the same threshold as in the plugin, and it is worth it: a power that saves only
+ * yourself and a power that takes a party through a wall are different powers, not one stronger
+ * one.
  *
- * Кожен проходить **один раз**: без цього гравець, що лишився стояти біля входу, їздив
- * би туди-сюди щотакту.
+ * Each person goes through **once**: without that, a player who stayed standing by the entrance
+ * would be shuttled back and forth every tick.
  */
 class DoorOpening : ActiveAbility(AbilityIdentity.of("door_opening")) {
 
@@ -56,7 +58,7 @@ class DoorOpening : ActiveAbility(AbilityIdentity.of("door_opening")) {
                     "▪ З Посл. $SHARED_FROM_SEQUENCE прохід лишається відкритим для інших\n"
                 }
                 ) +
-            "▪ Перепочинок ${COOLDOWN_SECONDS} с",
+            "▪ Відкат ${COOLDOWN_SECONDS} с",
     )
 
     override fun cast(context: CastContext): AbilityOutcome {
@@ -66,7 +68,7 @@ class DoorOpening : ActiveAbility(AbilityIdentity.of("door_opening")) {
         val forward = horizontal(context.look)
 
         val wall = wallInFront(context)
-            ?: return AbilityOutcome.failed("Ви повинні стояти близько до суцільної стіни")
+            ?: return AbilityOutcome.failed("Підійдіть упритул до суцільної стіни")
 
         val maxThickness = thickness(context.sequence)
         val exit = exitBehind(context.level, wall, forward, maxThickness)
@@ -80,14 +82,15 @@ class DoorOpening : ActiveAbility(AbilityIdentity.of("door_opening")) {
                 )
             }
 
-        // Двері стоять **на лицьовій грані** стіни, а не в центрі блока, у який упав
-        // промінь. Інакше рама опиняється всередині каменю — а частинку в товщі блока
-        // не видно взагалі, і сила виглядає так, ніби ефекту немає.
+        // The door stands **on the face** of the wall rather than in the centre of the block the
+        // ray hit. Otherwise the frame ends up inside the stone — and a particle inside a block's
+        // body is not visible at all, so the power looks as if it had no effect.
         //
-        // Y бере саме `wall`, а не `context.caster.y`: обидві половинки прохід мусять
-        // стояти на одному рівні. Раніше вхід малювався на висоті ока Учня, а вихід —
-        // на висоті блока стіни (`exitBehind` завжди зберігає Y стіни), і якщо гравець
-        // стояв не рівно на цілому блоці, двері виявлялись «не рівно одні відносно одних».
+        // The Y is taken from `wall` rather than from `context.caster.y`: both halves of the
+        // passage must stand at the same level. Previously the entrance was drawn at the
+        // Apprentice's eye height while the exit was at the wall block's height (`exitBehind`
+        // always keeps the wall's Y), and if the player was not standing exactly on a whole block
+        // the doors turned out "not quite level with each other".
         val face = Vec3(wall.x + 0.5, wall.y.toDouble(), wall.z + 0.5).subtract(forward.scale(FACE_CLEARANCE))
         val open = if (context.sequence.level <= SHARED_FROM_SEQUENCE) PORTAL_TICKS else DOOR_FLASH_TICKS
         doorway(context.scheduling, context.level, face, forward, open, context.effects.pathwayColor)
@@ -102,8 +105,8 @@ class DoorOpening : ActiveAbility(AbilityIdentity.of("door_opening")) {
             return AbilityOutcome.done("Ви пройшли крізь стіну")
         }
 
-        // Хто вже пройшов. Стан одного касту, а не поле здібності: екземпляр здібності
-        // спільний для всіх Учнів на сервері.
+        // Who has already gone through. State of one cast, not a field of the ability: the ability
+        // instance is shared by every Apprentice on the server.
         val passed = HashSet<UUID>()
         context.session {
             sustain(periodTicks = WATCH_PERIOD_TICKS, durationTicks = PORTAL_TICKS) { opener ->
@@ -118,10 +121,10 @@ class DoorOpening : ActiveAbility(AbilityIdentity.of("door_opening")) {
             }
         }
 
-        return AbilityOutcome.done("Прохід відкрито — крізь нього пройдуть і інші")
+        return AbilityOutcome.done("Прохід відкрито — крізь нього пройдуть й інші")
     }
 
-    /** Суцільний блок на відстані витягнутої руки; рідина й трава дверима не стають. */
+    /** A solid block at arm's length; liquids and grass do not become doors. */
     private fun wallInFront(context: CastContext): BlockPos? {
         val hit = context.caster.pick(ACTIVATION_RANGE, 1.0f, false) as? BlockHitResult ?: return null
         if (hit.type != HitResult.Type.BLOCK) return null
@@ -129,17 +132,17 @@ class DoorOpening : ActiveAbility(AbilityIdentity.of("door_opening")) {
     }
 
     /**
-     * Перше місце за стіною, де вміщається гравець: під ноги й під голову потрібне
-     * повітря. Опори під ногами не питаємо — Учень виходить туди, куди виходить прохід,
-     * а не туди, де зручно.
+     * The first place beyond the wall where the player fits: air is needed under the feet and
+     * under the head. No footing is required — the Apprentice comes out where the passage comes
+     * out, not where it is convenient.
      *
-     * Напрямок округлюється до однієї з восьми сітчастих осей **один раз**, а не на
-     * кожному кроці глибини. `Math.round(forward.x * depth)` округлював незалежно X і Z
-     * при кожному `depth` — і для похилого погляду (не рівно по осі чи діагоналі) це
-     * давало нерівномірний дрейф: крок міг піти на клітину вбік, якої в попередньому
-     * кроці не було. Вихід опинявся не навпроти входу, а десь збоку, і телепорт цілив
-     * туди ж. Фіксований `(dx, dz)`, помножений на `depth`, тримає всі кроки на одній
-     * прямій лінії сітки — тій самій, що дивиться Учень.
+     * The direction is rounded to one of the eight grid axes **once**, not at every step of the
+     * depth. `Math.round(forward.x * depth)` rounded X and Z independently at every `depth` — and
+     * for a slanted gaze (not exactly along an axis or a diagonal) that gave an uneven drift: a
+     * step could move into a cell that was not in the previous step. The exit ended up not
+     * opposite the entrance but somewhere off to the side, and the teleport aimed there too. A
+     * fixed `(dx, dz)` multiplied by `depth` keeps every step on one straight grid line — the one
+     * the Apprentice is looking along.
      */
     private fun exitBehind(
         level: ServerLevel,
@@ -165,7 +168,7 @@ class DoorOpening : ActiveAbility(AbilityIdentity.of("door_opening")) {
         level.sendParticles(ParticleTypes.PORTAL, exit.x, exit.y + 1.0, exit.z, 20, 0.3, 0.5, 0.3, 0.1)
     }
 
-    /** Спеціалізація шляху, тож `STRONG`: за це Двері й тримають. */
+    /** The pathway's specialty, hence `STRONG`: this is what the Door is kept for. */
     private fun thickness(sequence: Sequence): Int =
         scale(BASE_THICKNESS, sequence, SequenceScaler.ScalingStrategy.STRONG)
 
@@ -175,11 +178,11 @@ class DoorOpening : ActiveAbility(AbilityIdentity.of("door_opening")) {
         const val COOLDOWN_SECONDS = 15
         const val SHARED_FROM_SEQUENCE = 7
         const val PORTAL_TICKS = 5 * TICKS_PER_SECOND
-        /** Скільки видно двері, коли прохід одноразовий: рівно щоб побачити, що сталось. */
+        /** How long the door is visible when the passage is single-use: just enough to see what happened. */
         const val DOOR_FLASH_TICKS = 2 * TICKS_PER_SECOND
         const val WATCH_PERIOD_TICKS = 5
         const val ENTRY_RADIUS = 3.0
-        /** На скільки двері винесені перед гранню блока: у товщі каменю частинок не видно. */
+        /** How far the door is pushed out in front of the block's face: particles are invisible inside stone. */
         const val FACE_CLEARANCE = 0.55
     }
 }

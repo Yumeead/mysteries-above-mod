@@ -4,11 +4,10 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.LivingEntity
 
 /**
- * Вибір цілей навколо кастера. Прив'язаний до одного касту — радіуси й промінь
- * рахуються від нього, тож ідентичність кастера всередині вже є і другим аргументом
- * не передається.
+ * Picking targets around the caster. Bound to one cast — radii and the ray are measured from
+ * it, so the caster's identity is already inside and is not passed as a second argument.
  *
- * Сам кастер із результатів завжди виключений: «поблизу» означає «крім мене».
+ * The caster is always excluded from the results: "nearby" means "except me".
  */
 interface Targeting {
 
@@ -16,7 +15,7 @@ interface Targeting {
 
     fun playersNear(radius: Double): List<ServerPlayer>
 
-    /** Істота на промені погляду; `null`, якщо промінь упреться в блок або в порожнечу. */
+    /** The creature on the line of sight; `null` if the ray hits a block or empty space. */
     fun lookingAt(maxRange: Double): LivingEntity?
 
     fun playerLookingAt(maxRange: Double): ServerPlayer? = lookingAt(maxRange) as? ServerPlayer

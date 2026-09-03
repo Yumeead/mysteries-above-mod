@@ -1,8 +1,8 @@
 package me.vangoo.domain.valueobjects
 
 /**
- * Тимчасовий множник шкоди (Sun `Notarization`); [isActive] перевіряє момент часу
- * без окремого таску.
+ * Temporary damage multiplier (Sun `Notarization`); [isActive] checks a point in time
+ * without a separate task.
  */
 data class AmplificationBuff(val multiplier: Double, val expiresAtMillis: Long) {
 

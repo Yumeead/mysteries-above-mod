@@ -14,19 +14,19 @@ import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 
 /**
- * Зілля випите — що з цього виходить.
+ * The potion is drunk — here is what comes of it.
  *
- * Спадкоємець плагінного `PathwayPotionListener`, але розділений навпіл: [refusal]
- * відповідає **до** того, як пляшку піднесено до рота, [ascend] діє **після**. У плагіні
- * це був один хендлер, який скасовував подію на півдорозі; тут скасовувати нема чого —
- * предмет, який не можна випити, і не починає пити.
+ * The descendant of the plugin's `PathwayPotionListener`, but split in two: [refusal] answers
+ * **before** the bottle is raised to the lips, [ascend] acts **after**. In the plugin this was
+ * one handler that cancelled the event halfway through; here there is nothing to cancel — an
+ * item that cannot be drunk is never started on.
  *
- * Правила «чи можна» живуть у `core` ([Beyonder.canConsumePotion]); тут лише
- * формулювання відмови й наслідки у світі.
+ * The "may I" rules live in `core` ([Beyonder.canConsumePotion]); here there is only the wording
+ * of the refusal and the consequences in the world.
  */
 object Ascension {
 
-    /** `null` — зілля можна пити. Інакше — чому ні, українською. */
+    /** `null` — the potion may be drunk. Otherwise — why not, in Ukrainian. */
     fun refusal(player: ServerPlayer, brew: PotionBrew): Component? {
         val pathway = brew.resolvePathway()
             ?: return Component.literal("Шлях «${brew.pathway}» ще не існує в цьому світі")
@@ -38,8 +38,8 @@ object Ascension {
     }
 
     /**
-     * Робить те, на що зілля дає право. Кличеться лише після [refusal] `== null` —
-     * інакше падає, бо це вже помилка виклику, а не відмова гравцеві.
+     * Does what the potion grants the right to. Called only after [refusal] `== null` —
+     * otherwise it fails, because that is a call-site bug, not a refusal to the player.
      */
     fun ascend(player: ServerPlayer, brew: PotionBrew) {
         val pathway = checkNotNull(brew.resolvePathway()) { "Зілля невідомого шляху: ${brew.pathway}" }
@@ -53,21 +53,22 @@ object Ascension {
 
         aftertaste(player)
         BeyonderStatus.push(player)
-        // Список здібностей став іншим — ростер летить саме тут і більше ніде.
+        // The ability list is different now — the roster flies exactly here and nowhere else.
         BeyonderStatus.pushRoster(player)
         AbilityServices.statePump.pushNow(player.uuid)
     }
 
     /**
-     * Ставить шлях і Послідовність напряму — операторський короткий шлях до сили.
+     * Sets the pathway and the Sequence directly — an operator's shortcut to power.
      *
-     * Драбина «видав зілля → випив → добив засвоєння → випив наступне» — це десяток
-     * команд і десяток секунд на кожну Послідовність, і саме її доводиться проходити
-     * заново після кожної правки здібності. Перевірка механіки не має коштувати
-     * стільки; сам ланцюг зілль лишається на місці й лишається єдиним шляхом для гравця.
+     * The ladder "hand out a potion → drink → top up the mastery → drink the next" is a dozen
+     * commands and a dozen seconds per Sequence, and it has to be walked again after every edit
+     * to an ability. Testing a mechanic must not cost that much; the potion chain itself stays
+     * where it is and remains the only path for a player.
      *
-     * Попередній стан **знімається цілком** — через [forget], а не заміною запису в
-     * реєстрі: інакше на новому шляху лишились би сесії, підписки й перепочинки старого.
+     * The previous state is **removed entirely** — through [forget], not by replacing the
+     * registry entry: otherwise the sessions, subscriptions and cooldowns of the old pathway
+     * would remain on the new one.
      */
     fun bestow(player: ServerPlayer, pathway: Pathway, sequence: Sequence) {
         if (AbilityServices.beyonders.of(player.uuid) != null) forget(player)
@@ -80,12 +81,12 @@ object Ascension {
         AbilityServices.statePump.pushNow(player.uuid)
     }
 
-    /** Гравець більше не Потойбічний: усе, що тримав мод на нього, знімається. */
+    /** The player is no longer a Beyonder: everything the mod held on them is removed. */
     fun forget(player: ServerPlayer) {
         AbilityServices.passives.deactivate(player)
         AbilityServices.passives.forget(player.uuid)
-        // `passives.deactivate` знімає підписки лише пасивок; те, на що підписалась
-        // активна здібність у `cast`, лишилось би жити на вже-не-Потойбічному.
+        // `passives.deactivate` only removes the passives' subscriptions; whatever an active
+        // ability subscribed to in `cast` would stay alive on someone who is no longer a Beyonder.
         AbilityServices.events.forget(player.uuid)
         AbilityServices.scheduling.stopAll(player.uuid)
         AbilityServices.cooldowns.forget(player.uuid)
@@ -93,12 +94,12 @@ object Ascension {
         AbilityServices.beyonders.forget(player.uuid)
         AbilityServices.statePump.forget(player.uuid)
         BeyonderStatus.push(player)
-        // Порожній ростер — і є повідомлення «ти більше не Потойбічний»: стану після
-        // нього не летить нічого, бо стан має сенс лише в того, хто ним є.
+        // An empty roster **is** the message "you are no longer a Beyonder": no state flies
+        // after it, because state only makes sense for someone who is one.
         BeyonderStatus.pushRoster(player)
     }
 
-    // ── Перше зілля ─────────────────────────────────────────────────────────────
+    // ── The first potion ────────────────────────────────────────────────────────
 
     private fun firstPotionRefusal(brew: PotionBrew): Component? =
         if (brew.sequence == STARTING_SEQUENCE) {
@@ -125,14 +126,14 @@ object Ascension {
         )
     }
 
-    // ── Піднесення ──────────────────────────────────────────────────────────────
+    // ── Ascension ───────────────────────────────────────────────────────────────
 
     /**
-     * Розкладає `canConsumePotion` на три окремі причини.
+     * Breaks `canConsumePotion` down into three separate reasons.
      *
-     * У плагіні відмова була одна на всі випадки — «Ви не можете споживати цей еліксір!»
-     * — і гравець не дізнавався, що саме не так: чужа група, не та Послідовність чи
-     * недобране засвоєння.
+     * In the plugin the refusal was one for every case — "Ви не можете споживати цей еліксір!"
+     * — and the player never learned what exactly was wrong: the wrong group, the wrong
+     * Sequence, or mastery that had not been topped up.
      */
     private fun advancementRefusal(
         beyonder: Beyonder,
@@ -153,9 +154,10 @@ object Ascension {
         if (!beyonder.mastery.canAdvance()) {
             return Component.literal("Засвоєння ще не повне: ${beyonder.mastery}")
         }
-        // `canConsumePotion` цього не знає, а `advanceWithPathwayChange` — вимагає, і
-        // без перевірки тут ковток чужого шляху з Посл. 8 упав би `check()` усередині
-        // домену. Особистість складається на першому ж піднесенні, далі шлях уже свій.
+        // `canConsumePotion` does not know this, while `advanceWithPathwayChange` demands it,
+        // and without a check here a sip of another pathway at Seq. 8 would fail a `check()`
+        // inside the domain. The identity settles at the very first ascension; beyond that the
+        // pathway is already one's own.
         if (pathway.name != beyonder.pathway.name &&
             beyonder.sequence.level < Beyonder.PATHWAY_CHANGE_MIN_SEQUENCE
         ) {
@@ -170,8 +172,8 @@ object Ascension {
         val changingPathway = pathway.name != beyonder.pathway.name
         if (changingPathway) beyonder.advanceWithPathwayChange(pathway) else beyonder.advance()
 
-        // Список здібностей став іншим — постійні пасивки нової Послідовності треба
-        // активувати, втрачені — попрощатись, а тоглі згасити.
+        // The ability list is different now — the permanent passives of the new Sequence must be
+        // activated, the lost ones said goodbye to, and the toggles switched off.
         AbilityServices.passives.refresh(player)
         AbilityServices.selection.forget(player.uuid)
 
@@ -187,9 +189,9 @@ object Ascension {
         }
     }
 
-    // ── Наслідки у світі ────────────────────────────────────────────────────────
+    // ── Consequences in the world ───────────────────────────────────────────────
 
-    /** Зілля ламає тіло, перш ніж дати силу — сліпота, нудота й спалах порталу. */
+    /** The potion breaks the body before it grants power — blindness, nausea and a portal flash. */
     private fun aftertaste(player: ServerPlayer) {
         player.addEffect(MobEffectInstance(MobEffects.BLINDNESS, 100, 0))
         player.addEffect(MobEffectInstance(MobEffects.NAUSEA, 200, 1))
@@ -206,6 +208,6 @@ object Ascension {
         )
     }
 
-    /** Перше зілля — завжди Посл. 9: сильніші тіло без підготовки просто не втримає. */
+    /** The first potion is always Seq. 9: an unprepared body simply cannot hold a stronger one. */
     private const val STARTING_SEQUENCE = 9
 }

@@ -23,23 +23,22 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 /**
- * Розкладка шляхів: гри не піднімає.
+ * The pathway layout: it brings up no game.
  *
- * Здібності тут **будуються по-справжньому** — це і є перевірка, бо помилка в реєстрації
- * (не та Послідовність, дубльована ідентичність, тип, що не збігається з базовим класом)
- * інакше проявилась би лише в грі, і то не одразу.
+ * The abilities here are **really built** — that is the check, because a registration mistake
+ * (the wrong Sequence, a duplicated identity, a type that does not match the base class) would
+ * otherwise only show up in the game, and not immediately at that.
  */
 class ModPathwaysTest {
 
     companion object {
         /**
-         * Світ тут не піднімається — піднімаються **реєстри**.
+         * No world is brought up here — the **registries** are.
          *
-         * `ResistanceToHorror` тримає свій перелік дебафів у полі, тобто торкається
-         * `MobEffects` уже при завантаженні класу, а той без `Bootstrap` падає
-         * `ExceptionInInitializerError`. Розкладати константи по лінивих обгортках
-         * заради тесту не варто: `bootStrap()` коштує секунду й нічого, крім реєстрів,
-         * не вмикає.
+         * `ResistanceToHorror` keeps its list of debuffs in a field, i.e. it touches
+         * `MobEffects` at class load time, and that fails with an `ExceptionInInitializerError`
+         * without `Bootstrap`. Spreading constants over lazy wrappers for a test's sake is not
+         * worth it: `bootStrap()` costs a second and switches on nothing but the registries.
          */
         @JvmStatic
         @BeforeAll
@@ -70,27 +69,47 @@ class ModPathwaysTest {
     }
 
     @Test
-    @DisplayName("Усередині шляху ідентичності унікальні")
-    fun abilityIdentitiesAreUniqueWithinPathway() {
+    @DisplayName("Усередині однієї Послідовності ідентичності унікальні")
+    fun abilityIdentitiesAreUniqueWithinSequence() {
         ModPathways.all.forEach { pathway ->
-            val identities = (0 until Pathway.SEQUENCE_COUNT)
-                .flatMap(pathway::abilitiesFor)
-                .map { it.identity }
+            repeat(Pathway.SEQUENCE_COUNT) { level ->
+                val identities = pathway.abilitiesFor(level).map { it.identity }
+                assertEquals(
+                    identities.size, identities.toSet().size,
+                    "дубльовані ідентичності в ${pathway.name}, Посл. $level: $identities",
+                )
+            }
+        }
+    }
 
-            assertEquals(
-                identities.size, identities.toSet().size,
-                "дубльовані ідентичності в ${pathway.name}: $identities",
-            )
+    @Test
+    @DisplayName("Та сама ідентичність на різних Послідовностях — це тір однієї сили")
+    fun repeatedIdentityIsAnUpgradeOfTheSameAbility() {
+        // The domain is built for this: `AbilityTransformer` treats a repeated identity as
+        // "replaced by the stronger version", and `getAllSequencesUpToCurrent()` hands the
+        // sequences over 9 → 0, so the stronger tier arrives last and wins. What must not
+        // happen is two **different** powers sharing a key — that would be a silent swap.
+        ModPathways.all.forEach { pathway ->
+            (0 until Pathway.SEQUENCE_COUNT)
+                .flatMap(pathway::abilitiesFor)
+                .groupBy { it.identity }
+                .filterValues { it.size > 1 }
+                .forEach { (identity, tiers) ->
+                    assertEquals(
+                        1, tiers.map { it.javaClass }.toSet().size,
+                        "${pathway.name}: $identity носять різні класи — ${tiers.map { it.javaClass.simpleName }}",
+                    )
+                }
         }
     }
 
     @Test
     @DisplayName("Спільна ідентичність означає спільний клас, а не збіг імен")
     fun sharedIdentityMeansSharedClass() {
-        // Ідентичність — глобальний ключ (вона їде в збереження й пакети), тож та сама
-        // на двох шляхах допустима **лише** для справді спільної здібності з
-        // `pathways/common`. Копія `sun_holy_wave` під тим самим ім'ям в іншому шляху
-        // означала б, що сильніша версія одного шляху заміщає версію іншого.
+        // The identity is a global key (it travels into saves and packets), so the same one on two
+        // pathways is admissible **only** for a genuinely shared ability from `pathways/common`.
+        // A copy of `sun_holy_wave` under the same name in another pathway would mean the stronger
+        // version of one pathway replaces the other's.
         ModPathways.all
             .flatMap { pathway -> (0 until Pathway.SEQUENCE_COUNT).flatMap(pathway::abilitiesFor) }
             .groupBy { it.identity }
@@ -114,7 +133,7 @@ class ModPathwaysTest {
 
                     else -> Unit
                 }
-                // Пасивка, що цокає щотіку через недогляд, — найдорожча помилка цього шару.
+                // A passive ticking every tick by oversight is the most expensive mistake in this layer.
                 if (spec is Ticking) assertTrue(spec.tickPeriodTicks > 0, "${spec.identity}")
             }
     }
@@ -126,7 +145,7 @@ class ModPathwaysTest {
 
         assertEquals(listOf("tyrant_illusory_scales"), beyonder.abilities.map { it.identity.id })
 
-        // 9 → 8 → 7: засвоєння скидається на кожному піднесенні, тож добираємо його двічі.
+        // 9 → 8 → 7: mastery resets on every ascension, so it is topped up twice.
         repeat(2) {
             beyonder.setMastery(Mastery.max())
             beyonder.advance()
@@ -144,7 +163,7 @@ class ModPathwaysTest {
 
         assertEquals(35, spec.spiritualityCost)
         assertEquals(20, spec.cooldownSeconds(Sequence(7)))
-        // Активна здібність не утримується — платить разово.
+        // An active ability holds nothing — it pays once.
         assertEquals(0, spec.periodicCost(Sequence(7)))
     }
 
@@ -157,8 +176,8 @@ class ModPathwaysTest {
         assertEquals("Traveler", door.sequenceName(5))
         assertEquals("Door", door.sequenceName(0))
 
-        // Ростер — єдине місце, де ціла Послідовність може мовчки лишитись порожньою:
-        // здібність, забуту в списку, не спіймає ні компілятор, ні решта тестів.
+        // The roster is the only place a whole Sequence can silently stay empty: an ability
+        // forgotten in the list is caught by neither the compiler nor the rest of the tests.
         assertEquals(listOf(1, 4, 4, 3, 2), (9 downTo 5).map { door.abilitiesFor(it).size })
         assertTrue((4 downTo 0).all { door.abilitiesFor(it).isEmpty() }, "вище Посл. 5 плагін не піднімався")
     }

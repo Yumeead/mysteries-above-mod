@@ -10,16 +10,16 @@ import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 
 /**
- * Єдина точка входу в каст ззовні: команда й клавіша приходять сюди обидві.
+ * The single entry point into a cast from outside: the command and the key both arrive here.
  *
- * `AbilityExecutor` знає **порядок** одного касту; тут — усе, що йому передує й слідує
- * ззовні: знайти здібність у списку гравця, звірити, що вона взагалі активна, і
- * штовхнути клієнту оновлений стан. Дві точки входу, що роблять це кожна по-своєму, —
- * рівно та помилка, з якої в плагіні виросли два різні шляхи списання ресурсів.
+ * `AbilityExecutor` knows the **order** of one cast; here is everything that precedes and
+ * follows it from outside: find the ability in the player's list, check that it is active at
+ * all, and push the updated state to the client. Two entry points doing this each in its own
+ * way is exactly the mistake the plugin's two different resource-spending paths grew from.
  */
 object AbilityRequests {
 
-    /** Кастує обрану клавішею здібність. Нічого не обрано — каже про це. */
+    /** Casts the ability selected with the key. If nothing is selected, says so. */
     fun castSelected(player: ServerPlayer) {
         val selected = AbilityServices.selection.of(player.uuid)
         if (selected == null) {
@@ -42,18 +42,19 @@ object AbilityRequests {
             ?: return report(player, CastReport.Refused(CastRefusal.NotCastable))
 
         val result = AbilityServices.executor.cast(player, ability)
-        // Дія гравця штовхає стан негайно: після касту бар має впасти в той самий кадр,
-        // а не за 900 мс до наступного секундного такту.
+        // A player action pushes the state immediately: after a cast the bar must drop in the
+        // same frame, not 900 ms before the next one-second tick.
         //
-        // Знімок статусу (`BeyonderStatus.push`) сюди **не** йде, і це не економія:
-        // клієнт на цей пакет **відкриває екран**, тож кожен каст розгортав гравцеві
-        // меню здібностей просто в бою. Знімок належить явному запиту — команді
-        // `/mysteries status` і утриманню клавіші, — а не побічному ефекту удару.
+        // The status snapshot (`BeyonderStatus.push`) does **not** go here, and this is not a
+        // saving: the client **opens a screen** on that packet, so every cast used to unfold
+        // the ability menu right in the middle of a fight. The snapshot belongs to an explicit
+        // request — the `/mysteries status` command and holding the key — not to a side effect
+        // of a blow.
         AbilityServices.statePump.pushNow(player.uuid)
         return result
     }
 
-    /** Обирає здібність під клавішу. `false` — такої в гравця немає. */
+    /** Selects the ability for the key. `false` — the player does not have it. */
     fun select(player: ServerPlayer, identity: AbilityIdentity): Boolean {
         val beyonder = AbilityServices.beyonders.of(player.uuid) ?: return false
         val spec = beyonder.abilityBy(identity) ?: return false

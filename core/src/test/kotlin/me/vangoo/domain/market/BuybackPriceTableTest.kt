@@ -12,10 +12,10 @@ internal class BuybackPriceTableTest {
 
     private val table = BuybackPriceTable(
         ingredients,
-        2, // фолбек для інгредієнта без послідовності
+        2, // fallback for an ingredient with no sequence
         recipeBooks,
         characteristics,
-        mapOf("custom:stellar_aqua_crystal" to 5), // точковий override
+        mapOf("custom:stellar_aqua_crystal" to 5), // a point override
     )
 
     @Test
@@ -26,7 +26,7 @@ internal class BuybackPriceTableTest {
 
     @Test
     fun ingredientWithoutSequenceUsesFallback() {
-        // seq = -1 (не входить у жоден рецепт) → плоский фолбек
+        // seq = -1 (part of no recipe) → the flat fallback
         assertEquals(2, table.unitPriceFor(MarketItemCategory.INGREDIENT, -1, "custom:loot_only_thing").coppets)
     }
 
@@ -44,7 +44,7 @@ internal class BuybackPriceTableTest {
 
     @Test
     fun unknownSequenceFallsBackToZeroForPricedCategories() {
-        // seq без запису в таблиці (окрім інгредієнта з його фолбеком) → 0 к
+        // a seq with no entry in the table (apart from the ingredient with its fallback) → 0 c
         assertEquals(0, table.unitPriceFor(MarketItemCategory.RECIPE_BOOK, 42, "recipe:Fool:42").coppets)
         assertEquals(0, table.unitPriceFor(MarketItemCategory.CHARACTERISTIC, 42, "characteristic:Fool:42").coppets)
     }

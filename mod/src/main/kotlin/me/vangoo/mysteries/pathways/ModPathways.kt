@@ -2,34 +2,35 @@ package me.vangoo.mysteries.pathways
 
 import me.vangoo.domain.entities.Pathway
 import me.vangoo.mysteries.pathways.door.Door
+import me.vangoo.mysteries.pathways.error.Error
 import me.vangoo.mysteries.pathways.sun.Sun
 import me.vangoo.mysteries.pathways.tyrant.Tyrant
 import me.vangoo.mysteries.pathways.whitetower.WhiteTower
 
 /**
- * Шляхи, які мод уміє видати.
+ * The pathways the mod can hand out.
  *
- * Спадкоємець плагінного `PathwayManager`, але без його головної вади: там імена
- * Послідовностей жили в `PathwayManager`, а здібності — в самому шляху, тож обидві
- * половини одного шляху редагувались у різних файлах і розходились. Тут шлях
- * складається цілком у своїй фабриці, а цей об'єкт лише тримає список.
+ * The descendant of the plugin's `PathwayManager`, but without its main flaw: there the Sequence
+ * names lived in `PathwayManager` while the abilities lived in the pathway itself, so the two
+ * halves of one pathway were edited in different files and drifted apart. Here a pathway is
+ * assembled entirely in its own factory, and this object only keeps the list.
  *
- * **Двоє з двадцяти двох.** Фаза 05 переносить рівно три здібності, і більше шляхів
- * тут просто не було б чим наповнити: решта приїде у фазі 08 разом зі своїми
- * здібностями, а тринадцять заглушок — разом із зіллями. Брендинг (кольори рідини й
- * назви) уже знає всі 22 — див. `PathwayBranding`.
+ * **Two out of twenty-two.** Phase 05 ports exactly three abilities, and there would simply be
+ * nothing to fill more pathways with: the rest arrive in phase 08 together with their abilities,
+ * and the thirteen stubs together with their potions. The branding (liquid colours and names)
+ * already knows all 22 — see `PathwayBranding`.
  */
 object ModPathways {
 
     private val byName: Map<String, Pathway> =
-        listOf(Tyrant.create(), Sun.create(), WhiteTower.create(), Door.create())
+        listOf(Tyrant.create(), Sun.create(), WhiteTower.create(), Door.create(), Error.create())
             .associateBy { it.name }
 
     val all: Collection<Pathway> get() = byName.values
 
     val names: List<String> get() = byName.keys.toList()
 
-    /** Регістр не має значення: імена шляхів їздять у командах, набраних руками. */
+    /** Case does not matter: pathway names travel in commands typed by hand. */
     fun byName(name: String): Pathway? =
         byName.entries.firstOrNull { it.key.equals(name, ignoreCase = true) }?.value
 }
