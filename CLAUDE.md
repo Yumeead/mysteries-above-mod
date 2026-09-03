@@ -719,7 +719,7 @@ javap -cp "$MCM:$MCC" net.minecraft.client.gui.screens.Screen
   `/mysteries sanity`. Активи: перша власна текстура (`textures/particle/spirit_mote.png`),
   `sounds.json`, `shaders/post/sanity.fsh`, два `post_effect/*.json`.
   Разом 40 тест-класів / 304 тести зелені.
-- 🔄 **Фаза 08** — шар здібностей, усі 9 шляхів. **Закрито 3 з 9.**
+- 🔄 **Фаза 08** — шар здібностей, усі 9 шляхів. **Закрито 4 з 9.**
   - **WhiteTower** (Посл. 9–5): `pathways/common` (`RitualMagic`, `CombatProficiency`,
     `PhysicalEnhancement`), `pathways/whitetower` (`EnhancedMind`, `Deduction`, `Agility`,
     `CrimeReconstruction`, `Analysis`, `Spellcasting`, `MirrorCurse`), `ability/AttributeGrant`.
@@ -734,8 +734,16 @@ javap -cp "$MCM:$MCC" net.minecraft.client.gui.screens.Screen
     (`AbilityCast`) і **запит стану тогла** (`Beyonders.isToggled`), а з другою редакцією
     `TravellersDoor` — **перший власний вимір**: `mysteries_above:spirit_world`
     (`data/mysteries_above/` + `mysteries/world/SpiritWorld.kt`).
-  Разом 41 тест-клас / 310 тестів зелені.
-  Далі за розміром: error → visionary → tyrant → justiciar → fool → death.
+  - **Error** (Посл. 9–5, 5 Послідовностей — Marauder, Swindler, Cryptologist, Prometheus,
+    Dream Stealer): `ShadowTheft`, `SuperiorObservation`, `SwindlerCharm`, `Eloquence`,
+    `ThoughtMisdirection`, `MentalDisruption`, `MaterialTheft`, `Decryption`, `AttackTheft`,
+    `DreamTheft`, `ThoughtUsurpation`, `MentalFortitude`, `IdealTheft`, `HeartTheft`,
+    `TheftOfHeavenlySecrets`, `PowerTheft`, `AbilityTheft` (`AttackTheft`, `DreamTheft`,
+    `ThoughtUsurpation`, `IdealTheft`, `HeartTheft`, `AbilityTheft` ділять одну ідентичність
+    через `abilities/ConceptualTheft.kt`, спільний шар шляху). Приїхали **реєстр крадіжки**
+    (`beyonder/TheftRegistry`) і спільний **вівтар** (`Altar`) для обрядової магії.
+  Разом 43 тест-класи / 322 тести зелені.
+  Далі за розміром: visionary → tyrant → justiciar → fool → death.
 
 ### Колесо Потойбічного (фаза UI, M1–M3)
 
