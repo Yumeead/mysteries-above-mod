@@ -719,7 +719,7 @@ javap -cp "$MCM:$MCC" net.minecraft.client.gui.screens.Screen
   `/mysteries sanity`. Активи: перша власна текстура (`textures/particle/spirit_mote.png`),
   `sounds.json`, `shaders/post/sanity.fsh`, два `post_effect/*.json`.
   Разом 40 тест-класів / 304 тести зелені.
-- 🔄 **Фаза 08** — шар здібностей, усі 9 шляхів. **Закрито 4 з 9.**
+- 🔄 **Фаза 08** — шар здібностей, усі 9 шляхів. **Закрито 5 з 9.**
   - **WhiteTower** (Посл. 9–5): `pathways/common` (`RitualMagic`, `CombatProficiency`,
     `PhysicalEnhancement`), `pathways/whitetower` (`EnhancedMind`, `Deduction`, `Agility`,
     `CrimeReconstruction`, `Analysis`, `Spellcasting`, `MirrorCurse`), `ability/AttributeGrant`.
@@ -742,8 +742,20 @@ javap -cp "$MCM:$MCC" net.minecraft.client.gui.screens.Screen
     `ThoughtUsurpation`, `IdealTheft`, `HeartTheft`, `AbilityTheft` ділять одну ідентичність
     через `abilities/ConceptualTheft.kt`, спільний шар шляху). Приїхали **реєстр крадіжки**
     (`beyonder/TheftRegistry`) і спільний **вівтар** (`Altar`) для обрядової магії.
+  - **Visionary** (Посл. 9–5, 16 здібностей): `GoodMemory`, `ScanGaze`, `SharpVision`,
+    `DangerSense`, `IntentReader`, `SurgeOfInsanity`, `Appeasement`, `Telepathy`,
+    `ScanGazePassive`, `PsychicCue`, `PsychologicalInvisibility`, `BattleHypnotism`,
+    `DragonScale`, `Alteration`, `Guidance`, `DreamTraversal`. Приїхали **сеам вибору без
+    меню до фази 11** (`ability/runtime/PendingChoices` + `/mysteries choose`, для
+    `PsychicCue` і `Alteration`) і **видимість для одного глядача**
+    (`ability/SelectiveVisibility`, пакети `AddEntity`/`SetEntityData`/`SetEquipment` для
+    `BattleHypnotism` — перше, для чого публічної ванільної невидимості не вистачило).
+    Кілька механік плагіна свідомо звужено, а не перенесено 1:1: `DreamTraversal` замість
+    меню з кількох сплячих завжди будить найближчого; `Alteration` з дев'яти тригерів лишила
+    два, які справді ловить шина подій мода; навігаційний апгрейд `PsychicCue` (Посл. 6+)
+    чекає на примітив прицілювання по блоку, якого ще немає.
   Разом 43 тест-класи / 322 тести зелені.
-  Далі за розміром: visionary → tyrant → justiciar → fool → death.
+  Далі за розміром: tyrant → justiciar → fool → death.
 
 ### Колесо Потойбічного (фаза UI, M1–M3)
 
