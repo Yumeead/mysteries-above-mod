@@ -143,7 +143,10 @@ class ModPathwaysTest {
     fun advancingAccumulatesAbilities() {
         val beyonder = Beyonder(UUID.randomUUID(), Sequence.starter(), Tyrant.create())
 
-        assertEquals(listOf("tyrant_illusory_scales"), beyonder.abilities.map { it.identity.id })
+        assertEquals(
+            setOf("tyrant_physique", "tyrant_illusory_scales", "tyrant_stance", "tyrant_sea_lunge"),
+            beyonder.abilities.map { it.identity.id }.toSet(),
+        )
 
         // 9 → 8 → 7: mastery resets on every ascension, so it is topped up twice.
         repeat(2) {
@@ -159,7 +162,7 @@ class ModPathwaysTest {
     @Test
     @DisplayName("Ціна й перепочинок Цілющої Води — ті самі, що в плагіні")
     fun restorativeWaterKeepsItsPrice() {
-        val spec = Tyrant.create().abilitiesFor(7).single()
+        val spec = Tyrant.create().abilitiesFor(7).single { it.identity == identity("tyrant_restorative_water") }
 
         assertEquals(35, spec.spiritualityCost)
         assertEquals(20, spec.cooldownSeconds(Sequence(7)))

@@ -6,9 +6,9 @@
 abilities — that split is gone). The list is ordered **index 0 → 9 == Sequence 0 → 9**.
 `Pathway.sequenceName(level)` does `sequenceNames[level]`, so **the sequence level IS the list index.**
 
-**Ported so far:** `WhiteTower` and `Sun` (phase 08, complete for Seq 9-5) and `Tyrant`
-(phase 05, two abilities only). The other nineteen pathways are still plugin-only;
-`ModPathways.byName` returns `null` for them.
+**Ported so far:** `WhiteTower`, `Sun`, `Door`, `Error`, `Visionary` and `Tyrant` (phase 08,
+complete for Seq 9-5). The other eighteen pathways are still plugin-only; `ModPathways.byName`
+returns `null` for them.
 
 **The plugin fills Seq 9-5 only.** No pathway in the plugin has a roster at Seq 4-0 - writing
 those is new game design, not a port. Match the plugin's coverage unless told otherwise.
@@ -32,22 +32,26 @@ The plugin uses its *own* sequence names — several differ from the LotM wiki. 
 
 ---
 
-## Tyrant — group `GodAlmighty` (theme: sea, storm, wind, thunder) — **ported (phase 05)**
+## Tyrant — group `GodAlmighty` (theme: sea, storm, wind, thunder) — **ported (phase 08)**
 Sailor-family: the body belongs to the water, then the storm, then the sky. Utility and weather
 before violence; the lightning only arrives at the top half.
 
 | Seq | Name | Design hook | In the mod |
 |----|------|-------------|---|
-| 9 | Sailor | fish-like body, balance, swimming, sea affinity | `IllusoryScales` |
-| 8 | Furious One | rage, raw striking power, storm-hardened body | — |
-| 7 | Seafarer | water shaping, healing water, cleansing, sea memory | `RestorativeWater` |
-| 6 | Wind-Blessed | wind blades, flight, wind sprint, pressure waves | — |
-| 5 | Ocean Songster | song, lightning, abyssal dominion, thunder voice | — |
+| 9 | Sailor | fish-like body, balance, swimming, sea affinity | `PhysicalEnhancement`, `IllusoryScales`, `Balance`, `SeaLunge` |
+| 8 | Furious One | rage, raw striking power, storm-hardened body | `Wrath`, `RagingBlow` |
+| 7 | Seafarer | water shaping, healing water, cleansing, sea memory | `SeaMemory`, `PreciseThrow`, `WaterFilm`, `AzureWave`, `RestorativeWater`, `CleansingLight` |
+| 6 | Wind-Blessed | wind blades, flight, wind sprint, pressure waves | `Windblades`, `PressureWave`, `WindFlight`, `WindSprint`, `WindImbuedHands`, `WindPull`, `Eavesdrop`, `Balance` (Air Cushion tier), `WaterControl` |
+| 5 | Ocean Songster | song, lightning, abyssal dominion, thunder voice | `StormHeart`, `AbyssalDominion`, `LightningStrike`, `LightningBoltArrow`, `ThunderVoice`, `Singing`, `SeaTongue`, `WaterCurtain`, `CorrosiveDeluge`, `SlickWater`, `WindBinding` |
 | 4 | Calamity Patron | patronage over disaster, sea-borne calamity | — |
 | 3 | Sea King | rule the ocean and what lives in it | — |
 | 2 | Calamity | be the disaster: storm, flood, wreck | — |
 | 1 | God of Thunder | thunder as authority over a region | — |
 | 0 | Tyrant | command sea, storm and sky as one | — |
+
+**`Balance` is Tyrant's shared stance layer** — parameterised like `PhysicalEnhancement`, not
+subclassed: Seq. 6's Air Cushion is the same class with a stronger `resistance` and
+`fallImmune = true`, so the identity `tyrant_stance` stays one class across tiers.
 
 ## Sun — group `GodAlmighty` (theme: holy light, oath, judgment, purification) — **ported (phase 08)**
 Bard-family: light that sings first, then blesses, then burns. Anti-evil and anti-fear

@@ -3,6 +3,7 @@ package me.vangoo.mysteries.beyonder
 import me.vangoo.domain.PathwayBranding
 import me.vangoo.domain.abilities.AbilityType
 import me.vangoo.domain.entities.Beyonder
+import me.vangoo.domain.valueobjects.AbilityIdentity
 import me.vangoo.domain.valueobjects.Mastery
 import me.vangoo.domain.valueobjects.Sequence
 import me.vangoo.mysteries.GameRegistries
@@ -113,7 +114,8 @@ class AbilityRosterTest {
     @Test
     @DisplayName("Фарбування ростера не чіпає іконку самої здібності")
     fun tintingDoesNotLeakIntoTheAbility() {
-        val ability = Tyrant.create().abilitiesFor(9).single() as Ability
+        val ability = Tyrant.create().abilitiesFor(9)
+            .single { it.identity == AbilityIdentity.of("tyrant_illusory_scales") } as Ability
         BeyonderStatus.roster(sailor())
 
         assertTrue(

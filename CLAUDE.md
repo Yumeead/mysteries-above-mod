@@ -719,7 +719,7 @@ javap -cp "$MCM:$MCC" net.minecraft.client.gui.screens.Screen
   `/mysteries sanity`. Активи: перша власна текстура (`textures/particle/spirit_mote.png`),
   `sounds.json`, `shaders/post/sanity.fsh`, два `post_effect/*.json`.
   Разом 40 тест-класів / 304 тести зелені.
-- 🔄 **Фаза 08** — шар здібностей, усі 9 шляхів. **Закрито 5 з 9.**
+- 🔄 **Фаза 08** — шар здібностей, усі 9 шляхів. **Закрито 6 з 9.**
   - **WhiteTower** (Посл. 9–5): `pathways/common` (`RitualMagic`, `CombatProficiency`,
     `PhysicalEnhancement`), `pathways/whitetower` (`EnhancedMind`, `Deduction`, `Agility`,
     `CrimeReconstruction`, `Analysis`, `Spellcasting`, `MirrorCurse`), `ability/AttributeGrant`.
@@ -754,8 +754,25 @@ javap -cp "$MCM:$MCC" net.minecraft.client.gui.screens.Screen
     меню з кількох сплячих завжди будить найближчого; `Alteration` з дев'яти тригерів лишила
     два, які справді ловить шина подій мода; навігаційний апгрейд `PsychicCue` (Посл. 6+)
     чекає на примітив прицілювання по блоку, якого ще немає.
-  Разом 43 тест-класи / 322 тести зелені.
-  Далі за розміром: tyrant → justiciar → fool → death.
+  - **Tyrant** (Посл. 9–5, 29 здібностей): `Balance`/`AirCushion` (те саме тіло — параметризований
+    `Balance`, не підклас, бо спільна ідентичність мусить нести спільний клас), `SeaLunge`,
+    `Wrath`, `RagingBlow`, `SeaMemory`, `PreciseThrow`, `WaterFilm`, `AzureWave`, `RestorativeWater`,
+    `CleansingLight`, `Windblades`, `PressureWave`, `WindFlight`, `WindSprint`, `WindImbuedHands`,
+    `WindPull`, `Eavesdrop`, `WaterControl`, `StormHeart`, `AbyssalDominion`, `LightningStrike`,
+    `LightningBoltArrow`, `ThunderVoice`, `Singing`, `SeaTongue`, `WaterCurtain`, `CorrosiveDeluge`,
+    `SlickWater`, `WindBinding`. `IllusoryScales` — фаза 06. Костилі, замінені справжньою механікою:
+    `SeaMemory` (десять іменованих міток у меню → лодестон-компас без лодестона,
+    `LodestoneTracker(tracked = false)`; кілька міток — кілька компасів), `WindFlight`
+    (ручний цикл швидкості → `abilities.mayfly` для Польоту, `SLOW_FALLING` для Ковзання),
+    `AirCushion` (формула падіння вручну → `FALL_DAMAGE_MULTIPLIER`, той самий прийом, що
+    в `Agility` фази 08 WhiteTower). Два костилі лишились нездоланними в цій фазі, а не
+    перенесеними: `LightningBoltArrow` («заряди наступні 5 пострілів» через
+    `EntityShootBowEvent`, якого нема в Fabric API — стала пронизливою блискавкою по лінії
+    погляду) і `ThunderVoice` (вибір адресата через `PendingChoices`, як у `PsychicCue`;
+    вільний рядок у чат за 30 с — не переніс: захоплення чат-вводу належить `ui`, фазі 11).
+  Разом 43 тест-класи / 322 тести зелені (Tyrant рахунок не змінює: нових тест-класів не додано,
+  дві застарілі перевірки фази 05 виправлено під повний ростер).
+  Далі за розміром: justiciar → fool → death.
 
 ### Колесо Потойбічного (фаза UI, M1–M3)
 
