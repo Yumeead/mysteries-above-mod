@@ -10,11 +10,11 @@ import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
-import net.minecraft.world.Containers
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.item.ItemEntity
 import net.minecraft.world.entity.monster.Enemy
 import net.minecraft.world.item.ItemStack
 
@@ -93,7 +93,12 @@ class Authority : ActiveAbility(AbilityIdentity.of("justiciar_authority")) {
             val stack = target.getItemBySlot(slot)
             if (!stack.isEmpty) {
                 target.setItemSlot(slot, ItemStack.EMPTY)
-                Containers.dropItemStack(level, drop.x, drop.y + 1.0, drop.z, stack)
+                // Dropped right under the victim's own feet: the vanilla default pickup delay
+                // (10 ticks) elapses before the Slowness even registers, so they scoop it straight
+                // back up. A longer delay is what actually makes the stumble visible.
+                val item = ItemEntity(level, drop.x, drop.y + 1.0, drop.z, stack)
+                item.setPickUpDelay(DROP_PICKUP_DELAY_TICKS)
+                level.addFreshEntity(item)
             }
         }
         target.addEffect(MobEffectInstance(MobEffects.SLOWNESS, SLOWNESS_DURATION_TICKS, 0))
@@ -117,6 +122,7 @@ class Authority : ActiveAbility(AbilityIdentity.of("justiciar_authority")) {
         const val RADIUS = 15.0
         const val BUILDUP_TICKS = 120
         const val SLOWNESS_DURATION_TICKS = 200
+        const val DROP_PICKUP_DELAY_TICKS = 60
         const val MOB_DAMAGE = 8.0f
         const val COOLDOWN_SECONDS = 30
     }
