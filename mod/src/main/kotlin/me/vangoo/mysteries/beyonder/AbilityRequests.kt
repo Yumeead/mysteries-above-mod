@@ -2,9 +2,11 @@ package me.vangoo.mysteries.beyonder
 
 import me.vangoo.domain.abilities.CastRefusal
 import me.vangoo.domain.valueobjects.AbilityIdentity
+import me.vangoo.mysteries.ability.AbilityOutcome
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastMessages
 import me.vangoo.mysteries.ability.CastReport
+import me.vangoo.mysteries.ability.ToggleablePassiveAbility
 import me.vangoo.mysteries.ability.runtime.AbilityServices
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
@@ -38,6 +40,16 @@ object AbilityRequests {
 
         val spec = beyonder.abilityBy(identity)
             ?: return report(player, CastReport.Refused(CastRefusal.NotOwned))
+
+        // A toggle has no ticket to settle and no cooldown to charge — it flips a switch and the
+        // ability itself announces the new state (`onEnable`/`onDisable`), the same way a cast
+        // words its own outcome.
+        if (spec is ToggleablePassiveAbility) {
+            val nowEnabled = AbilityServices.passives.toggle(player, spec)
+            AbilityServices.statePump.pushNow(player.uuid)
+            return CastReport.Performed(AbilityOutcome.done(if (nowEnabled) "Увімкнено" else "Вимкнено"), null)
+        }
+
         val ability = spec as? ActiveAbility
             ?: return report(player, CastReport.Refused(CastRefusal.NotCastable))
 
