@@ -3,8 +3,11 @@ package me.vangoo.mysteries.pathways.fool
 import me.vangoo.domain.entities.Pathway
 import me.vangoo.domain.entities.PathwayGroup
 import me.vangoo.mysteries.pathways.common.RitualMagic
+import me.vangoo.mysteries.pathways.fool.abilities.ClownAgility
 import me.vangoo.mysteries.pathways.fool.abilities.DangerIntuition
 import me.vangoo.mysteries.pathways.fool.abilities.DivinationArts
+import me.vangoo.mysteries.pathways.fool.abilities.ExpressionControl
+import me.vangoo.mysteries.pathways.fool.abilities.PaperCutter
 import me.vangoo.mysteries.pathways.fool.abilities.SeerSpiritVision
 
 /**
@@ -31,6 +34,7 @@ object Fool {
         sequenceNames = SEQUENCE_NAMES,
         roster = mapOf(
             9 to listOf(DivinationArts(), SeerSpiritVision(), DangerIntuition(), RitualMagic()),
+            8 to listOf(PaperCutter(), ExpressionControl(), ClownAgility()),
         ),
     )
 }

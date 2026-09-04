@@ -10,6 +10,7 @@ import me.vangoo.mysteries.item.ModComponents
 import me.vangoo.mysteries.item.ModItems
 import me.vangoo.mysteries.net.ModChannels
 import me.vangoo.mysteries.pathways.ModPathways
+import me.vangoo.mysteries.pathways.fool.PaperThrowTrigger
 import me.vangoo.mysteries.server.MysteriesCommand
 import me.vangoo.mysteries.world.SpiritWorld
 import net.fabricmc.api.ModInitializer
@@ -45,6 +46,10 @@ object MysteriesAboveMod : ModInitializer {
         // Error's stolen dream refuses its owner a bed. A Fabric event cannot be unregistered,
         // so the hook is hung once here and the theft registry decides whether it bites.
         ConceptualTheft.install()
+
+        // Fool's "hold paper, right-click, throw" has no cast and no menu — same reasoning
+        // as ConceptualTheft above, only the registry it defers to is the Beyonder's own list.
+        PaperThrowTrigger.install()
 
         // The spirit world is data in itself, but a player who left the game inside it would
         // stay there forever: the session that could bring them back goes out together with
