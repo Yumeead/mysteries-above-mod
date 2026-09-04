@@ -10,6 +10,9 @@ import me.vangoo.mysteries.event.AbilityCast
 import me.vangoo.mysteries.event.EvidenceLog
 import me.vangoo.mysteries.event.GameEvent
 import me.vangoo.mysteries.event.GameEventBridge
+import me.vangoo.mysteries.event.IncomingDamage
+import me.vangoo.mysteries.pathways.fool.PaperWeaponHits
+import me.vangoo.mysteries.pathways.fool.RecentDamageLedger
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
 import me.vangoo.mysteries.schedule.TickScheduler
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
@@ -184,6 +187,10 @@ object AbilityServices {
      */
     private fun publish(event: GameEvent) {
         if (event is AbilityCast) EvidenceLog.record(event)
+        if (event is IncomingDamage) {
+            RecentDamageLedger.record(event)
+            PaperWeaponHits.onDamage(event)
+        }
         events.publish(event)
     }
 
@@ -202,6 +209,7 @@ object AbilityServices {
     private fun reset() {
         GameEventBridge.reset()
         EvidenceLog.reset()
+        RecentDamageLedger.reset()
         TheftRegistry.reset()
         events.clear()
         scheduling.shutdown()

@@ -3,11 +3,18 @@ package me.vangoo.mysteries.pathways.fool
 import me.vangoo.domain.entities.Pathway
 import me.vangoo.domain.entities.PathwayGroup
 import me.vangoo.mysteries.pathways.common.RitualMagic
+import me.vangoo.mysteries.pathways.door.abilities.Burning
+import me.vangoo.mysteries.pathways.fool.abilities.AirBullet
+import me.vangoo.mysteries.pathways.fool.abilities.AquaticBreath
 import me.vangoo.mysteries.pathways.fool.abilities.ClownAgility
+import me.vangoo.mysteries.pathways.fool.abilities.DamageTransfer
 import me.vangoo.mysteries.pathways.fool.abilities.DangerIntuition
 import me.vangoo.mysteries.pathways.fool.abilities.DivinationArts
 import me.vangoo.mysteries.pathways.fool.abilities.ExpressionControl
+import me.vangoo.mysteries.pathways.fool.abilities.FlameJump
+import me.vangoo.mysteries.pathways.fool.abilities.IllusionCreation
 import me.vangoo.mysteries.pathways.fool.abilities.PaperCutter
+import me.vangoo.mysteries.pathways.fool.abilities.PaperSubstitution
 import me.vangoo.mysteries.pathways.fool.abilities.SeerSpiritVision
 
 /**
@@ -35,6 +42,10 @@ object Fool {
         roster = mapOf(
             9 to listOf(DivinationArts(), SeerSpiritVision(), DangerIntuition(), RitualMagic()),
             8 to listOf(PaperCutter(), ExpressionControl(), ClownAgility()),
+            7 to listOf(
+                FlameJump(), PaperSubstitution(), AirBullet(), DamageTransfer(),
+                AquaticBreath(), IllusionCreation(), Burning(),
+            ),
         ),
     )
 }

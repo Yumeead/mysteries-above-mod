@@ -19,6 +19,11 @@ object ModComponents {
         it.persistent(PotionBrew.CODEC).networkSynchronized(PotionBrew.STREAM_CODEC)
     }
 
+    /** A paper weapon's kind and remaining charge (Fool, Seq. 7). */
+    val PAPER_WEAPON: DataComponentType<PaperWeapon> = register("paper_weapon") {
+        it.persistent(PaperWeapon.CODEC).networkSynchronized(PaperWeapon.STREAM_CODEC)
+    }
+
     /**
      * Touches the class, forcing it to initialise.
      *
