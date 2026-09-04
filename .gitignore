@@ -6,6 +6,7 @@ build/
 # Loom
 .loom-cache/
 run/
+run-client*/
 remappedSrc/
 
 # IDE

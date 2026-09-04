@@ -23,6 +23,17 @@ loom {
             sourceSet(sourceSets["client"])
         }
     }
+
+    // Second client for testing abilities that need another live player (marks,
+    // zones, targeting). Own game dir and username so it doesn't collide with the
+    // default client on options.txt/logs/latest.log or the server's username check.
+    runs {
+        create("client2") {
+            inherit(getByName("client"))
+            runDir("run-client2")
+            programArgs("--username", "Tester2")
+        }
+    }
 }
 
 dependencies {
