@@ -584,6 +584,14 @@ ability)` — рівно для цього: `AntiDivination` Дверей сам
    інтерпольовану позицію власника тим самим `partialTick` і виставити `xo == x`, щоб лерп
    рендера не зсунув фігуру назад. Тоді вона рухається **кадр у кадр** із моделлю.
 
+8. **Access widener: простір імен — `official`, і заголовок мусить бути першим рядком.**
+   Обидві помилки коштували по збірці. `named` loom відхиляє прямо (`Expected official namespace
+   for access widener entry, found: named`) — гра на 26.x не обфускована, тож офіційні імена і є
+   читабельними. А коментар перед заголовком дає `Invalid access widener file header`: рядок
+   `accessWidener v2 official` має бути найпершим, коментарі — тільки під ним. Підключається
+   двома місцями: `loom { accessWidenerPath = ... }` і `"accessWidener"` у `fabric.mod.json`.
+   У пошуку гачків AW стоїть **нижче за міксин**: він міняє лише видимість і не вставляє коду.
+
 Канонічне джерело версій — `FabricMC/fabric-example-mod` гілка `26.2`
 (`gradle.properties` + `build.gradle`). **Не вгадувати версії з пам'яті.**
 
@@ -719,7 +727,7 @@ javap -cp "$MCM:$MCC" net.minecraft.client.gui.screens.Screen
   `/mysteries sanity`. Активи: перша власна текстура (`textures/particle/spirit_mote.png`),
   `sounds.json`, `shaders/post/sanity.fsh`, два `post_effect/*.json`.
   Разом 40 тест-класів / 304 тести зелені.
-- 🔄 **Фаза 08** — шар здібностей, усі 9 шляхів. **Закрито 7 з 9.**
+- 🔄 **Фаза 08** — шар здібностей, усі 9 шляхів. **Закрито 8 з 9** (у Fool лишилась Посл. 5).
   - **WhiteTower** (Посл. 9–5): `pathways/common` (`RitualMagic`, `CombatProficiency`,
     `PhysicalEnhancement`), `pathways/whitetower` (`EnhancedMind`, `Deduction`, `Agility`,
     `CrimeReconstruction`, `Analysis`, `Spellcasting`, `MirrorCurse`), `ability/AttributeGrant`.
@@ -798,7 +806,23 @@ javap -cp "$MCM:$MCC" net.minecraft.client.gui.screens.Screen
     `LightningBoltArrow` і `ThunderVoice` у Tyrant. `SpawnProhibition` лишився поллінгом
     (двічі на секунду виганяє заборонений вид із зони), бо `CreatureSpawnEvent` теж не має
     аналога на Fabric — чесний компроміс, не костиль: зона **виганяє**, а не **скасовує**.
-  Далі за розміром: fool → death.
+  - **Fool** (Посл. 9–6; Посл. 5 лишилась): `DivinationArts`, `SeerSpiritVision`, `DangerIntuition`
+    (Посл. 9); `PaperCutter`, `ExpressionControl`, `ClownAgility` (Посл. 8); `FlameJump`,
+    `PaperSubstitution`, `AirBullet`, `DamageTransfer`, `AquaticBreath`, `IllusionCreation`
+    (Посл. 7, плюс `Burning` Дверей і `RitualMagic` даром); `Shapeshifting` (Посл. 6). Приїхали
+    `PaperThrowTrigger` (`UseItemCallback` замість касту), `RecentDamageLedger` і `PaperWeaponHits`
+    (обидва слухають `IncomingDamage` із самої точки `AbilityServices.publish`, бо залежать від
+    того, кого вдарили й що в руці, а не від власника здібності), компонент `PaperWeapon` і
+    **перший access widener мода** — заради `Disguise` (див. нижче).
+    **Дві еволюції плагіна злились у свій базовий клас**, бо спільна ідентичність мусить нести
+    спільний клас: `PaperWeaponry` → `PaperCutter` (плетіння зброї просто «ще не відкрито» вище
+    Посл. 7), `GracefulDescent` → `ClownAgility` (крок швидкості й слід падіння читають
+    Послідовність). Побічно виявлено: `PassiveTicker.activate` **не** кличе `onActivate` для вже
+    активованої пасивки, тож піднесення 8→6 лишало старий модифікатор атрибута до перезаходу —
+    `ClownAgility` тепер звіряє живий модифікатор у такті й переставляє лише на розбіжність.
+    Викреслено як дублікати: лозошукання й сонне провидіння `DivinationArts` (обидва вже є в
+    Дверей і в `TravellersDoor`).
+  Далі: fool Посл. 5 (Маріонетник) → death.
 
 ### Колесо Потойбічного (фаза UI, M1–M3)
 
