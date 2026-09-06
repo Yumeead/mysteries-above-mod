@@ -21,6 +21,7 @@
       }
     ]
   },
+  "accessWidener": "mysteries_above.accesswidener",
   "mixins": [
     "mysteries_above.mixins.json",
     {

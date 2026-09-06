@@ -1,0 +1,16 @@
+accessWidener	v2	official
+
+# The header must be the very first line, and the namespace is `official`, not `named`: on 26.x
+# the game ships unobfuscated, so the official names already are the readable ones and loom
+# refuses a `named` header outright.
+#
+# Fool, Seq. 6 (Faceless) — Shapeshifting has to tell the other clients that this player is
+# wearing someone else's face. `ClientboundPlayerInfoUpdatePacket` only ever builds its entries
+# from real `ServerPlayer`s, so a fabricated `GameProfile` cannot reach it through any public
+# constructor; the entry record itself is public, only the list holding it is not.
+#
+# This is the cheapest tool that works, and deliberately cheaper than the mixin the hook search
+# order would otherwise end at: widening a member's visibility injects no code into any method
+# body, so nothing here can break the way a `@Redirect` into a rewritten method would.
+accessible	field	net/minecraft/network/protocol/game/ClientboundPlayerInfoUpdatePacket	entries	Ljava/util/List;
+mutable	field	net/minecraft/network/protocol/game/ClientboundPlayerInfoUpdatePacket	entries	Ljava/util/List;

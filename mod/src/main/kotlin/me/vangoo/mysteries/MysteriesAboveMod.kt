@@ -1,5 +1,6 @@
 package me.vangoo.mysteries
 
+import me.vangoo.mysteries.ability.Disguise
 import me.vangoo.mysteries.ability.runtime.AbilityServices
 import me.vangoo.mysteries.pathways.error.abilities.ConceptualTheft
 import me.vangoo.mysteries.beyonder.AbilityRequests
@@ -50,6 +51,10 @@ object MysteriesAboveMod : ModInitializer {
         // Fool's "hold paper, right-click, throw" has no cast and no menu — same reasoning
         // as ConceptualTheft above, only the registry it defers to is the Beyonder's own list.
         PaperThrowTrigger.install()
+
+        // A borrowed face is a lie told to each client separately, so a player who joins while
+        // the mask is up has to be told it too — the one gap the vanilla join sequence leaves.
+        Disguise.install()
 
         // The spirit world is data in itself, but a player who left the game inside it would
         // stay there forever: the session that could bring them back goes out together with

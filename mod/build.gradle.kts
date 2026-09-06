@@ -17,6 +17,11 @@ loom {
     // виділеному сервері, а помилка компіляції.
     splitEnvironmentSourceSets()
 
+    // One widened field, for Fool's `Shapeshifting` — see the file itself for why. An access
+    // widener changes visibility only; it injects nothing, so it sits below a mixin in the same
+    // hook search order, not beside it.
+    accessWidenerPath = file("src/main/resources/mysteries_above.accesswidener")
+
     mods {
         register("mysteries_above") {
             sourceSet(sourceSets.main.get())

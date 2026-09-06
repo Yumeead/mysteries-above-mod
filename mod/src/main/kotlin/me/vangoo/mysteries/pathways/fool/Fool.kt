@@ -16,14 +16,15 @@ import me.vangoo.mysteries.pathways.fool.abilities.IllusionCreation
 import me.vangoo.mysteries.pathways.fool.abilities.PaperCutter
 import me.vangoo.mysteries.pathways.fool.abilities.PaperSubstitution
 import me.vangoo.mysteries.pathways.fool.abilities.SeerSpiritVision
+import me.vangoo.mysteries.pathways.fool.abilities.Shapeshifting
 
 /**
  * The pathway of the Fool — divination and information first (Seer), then trickery and paper
  * (Clown, Magician), then identity itself (Faceless, Marionettist).
  *
- * **Phase 08, Seq. 9-5.** Filled incrementally: Seq. 9 first, the rest to follow. `Shapeshifting`
- * (Seq. 6) and `MarionettistControl` (Seq. 5, the pathway's largest single ability — no Fabric
- * equivalent to the plugin's Citizens-NPC puppet) are deferred to their own design pass.
+ * **Phase 08, Seq. 9-6 filled.** `MarionettistControl` (Seq. 5, the pathway's largest single
+ * ability — no Fabric equivalent to the plugin's Citizens-NPC puppet) is still on its own design
+ * pass.
  */
 object Fool {
 
@@ -46,6 +47,10 @@ object Fool {
                 FlameJump(), PaperSubstitution(), AirBullet(), DamageTransfer(),
                 AquaticBreath(), IllusionCreation(), Burning(),
             ),
+            // `GracefulDescent` is not here: it was the plugin's second class under `ClownAgility`'s
+            // identity, and one identity carries one class — the upgrade lives inside that passive
+            // and reads the Sequence, exactly as `PaperCutter` does one Sequence above.
+            6 to listOf(Shapeshifting()),
         ),
     )
 }

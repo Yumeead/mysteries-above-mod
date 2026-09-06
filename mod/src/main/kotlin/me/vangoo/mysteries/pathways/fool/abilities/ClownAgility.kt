@@ -9,29 +9,41 @@ import me.vangoo.mysteries.ability.Ticking
 import me.vangoo.mysteries.ability.grantAttribute
 import me.vangoo.mysteries.ability.modifierId
 import me.vangoo.mysteries.ability.revokeAttribute
+import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
 import net.minecraft.core.BlockPos
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.chat.Component
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.ai.attributes.AttributeModifier
 import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.phys.Vec3
 
 /**
- * Fool, Seq. 8 (Clown): **Clown Agility**.
+ * Fool, Seq. 8 (Clown), sharpening into **Graceful Descent** at Seq. 6 (Faceless): **Clown
+ * Agility**.
  *
- * A tumbler's body: quick on their feet, and a fall never hurts them. Falls immune the same way
- * Tyrant's `Balance` already zeroes fall damage — `FALL_DAMAGE_MULTIPLIER` at its source, not a
- * caught-and-cancelled `EntityDamageEvent`.
+ * A tumbler's body: quick on their feet, and a fall never hurts them. Fall immunity is
+ * `FALL_DAMAGE_MULTIPLIER` at the damage's source, the same move Tyrant's `Balance` already made,
+ * not a caught-and-cancelled event.
  *
- * ## Wall climbing has no attribute to lean on
+ * ## One class, not two — the Seq. 6 upgrade is a number, not a new power
  *
- * There is no vanilla hook for "sneak-jumped into a wall, keep it pressed" — this is genuinely
- * `PassiveTicker`'s tier of the search order, the same as the plugin: a solid block ahead plus
- * sneaking plus airborne is checked every tick, and the vertical speed comes straight from
- * [WallClimbRules].
+ * The plugin had `GracefulDescent` replace this passive through a shared `AbilityIdentity`. The
+ * mod does not allow that (a shared identity must carry a shared class — see `PaperCutter` and
+ * Tyrant's `Balance`), and it costs nothing here: what the evolution actually changed was the
+ * speed step and some particles, both of which read [Sequence] anyway. Above Seq. 6 the body
+ * moves faster and starts leaving a trail on the way down.
  *
- * [identity] is shared with [GracefulDescent] (Seq. 6): advancing swaps this instance for that
- * one, the same evolution pattern `PaperCutter`/`PaperWeaponry` use.
+ * ## Two things a passive cannot get from an attribute
+ *
+ * Wall climbing has no vanilla hook — "sneak-jumped into a wall, keep it pressed" is genuinely
+ * `PassiveTicker`'s tier of the search order, the same as in the plugin.
+ *
+ * The speed step has one, but granting it in [onActivate] alone is not enough: `PassiveTicker`
+ * only calls that for a passive it has **not** activated yet, so a Beyonder who ascends 8 → 6
+ * would keep the weaker modifier until they relogged. [tick] compares the live modifier against
+ * what the current Sequence asks for once a second and re-grants only on a mismatch — stateless,
+ * so nothing here goes stale across a respawn either.
  */
 class ClownAgility : PermanentPassiveAbility(IDENTITY), Ticking {
 
@@ -41,17 +53,18 @@ class ClownAgility : PermanentPassiveAbility(IDENTITY), Ticking {
     private val fallModifier = modifierId(identity.id, "fall_damage_multiplier")
 
     override fun description(sequence: Sequence): Component = Component.literal(
-        "Акробатична спритність: швидкість +1 і повний імунітет до шкоди від падіння.\n" +
-            "▪ Стрибок у стіну в присіді (Shift+Пробіл) — дертеся вгору",
+        "Акробатична спритність: швидкість +${(speedBonus(sequence) * 100).toInt()}% і повний імунітет до шкоди від падіння.\n" +
+            "▪ Стрибок у стіну в присіді (Shift+Пробіл) — дертеся вгору\n" +
+            if (sequence.level <= GRACE_UNLOCK_SEQUENCE) {
+                "▪ Витончений спуск: падіння лишає слід, тіло слухається повністю"
+            } else {
+                "▪ На Посл. $GRACE_UNLOCK_SEQUENCE спритність переростає у витончений спуск"
+            },
     )
 
     override fun onActivate(context: AbilityContext) {
-        context.caster.grantAttribute(
-            Attributes.MOVEMENT_SPEED, speedModifier,
-            SPEED_BONUS_PERCENT, AttributeModifier.Operation.ADD_MULTIPLIED_BASE,
-        )
-        // 1.0 (base) + (-1.0) == 0: the fall's own damage is zeroed out at its source,
-        // the same move Tyrant's `Balance` already made.
+        grantSpeed(context.caster, context.sequence)
+        // 1.0 (base) + (-1.0) == 0: the fall's own damage is zeroed out at its source.
         context.caster.grantAttribute(Attributes.FALL_DAMAGE_MULTIPLIER, fallModifier, -1.0)
     }
 
@@ -62,6 +75,33 @@ class ClownAgility : PermanentPassiveAbility(IDENTITY), Ticking {
 
     override fun tick(context: AbilityContext) {
         val player = context.caster
+        if (context.scheduling.tick % TICKS_PER_SECOND == 0L) keepSpeedCurrent(player, context.sequence)
+        if (context.sequence.level <= GRACE_UNLOCK_SEQUENCE) traceDescent(context, player)
+        climbWall(context, player)
+    }
+
+    /** The Sequence moved and nobody re-activated the passive: put the right step back. */
+    private fun keepSpeedCurrent(player: ServerPlayer, sequence: Sequence) {
+        val granted = player.getAttribute(Attributes.MOVEMENT_SPEED)?.getModifier(speedModifier)
+        if (granted != null && granted.amount() == speedBonus(sequence)) return
+        grantSpeed(player, sequence)
+    }
+
+    private fun grantSpeed(player: ServerPlayer, sequence: Sequence) {
+        player.grantAttribute(
+            Attributes.MOVEMENT_SPEED, speedModifier,
+            speedBonus(sequence), AttributeModifier.Operation.ADD_MULTIPLIED_BASE,
+        )
+    }
+
+    /** The name earns itself: from Seq. 6 a long drop is visibly slowed rather than merely survived. */
+    private fun traceDescent(context: AbilityContext, player: ServerPlayer) {
+        if (player.onGround() || player.deltaMovement.y > DESCENT_SPEED) return
+        val at = player.position()
+        context.level.sendParticles(ParticleTypes.CLOUD, at.x, at.y + 0.1, at.z, 1, 0.2, 0.0, 0.2, 0.0)
+    }
+
+    private fun climbWall(context: AbilityContext, player: ServerPlayer) {
         if (!player.isShiftKeyDown) return
         if (player.onGround() || player.isInWater || player.isFallFlying) return
 
@@ -87,9 +127,21 @@ class ClownAgility : PermanentPassiveAbility(IDENTITY), Ticking {
         }
     }
 
+    private fun speedBonus(sequence: Sequence): Double =
+        if (sequence.level <= GRACE_UNLOCK_SEQUENCE) GRACEFUL_SPEED_PERCENT else CLOWN_SPEED_PERCENT
+
     companion object {
         val IDENTITY: AbilityIdentity = AbilityIdentity.of("fool_agility")
+
+        private const val GRACE_UNLOCK_SEQUENCE = 6
+
         /** +20% — the same as vanilla `SPEED I` gave, only without the step (WhiteTower's `Agility` precedent). */
-        private const val SPEED_BONUS_PERCENT = 0.2
+        private const val CLOWN_SPEED_PERCENT = 0.2
+
+        /** The plugin's `SPEED II` at Seq. 6, again without being nailed to the effect's 20% step. */
+        private const val GRACEFUL_SPEED_PERCENT = 0.4
+
+        /** Falling at least this fast counts as a descent worth marking. */
+        private const val DESCENT_SPEED = -0.6
     }
 }
