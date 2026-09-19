@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "minecraft:item/amethyst_shard",
+    "tints": [
+      {
+        "type": "minecraft:dye",
+        "default": -4934476
+      }
+    ]
+  }
+}

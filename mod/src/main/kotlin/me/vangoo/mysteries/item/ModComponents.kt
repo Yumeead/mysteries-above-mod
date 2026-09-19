@@ -24,6 +24,11 @@ object ModComponents {
         it.persistent(PaperWeapon.CODEC).networkSynchronized(PaperWeapon.STREAM_CODEC)
     }
 
+    /** Whose power condensed into this core, and from which Sequence (Fool, Seq. 5). */
+    val CHARACTERISTIC: DataComponentType<CharacteristicData> = register("characteristic") {
+        it.persistent(CharacteristicData.CODEC).networkSynchronized(CharacteristicData.STREAM_CODEC)
+    }
+
     /**
      * Touches the class, forcing it to initialise.
      *

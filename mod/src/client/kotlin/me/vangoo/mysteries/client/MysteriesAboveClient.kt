@@ -2,11 +2,15 @@ package me.vangoo.mysteries.client
 
 import me.vangoo.mysteries.MOD_ID
 import me.vangoo.mysteries.client.beyonder.ClientAbilityState
+import me.vangoo.mysteries.client.beyonder.ClientMarionettes
 import me.vangoo.mysteries.client.beyonder.SanityAmbience
+import me.vangoo.mysteries.client.render.MarionetteRenderer
 import me.vangoo.mysteries.client.render.SpiritGlyphParticle
 import me.vangoo.mysteries.client.render.SpiritMoteParticle
 import me.vangoo.mysteries.effect.ModParticles
+import me.vangoo.mysteries.entity.ModEntities
 import me.vangoo.mysteries.client.hud.AbilityHud
+import me.vangoo.mysteries.client.hud.MarionetteHud
 import me.vangoo.mysteries.client.hud.SpiritualityHud
 import me.vangoo.mysteries.client.input.ModKeys
 import me.vangoo.mysteries.client.net.receiveOnClient
@@ -16,6 +20,7 @@ import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry
+import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry
 import org.slf4j.LoggerFactory
 
 /**
@@ -48,6 +53,11 @@ object MysteriesAboveClient : ClientModInitializer {
         ModChannels.ABILITY_ROSTER.receiveOnClient { payload, _ -> ClientAbilityState.accept(payload) }
         ModChannels.ABILITY_STATE.receiveOnClient { payload, _ -> ClientAbilityState.accept(payload) }
 
+        // Fool's threads. A third store beside the two above, and separate for the same reason
+        // they are separate from each other: its packet arrives only for the one player holding
+        // puppets, and never at all for anybody else.
+        ModChannels.MARIONETTE_STATE.receiveOnClient { payload, _ -> ClientMarionettes.accept(payload) }
+
         // The cooldown clock. The client tick, not wall time: a paused single-player game stands
         // still — the server and the countdown along with it.
         ClientTickEvents.END_CLIENT_TICK.register {
@@ -68,13 +78,20 @@ object MysteriesAboveClient : ClientModInitializer {
         }
 
         // The next world starts with a clean slate: someone else's roster is neither drawable nor wanted.
+        // The marionette wears a player model and a stolen face; the renderer is the mod's first,
+        // and it exists because `AvatarRenderer`'s own bound is a client-only interface the shared
+        // entity class cannot implement. See `MarionetteRenderer`.
+        EntityRendererRegistry.register(ModEntities.MARIONETTE, ::MarionetteRenderer)
+
         ClientPlayConnectionEvents.DISCONNECT.register { _, _ ->
             ClientAbilityState.clear()
+            ClientMarionettes.clear()
             SanityAmbience.clear()
         }
 
         SpiritualityHud.register()
         AbilityHud.register()
+        MarionetteHud.register()
         ModKeys.register()
 
         log.info("Mysteries Above: client side is up")

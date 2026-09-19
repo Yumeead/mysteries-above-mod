@@ -7,10 +7,12 @@ import me.vangoo.mysteries.beyonder.AbilityRequests
 import me.vangoo.mysteries.beyonder.BeyonderStatus
 import me.vangoo.mysteries.effect.ModParticles
 import me.vangoo.mysteries.effect.ModSounds
+import me.vangoo.mysteries.entity.ModEntities
 import me.vangoo.mysteries.item.ModComponents
 import me.vangoo.mysteries.item.ModItems
 import me.vangoo.mysteries.net.ModChannels
 import me.vangoo.mysteries.pathways.ModPathways
+import me.vangoo.mysteries.pathways.fool.Marionettes
 import me.vangoo.mysteries.pathways.fool.PaperThrowTrigger
 import me.vangoo.mysteries.server.MysteriesCommand
 import me.vangoo.mysteries.world.SpiritWorld
@@ -34,6 +36,7 @@ object MysteriesAboveMod : ModInitializer {
         // The component before the item: the item already requires it.
         ModComponents.register()
         ModItems.register()
+        ModEntities.register()
 
         // The sensory vocabulary: particles and sounds are registered on both sides — the
         // server sends them in packets, the client draws and plays them.
@@ -51,6 +54,10 @@ object MysteriesAboveMod : ModInitializer {
         // Fool's "hold paper, right-click, throw" has no cast and no menu — same reasoning
         // as ConceptualTheft above, only the registry it defers to is the Beyonder's own list.
         PaperThrowTrigger.install()
+
+        // Fool's threads: orders and possession are not casts, so they have their own channel and
+        // their own clock rather than a place in the ability pipeline.
+        Marionettes.install()
 
         // A borrowed face is a lie told to each client separately, so a player who joins while
         // the mask is up has to be told it too — the one gap the vanilla join sequence leaves.

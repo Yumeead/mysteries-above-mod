@@ -14,3 +14,8 @@ accessWidener	v2	official
 # body, so nothing here can break the way a `@Redirect` into a rewritten method would.
 accessible	field	net/minecraft/network/protocol/game/ClientboundPlayerInfoUpdatePacket	entries	Ljava/util/List;
 mutable	field	net/minecraft/network/protocol/game/ClientboundPlayerInfoUpdatePacket	entries	Ljava/util/List;
+
+# Fool, Seq. 5 (Marionettist) — a mob on the threads keeps its own pathfinding and its own melee
+# goals, and loses only the right to choose its enemies. That is one line, `targetSelector`, and
+# vanilla keeps it protected because nothing outside a `Mob` normally rewrites another mob's will.
+accessible	field	net/minecraft/world/entity/Mob	targetSelector	Lnet/minecraft/world/entity/ai/goal/GoalSelector;

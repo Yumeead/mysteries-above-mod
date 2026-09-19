@@ -5,6 +5,8 @@ import me.vangoo.mysteries.net.payload.AbilityRosterPayload
 import me.vangoo.mysteries.net.payload.AbilityStatePayload
 import me.vangoo.mysteries.net.payload.BeyonderStatusPayload
 import me.vangoo.mysteries.net.payload.CastRequestPayload
+import me.vangoo.mysteries.net.payload.MarionetteOrderPayload
+import me.vangoo.mysteries.net.payload.MarionetteStatePayload
 import me.vangoo.mysteries.net.payload.StatusRequestPayload
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.StreamCodec
@@ -53,6 +55,17 @@ object ModChannels {
     /** One player intent: select, cast, select and cast, toggle. */
     val ABILITY_ACTION: ServerboundChannel<AbilityActionPayload> =
         serverbound(AbilityActionPayload.TYPE, AbilityActionPayload.CODEC)
+
+    /**
+     * The row of threads (Fool, Seq. 5). Its own rhythm: once a second, and only for the one
+     * player in a thousand who is holding puppets at all.
+     */
+    val MARIONETTE_STATE: ClientboundChannel<MarionetteStatePayload> =
+        clientbound(MarionetteStatePayload.TYPE, MarionetteStatePayload.CODEC)
+
+    /** The Marionettist's hands: pick a thread, give an order, cut it, steer, strike. */
+    val MARIONETTE_ORDER: ServerboundChannel<MarionetteOrderPayload> =
+        serverbound(MarionetteOrderPayload.TYPE, MarionetteOrderPayload.CODEC)
 
     /** Every declared channel — for logs and tests. */
     val all: List<Channel<*>> get() = declared.toList()

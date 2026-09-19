@@ -11,6 +11,7 @@ import me.vangoo.mysteries.event.EvidenceLog
 import me.vangoo.mysteries.event.GameEvent
 import me.vangoo.mysteries.event.GameEventBridge
 import me.vangoo.mysteries.event.IncomingDamage
+import me.vangoo.mysteries.pathways.fool.Marionettes
 import me.vangoo.mysteries.pathways.fool.PaperWeaponHits
 import me.vangoo.mysteries.pathways.fool.RecentDamageLedger
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
@@ -46,6 +47,15 @@ object AbilityServices {
     private val onError: (String, Throwable) -> Unit = { what, error -> log.error(what, error) }
 
     private val players: (UUID) -> ServerPlayer? = { id -> server?.playerList?.getPlayer(id) }
+
+    /**
+     * Whoever is in the game under this id, or `null`.
+     *
+     * The mod's plumbing — the parts with no `AbilityContext` of their own — already reaches for
+     * this through [messaging]; Fool's marionettes need the player themselves rather than a line
+     * of text, so the same lookup is public here instead of copied a second time.
+     */
+    fun playerOf(id: UUID): ServerPlayer? = players(id)
 
     // Toggles live in `passives`, and that is built later — the lambda body reads it at call
     // time, i.e. long after the object is initialised.
@@ -211,6 +221,7 @@ object AbilityServices {
         EvidenceLog.reset()
         RecentDamageLedger.reset()
         TheftRegistry.reset()
+        Marionettes.reset()
         events.clear()
         scheduling.shutdown()
         // One farewell tick. Cancellation only takes a session out of its wait — unwinding the

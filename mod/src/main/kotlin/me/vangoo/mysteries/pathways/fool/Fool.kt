@@ -13,18 +13,20 @@ import me.vangoo.mysteries.pathways.fool.abilities.DivinationArts
 import me.vangoo.mysteries.pathways.fool.abilities.ExpressionControl
 import me.vangoo.mysteries.pathways.fool.abilities.FlameJump
 import me.vangoo.mysteries.pathways.fool.abilities.IllusionCreation
+import me.vangoo.mysteries.pathways.fool.abilities.MarionetteControl
 import me.vangoo.mysteries.pathways.fool.abilities.PaperCutter
 import me.vangoo.mysteries.pathways.fool.abilities.PaperSubstitution
+import me.vangoo.mysteries.pathways.fool.abilities.Possession
 import me.vangoo.mysteries.pathways.fool.abilities.SeerSpiritVision
 import me.vangoo.mysteries.pathways.fool.abilities.Shapeshifting
+import me.vangoo.mysteries.pathways.fool.abilities.ThreadSight
 
 /**
  * The pathway of the Fool — divination and information first (Seer), then trickery and paper
  * (Clown, Magician), then identity itself (Faceless, Marionettist).
  *
- * **Phase 08, Seq. 9-6 filled.** `MarionettistControl` (Seq. 5, the pathway's largest single
- * ability — no Fabric equivalent to the plugin's Citizens-NPC puppet) is still on its own design
- * pass.
+ * **Phase 08, Seq. 9-5 filled.** The plugin never went above Seq. 5 on any pathway, so this is
+ * the whole of the Fool there is to port.
  */
 object Fool {
 
@@ -51,6 +53,12 @@ object Fool {
             // identity, and one identity carries one class — the upgrade lives inside that passive
             // and reads the Sequence, exactly as `PaperCutter` does one Sequence above.
             6 to listOf(Shapeshifting()),
+            // `MarionetteSwapMenu` is not here and never will be: it was 60 lines of `ActiveAbility`
+            // whose whole body opened a chest listing the caster's puppets. The row of threads on
+            // the HUD answers the same question without a menu, and the mouse wheel answers it
+            // faster — so the third slot went to `Possession`, which the plugin buried inside a
+            // sneak-modifier on the control ability.
+            5 to listOf(ThreadSight(), MarionetteControl(), Possession()),
         ),
     )
 }
