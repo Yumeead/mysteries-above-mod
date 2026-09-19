@@ -1,0 +1,6 @@
+- [Здібності — важкі й лорні](pathway-abilities-should-be-hard-and-lore-heavy.md) — лор веде порт, спрощення плагіна не переносити
+- [Духовний світ](spirit-world-dimension.md) — перший власний вимір; світи додаються датапаком, не кодом
+- [Fool, Посл. 5 — Маріонетник](fool-sequence-5-marionettist.md) — що там усередині, чому це найбільша здібність порту і що вже готове під неї
+- [Керування маріонетками](marionette-control-surface.md) — HUD-ряд замість предметів; Avatar, setCamera і START_CLIENT_TICK
+- [Перевтілення: скін](shapeshifting-skin-open-question.md) — ім'я працює, скін ні; що вже виключено й чому тест відкладено
+- [Перевірка у грі на двох клієнтах](in-game-verification-with-two-clients.md) — здібності перевіряються грою, а не збіркою; чого не показує dev-середовище

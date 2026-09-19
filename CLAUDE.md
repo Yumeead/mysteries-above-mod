@@ -1150,3 +1150,21 @@ F1 (`Minecraft.gui.hud.isHidden()`). Режими — `ЗАВЖДИ` / `АВТО
 - Комітити чи пушити — лише коли користувач попросив.
 - Довгі повідомлення передавай через `git commit -F <файл>`, а не here-string: через bash
   here-string у повідомленні лишаються літеральні `@`.
+
+## Пам'ять Claude — у репозиторії
+
+Нотатки сесій лежать у **`.claude/memory/`** і комітяться разом із кодом, тож на будь-якій
+машині вони приїжджають звичайним `git pull`. Харнес читає їх за іншим шляхом
+(`~/.claude/projects/C--Users-<user>-IdeaProjects-mysteries-above-mod/memory`), тому на
+новій машині цей шлях треба один раз перевести на репозиторій junction'ом:
+
+```powershell
+$h = "$env:USERPROFILE\.claude\projects\C--Users-$env:USERNAME-IdeaProjects-mysteries-above-mod\memory"
+Remove-Item -Recurse -Force $h -ErrorAction SilentlyContinue
+cmd /c mklink /J "$h" "$env:USERPROFILE\IdeaProjects\mysteries-above-mod\.claude\memory"
+```
+
+Після цього все, що Claude запише в пам'ять, одразу видно в `git status`.
+
+База claude-mem (`~/.claude-mem/claude-mem.db`, 27 МБ, усі проєкти разом) сюди **не** їде —
+її або копіювати файлом, або вмикати синхронізацію cmem.ai Pro (скіл `claude-mem:cloud-sync`).
