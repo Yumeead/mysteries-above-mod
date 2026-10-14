@@ -38,6 +38,11 @@ loom {
             runDir("run-client2")
             programArgs("--username", "Tester2")
         }
+        // A fixed name for the first client too, so ops.json on the dev server keeps working
+        // across launches. Set after client2 inherits, or client2 would get two --username.
+        getByName("client") {
+            programArgs("--username", "Tester1")
+        }
     }
 }
 
