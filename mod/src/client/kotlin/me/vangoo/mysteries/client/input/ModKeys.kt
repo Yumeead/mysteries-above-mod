@@ -4,12 +4,12 @@ import com.mojang.blaze3d.platform.InputConstants
 import me.vangoo.mysteries.MOD_ID
 import me.vangoo.mysteries.client.beyonder.ClientMarionettes
 import me.vangoo.mysteries.client.net.sendToServer
+import me.vangoo.mysteries.entity.MarionetteEntity
 import me.vangoo.mysteries.modId
 import me.vangoo.mysteries.net.ModChannels
 import me.vangoo.mysteries.net.payload.CastRequestPayload
 import me.vangoo.mysteries.net.payload.MarionetteOrderPayload
 import me.vangoo.mysteries.net.payload.StatusRequestPayload
-import kotlin.math.abs
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback
@@ -76,8 +76,8 @@ object ModKeys {
     /** The hotbar slot the wheel was stolen from, to be put back when the threads are let go. */
     private var borrowedSlot = -1
 
-    private var sentYaw = Float.NaN
-    private var sentPitch = Float.NaN
+    /** The puppet the local player is inside, hidden from its own driver; see [inside]. */
+    private var worn: MarionetteEntity? = null
 
     fun register() {
         // START, not END: vanilla drains the click queues inside `Minecraft.tick()`, so a handler
@@ -85,7 +85,7 @@ object ModKeys {
         // get first refusal on the mouse, and hand it back the moment the key is released.
         ClientTickEvents.START_CLIENT_TICK.register { client ->
             threads(client)
-            drive(client)
+            inside(client)
         }
 
         // Consuming the click stops a *click*; holding the button is a separate path through
@@ -173,47 +173,27 @@ object ModKeys {
     }
 
     /**
-     * While possessing: the head and the fist, which are the two things vanilla stops sending.
-     *
-     * With the camera on a puppet the client keeps sending the movement **keys** (the server reads
-     * them as `ServerPlayer.lastClientInput`) but not the rotation — `LocalPlayer.sendPosition`
-     * sits behind `isControlledCamera`. So the rotation comes down the mod's own channel, and only
-     * while it changes. The blow goes the same way because vanilla's own attack is measured from
-     * the body, standing wherever it was left, and the server drops it on reach.
+     * While possessing: the puppet the local player is standing inside is theirs to wear, not to
+     * look at. It is marked so it is neither drawn around the camera nor caught by the crosshair
+     * (`MarionetteEntity.hiddenForDriver`), and the mark comes off the moment they leave.
      */
-    private fun drive(client: net.minecraft.client.Minecraft) {
-        val player = client.player
-        if (player == null || ClientMarionettes.possessing == null) {
-            sentYaw = Float.NaN
-            return
-        }
-
-        if (sentYaw.isNaN() || abs(player.yRot - sentYaw) > AIM_EPSILON || abs(player.xRot - sentPitch) > AIM_EPSILON) {
-            sentYaw = player.yRot
-            sentPitch = player.xRot
-            ModChannels.MARIONETTE_ORDER.sendToServer(MarionetteOrderPayload.look(sentYaw, sentPitch))
-        }
-
-        if (client.options.keyAttack.consumeClick()) {
-            ModChannels.MARIONETTE_ORDER.sendToServer(MarionetteOrderPayload(MarionetteOrderPayload.Action.STRIKE))
-        }
+    private fun inside(client: net.minecraft.client.Minecraft) {
+        val puppet = ClientMarionettes.possessing?.let { client.level?.getEntity(it) } as? MarionetteEntity
+        if (puppet === worn) return
+        worn?.hiddenForDriver = false
+        puppet?.hiddenForDriver = true
+        worn = puppet
     }
 
     /**
-     * Whether the world should ignore this hand right now.
-     *
-     * Two cases, and they are the same case: the hands are on the threads, or the hands are a
-     * hundred blocks away inside a puppet. Either way a click means something other than "put a
-     * block here", and vanilla must not act on it.
+     * Whether the world should ignore this hand right now: the hands are on the threads, and a
+     * click means an order rather than "put a block here".
      */
     private fun refuse(): InteractionResult =
-        if (THREADS.isDown || ClientMarionettes.possessing != null) InteractionResult.FAIL else InteractionResult.PASS
+        if (THREADS.isDown) InteractionResult.FAIL else InteractionResult.PASS
 
     /** A quarter of a second: longer than a click, shorter than a deliberate hold. */
     private const val HOLD_TICKS = 5
 
     private const val HOTBAR_SLOTS = 9
-
-    /** Half a degree: below what a hand can hold still, above what a packet a tick is worth. */
-    private const val AIM_EPSILON = 0.5f
 }

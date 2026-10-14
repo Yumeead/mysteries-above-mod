@@ -2,16 +2,14 @@ package me.vangoo.mysteries.client.render
 
 import com.mojang.authlib.GameProfile
 import me.vangoo.mysteries.entity.MarionetteEntity
-import net.minecraft.client.Minecraft
 import net.minecraft.client.model.geom.ModelLayers
+import net.minecraft.client.renderer.culling.Frustum
 import net.minecraft.client.model.player.PlayerModel
 import net.minecraft.client.renderer.entity.EntityRendererProvider
 import net.minecraft.client.renderer.entity.LivingEntityRenderer
 import net.minecraft.client.renderer.entity.state.AvatarRenderState
 import net.minecraft.resources.Identifier
 import net.minecraft.world.entity.player.PlayerSkin
-import java.util.UUID
-import java.util.function.Supplier
 
 /**
  * Draws a marionette with the player model and the face it stole.
@@ -65,16 +63,13 @@ class MarionetteRenderer(context: EntityRendererProvider.Context) :
         state.showCape = false
     }
 
-    private fun skinOf(profile: GameProfile): PlayerSkin =
-        LOOKUPS.getOrPut(profile.id) { Minecraft.getInstance().skinManager.createLookup(profile, false) }.get()
+    private fun skinOf(profile: GameProfile): PlayerSkin = PuppetSkins.of(profile)
+
+    /** The puppet its own driver is standing inside is not drawn around their camera. */
+    override fun shouldRender(entity: MarionetteEntity, frustum: Frustum, x: Double, y: Double, z: Double): Boolean =
+        !entity.hiddenForDriver && super.shouldRender(entity, frustum, x, y, z)
 
     private companion object {
         const val SHADOW = 0.5f
-
-        /**
-         * Kept for the client session. Bounded by how many distinct faces have ever been made into
-         * puppets in one sitting — a handful, and vanilla's own player list is no smaller.
-         */
-        val LOOKUPS = HashMap<UUID, Supplier<PlayerSkin>>()
     }
 }

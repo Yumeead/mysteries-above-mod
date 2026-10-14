@@ -23,15 +23,11 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload
  * is *attack*, empty air is *follow me*, and sneaking is *stand still*. A client that named the
  * target would have to be checked against exactly that ray anyway.
  *
- * [Action.LOOK] is the one thing the server cannot work out for itself: with the camera on a
- * puppet the vanilla client stops sending its rotation (`LocalPlayer.sendPosition` sits behind
- * `isControlledCamera`), so while possessing it comes here instead — and only while possessing.
+ * Possession sends nothing here: the driver walks as an ordinary player (see `Marionettes.possess`).
  */
 data class MarionetteOrderPayload(
     val action: Action,
     val delta: Int = 0,
-    val yaw: Float = 0f,
-    val pitch: Float = 0f,
 ) : CustomPacketPayload {
 
     enum class Action {
@@ -43,12 +39,6 @@ data class MarionetteOrderPayload(
 
         /** Cut the selected thread. The puppet falls where it stands. */
         CUT,
-
-        /** Where the driver is looking, while possessing. */
-        LOOK,
-
-        /** The driver swung — the puppet's fist, not the body's. */
-        STRIKE,
     }
 
     override fun type(): CustomPacketPayload.Type<MarionetteOrderPayload> = TYPE
@@ -56,8 +46,6 @@ data class MarionetteOrderPayload(
     companion object {
 
         fun cycle(delta: Int) = MarionetteOrderPayload(Action.CYCLE, delta = delta)
-
-        fun look(yaw: Float, pitch: Float) = MarionetteOrderPayload(Action.LOOK, yaw = yaw, pitch = pitch)
 
         val TYPE: CustomPacketPayload.Type<MarionetteOrderPayload> =
             CustomPacketPayload.Type(modId("marionette_order"))
@@ -71,12 +59,10 @@ data class MarionetteOrderPayload(
         private fun write(payload: MarionetteOrderPayload, buf: RegistryFriendlyByteBuf) {
             buf.writeVarInt(payload.action.ordinal)
             buf.writeVarInt(payload.delta)
-            buf.writeFloat(payload.yaw)
-            buf.writeFloat(payload.pitch)
         }
 
         private fun read(buf: RegistryFriendlyByteBuf): MarionetteOrderPayload =
-            MarionetteOrderPayload(action(buf.readVarInt()), buf.readVarInt(), buf.readFloat(), buf.readFloat())
+            MarionetteOrderPayload(action(buf.readVarInt()), buf.readVarInt())
 
         private fun action(ordinal: Int): Action {
             val values = Action.entries

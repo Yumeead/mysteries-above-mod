@@ -4,7 +4,8 @@
   "package": "me.vangoo.mysteries.mixin.client",
   "compatibilityLevel": "JAVA_25",
   "client": [
-    "GameRendererInvoker"
+    "GameRendererInvoker",
+    "AbstractClientPlayerSkinMixin"
   ],
   "injectors": {
     "defaultRequire": 1

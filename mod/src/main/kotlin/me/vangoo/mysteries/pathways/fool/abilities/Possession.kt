@@ -16,20 +16,21 @@ import net.minecraft.world.item.Items
  * The Marionettist steps into the puppet they are holding and walks in it. Their own body stays
  * exactly where it stood — slack, breathing, and completely undefended.
  *
- * ## Not a body swap
+ * ## The plugin's swap, kept — and why
  *
- * The plugin teleported the caster into the puppet, swapped both inventories, swapped both
- * appearances, and handed out an NBT-tagged item as the only way back. All of that was scaffolding
- * around one thing Spigot could not do: steer somebody else's body. Here the camera goes to the
- * puppet and the keys are read off the driver (`Marionettes.possess`), so nothing is exchanged at
- * all — and what is left is the picture from the novel, where the puppeteer does not move.
+ * The plugin moved the caster into the puppet and swapped inventories and looks. The port first
+ * tried the opposite (the camera into the puppet, the player left home), and the vanilla client
+ * refused it piece by piece: the hand, the run, the hotbar and the hearts all assume the camera
+ * is a player. So the driver goes into the puppet again (`Marionettes.possess`), but without the
+ * plugin's NBT exit item and appearance swap: the stash of their own things is persistent, the way
+ * back is this same ability, and the skin is swapped on the client alone.
  *
  * ## The body left behind is the price
  *
- * Damage to the puppet does not reach the driver — it has its own health, inherited from whoever
- * it was made of, and that is the whole point of having one. Damage to the **body** does: it is a
- * player standing still in the world, and if it dies while you are away, you die. A heartbeat is
- * played when something strikes it, because the driver cannot see it happen.
+ * Inside, the driver's hit points are the puppet's: running out breaks the puppet and throws them
+ * home. The **body** stays behind as a vessel with their own health — struck, pushed, and if it
+ * falls while they are away, they die. A heartbeat plays when it is struck, because the driver
+ * cannot see it happen.
  *
  * ## Free to enter, free to leave
  *
@@ -48,9 +49,9 @@ class Possession : ActiveAbility(AbilityIdentity.of("fool_marionette_possession"
 
     override fun description(sequence: Sequence): Component = Component.literal(
         "Ви входите в обрану маріонетку й ходите в ній. Ваше тіло лишається стояти там, де стояло.\n" +
-            "▪ Керування — звичайні клавіші руху; удар б'є рукою маріонетки\n" +
+            "▪ Ви ходите як маріонетка: її вигляд, її речі, її здоров'я; ваші речі чекають у тілі\n" +
             "▪ Поки ви всередині, вам доступні й сили того, з кого зроблено маріонетку\n" +
-            "▪ Шкода по маріонетці вас не зачіпає; шкода по вашому тілу — зачіпає, і смерть тіла є вашою смертю\n" +
+            "▪ Якщо маріонетку розбито — вас викидає в тіло; якщо вбито тіло — ви гинете\n" +
             "▪ Повторний каст повертає вас у тіло; маріонетка лишається там, де ви її покинули",
     )
 
@@ -58,8 +59,7 @@ class Possession : ActiveAbility(AbilityIdentity.of("fool_marionette_possession"
         val casterId = context.caster.uuid
 
         if (Marionettes.isPossessing(casterId)) {
-            Marionettes.eject(casterId)
-            Marionettes.pushState(context.caster)
+            Marionettes.eject(context.caster)
             return AbilityOutcome.done("Ви повернулись у власне тіло")
         }
 

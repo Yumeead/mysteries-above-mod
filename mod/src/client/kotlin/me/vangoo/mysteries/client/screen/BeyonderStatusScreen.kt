@@ -1,5 +1,6 @@
 package me.vangoo.mysteries.client.screen
 
+import me.vangoo.domain.PathwayBranding
 import me.vangoo.domain.abilities.AbilityType
 import me.vangoo.mysteries.client.beyonder.ClientAbilityState
 import me.vangoo.mysteries.client.net.sendToServer
@@ -109,10 +110,25 @@ class BeyonderStatusScreen(private var status: BeyonderStatusPayload) :
             ?: beyonder.spirituality
 
         return listOf(
-            Component.literal("Шлях: ${beyonder.pathwayId} · Послідовність ${beyonder.sequence.level}"),
+            pathwayLine(beyonder),
             Component.literal("Духовність: ${spirituality.current} / ${spirituality.maximum}"),
             Component.literal("відповідей від сервера: $responses"),
         )
+    }
+
+    /**
+     * Inside a puppet the list holds the puppet's powers, so its pathway heads the line in that
+     * pathway's colour, and the Marionettist's own follows in grey — whose body, then whose soul.
+     */
+    private fun pathwayLine(beyonder: BeyonderStatusPayload.Beyonder): Component {
+        val own = "${beyonder.pathwayId} · Послідовність ${beyonder.sequence.level}"
+        val worn = beyonder.worn ?: return Component.literal("Шлях: $own")
+        return Component.literal("Шлях: ")
+            .append(
+                Component.literal("${worn.pathwayId} · Послідовність ${worn.sequence.level}")
+                    .withColor(PathwayBranding.textOf(worn.pathwayId).packed),
+            )
+            .append(Component.literal("  (ваш: $own)").withColor(OWN_PATHWAY_GREY))
     }
 
     private fun buildRows(): List<Row> {
@@ -157,6 +173,9 @@ class BeyonderStatusScreen(private var status: BeyonderStatusPayload) :
     override fun isPauseScreen(): Boolean = false
 
     private companion object {
+        /** The Marionettist's own pathway, set aside while they wear someone else's. */
+        const val OWN_PATHWAY_GREY = 0x8A8A8A
+
         const val TOP = 24
         const val LINE = 12
         const val ROW = 22

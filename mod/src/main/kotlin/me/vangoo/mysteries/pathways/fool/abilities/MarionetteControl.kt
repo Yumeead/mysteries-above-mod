@@ -1,29 +1,31 @@
 package me.vangoo.mysteries.pathways.fool.abilities
 
-import me.vangoo.domain.services.SequenceScaler
 import me.vangoo.domain.valueobjects.AbilityIdentity
 import me.vangoo.domain.valueobjects.MarionetteTiming
 import me.vangoo.domain.valueobjects.Sequence
 import me.vangoo.mysteries.ability.AbilityOutcome
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
+import me.vangoo.mysteries.ability.grantAttribute
+import me.vangoo.mysteries.ability.modifierId
+import me.vangoo.mysteries.ability.revokeAttribute
 import me.vangoo.mysteries.ability.context.on
 import me.vangoo.mysteries.ability.session
 import me.vangoo.mysteries.ability.sessionRunning
 import me.vangoo.mysteries.ability.stopSession
 import me.vangoo.mysteries.event.IncomingDamage
 import me.vangoo.mysteries.pathways.fool.Marionettes
-import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
-import net.minecraft.core.particles.ParticleTypes
+import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.chat.Component
+import net.minecraft.network.protocol.game.ClientboundSoundPacket
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
-import net.minecraft.world.effect.MobEffectInstance
-import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.Mob
+import net.minecraft.world.entity.ai.attributes.AttributeModifier
+import net.minecraft.world.entity.ai.attributes.Attributes
 
 /**
  * Fool, Seq. 5 (Marionettist): **Marionette Control**.
@@ -33,11 +35,18 @@ import net.minecraft.world.entity.Mob
  *
  * ## Two phases, and the second one is long on purpose
  *
- * Fixation takes 20 seconds at no mastery and 5 at full, and it needs the victim within five
- * blocks the whole time — that is a hand on someone, not a spell at range. Conversion is longer
- * still: fifteen seconds for a beast, **five minutes** for a person, scaled down by Sequence.
- * These are the plugin's own numbers and they are kept: at this Sequence the power is not meant
- * to be used in a fight, it is meant to be used on somebody who cannot get away.
+ * Fixation takes 20 seconds at no mastery and 5 at full; conversion takes fifteen seconds for a
+ * beast and **five minutes** for a person, scaled down by Sequence — the plugin's own numbers.
+ * The threads reach 100 blocks, but they tighten at full speed only within 10: past that the
+ * progress slows in proportion to the distance, so a grip from across a valley takes ten times
+ * as long as one from arm's reach.
+ *
+ * ## The victim does not know, until the second phase
+ *
+ * Fixation is silent: no effect, no sound at the victim's ears, and the victim's threads darkening
+ * and turning towards the caster are seen only by Marionettists — see `ThreadSight`. Only when the will
+ * starts to break does the body notice, and what it notices is its legs: the jump shrinks as the
+ * phase runs on. A transient attribute modifier, taken off in `finally` whatever ends the grip.
  *
  * A single blow of 6 damage or more on the victim snaps the threads. So the way out of this is
  * for someone else to hit your friend once, hard.
@@ -64,8 +73,9 @@ class MarionetteControl : ActiveAbility(AbilityIdentity.of("fool_marionettist_co
 
     override fun description(sequence: Sequence): Component = Component.literal(
         "Нитки з ваших пальців беруть живе тіло під владу. Двофазний захват: спершу фіксація, потім злам волі.\n" +
-            "▪ Ціль під прицілом, до ${selectRange(sequence).toInt()} бл.; далі тримайте її за $TETHER бл. від себе\n" +
+            "▪ Ціль під прицілом, до ${REACH.toInt()} бл.; найшвидше — ближче ніж ${FAST_RADIUS.toInt()} бл., далі повільніше\n" +
             "▪ Фіксація 20→5 с (за засвоєнням), злам: звір ~15 с, людина ~5 хв (швидшає з Послідовністю)\n" +
+            "▪ Під час фіксації жертва нічого не помічає; під час зламу її стрибок слабшає\n" +
             "▪ Один удар від $BREAK шкоди по жертві рве нитки; ціна знімається лише за готову маріонетку\n" +
             "▪ Звір лишається живим; людина гине, а її Характеристика назавжди переходить у маріонетку",
     )
@@ -84,7 +94,7 @@ class MarionetteControl : ActiveAbility(AbilityIdentity.of("fool_marionettist_co
             )
         }
 
-        val target = context.targeting.lookingAt(selectRange(context.sequence))
+        val target = context.targeting.lookingAt(REACH)
             ?: return AbilityOutcome.failed("Немає цілі — гляньте на живу істоту")
         if (Marionettes.isPuppet(target)) {
             return AbilityOutcome.failed("Ця істота вже на чиїхось нитках")
@@ -126,12 +136,16 @@ class MarionetteControl : ActiveAbility(AbilityIdentity.of("fool_marionettist_co
         context.session {
             try {
                 val caster = owner ?: return@session
-                caster.level().playSound(
-                    null, caster.x, caster.y, caster.z, SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.6f, 0.5f,
+                // For the caster's ears only: a sound in the world would be the victim's warning.
+                caster.connection.send(
+                    ClientboundSoundPacket(
+                        BuiltInRegistries.SOUND_EVENT.wrapAsHolder(SoundEvents.BEACON_ACTIVATE),
+                        SoundSource.PLAYERS, caster.x, caster.y, caster.z, 0.6f, 0.5f, caster.random.nextLong(),
+                    ),
                 )
 
-                if (!hold(lockTicks, targetId, targetName, "Фіксація ниток", messaging) { snapped }) return@session
-                if (!hold(breakTicks, targetId, targetName, "Злам волі", messaging) { snapped }) return@session
+                if (!hold(lockTicks, targetId, targetName, "Фіксація ниток", messaging, restrain = false, grips = 0f..FIXATION_SHARE) { snapped }) return@session
+                if (!hold(breakTicks, targetId, targetName, "Злам волі", messaging, restrain = true, grips = FIXATION_SHARE..1f) { snapped }) return@session
 
                 val caster2 = owner ?: return@session
                 val victim = resolve(caster2, targetId) ?: return@session
@@ -147,16 +161,23 @@ class MarionetteControl : ActiveAbility(AbilityIdentity.of("fool_marionettist_co
                 Marionettes.pushState(caster2)
             } finally {
                 watch.cancel()
+                Marionettes.unweave(targetId)
+                owner?.let { resolve(it, targetId) }?.revokeAttribute(Attributes.JUMP_STRENGTH, FETTER)
             }
         }
     }
 
     /**
-     * One phase: keep the victim on the tether for [ticks], or fail.
+     * One phase: keep the victim on the threads for [ticks] of progress, or fail.
      *
-     * Returns `false` the moment the grip is lost — too far, gone, dead, or struck hard enough to
-     * snap the strands — and says why. The stupor deepens as the phase runs on: this is what the
-     * victim feels while it is happening to them.
+     * Progress runs at full speed within [FAST_RADIUS] and slows in proportion to the distance
+     * past it, so the same phase from 100 blocks takes ten times as long. Returns `false` the
+     * moment the grip is lost — out of reach, gone, dead, or struck hard enough to snap the
+     * strands — and says why. With [restrain] the victim's jump weakens as the phase runs on.
+     *
+     * The progress is also what Spirit Vision draws: [grips] is the stretch of the whole grip
+     * this phase covers, reported to [Marionettes.weave] so every Marionettist nearby sees the
+     * victim's threads darken and turn towards the caster.
      */
     private suspend fun me.vangoo.mysteries.ability.SessionScope.hold(
         ticks: Int,
@@ -164,12 +185,13 @@ class MarionetteControl : ActiveAbility(AbilityIdentity.of("fool_marionettist_co
         targetName: String,
         phase: String,
         messaging: me.vangoo.mysteries.ability.context.Messaging,
+        restrain: Boolean,
+        grips: ClosedFloatingPointRange<Float>,
         snapped: () -> Boolean,
     ): Boolean {
-        var held = 0
+        var held = 0.0
         while (held < ticks) {
             waitTicks(STEP_TICKS)
-            held += STEP_TICKS
 
             val caster = owner ?: return false
             if (snapped()) {
@@ -177,63 +199,59 @@ class MarionetteControl : ActiveAbility(AbilityIdentity.of("fool_marionettist_co
                 return false
             }
             val victim = resolve(caster, targetId)
-            if (victim == null || !victim.isAlive) {
+            if (victim == null || !victim.isAlive || victim.level() !== caster.level()) {
                 messaging.actionBar(caster, Component.literal("Ціль зникла — нитки обірвались"))
                 return false
             }
-            if (caster.distanceToSqr(victim) > TETHER * TETHER) {
+            val distance = caster.distanceTo(victim).toDouble()
+            if (distance > REACH) {
                 messaging.actionBar(caster, Component.literal("Задалеко — нитки зісковзнули"))
                 return false
             }
 
-            stupor(victim)
-            strands(caster, victim)
-            messaging.actionBar(
-                caster,
-                Component.literal("$phase: $targetName — ${percent(held, ticks)}%"),
-            )
+            held += STEP_TICKS * pace(distance)
+            val fraction = (held / ticks).coerceAtMost(1.0)
+            if (restrain) {
+                victim.grantAttribute(
+                    Attributes.JUMP_STRENGTH,
+                    FETTER,
+                    -(FETTER_START + (FETTER_FULL - FETTER_START) * fraction),
+                    AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL,
+                )
+            }
+            Marionettes.weave(victim, caster, grips.start + (grips.endInclusive - grips.start) * fraction.toFloat())
+            messaging.actionBar(caster, Component.literal("$phase: $targetName — ${(fraction * 100).toInt()}%"))
         }
         return true
     }
 
-    /** The victim's share of it: heavy limbs, a swimming head, no strength in the arms. */
-    private fun stupor(victim: LivingEntity) {
-        victim.addEffect(MobEffectInstance(MobEffects.SLOWNESS, STUPOR_TICKS, SLOWNESS_LEVEL, true, false))
-        victim.addEffect(MobEffectInstance(MobEffects.NAUSEA, STUPOR_TICKS, 0, true, false))
-        victim.addEffect(MobEffectInstance(MobEffects.WEAKNESS, STUPOR_TICKS, 1, true, false))
-    }
-
-    /** The threads themselves, drawn hand to victim so both sides can see what is happening. */
-    private fun strands(caster: ServerPlayer, victim: LivingEntity) {
-        val level = caster.level()
-        val from = caster.eyePosition
-        val to = victim.position().add(0.0, victim.bbHeight * 0.6, 0.0)
-        for (step in 0..STRAND_POINTS) {
-            val at = from.lerp(to, step.toDouble() / STRAND_POINTS)
-            level.sendParticles(ParticleTypes.SOUL, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0)
-        }
-    }
+    /** 1 within [FAST_RADIUS], then `FAST_RADIUS / distance` — a tenth of the speed at [REACH]. */
+    private fun pace(distance: Double): Double = if (distance <= FAST_RADIUS) 1.0 else FAST_RADIUS / distance
 
     private fun resolve(caster: ServerPlayer, id: java.util.UUID): LivingEntity? =
         (caster.level() as ServerLevel).getEntityInAnyDimension(id) as? LivingEntity
 
-    private fun percent(done: Int, total: Int): Int = (done * 100 / total.coerceAtLeast(1)).coerceAtMost(100)
-
-    private fun selectRange(sequence: Sequence): Double =
-        BASE_SELECT_RANGE * SequenceScaler.calculateMultiplier(sequence.level, SequenceScaler.ScalingStrategy.WEAK)
-
     private companion object {
         const val COST = 500
         const val COOLDOWN_SECONDS = 120
-        const val BASE_SELECT_RANGE = 30.0
-        const val TETHER = 5.0
+        /** How far the threads reach, both to catch and to hold. */
+        const val REACH = 100.0
+
+        /** Within this the threads tighten at full speed. */
+        const val FAST_RADIUS = 10.0
         const val BREAK = MarionetteTiming.BREAK_DAMAGE_THRESHOLD.toFloat()
 
         /** Four times a second: fine enough that walking out of the tether is felt at once. */
         const val STEP_TICKS = 5
 
-        const val STUPOR_TICKS = 3 * TICKS_PER_SECOND
-        const val SLOWNESS_LEVEL = 9
-        const val STRAND_POINTS = 10
+        /** The victim's jump is weakened by this share at the start of the second phase… */
+        const val FETTER_START = 0.1
+
+        /** …and by this share at its end: a full block is out of reach by then. */
+        const val FETTER_FULL = 0.4
+        val FETTER = modifierId("fool_marionettist_control", "jump_strength")
+
+        /** How much of the drawn grip the fixation covers; the will breaking is the rest. */
+        const val FIXATION_SHARE = 0.35f
     }
 }

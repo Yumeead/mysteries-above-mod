@@ -39,9 +39,19 @@ object BeyonderStatus {
                 pathwayId = beyonder.pathway.name,
                 sequence = beyonder.sequence,
                 spirituality = beyonder.spirituality,
+                worn = wornBody(player.uuid),
             ),
         )
     }
+
+    /**
+     * The body a player is wearing, if any — set by the Marionettist's plumbing at install.
+     *
+     * A lambda rather than a call into `pathways/fool`: the status snapshot belongs to every
+     * Beyonder, and possession is one pathway's business. The same seam `PassiveTicker` uses for
+     * toggle state.
+     */
+    var wornBody: (java.util.UUID) -> BeyonderStatusPayload.Worn? = { null }
 
     /**
      * The ability list with everything the menu needs. The numbers are already computed for the

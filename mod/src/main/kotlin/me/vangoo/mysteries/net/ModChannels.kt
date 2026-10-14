@@ -8,6 +8,7 @@ import me.vangoo.mysteries.net.payload.CastRequestPayload
 import me.vangoo.mysteries.net.payload.MarionetteOrderPayload
 import me.vangoo.mysteries.net.payload.MarionetteStatePayload
 import me.vangoo.mysteries.net.payload.StatusRequestPayload
+import me.vangoo.mysteries.net.payload.ThreadSightPayload
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.StreamCodec
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
@@ -66,6 +67,10 @@ object ModChannels {
     /** The Marionettist's hands: pick a thread, give an order, cut it, steer, strike. */
     val MARIONETTE_ORDER: ServerboundChannel<MarionetteOrderPayload> =
         serverbound(MarionetteOrderPayload.TYPE, MarionetteOrderPayload.CODEC)
+
+    /** Spirit Vision (Fool, Seq. 5): who holds whom. Twice a second, to Marionettists only. */
+    val THREAD_SIGHT: ClientboundChannel<ThreadSightPayload> =
+        clientbound(ThreadSightPayload.TYPE, ThreadSightPayload.CODEC)
 
     /** Every declared channel — for logs and tests. */
     val all: List<Channel<*>> get() = declared.toList()

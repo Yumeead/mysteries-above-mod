@@ -23,7 +23,12 @@ data class BeyonderStatusPayload(val beyonder: Beyonder?) : CustomPacketPayload 
         val pathwayId: String,
         val sequence: Sequence,
         val spirituality: Spirituality,
+        /** The body a possessing Marionettist is wearing, if that body was a Beyonder's. */
+        val worn: Worn? = null,
     )
+
+    /** Whose pathway the powers on the list come from while inside a puppet. */
+    data class Worn(val pathwayId: String, val sequence: Sequence)
 
     override fun type(): CustomPacketPayload.Type<BeyonderStatusPayload> = TYPE
 
@@ -45,6 +50,11 @@ data class BeyonderStatusPayload(val beyonder: Beyonder?) : CustomPacketPayload 
             buf.writeVarInt(beyonder.sequence.level)
             buf.writeVarInt(beyonder.spirituality.current)
             buf.writeVarInt(beyonder.spirituality.maximum)
+            buf.writeBoolean(beyonder.worn != null)
+            beyonder.worn?.let {
+                buf.writeUtf(it.pathwayId)
+                buf.writeVarInt(it.sequence.level)
+            }
         }
 
         private fun read(buf: RegistryFriendlyByteBuf): BeyonderStatusPayload {
@@ -53,8 +63,9 @@ data class BeyonderStatusPayload(val beyonder: Beyonder?) : CustomPacketPayload 
             val sequence = Sequence(buf.readVarInt())
             val current = buf.readVarInt()
             val maximum = buf.readVarInt()
+            val worn = if (buf.readBoolean()) Worn(buf.readUtf(), Sequence(buf.readVarInt())) else null
             return BeyonderStatusPayload(
-                Beyonder(pathwayId, sequence, Spirituality(current, maximum)),
+                Beyonder(pathwayId, sequence, Spirituality(current, maximum), worn),
             )
         }
     }

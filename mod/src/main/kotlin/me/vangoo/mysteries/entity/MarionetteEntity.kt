@@ -9,7 +9,6 @@ import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier
 import net.minecraft.world.entity.ai.attributes.Attributes
-import net.minecraft.world.entity.player.Input
 import net.minecraft.world.item.component.ResolvableProfile
 import net.minecraft.world.level.Level
 import net.minecraft.world.phys.Vec3
@@ -81,7 +80,8 @@ class MarionetteEntity(type: EntityType<out MarionetteEntity>, level: Level) : A
         val name: String,
         val pathway: String?,
         val sequence: Int?,
-        val inventory: List<net.minecraft.world.item.ItemStack>,
+        /** Rewritten when a possession ends: the driver may have used or picked things up. */
+        var inventory: List<net.minecraft.world.item.ItemStack>,
     )
 
     var capture: Capture? = null
@@ -92,13 +92,51 @@ class MarionetteEntity(type: EntityType<out MarionetteEntity>, level: Level) : A
     var order: Order = Order.Stand
 
     /**
-     * The rider's input while possessed, or `null` when the puppet moves on its own.
-     *
-     * The whole possession layer is these two fields plus a yaw: the client keeps sending
-     * `ServerboundPlayerInputPacket` even with its camera elsewhere, so the server already has
-     * the keys — see `PuppetDrive`.
+     * Set when this is not a puppet at all but the **vessel**: the body a possessing Marionettist
+     * left standing, in their own face. It stands still, is pushed and struck like anyone, and
+     * passes every blow on to the player it stands for — see `Marionettes.possess`.
      */
-    var driverInput: Input? = null
+    var vesselOf: UUID? = null
+
+    /**
+     * Server side: who is inside, or `null` when the puppet moves on its own.
+     *
+     * While it is set the puppet only follows its driver (`Marionettes.steerPossessed`): it is
+     * not simulated here ([isClientAuthoritative]) and cannot be shoved ([isPushable]) — the
+     * driver stands in the very same spot, and vanilla's entity push would shove the puppet off.
+     */
+    var driverId: UUID? = null
+
+    /**
+     * Client side: this is the puppet the local player is inside. It is still there (its face is
+     * the local player's skin for now), but it is neither drawn around the camera nor picked by
+     * the crosshair — which, cast from inside its box, would otherwise always land on it.
+     */
+    var hiddenForDriver: Boolean = false
+
+    /**
+     * Walking speed from the attribute, as `Player` does it.
+     *
+     * `LivingEntity.getSpeed` returns a field only a mob's AI ever sets; for an `Avatar` it stays
+     * 0, so the puppet could jump but never walk — neither under a driver nor on an order.
+     */
+    override fun getSpeed(): Float = getAttributeValue(Attributes.MOVEMENT_SPEED).toFloat()
+
+    /**
+     * [driverId] is server-only, so the driver's client needs [hiddenForDriver] as well: there the
+     * puppet lags a tick plus ping behind the local player it overlaps, and vanilla's client-side
+     * push (which only ever moves the local player) would shove them on in the walking direction,
+     * the puppet catching up and shoving again — the "inertia" slide.
+     */
+    override fun isPushable(): Boolean = driverId == null && !hiddenForDriver && super.isPushable()
+
+    override fun pushEntities() {
+        if (!hiddenForDriver) super.pushEntities()
+    }
+
+    override fun isClientAuthoritative(): Boolean = driverId != null
+
+    override fun isPickable(): Boolean = !hiddenForDriver && super.isPickable()
 
     override fun defineSynchedData(builder: SynchedEntityData.Builder) {
         super.defineSynchedData(builder)
@@ -134,26 +172,13 @@ class MarionetteEntity(type: EntityType<out MarionetteEntity>, level: Level) : A
      * gravity, water, slabs and knockback all keep working without a line here.
      */
     private fun steer() {
-        val input = driverInput
-        if (input != null) {
-            drive(input)
-            return
-        }
+        if (driverId != null) return
         when (val current = order) {
             is Order.Stand -> halt()
             is Order.GoTo -> walkTo(current.target) { order = Order.Stand }
             is Order.Follow -> follow()
             is Order.Attack -> assault(current.victimId)
         }
-    }
-
-    private fun drive(input: Input) {
-        zza = (if (input.forward()) 1f else 0f) - (if (input.backward()) 1f else 0f)
-        xxa = (if (input.left()) 1f else 0f) - (if (input.right()) 1f else 0f)
-        isSprinting = input.sprint() && input.forward()
-        if (input.jump() && onGround()) jumpFromGround()
-        yHeadRot = yRot
-        yBodyRot = yRot
     }
 
     private fun halt() {

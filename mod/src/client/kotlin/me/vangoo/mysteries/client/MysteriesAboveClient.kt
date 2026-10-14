@@ -7,6 +7,7 @@ import me.vangoo.mysteries.client.beyonder.SanityAmbience
 import me.vangoo.mysteries.client.render.MarionetteRenderer
 import me.vangoo.mysteries.client.render.SpiritGlyphParticle
 import me.vangoo.mysteries.client.render.SpiritMoteParticle
+import me.vangoo.mysteries.client.render.SpiritThreads
 import me.vangoo.mysteries.effect.ModParticles
 import me.vangoo.mysteries.entity.ModEntities
 import me.vangoo.mysteries.client.hud.AbilityHud
@@ -57,6 +58,7 @@ object MysteriesAboveClient : ClientModInitializer {
         // they are separate from each other: its packet arrives only for the one player holding
         // puppets, and never at all for anybody else.
         ModChannels.MARIONETTE_STATE.receiveOnClient { payload, _ -> ClientMarionettes.accept(payload) }
+        ModChannels.THREAD_SIGHT.receiveOnClient { payload, _ -> SpiritThreads.accept(payload) }
 
         // The cooldown clock. The client tick, not wall time: a paused single-player game stands
         // still — the server and the countdown along with it.
@@ -65,6 +67,7 @@ object MysteriesAboveClient : ClientModInitializer {
             // The whisper and the screen chain are derived from the state just updated, so they
             // come right after it rather than as a separate subscription with an undefined order.
             SanityAmbience.tick()
+            SpiritThreads.tick()
         }
 
         // A mote's motion and fade are the client's: the server only sends "where and what colour".
@@ -74,6 +77,8 @@ object MysteriesAboveClient : ClientModInitializer {
             SpiritMoteParticle.Provider(sprites)
         }
         ParticleProviderRegistry.getInstance().register(ModParticles.SPIRIT_GLYPH) { sprites ->
+            // The threads are built of the glyph's pixels, spawned by hand rather than by a packet.
+            SpiritThreads.sprites = sprites
             SpiritGlyphParticle.Provider(sprites)
         }
 
@@ -87,6 +92,7 @@ object MysteriesAboveClient : ClientModInitializer {
             ClientAbilityState.clear()
             ClientMarionettes.clear()
             SanityAmbience.clear()
+            SpiritThreads.clear()
         }
 
         SpiritualityHud.register()
