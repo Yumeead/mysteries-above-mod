@@ -1,6 +1,10 @@
 - [Здібності — важкі й лорні](pathway-abilities-should-be-hard-and-lore-heavy.md) — лор веде порт, спрощення плагіна не переносити
 - [Духовний світ](spirit-world-dimension.md) — перший власний вимір; світи додаються датапаком, не кодом
 - [Fool, Посл. 5 — Маріонетник](fool-sequence-5-marionettist.md) — що там усередині, чому це найбільша здібність порту і що вже готове під неї
-- [Керування маріонетками](marionette-control-surface.md) — HUD-ряд замість предметів; Avatar, setCamera і START_CLIENT_TICK
+- [Керування маріонетками](marionette-control-surface.md) — HUD-ряд замість предметів; Avatar, START_CLIENT_TICK; вселення переносить гравця, не камеру
 - [Перевтілення: скін](shapeshifting-skin-open-question.md) — ім'я працює, скін ні; що вже виключено й чому тест відкладено
 - [Перевірка у грі на двох клієнтах](in-game-verification-with-two-clients.md) — здібності перевіряються грою, а не збіркою; чого не показує dev-середовище
+- [Ask questions in Ukrainian](ask-questions-in-ukrainian.md) — AskUserQuestion prompts and clarifying questions should be in Ukrainian
+- [Resumed session: re-read files first](resumed-session-reread-files-first.md) — an interrupted session may have changed files since your earlier Read
+- [Ability visuals: pixel and on-theme](ability-visuals-pixel-and-on-theme.md) — no smooth geometry, no default ground circles; the effect must depict the ability
+- [Ability visuals must not clutter](ability-visuals-must-not-clutter.md) — persistent visuals sparse and fading; ThreadSight was rejected as screen-filling
