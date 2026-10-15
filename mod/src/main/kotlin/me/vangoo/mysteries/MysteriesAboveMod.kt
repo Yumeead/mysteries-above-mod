@@ -7,6 +7,7 @@ import me.vangoo.mysteries.beyonder.AbilityRequests
 import me.vangoo.mysteries.beyonder.BeyonderStatus
 import me.vangoo.mysteries.beyonder.BeyonderStore
 import me.vangoo.mysteries.pathways.fool.abilities.PaperDolls
+import me.vangoo.mysteries.pathways.sun.Oaths
 import me.vangoo.mysteries.effect.ModParticles
 import me.vangoo.mysteries.effect.ModSounds
 import me.vangoo.mysteries.entity.ModEntities
@@ -75,6 +76,9 @@ object MysteriesAboveMod : ModInitializer {
         // Death's world-level memory: every death leaves a trace, every servant is a saved mob,
         // the Underworld gives back whoever it holds — none of that waits for a cast.
         Death.install()
+
+        // Sun's Oaths are debts the world holds: paid by hand, broken on the wall clock.
+        Oaths.install()
 
         // Last on purpose: the handlers above still change a Beyonder on the way out (a
         // Marionettist leaving their puppet), and the save must see the result.

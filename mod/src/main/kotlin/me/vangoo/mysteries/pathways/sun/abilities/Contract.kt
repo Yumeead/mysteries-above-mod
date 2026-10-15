@@ -19,7 +19,9 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
+import net.minecraft.world.item.ItemStack
 import net.minecraft.world.phys.Vec3
+import me.vangoo.mysteries.pathways.sun.Oaths
 import me.vangoo.domain.contracts.Contract as DomainContract
 
 /**
@@ -46,12 +48,12 @@ import me.vangoo.domain.contracts.Contract as DomainContract
  * punishment and no check are needed. The promise holds itself, and that is exactly what makes
  * it worth Seq. 6.
  *
- * ## Why only `PEACE`
+ * ## The off hand chooses the term
  *
- * `ContractTerm` also has `DEBT` — and that is the one that needs what the mod does not yet have:
- * a debt you can escape by leaving the game is not a debt. `DEBT` will switch on together with
- * phase 09, when there is somewhere to store contracts; what is missing here is storage, not
- * intent.
+ * The plugin asked in a chest which deal to make. Here the deal is whatever the Notary holds out:
+ * an empty off hand offers peace; goods in the off hand demand an **Oath** (`DEBT`) — that item,
+ * that many, within three real days. The bow seals both alike. Everything after the signature —
+ * the scroll, the payment, the breach — lives in `Oaths`, because a debt outlasts any session.
  */
 class Contract : ActiveAbility(AbilityIdentity.of("sun_contract")) {
 
@@ -62,10 +64,11 @@ class Contract : ActiveAbility(AbilityIdentity.of("sun_contract")) {
     override fun cooldownSeconds(sequence: Sequence): Int = COOLDOWN_SECONDS
 
     override fun description(sequence: Sequence): Component = Component.literal(
-        "Пропонує гравцеві під прицілом Золотий Сувій миру.\n" +
+        "Пропонує гравцеві під прицілом Золотий Сувій: мир або Клятву.\n" +
             "▪ Він приймає, присівши й подивившись на вас протягом $OFFER_SECONDS с\n" +
-            "▪ Поки діє (${peaceSeconds(sequence)} с), ви двоє не можете зашкодити одне одному\n" +
-            "▪ Відмова не коштує нічого",
+            "▪ Порожня друга рука — мир: ${peaceSeconds(sequence)} с ви двоє не можете зашкодити одне одному\n" +
+            "▪ Предмет у другій руці — Клятва: за 3 дні він віддасть стільки ж власникові сувою\n" +
+            "▪ Сплата — присісти й ПКМ по власнику сувою; за прострочення карає Сонце",
     )
 
     /** A second offer on top of the first — a player has one session. */
@@ -77,6 +80,9 @@ class Contract : ActiveAbility(AbilityIdentity.of("sun_contract")) {
         if (other.uuid == context.caster.uuid) {
             return AbilityOutcome.failed("Із собою не домовляються")
         }
+
+        val goods = context.caster.offhandItem.takeUnless { it.isEmpty }?.copy()
+        if (goods != null) return offerOath(context, other, goods)
 
         val notary = context.caster.uuid
         val party = other.uuid
@@ -124,6 +130,44 @@ class Contract : ActiveAbility(AbilityIdentity.of("sun_contract")) {
         }
 
         return AbilityOutcome.Awaiting(Component.literal("Сувій розгорнуто перед ${other.name.string}"))
+    }
+
+    /** The same bow, a different scroll: the debtor swears to deliver [goods]. */
+    private fun offerOath(context: CastContext, other: ServerPlayer, goods: ItemStack): AbilityOutcome {
+        val notary = context.caster.uuid
+        val party = other.uuid
+        val pending = context.cast
+        val messaging = context.messaging
+        val mote = ModParticles.mote(context.effects.pathwayColor)
+        val what = "${goods.count} × ${goods.hoverName.string}"
+
+        messaging.tell(other, Component.literal("${context.caster.name.string} вимагає Клятви: $what за 3 дні."))
+        messaging.actionBar(party, Component.literal("Присядьте й подивіться на нього, щоб поклястися"))
+
+        context.session {
+            repeat(OFFER_SECONDS * TICKS_PER_SECOND / POLL_TICKS) {
+                val self = owner ?: return@session
+                val guest = self.level().server.playerList.getPlayer(party) ?: return@session
+                scroll(self, guest, mote)
+
+                if (bowsTo(guest, self)) {
+                    val sealed = Oaths.swear(self, guest, goods)
+                    if (!self.inventory.add(sealed)) self.drop(sealed, false)
+                    pending.complete()
+                    seal(self, guest)
+                    messaging.tell(notary, Component.literal("Клятву засвідчено: Золотий Сувій у вас"))
+                    messaging.tell(
+                        party,
+                        Component.literal("Ви поклялися віддати $what. Щоб сплатити — присядьте й ПКМ по власнику сувою"),
+                    )
+                    return@session
+                }
+                waitTicks(POLL_TICKS)
+            }
+            messaging.actionBar(notary, Component.literal("Сувій згорнувся: відповіді не було"))
+        }
+
+        return AbilityOutcome.Awaiting(Component.literal("Клятва розгорнута перед ${other.name.string}"))
     }
 
     /**

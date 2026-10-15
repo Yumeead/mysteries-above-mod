@@ -1,5 +1,7 @@
 package me.vangoo.mysteries.item
 
+import net.minecraft.core.UUIDUtil
+import java.util.UUID
 import me.vangoo.mysteries.modId
 import net.minecraft.core.Registry
 import net.minecraft.core.component.DataComponentType
@@ -27,6 +29,11 @@ object ModComponents {
     /** Whose power condensed into this core, and from which Sequence (Fool, Seq. 5). */
     val CHARACTERISTIC: DataComponentType<CharacteristicData> = register("characteristic") {
         it.persistent(CharacteristicData.CODEC).networkSynchronized(CharacteristicData.STREAM_CODEC)
+    }
+
+    /** Which Oath this scroll is the original of (Sun, Seq. 6). */
+    val OATH: DataComponentType<UUID> = register("oath") {
+        it.persistent(UUIDUtil.CODEC).networkSynchronized(UUIDUtil.STREAM_CODEC)
     }
 
     /**
