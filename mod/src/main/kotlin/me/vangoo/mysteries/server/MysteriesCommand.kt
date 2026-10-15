@@ -1,6 +1,8 @@
 package me.vangoo.mysteries.server
 
 import com.mojang.brigadier.CommandDispatcher
+import com.mojang.brigadier.builder.ArgumentBuilder
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType
 import com.mojang.brigadier.arguments.DoubleArgumentType
 import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
@@ -23,8 +25,10 @@ import me.vangoo.mysteries.pathways.ModPathways
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
 import net.minecraft.commands.SharedSuggestionProvider
+import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.world.item.ItemStack
 
 /**
  * `/mysteries` — all interaction with the mod until phase 11.
@@ -40,6 +44,8 @@ object MysteriesCommand {
 
     /** Operator level: the branches that hand out power do not belong to players. */
     private val OPERATOR = Commands.hasPermission<CommandSourceStack>(Commands.LEVEL_GAMEMASTERS)
+
+    private const val NOT_BEYONDER = "не Потойбічний"
 
     fun register(dispatcher: CommandDispatcher<CommandSourceStack>) {
         dispatcher.register(
@@ -64,34 +70,73 @@ object MysteriesCommand {
                 )
                 .then(
                     Commands.literal("become").requires(OPERATOR).then(
-                        pathwayArgument().then(
-                            Commands.argument("sequence", IntegerArgumentType.integer(0, Pathway.SEQUENCE_COUNT - 1))
-                                .executes { context -> become(context) },
-                        ),
+                        pathwayArgument().then(sequenceArgument().forPlayers(::become)),
                     ),
                 )
                 .then(
                     Commands.literal("potion").requires(OPERATOR).then(
-                        pathwayArgument().then(
-                            Commands.argument("sequence", IntegerArgumentType.integer(0, Pathway.SEQUENCE_COUNT - 1))
-                                .executes { context -> potion(context) },
-                        ),
+                        pathwayArgument().then(sequenceArgument().forPlayers(::potion)),
+                    ),
+                )
+                .then(
+                    Commands.literal("characteristic").requires(OPERATOR).then(
+                        pathwayArgument().then(sequenceArgument().forPlayers(::characteristic)),
                     ),
                 )
                 .then(
                     Commands.literal("mastery").requires(OPERATOR).then(
-                        Commands.argument("percent", DoubleArgumentType.doubleArg(0.0, 100.0))
-                            .executes { context -> mastery(context) },
+                        Commands.argument("percent", DoubleArgumentType.doubleArg(0.0, 100.0)).forPlayers(::mastery),
                     ),
                 )
                 .then(
                     Commands.literal("sanity").requires(OPERATOR).then(
-                        Commands.argument("scale", IntegerArgumentType.integer(0, 100))
-                            .executes { context -> sanity(context) },
+                        Commands.argument("scale", IntegerArgumentType.integer(0, 100)).forPlayers(::sanity),
                     ),
                 )
-                .then(Commands.literal("forget").requires(OPERATOR).executes(::forget)),
+                .then(Commands.literal("forget").requires(OPERATOR).forPlayers(::forget)),
         )
+    }
+
+    // ── Targets ─────────────────────────────────────────────────────────────────
+
+    /** What one target came to: the line for whoever ran the command, and whether it counts. */
+    private class Reply(val text: String, val ok: Boolean)
+
+    private fun done(text: String) = Reply(text, true)
+    private fun refused(text: String) = Reply(text, false)
+
+    /**
+     * Ends an operator branch with an optional trailing `[targets]`, as vanilla `/clear` and `/kill`
+     * do: without it the branch acts on whoever typed it, with it on any selector — `@a`, a name,
+     * `@p` from a command block. The plugin took a bare name and only an online one; the selector
+     * also makes the branch usable from the console.
+     */
+    private fun <T : ArgumentBuilder<CommandSourceStack, T>> T.forPlayers(
+        action: (CommandContext<CommandSourceStack>, ServerPlayer) -> Reply,
+    ): T = executes { context -> perform(context, listOf(context.source.playerOrException), action) }
+        .then(
+            Commands.argument("targets", EntityArgument.players())
+                .executes { context -> perform(context, EntityArgument.getPlayers(context, "targets"), action) },
+        )
+
+    private fun perform(
+        context: CommandContext<CommandSourceStack>,
+        targets: Collection<ServerPlayer>,
+        action: (CommandContext<CommandSourceStack>, ServerPlayer) -> Reply,
+    ): Int {
+        val self = context.source.player
+        var count = 0
+        for (target in targets) {
+            val reply = action(context, target)
+            val text = Component.literal(if (target == self) reply.text else "${target.name.string}: ${reply.text}")
+            if (reply.ok) {
+                count++
+                context.source.sendSuccess({ text }, false)
+            } else {
+                context.source.sendFailure(text)
+            }
+        }
+        return count
     }
 
     // ── State ───────────────────────────────────────────────────────────────────
@@ -183,42 +228,41 @@ object MysteriesCommand {
      * commands per Sequence, and an ability has to be tested after every edit. This path is not
      * available to a player — the branch is operator-only.
      */
-    private fun become(context: CommandContext<CommandSourceStack>): Int {
-        val player = context.source.playerOrException
-        val name = StringArgumentType.getString(context, "pathway")
-        val pathway = ModPathways.byName(name)
-            ?: return fail(context, "Невідомий шлях: $name")
-        val sequence = Sequence(IntegerArgumentType.getInteger(context, "sequence"))
+    private fun become(context: CommandContext<CommandSourceStack>, player: ServerPlayer): Reply {
+        val pathway = pathwayArgument(context)
+        val sequence = sequenceArgument(context)
 
         Ascension.bestow(player, pathway, sequence)
-        context.source.sendSuccess(
-            {
-                Component.literal(
-                    "Ви — ${pathway.name} · Посл. ${sequence.level} " +
-                        "(${pathway.sequenceName(sequence.level)})",
-                )
-            },
-            false,
-        )
-        return 1
+        return done("${pathway.name} · Посл. ${sequence.level} (${pathway.sequenceName(sequence.level)})")
     }
 
-    private fun potion(context: CommandContext<CommandSourceStack>): Int {
-        val player = context.source.playerOrException
-        val name = StringArgumentType.getString(context, "pathway")
-        val pathway = ModPathways.byName(name)
-            ?: return fail(context, "Невідомий шлях: $name")
-        val sequence = Sequence(IntegerArgumentType.getInteger(context, "sequence"))
+    private fun potion(context: CommandContext<CommandSourceStack>, player: ServerPlayer): Reply {
+        val pathway = pathwayArgument(context)
+        val sequence = sequenceArgument(context)
 
-        val stack = ModItems.potionOf(pathway, sequence)
+        give(player, ModItems.potionOf(pathway, sequence))
+        return done("видано зілля: ${pathway.name} · Посл. ${sequence.level}")
+    }
+
+    /**
+     * Hands out a Characteristic — the plugin's `/characteristic give`.
+     *
+     * Until brewing lands the only honest source is a marionette's death, and a recipe cannot be
+     * tested by killing a puppet each time. No amount argument: the item stacks to one.
+     */
+    private fun characteristic(context: CommandContext<CommandSourceStack>, player: ServerPlayer): Reply {
+        val pathway = pathwayArgument(context)
+        val sequence = sequenceArgument(context)
+
+        give(player, ModItems.characteristicOf(pathway.name, sequence.level))
+        return done("видано Характеристику: ${pathway.name} · Посл. ${sequence.level}")
+    }
+
+    /** Into the inventory, or at the feet when it is full — the item is never lost. */
+    private fun give(player: ServerPlayer, stack: ItemStack) {
         if (!player.addItem(stack)) {
             player.drop(stack, false)
         }
-        context.source.sendSuccess(
-            { Component.literal("Видано зілля: ${pathway.name} · Посл. ${sequence.level}") },
-            false,
-        )
-        return 1
     }
 
     /**
@@ -227,16 +271,13 @@ object MysteriesCommand {
      * It exists exactly because mastery grows from casts (`MasteryProgressionCalculator`), and
      * topping it up to 100 % just to test an ascension is tens of minutes of casting into the void.
      */
-    private fun mastery(context: CommandContext<CommandSourceStack>): Int {
-        val player = context.source.playerOrException
-        val beyonder = AbilityServices.beyonders.of(player.uuid)
-            ?: return fail(context, "Ви не Потойбічний")
+    private fun mastery(context: CommandContext<CommandSourceStack>, player: ServerPlayer): Reply {
+        val beyonder = AbilityServices.beyonders.of(player.uuid) ?: return refused(NOT_BEYONDER)
 
         beyonder.setMastery(Mastery.of(DoubleArgumentType.getDouble(context, "percent")))
         // Mastery moves the spirituality ceiling — that is already a number from the state snapshot.
         AbilityServices.statePump.pushNow(player.uuid)
-        context.source.sendSuccess({ Component.literal("Засвоєння: ${beyonder.mastery}") }, false)
-        return 1
+        return done("засвоєння ${beyonder.mastery}")
     }
 
     /**
@@ -245,10 +286,8 @@ object MysteriesCommand {
      * It exists for the same reason as `mastery`: on its own it grows by two points per cast on
      * an empty tank, so reaching the whisper and the screen chain "honestly" is hundreds of casts.
      */
-    private fun sanity(context: CommandContext<CommandSourceStack>): Int {
-        val player = context.source.playerOrException
-        val beyonder = AbilityServices.beyonders.of(player.uuid)
-            ?: return fail(context, "Ви не Потойбічний")
+    private fun sanity(context: CommandContext<CommandSourceStack>, player: ServerPlayer): Reply {
+        val beyonder = AbilityServices.beyonders.of(player.uuid) ?: return refused(NOT_BEYONDER)
 
         val wanted = SanityLoss.of(IntegerArgumentType.getInteger(context, "scale"))
         // There is deliberately no direct setter in the domain: sanity moves through events, not assignment.
@@ -256,18 +295,14 @@ object MysteriesCommand {
         if (delta > 0) beyonder.increaseSanityLoss(delta) else beyonder.decreaseSanityLoss(-delta)
 
         AbilityServices.statePump.pushNow(player.uuid)
-        context.source.sendSuccess({ Component.literal("Втрата глузду: ${beyonder.sanityLoss}") }, false)
-        return 1
+        return done("втрата глузду ${beyonder.sanityLoss}")
     }
 
-    private fun forget(context: CommandContext<CommandSourceStack>): Int {
-        val player = context.source.playerOrException
-        if (AbilityServices.beyonders.of(player.uuid) == null) {
-            return fail(context, "Ви й так не Потойбічний")
-        }
+    @Suppress("UNUSED_PARAMETER")
+    private fun forget(context: CommandContext<CommandSourceStack>, player: ServerPlayer): Reply {
+        if (AbilityServices.beyonders.of(player.uuid) == null) return refused(NOT_BEYONDER)
         Ascension.forget(player)
-        context.source.sendSuccess({ Component.literal("Силу забуто.") }, false)
-        return 1
+        return done("силу забуто")
     }
 
     // ── Arguments ───────────────────────────────────────────────────────────────
@@ -285,6 +320,19 @@ object MysteriesCommand {
         Commands.argument("pathway", StringArgumentType.word()).suggests { _, builder ->
             SharedSuggestionProvider.suggest(ModPathways.names, builder)
         }
+
+    /** Thrown rather than replied: an unknown pathway is the same mistake for every target. */
+    private fun pathwayArgument(context: CommandContext<CommandSourceStack>): Pathway {
+        val name = StringArgumentType.getString(context, "pathway")
+        return ModPathways.byName(name)
+            ?: throw SimpleCommandExceptionType(Component.literal("Невідомий шлях: $name")).create()
+    }
+
+    private fun sequenceArgument() =
+        Commands.argument("sequence", IntegerArgumentType.integer(0, Pathway.SEQUENCE_COUNT - 1))
+
+    private fun sequenceArgument(context: CommandContext<CommandSourceStack>) =
+        Sequence(IntegerArgumentType.getInteger(context, "sequence"))
 
     private fun identityArgument(context: CommandContext<CommandSourceStack>): AbilityIdentity =
         AbilityIdentity.of(StringArgumentType.getString(context, "ability"))
