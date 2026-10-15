@@ -65,8 +65,8 @@ class PotionBrewTest {
     @Test
     @DisplayName("Шлях, якого ще немає в моді, розпізнається як відсутній, а не падає")
     fun unknownPathwayResolvesToNull() {
-        // Thirteen stub pathways and the rest of phase 08: a potion may exist before its pathway.
-        assertNull(PotionBrew("Darkness", 9).resolvePathway())
+        // A potion may name a pathway the mod does not know: a typo in a command, an old item.
+        assertNull(PotionBrew("Nonexistent", 9).resolvePathway())
         assertNotNull(PotionBrew("Tyrant", 9).resolvePathway())
     }
 }

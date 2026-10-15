@@ -51,6 +51,15 @@ object Ascension {
             advance(player, existing, pathway)
         }
 
+        // A stub pathway: the Sequence is real, the powers are not written yet — say so, or the
+        // player hunts for an ability list that will never appear.
+        if (!pathway.hasAnyAbility()) {
+            AbilityServices.messaging.tell(
+                player,
+                Component.literal("Сили цього шляху ще не прокинулись у цьому світі — здібностей поки немає"),
+            )
+        }
+
         aftertaste(player)
         BeyonderStatus.push(player)
         // The ability list is different now — the roster flies exactly here and nowhere else.

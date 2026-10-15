@@ -19,17 +19,17 @@ import me.vangoo.mysteries.pathways.whitetower.WhiteTower
  * halves of one pathway were edited in different files and drifted apart. Here a pathway is
  * assembled entirely in its own factory, and this object only keeps the list.
  *
- * **Two out of twenty-two.** Phase 05 ports exactly three abilities, and there would simply be
- * nothing to fill more pathways with: the rest arrive in phase 08 together with their abilities,
- * and the thirteen stubs together with their potions. The branding (liquid colours and names)
- * already knows all 22 — see `PathwayBranding`.
+ * **All twenty-two.** Nine are filled for Seq. 9–5; the other thirteen are [StubPathways] —
+ * potion, Characteristic and colour, no abilities yet.
  */
 object ModPathways {
 
     private val byName: Map<String, Pathway> =
-        listOf(
-            Tyrant.create(), Sun.create(), WhiteTower.create(), Door.create(), Error.create(), Visionary.create(),
-            Justiciar.create(), Fool.create(), Death.create(),
+        (
+            listOf(
+                Tyrant.create(), Sun.create(), WhiteTower.create(), Door.create(), Error.create(), Visionary.create(),
+                Justiciar.create(), Fool.create(), Death.create(),
+            ) + StubPathways.create()
         ).associateBy { it.name }
 
     val all: Collection<Pathway> get() = byName.values

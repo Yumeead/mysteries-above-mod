@@ -29,7 +29,7 @@ data class PotionBrew(val pathway: String, val sequence: Int) {
         }
     }
 
-    /** `null` — the pathway has not been ported yet (13 stubs and the rest of phase 08). */
+    /** `null` — no such pathway in the mod (a typo in a command, an item from an old build). */
     fun resolvePathway(): Pathway? = ModPathways.byName(pathway)
 
     fun asSequence(): Sequence = Sequence(sequence)

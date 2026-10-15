@@ -1,6 +1,7 @@
 package me.vangoo.mysteries.pathways
 
 import me.vangoo.mysteries.GameRegistries
+import me.vangoo.domain.PathwayBranding
 import me.vangoo.domain.abilities.AbilityType
 import me.vangoo.domain.entities.Beyonder
 import me.vangoo.domain.entities.Pathway
@@ -58,14 +59,17 @@ class ModPathwaysTest {
     }
 
     @Test
-    @DisplayName("Кожен шлях оголошує всі десять Послідовностей і має здібності")
+    @DisplayName("Усі 22 шляхи оголошують десять Послідовностей; здібності мають рівно дев'ять")
     fun everyPathwayIsComplete() {
+        // Branding is the list of 22: a pathway missing here would have a colour and no potion.
+        assertEquals(PathwayBranding.names, ModPathways.names.toSet())
         ModPathways.all.forEach { pathway ->
             repeat(Pathway.SEQUENCE_COUNT) { level ->
                 assertTrue(pathway.sequenceName(level).isNotBlank(), "${pathway.name} $level")
             }
-            assertTrue(pathway.hasAnyAbility(), "${pathway.name} — заглушка, а не шлях")
         }
+        val filled = setOf("Tyrant", "Sun", "WhiteTower", "Door", "Error", "Visionary", "Justiciar", "Fool", "Death")
+        assertEquals(filled, ModPathways.all.filter { it.hasAnyAbility() }.map { it.name }.toSet())
     }
 
     @Test
@@ -189,7 +193,7 @@ class ModPathwaysTest {
     @DisplayName("Пошук шляху не зважає на регістр, невідомого — немає")
     fun lookupIsCaseInsensitive() {
         assertEquals("Tyrant", ModPathways.byName("tYrAnT")?.name)
-        assertNull(ModPathways.byName("Darkness"))
+        assertNull(ModPathways.byName("Nonexistent"))
     }
 
     private fun identity(id: String) = AbilityIdentity.of(id)
