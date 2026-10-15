@@ -96,6 +96,11 @@ object MysteriesAboveMod : ModInitializer {
             AbilityRequests.castSelected(context.player())
         }
 
+        // The wheel (and, from M5, the slots): select, cast, or both, by identity.
+        ModChannels.ABILITY_ACTION.receiveOnServer { payload, context ->
+            AbilityRequests.act(context.player(), payload)
+        }
+
         CommandRegistrationCallback.EVENT.register { dispatcher, _, _ -> MysteriesCommand.register(dispatcher) }
 
         log.info(

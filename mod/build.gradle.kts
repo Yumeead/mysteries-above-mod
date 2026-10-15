@@ -68,6 +68,13 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+// Pure client-side logic (the wheel's geometry) is tested without the game too. Only the test
+// classpath sees `client`; the main source set still cannot.
+sourceSets.test {
+    compileClasspath += sourceSets["client"].output
+    runtimeClasspath += sourceSets["client"].output
+}
+
 tasks.test {
     useJUnitPlatform()
     testLogging { events("passed", "skipped", "failed") }

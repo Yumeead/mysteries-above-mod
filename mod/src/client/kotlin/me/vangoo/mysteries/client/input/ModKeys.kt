@@ -2,14 +2,16 @@ package me.vangoo.mysteries.client.input
 
 import com.mojang.blaze3d.platform.InputConstants
 import me.vangoo.mysteries.MOD_ID
+import me.vangoo.mysteries.client.ClientOptions
+import me.vangoo.mysteries.client.beyonder.ClientAbilityState
 import me.vangoo.mysteries.client.beyonder.ClientMarionettes
+import me.vangoo.mysteries.client.screen.AbilityWheelScreen
 import me.vangoo.mysteries.client.net.sendToServer
 import me.vangoo.mysteries.entity.MarionetteEntity
 import me.vangoo.mysteries.modId
 import me.vangoo.mysteries.net.ModChannels
 import me.vangoo.mysteries.net.payload.CastRequestPayload
 import me.vangoo.mysteries.net.payload.MarionetteOrderPayload
-import me.vangoo.mysteries.net.payload.StatusRequestPayload
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback
@@ -18,13 +20,14 @@ import net.fabricmc.fabric.api.event.player.UseBlockCallback
 import net.fabricmc.fabric.api.event.player.UseEntityCallback
 import net.fabricmc.fabric.api.event.player.UseItemCallback
 import net.minecraft.client.KeyMapping
+import net.minecraft.client.Minecraft
 import net.minecraft.world.InteractionResult
 import org.lwjgl.glfw.GLFW
 
 /**
  * The mod's keys.
  *
- * One key, two actions: **press and release — cast**, **hold — menu**. The vanilla inventory of
+ * One key, two actions: **press and release — cast**, **hold — the ability wheel**. The vanilla inventory of
  * the mobile build behaves the same way, as does half the mods with an ability wheel, and for
  * the same reason: in a fight the hand must not go looking for a second key, and a menu is not
  * wanted in a fight.
@@ -41,7 +44,7 @@ import org.lwjgl.glfw.GLFW
  *
  * Otherwise "held" cannot be told from "pressed": at the moment of the press it is not yet known
  * which it will become. So the cast happens on release, if the key was held for less than
- * [HOLD_TICKS] ticks — a quarter of a second, i.e. less than a person holds deliberately and
+ * `ClientOptions.wheelHoldMillis` (180 ms by default) — i.e. less than a person holds deliberately and
  * more than an ordinary click lasts.
  *
  * On 26.2 a key category is not a string but a `KeyMapping.Category` with its own `Identifier`;
@@ -105,16 +108,19 @@ object ModKeys {
 
             if (CAST.isDown) {
                 heldTicks++
-                if (heldTicks >= HOLD_TICKS && !opened) {
+                if (heldTicks >= holdTicks() && !opened) {
                     opened = true
-                    // The server opens the screen in its reply: only it knows the roster.
-                    ModChannels.STATUS_REQUEST.sendToServer(StatusRequestPayload)
+                    // Straight from the client cache — no round trip. The wheel takes over the key
+                    // from here: its own `keyReleased` sends the cast, so this tick must not.
+                    if (ClientAbilityState.entries.isNotEmpty()) {
+                        Minecraft.getInstance().gui.setScreen(AbilityWheelScreen(CAST))
+                    }
                 }
                 return@register
             }
 
             // The key was released. A cast only if this was a click, not a hold.
-            if (heldTicks in 1 until HOLD_TICKS && !opened) {
+            if (heldTicks in 1 until holdTicks() && !opened) {
                 ModChannels.CAST_REQUEST.sendToServer(CastRequestPayload.INSTANCE)
             }
             heldTicks = 0
@@ -192,8 +198,10 @@ object ModKeys {
     private fun refuse(): InteractionResult =
         if (THREADS.isDown) InteractionResult.FAIL else InteractionResult.PASS
 
-    /** A quarter of a second: longer than a click, shorter than a deliberate hold. */
-    private const val HOLD_TICKS = 5
+    /** `wheelHoldMillis` in whole ticks, at least one: longer than a click, shorter than a deliberate hold. */
+    private fun holdTicks(): Int = maxOf(1, (ClientOptions.wheelHoldMillis + MILLIS_PER_TICK - 1) / MILLIS_PER_TICK)
+
+    private const val MILLIS_PER_TICK = 50
 
     private const val HOTBAR_SLOTS = 9
 }

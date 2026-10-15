@@ -8,6 +8,8 @@ import me.vangoo.mysteries.ability.CastMessages
 import me.vangoo.mysteries.ability.CastReport
 import me.vangoo.mysteries.ability.ToggleablePassiveAbility
 import me.vangoo.mysteries.ability.runtime.AbilityServices
+import me.vangoo.mysteries.net.payload.AbilityActionPayload
+import me.vangoo.mysteries.net.payload.AbilityActionPayload.Action
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 
@@ -73,6 +75,22 @@ object AbilityRequests {
         AbilityServices.selection.select(player.uuid, spec.identity)
         AbilityServices.statePump.pushNow(player.uuid)
         return true
+    }
+
+    /**
+     * One `ABILITY_ACTION` from the client. The identity is foreign input: a blank one is
+     * dropped here rather than tripping `AbilityIdentity`'s `require` inside the network handler.
+     */
+    fun act(player: ServerPlayer, payload: AbilityActionPayload) {
+        val identity = payload.identity?.takeIf { it.isNotBlank() }?.let(AbilityIdentity::of)
+        when (payload.action) {
+            Action.SELECT -> identity?.let { select(player, it) }
+            Action.CAST -> if (identity == null) castSelected(player) else cast(player, identity)
+            // Select first, so a refused cast still leaves the wheel's choice "in hand".
+            Action.SELECT_AND_CAST -> identity?.let { if (select(player, it)) cast(player, it) }
+            // `cast` already flips a toggle; the distinct verb exists for the client's sake (M5).
+            Action.TOGGLE -> identity?.let { cast(player, it) }
+        }
     }
 
     private fun report(player: ServerPlayer, report: CastReport): CastReport {
