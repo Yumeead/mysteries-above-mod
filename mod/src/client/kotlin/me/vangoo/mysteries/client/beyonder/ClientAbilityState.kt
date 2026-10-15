@@ -155,6 +155,17 @@ object ClientAbilityState {
         return (1f - remaining.toFloat() / total).coerceIn(0f, 1f)
     }
 
+    /**
+     * The identity [step] places away from [current] in [identities]. Wraps around both ends;
+     * with nothing (or something absent) selected, a step forward lands on the first.
+     */
+    fun cycle(identities: List<String>, current: String?, step: Int): String? {
+        if (identities.isEmpty()) return null
+        val index = identities.indexOf(current)
+        if (index < 0) return identities[if (step > 0) 0 else identities.size - 1]
+        return identities[Math.floorMod(index + step, identities.size)]
+    }
+
     /** A hint, not a ban: the key can always be pressed, the server is what refuses. */
     fun canAfford(entry: AbilityRosterPayload.Entry): Boolean =
         spirituality?.hasSufficient(entry.cost) ?: true

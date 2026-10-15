@@ -7,6 +7,7 @@ import me.vangoo.mysteries.client.ClientOptions
 import me.vangoo.mysteries.client.HudAnchor
 import me.vangoo.mysteries.client.HudMode
 import me.vangoo.mysteries.client.beyonder.ClientAbilityState
+import me.vangoo.mysteries.client.input.ModKeys
 import me.vangoo.mysteries.client.render.UiTheme
 import me.vangoo.mysteries.modId
 import me.vangoo.mysteries.net.payload.AbilityRosterPayload
@@ -51,6 +52,7 @@ object AbilityHud : HudElement {
         val price: Component?,
         val priceCritical: Boolean,
         val marker: Component?,
+        val slot: Component?,
         val cooldownLabel: Component?,
         val accent: Int,
         val width: Int,
@@ -74,6 +76,8 @@ object AbilityHud : HudElement {
         /** Not the spirituality number itself: the panel only shows whether it covers the selection. */
         val affordable: Boolean,
         val showCooldownNumbers: Boolean,
+        /** The hotkey's name in the active group, not its label: the label is built when the panel rebuilds. */
+        val hotkey: String?,
     )
 
     private var signature: Signature? = null
@@ -139,6 +143,7 @@ object AbilityHud : HudElement {
             sustaining = identity?.let(ClientAbilityState::isSustaining) ?: false,
             affordable = entry?.let(ClientAbilityState::canAfford) ?: true,
             showCooldownNumbers = ClientOptions.showCooldownNumbers,
+            hotkey = identity?.let { ClientOptions.group.keyOf(it) },
         )
     }
 
@@ -156,6 +161,8 @@ object AbilityHud : HudElement {
             else -> null
         }
 
+        val slot = signature.identity?.let { ModKeys.hotkeyLabel(it) }
+
         val cooldownLabel = if (signature.showCooldownNumbers && signature.remainingSeconds > 0) {
             Component.literal(signature.remainingSeconds.toString())
         } else {
@@ -164,7 +171,8 @@ object AbilityHud : HudElement {
 
         // The width fits the longer of the two: the name, or the cost line with the status mark.
         val detailWidth = (price?.let { UiTheme.badgeWidth(font, it) } ?: 0) +
-            (marker?.let { MARKER_GAP + font.width(it) } ?: 0)
+            (marker?.let { MARKER_GAP + font.width(it) } ?: 0) +
+            (slot?.let { MARKER_GAP + font.width(it) } ?: 0)
         val content = (if (entry != null) ICON + GAP else 0) +
             maxOf(font.width(name), detailWidth)
 
@@ -178,6 +186,7 @@ object AbilityHud : HudElement {
             price = price,
             priceCritical = priceCritical,
             marker = marker,
+            slot = slot,
             cooldownLabel = cooldownLabel,
             accent = PathwayBranding.textOf(signature.pathwayId).packed,
             width = content + PADDING * 2,
@@ -266,6 +275,10 @@ object AbilityHud : HudElement {
         }
         panel.marker?.let {
             graphics.text(font, it, detailX, y + PADDING + DETAIL_OFFSET + 2, UiTheme.argb(UiTheme.ACCENT, alpha))
+            detailX += font.width(it) + MARKER_GAP
+        }
+        panel.slot?.let {
+            graphics.text(font, it, detailX, y + PADDING + DETAIL_OFFSET + 2, UiTheme.argb(UiTheme.MUTED, alpha))
         }
 
         UiTheme.hairline(graphics, left, y + panel.hairlineY, panel.width - PADDING * 2, panel.accent, alpha)

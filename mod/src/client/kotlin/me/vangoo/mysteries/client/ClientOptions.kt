@@ -18,7 +18,47 @@ enum class HudMode { ALWAYS, AUTO, NEVER }
 enum class HudAnchor { LEFT_CENTER, RIGHT_CENTER, LEFT_TOP, RIGHT_TOP }
 
 /**
- * Client settings — and the quick slots along with them.
+ * A named set of abilities with hotkeys of its own: switch the group and the same keys cast
+ * something else (a fighting rotation, a travelling one).
+ *
+ * [abilities] `null` is the built-in "all" group: it shows the whole roster and cannot be
+ * deleted. A named group keeps identities the roster may not hold right now (a borrowed power,
+ * a demotion): they are filtered out when shown, never pruned, so a temporary change of the
+ * roster does not wipe a layout the player built by hand.
+ *
+ * Plain data with no game types, so its rules are checked by a unit test.
+ */
+class AbilityGroup(
+    var name: String,
+    val abilities: MutableList<String>?,
+    /** `InputConstants.Key` name (`key.keyboard.c`, `key.mouse.4`) → ability identity. */
+    val hotkeys: MutableMap<String, String> = LinkedHashMap(),
+) {
+    val isAll: Boolean get() = abilities == null
+
+    fun contains(identity: String): Boolean = abilities?.contains(identity) ?: true
+
+    fun keyOf(identity: String): String? = hotkeys.entries.firstOrNull { it.value == identity }?.key
+
+    /** One key casts one ability, and one ability has one key: binding moves both. */
+    fun bind(key: String, identity: String) {
+        unbind(identity)
+        hotkeys[key] = identity
+    }
+
+    fun unbind(identity: String) {
+        hotkeys.values.removeAll { it == identity }
+    }
+
+    /** Add or remove; a removed ability loses its key in this group too. */
+    fun toggle(identity: String) {
+        val list = abilities ?: return
+        if (!list.remove(identity)) list.add(identity) else unbind(identity)
+    }
+}
+
+/**
+ * Client settings — and the ability groups along with them.
  *
  * There was no configuration in the project at all, so there is nothing to reuse. This is the
  * least that covers the requirement: one `config/mysteries_above_client.json` file, Gson
@@ -26,11 +66,11 @@ enum class HudAnchor { LEFT_CENTER, RIGHT_CENTER, LEFT_TOP, RIGHT_TOP }
  *
  * **There is nothing about game rules here.** Everything below is about how the player sees
  * things and what they use, not about what they are allowed to do. The slot map lives here
- * rather than on the server for one reason: a slot must survive leaving the game, and server
- * storage only arrives in phase 09. A slot is a shortcut to an identity, not a right to cast
- * it: the server verifies the identity it is sent the same way it would any other.
+ * rather than on the server for one reason: a layout must survive leaving the game and is
+ * about how the player works, not what they may do. A hotkey is a shortcut to an identity, not a
+ * right to cast it: the server verifies the identity it is sent the same way it would any other.
  *
- * The settings screen is not part of this phase (M7); for now there is the file and the keys.
+ * Groups and hotkeys are edited in `AbilityBookScreen`; the rest is the file for now (M7).
  */
 object ClientOptions {
 
@@ -68,29 +108,19 @@ object ClientOptions {
 
     var reducedMotion: Boolean by persisted(false)
 
-    private val bindings = LinkedHashMap<Int, String>()
+    /** Index 0 is always the built-in "all" group. */
+    val groups: MutableList<AbilityGroup> = mutableListOf(AbilityGroup("", null))
 
-    /** Quick slot → ability identity. Empty until the player assigns anything. */
-    val slots: Map<Int, String> get() = bindings
+    var activeGroup: Int by persisted(0)
 
-    /** The identity in the slot, or `null` if the slot is free. */
-    fun slot(number: Int): String? = bindings[number]
+    /** The active group; an index left dangling by a deletion falls back to "all". */
+    val group: AbilityGroup get() = groups.getOrElse(activeGroup) { groups[0] }
 
-    /**
-     * Write a slot; `null` frees it.
-     *
-     * This is storage, not rules: "rebind", "clear", "the ability is gone" are the job of
-     * `AbilitySlots` (M5), which is what calls this method.
-     */
-    fun bindSlot(number: Int, identity: String?) {
-        require(number in SLOT_RANGE) { "Слота $number не існує" }
-
-        val changed = if (identity == null) {
-            bindings.remove(number) != null
-        } else {
-            bindings.put(number, identity) != identity
-        }
-        if (changed) save()
+    /** Groups are mutable data: edit them inside, and the file is written once after. */
+    fun editGroups(change: () -> Unit) {
+        change()
+        if (activeGroup !in groups.indices) activeGroup = 0
+        save()
     }
 
     // ── File ────────────────────────────────────────────────────────────────────
@@ -127,11 +157,19 @@ object ClientOptions {
             dto.showDescriptions?.let { showDescriptions = it }
             dto.reducedMotion?.let { reducedMotion = it }
 
-            bindings.clear()
-            dto.slots?.forEach { (key, identity) ->
-                val number = key.toIntOrNull()
-                if (number != null && number in SLOT_RANGE) bindings[number] = identity
+            dto.groups?.let { saved ->
+                groups.clear()
+                groups += AbilityGroup("", null)
+                saved.forEachIndexed { index, group ->
+                    val hotkeys = LinkedHashMap(group.hotkeys.orEmpty())
+                    if (index == 0) {
+                        groups[0].hotkeys += hotkeys
+                    } else {
+                        groups += AbilityGroup(group.name.orEmpty(), group.abilities.orEmpty().toMutableList(), hotkeys)
+                    }
+                }
             }
+            dto.activeGroup?.let { activeGroup = it.coerceIn(groups.indices) }
         } finally {
             loading = false
         }
@@ -152,7 +190,8 @@ object ClientOptions {
             it.showSpirituality = showSpirituality
             it.showDescriptions = showDescriptions
             it.reducedMotion = reducedMotion
-            it.slots = bindings.entries.associate { (number, identity) -> number.toString() to identity }
+            it.groups = groups.map { group -> GroupDto(group.name, group.abilities, group.hotkeys) }
+            it.activeGroup = activeGroup
         }
 
         val path = file
@@ -208,11 +247,15 @@ object ClientOptions {
         var showSpirituality: Boolean? = null
         var showDescriptions: Boolean? = null
         var reducedMotion: Boolean? = null
-        var slots: Map<String, String>? = null
+        var groups: List<GroupDto>? = null
+        var activeGroup: Int? = null
     }
 
-    /** Six slots — exactly as many bindings as `ModKeys` will register (M5). */
-    val SLOT_RANGE: IntRange = 1..6
+    private class GroupDto(
+        var name: String? = null,
+        var abilities: List<String>? = null,
+        var hotkeys: Map<String, String>? = null,
+    )
 
     private const val MIN_SCALE = 0.5f
     private const val MAX_SCALE = 2.0f

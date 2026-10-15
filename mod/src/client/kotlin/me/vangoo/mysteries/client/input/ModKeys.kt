@@ -2,14 +2,21 @@ package me.vangoo.mysteries.client.input
 
 import com.mojang.blaze3d.platform.InputConstants
 import me.vangoo.mysteries.MOD_ID
+import me.vangoo.domain.abilities.AbilityType
+import me.vangoo.mysteries.client.AbilityGroup
 import me.vangoo.mysteries.client.ClientOptions
+import me.vangoo.mysteries.client.HudMode
 import me.vangoo.mysteries.client.beyonder.ClientAbilityState
 import me.vangoo.mysteries.client.beyonder.ClientMarionettes
+import me.vangoo.mysteries.client.screen.AbilityBookScreen
 import me.vangoo.mysteries.client.screen.AbilityWheelScreen
 import me.vangoo.mysteries.client.net.sendToServer
 import me.vangoo.mysteries.entity.MarionetteEntity
 import me.vangoo.mysteries.modId
 import me.vangoo.mysteries.net.ModChannels
+import me.vangoo.mysteries.net.payload.AbilityActionPayload
+import me.vangoo.mysteries.net.payload.AbilityActionPayload.Action
+import me.vangoo.mysteries.net.payload.AbilityRosterPayload
 import me.vangoo.mysteries.net.payload.CastRequestPayload
 import me.vangoo.mysteries.net.payload.MarionetteOrderPayload
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
@@ -21,6 +28,8 @@ import net.fabricmc.fabric.api.event.player.UseEntityCallback
 import net.fabricmc.fabric.api.event.player.UseItemCallback
 import net.minecraft.client.KeyMapping
 import net.minecraft.client.Minecraft
+import net.minecraft.client.input.KeyEvent
+import net.minecraft.network.chat.Component
 import net.minecraft.world.InteractionResult
 import org.lwjgl.glfw.GLFW
 
@@ -70,6 +79,31 @@ object ModKeys {
         KeyMapping("key.$MOD_ID.threads", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G, CATEGORY),
     )
 
+    /** Step through the abilities without a screen: the fight-time path, where freezing is not an option. */
+    private val NEXT: KeyMapping = KeyMappingHelper.registerKeyMapping(
+        KeyMapping("key.$MOD_ID.next", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_X, CATEGORY),
+    )
+
+    private val PREV: KeyMapping = KeyMappingHelper.registerKeyMapping(
+        KeyMapping("key.$MOD_ID.prev", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_Z, CATEGORY),
+    )
+
+    /** Unbound: a rare action must not take a key from every player. */
+    private val TOGGLE_HUD: KeyMapping = KeyMappingHelper.registerKeyMapping(
+        KeyMapping("key.$MOD_ID.toggle_hud", InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.value, CATEGORY),
+    )
+
+    /** The ability book: descriptions, groups and hotkeys. */
+    private val BOOK: KeyMapping = KeyMappingHelper.registerKeyMapping(
+        KeyMapping("key.$MOD_ID.book", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_B, CATEGORY),
+    )
+
+    /** Hotkeys of the active group that were down on the previous tick: a cast fires on the press edge. */
+    private val heldHotkeys = HashSet<String>()
+
+    /** The mode to come back to when the HUD key shows the panel again. */
+    private var shownHud = HudMode.AUTO
+
     /** How many ticks the key has been held down. Zero — released. */
     private var heldTicks = 0
 
@@ -106,6 +140,8 @@ object ModKeys {
             @Suppress("ControlFlowWithEmptyBody")
             while (CAST.consumeClick()) { }
 
+            quickKeys(it)
+
             if (CAST.isDown) {
                 heldTicks++
                 if (heldTicks >= holdTicks() && !opened) {
@@ -126,6 +162,92 @@ object ModKeys {
             heldTicks = 0
             opened = false
         }
+    }
+
+    /** Z/X, the book, the HUD key and the group hotkeys. Click queues only fill while no screen is open. */
+    private fun quickKeys(client: Minecraft) {
+        var step = 0
+        while (NEXT.consumeClick()) step++
+        while (PREV.consumeClick()) step--
+        // Several presses in one tick become one request: the echo of the first has not arrived yet.
+        if (step != 0) {
+            val ids = visible().filter { it.type != AbilityType.PERMANENT_PASSIVE }.map { it.identity }
+            ClientAbilityState.cycle(ids, ClientAbilityState.selected, step)?.let {
+                ModChannels.ABILITY_ACTION.sendToServer(AbilityActionPayload(Action.SELECT, it))
+            }
+        }
+
+        var book = false
+        while (BOOK.consumeClick()) book = true
+        if (book && client.gui.screen() == null && ClientAbilityState.entries.isNotEmpty()) {
+            client.gui.setScreen(AbilityBookScreen())
+        }
+
+        hotkeys(client)
+
+        while (TOGGLE_HUD.consumeClick()) {
+            if (ClientOptions.hud == HudMode.NEVER) {
+                ClientOptions.hud = shownHud
+            } else {
+                shownHud = ClientOptions.hud
+                ClientOptions.hud = HudMode.NEVER
+            }
+        }
+    }
+
+    /**
+     * The active group's hotkeys. They are the player's own keys rather than `KeyMapping`s (any
+     * number, per group), so there is no click queue: the key state is read once a tick and a cast
+     * fires on the press edge. Nothing fires while a screen is open — chat included.
+     *
+     * ponytail: polled at 20 Hz, so a tap shorter than one tick (50 ms) can be missed; a GLFW key
+     * callback hook would catch it if that ever shows up in play.
+     */
+    private fun hotkeys(client: Minecraft) {
+        if (client.gui.screen() != null || client.player == null || !client.isWindowActive) {
+            heldHotkeys.clear()
+            return
+        }
+        val window = client.window
+        for ((name, identity) in ClientOptions.group.hotkeys) {
+            val key = InputConstants.getKey(name)
+            val down = when (key.type) {
+                InputConstants.Type.MOUSE -> GLFW.glfwGetMouseButton(window.handle(), key.value) == GLFW.GLFW_PRESS
+                else -> InputConstants.isKeyDown(window, key.value)
+            }
+            if (!down) {
+                heldHotkeys.remove(name)
+            } else if (heldHotkeys.add(name) && ClientAbilityState.entry(identity) != null) {
+                use(identity)
+            }
+        }
+    }
+
+    fun isBookKey(event: KeyEvent): Boolean = BOOK.matches(event)
+
+    /** The active group's abilities the player holds right now, in roster order. */
+    fun visible(group: AbilityGroup = ClientOptions.group): List<AbilityRosterPayload.Entry> =
+        ClientAbilityState.entries.filter { group.contains(it.identity) }
+
+    /** The active group's hotkey label for [identity], or `null` if it has none. */
+    fun hotkeyLabel(identity: String, group: AbilityGroup = ClientOptions.group): Component? =
+        group.keyOf(identity)?.let { InputConstants.getKey(it).displayName }
+
+    /**
+     * Use one ability straight away — a hotkey or the wheel's release.
+     *
+     * A toggle is flipped with `TOGGLE` rather than selected: it is set and forgotten, and taking
+     * the cast key's place would leave the player tapping a switch mid-fight. A permanent passive
+     * has nothing to use. An identity the roster no longer knows still goes out: the server says
+     * `NotOwned`, the client decides nothing.
+     */
+    fun use(identity: String) {
+        val action = when (ClientAbilityState.entry(identity)?.type) {
+            AbilityType.PERMANENT_PASSIVE -> return
+            AbilityType.TOGGLEABLE_PASSIVE -> Action.TOGGLE
+            else -> Action.SELECT_AND_CAST
+        }
+        ModChannels.ABILITY_ACTION.sendToServer(AbilityActionPayload(action, identity))
     }
 
     /**

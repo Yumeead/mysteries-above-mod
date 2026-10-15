@@ -5,11 +5,9 @@ import me.vangoo.domain.abilities.AbilityType
 import me.vangoo.mysteries.MOD_ID
 import me.vangoo.mysteries.client.ClientOptions
 import me.vangoo.mysteries.client.beyonder.ClientAbilityState
-import me.vangoo.mysteries.client.net.sendToServer
+import me.vangoo.mysteries.client.input.ModKeys
 import me.vangoo.mysteries.client.render.UiTheme
 import me.vangoo.mysteries.client.render.WheelLayout
-import me.vangoo.mysteries.net.ModChannels
-import me.vangoo.mysteries.net.payload.AbilityActionPayload
 import me.vangoo.mysteries.net.payload.AbilityRosterPayload
 import net.minecraft.client.KeyMapping
 import net.minecraft.client.gui.GuiGraphicsExtractor
@@ -22,8 +20,12 @@ import net.minecraft.util.FormattedCharSequence
 /**
  * The ability wheel: hold the cast key, point, let go.
  *
- * It lives only while [key] is held. Releasing it sends `SELECT_AND_CAST` for the card under the
- * cursor, or nothing from the dead centre. The screen closes at once and draws nothing as
+ * It lives only while [key] is held. Releasing it uses the card under the cursor (`SELECT_AND_CAST`,
+ * or `TOGGLE` for a switch — see `ModKeys.use`), or nothing from the dead centre.
+ *
+ * It shows the active group. The mouse wheel walks the pages of every group in turn (a group of
+ * more than twelve takes several), and the group of the page it stops on becomes the active one —
+ * its hotkeys with it. Groups and keys are set up in [AbilityBookScreen]; the wheel only uses them. The screen closes at once and draws nothing as
  * "cast": the truth comes back with `ABILITY_STATE`, and a refusal with the usual action-bar line.
  *
  * The client dims what it thinks is unavailable but never withholds the request — the server
@@ -44,9 +46,14 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
         val cooldown: Component?,
         val remaining: Float,
         val dim: Boolean,
+        val slot: Component?,
     )
 
+    /** One ring: up to twelve abilities of one group. */
+    private class Page(val group: Int, val entries: List<AbilityRosterPayload.Entry>, val label: Component?)
+
     private var entries: List<AbilityRosterPayload.Entry> = ClientAbilityState.entries
+    private var pages: List<Page> = pagesOf()
     private var page = startPage()
     private var cards: List<Card> = emptyList()
     private var hovered = -1
@@ -76,7 +83,8 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
         if (ClientAbilityState.entries !== entries) {
             val kept = hoveredEntry()?.identity
             entries = ClientAbilityState.entries
-            page = page.coerceAtMost(WheelLayout.pages(entries.size) - 1)
+            pages = pagesOf()
+            page = page.coerceAtMost(pages.size - 1)
             hovered = kept?.let { id -> onPage().indexOfFirst { it.identity == id } } ?: -1
             updateCaption()
         }
@@ -99,9 +107,9 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
     }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, scrollX: Double, scrollY: Double): Boolean {
-        val pages = WheelLayout.pages(entries.size)
-        if (pages <= 1 || scrollY == 0.0) return false
-        page = Math.floorMod(page + if (scrollY < 0) 1 else -1, pages)
+        if (pages.size <= 1 || scrollY == 0.0) return false
+        page = Math.floorMod(page + if (scrollY < 0) 1 else -1, pages.size)
+        ClientOptions.activeGroup = pages[page].group
         hovered = -1
         updateCaption()
         rebuild()
@@ -122,24 +130,37 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
     }
 
     private fun commit() {
-        val entry = hoveredEntry()
-        if (entry != null && entry.type != AbilityType.PERMANENT_PASSIVE) {
-            ModChannels.ABILITY_ACTION.sendToServer(
-                AbilityActionPayload(AbilityActionPayload.Action.SELECT_AND_CAST, entry.identity),
-            )
-        }
+        hoveredEntry()?.let { ModKeys.use(it.identity) }
         onClose()
     }
 
     // ── State ───────────────────────────────────────────────────────────────────
 
-    private fun startPage(): Int {
-        val index = entries.indexOfFirst { it.identity == ClientAbilityState.selected }
-        return if (index < 0) 0 else index / WheelLayout.PAGE_SIZE
+    /** Every group that holds something right now, each cut into rings of twelve. */
+    private fun pagesOf(): List<Page> {
+        val named = ClientOptions.groups.size > 1
+        val built = ClientOptions.groups.flatMapIndexed { index, group ->
+            val chunks = ModKeys.visible(group).chunked(WheelLayout.PAGE_SIZE)
+            chunks.mapIndexed { n, chunk ->
+                val parts = buildList {
+                    if (named) add(groupTitle(group).string)
+                    if (chunks.size > 1) add("${n + 1} / ${chunks.size}")
+                }
+                Page(index, chunk, parts.takeIf { it.isNotEmpty() }?.let { Component.literal(it.joinToString(" · ")) })
+            }
+        }
+        return built.ifEmpty { listOf(Page(0, emptyList(), null)) }
     }
 
-    private fun onPage(): List<AbilityRosterPayload.Entry> =
-        entries.drop(page * WheelLayout.PAGE_SIZE).take(WheelLayout.PAGE_SIZE)
+    /** The active group's page holding the selection, else its first page, else the first of all. */
+    private fun startPage(): Int {
+        val active = ClientOptions.activeGroup
+        val holding = pages.indexOfFirst { p -> p.group == active && p.entries.any { it.identity == ClientAbilityState.selected } }
+        if (holding >= 0) return holding
+        return pages.indexOfFirst { it.group == active }.coerceAtLeast(0)
+    }
+
+    private fun onPage(): List<AbilityRosterPayload.Entry> = pages[page].entries
 
     private fun hoveredEntry(): AbilityRosterPayload.Entry? = onPage().getOrNull(hovered)
 
@@ -175,10 +196,10 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
                 cooldown = if (seconds > 0 && ClientOptions.showCooldownNumbers) Component.literal("$seconds") else null,
                 remaining = 1f - ClientAbilityState.cooldownProgress(entry),
                 dim = entry.type == AbilityType.PERMANENT_PASSIVE,
+                slot = ModKeys.hotkeyLabel(entry.identity, ClientOptions.groups.getOrElse(pages[page].group) { ClientOptions.group }),
             )
         }
-        val pages = WheelLayout.pages(entries.size)
-        pageLabel = if (pages > 1) Component.literal("${page + 1} / $pages") else null
+        pageLabel = pages[page].label
         if (caption.isEmpty()) updateCaption()
     }
 
@@ -218,6 +239,7 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
             UiTheme.cooldownVeil(graphics, x + ICON_INSET, y + ICON_INSET, ICON, card.remaining, a)
             card.cooldown?.let { graphics.centeredText(font, it, x + CARD / 2, y + CARD / 2 - 4, UiTheme.argb(UiTheme.TEXT, a)) }
             card.marker?.let { graphics.text(font, it, x + CARD - 5, y - 3, UiTheme.argb(UiTheme.ACCENT, a)) }
+            card.slot?.let { graphics.text(font, it, x - 2, y - 3, UiTheme.argb(UiTheme.MUTED, a)) }
             card.price?.let {
                 val color = if (card.critical) UiTheme.CRITICAL else UiTheme.MUTED
                 graphics.centeredText(font, it, x + CARD / 2, y + CARD + 2, UiTheme.argb(color, a))
