@@ -8,9 +8,8 @@ import java.util.UUID
 /**
  * The Beyonders currently in the game.
  *
- * Memory only: storage arrives in phase 09, and it is what will fill the registry when a player
- * joins. Until then the command puts them here — enough for the cast backbone to work in the
- * game rather than only in tests.
+ * Only those in the game: `BeyonderStore` fills the registry on join from the player's save and
+ * takes them out again on leave.
  */
 class BeyonderRegistry(
     /**

@@ -1,5 +1,8 @@
 package me.vangoo.mysteries.entity
 
+import com.mojang.serialization.Codec
+import com.mojang.serialization.codecs.RecordCodecBuilder
+import net.minecraft.core.UUIDUtil
 import net.minecraft.network.syncher.EntityDataAccessor
 import net.minecraft.network.syncher.EntityDataSerializers
 import net.minecraft.network.syncher.SynchedEntityData
@@ -9,9 +12,13 @@ import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier
 import net.minecraft.world.entity.ai.attributes.Attributes
+import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.component.ResolvableProfile
 import net.minecraft.world.level.Level
+import net.minecraft.world.level.storage.ValueInput
+import net.minecraft.world.level.storage.ValueOutput
 import net.minecraft.world.phys.Vec3
+import java.util.Optional
 import java.util.UUID
 
 /**
@@ -42,11 +49,15 @@ import java.util.UUID
  * ponytail: hand-steering, swap for a real `PathFinder` if puppets need to cross terrain
  * unattended.
  *
- * ## Nothing here is saved
+ * ## A puppet is saved with its chunk; a stand-in is not
  *
- * The type is `noSave()`: a marionette lives as long as the server does, exactly like the
- * Beyonder status it was cut from. The plugin needed a `MarionetteRestorer` because Citizens
- * persisted its NPCs on its own and orphans would have survived a restart.
+ * A puppet carries the Characteristic torn out of its victim, so it must outlive a chunk unload
+ * and a restart exactly as a mob does: its owner, capture, face and order are written with the
+ * chunk ([addAdditionalSaveData]), and `Marionettes` re-adopts it the moment it loads. The plugin
+ * needed a `MarionetteRestorer` for this; vanilla already saves entities.
+ *
+ * A vessel (possession, Language of the Dead) has no [capture] and is never saved
+ * ([shouldBeSaved]): it stands in for a living player and means nothing without them.
  */
 class MarionetteEntity(type: EntityType<out MarionetteEntity>, level: Level) : Avatar(type, level) {
 
@@ -82,7 +93,21 @@ class MarionetteEntity(type: EntityType<out MarionetteEntity>, level: Level) : A
         val sequence: Int?,
         /** Rewritten when a possession ends: the driver may have used or picked things up. */
         var inventory: List<net.minecraft.world.item.ItemStack>,
-    )
+    ) {
+        companion object {
+            val CODEC: Codec<Capture> = RecordCodecBuilder.create { row ->
+                row.group(
+                    UUIDUtil.CODEC.fieldOf("victim").forGetter(Capture::victimId),
+                    Codec.STRING.fieldOf("name").forGetter(Capture::name),
+                    Codec.STRING.optionalFieldOf("pathway").forGetter { Optional.ofNullable(it.pathway) },
+                    Codec.INT.optionalFieldOf("sequence").forGetter { Optional.ofNullable(it.sequence) },
+                    ItemStack.OPTIONAL_CODEC.listOf().fieldOf("inventory").forGetter(Capture::inventory),
+                ).apply(row) { victim, name, pathway, sequence, inventory ->
+                    Capture(victim, name, pathway.orElse(null), sequence.orElse(null), inventory)
+                }
+            }
+        }
+    }
 
     var capture: Capture? = null
 
@@ -137,6 +162,40 @@ class MarionetteEntity(type: EntityType<out MarionetteEntity>, level: Level) : A
     override fun isClientAuthoritative(): Boolean = driverId != null
 
     override fun isPickable(): Boolean = !hiddenForDriver && super.isPickable()
+
+    override fun shouldBeSaved(): Boolean = capture != null && ownerId != null && super.shouldBeSaved()
+
+    override fun addAdditionalSaveData(output: ValueOutput) {
+        super.addAdditionalSaveData(output)
+        capture?.let { output.store("capture", Capture.CODEC, it) }
+        output.storeNullable("owner", UUIDUtil.CODEC, ownerId)
+        output.store("profile", ResolvableProfile.CODEC, profile)
+        when (val current = order) {
+            is Order.Stand -> output.putString("order", "stand")
+            is Order.Follow -> output.putString("order", "follow")
+            is Order.GoTo -> {
+                output.putString("order", "go_to")
+                output.store("order_target", Vec3.CODEC, current.target)
+            }
+            is Order.Attack -> {
+                output.putString("order", "attack")
+                output.store("order_victim", UUIDUtil.CODEC, current.victimId)
+            }
+        }
+    }
+
+    override fun readAdditionalSaveData(input: ValueInput) {
+        super.readAdditionalSaveData(input)
+        capture = input.read("capture", Capture.CODEC).orElse(null)
+        ownerId = input.read("owner", UUIDUtil.CODEC).orElse(null)
+        input.read("profile", ResolvableProfile.CODEC).ifPresent(::setProfile)
+        order = when (input.getStringOr("order", "stand")) {
+            "follow" -> Order.Follow
+            "go_to" -> input.read("order_target", Vec3.CODEC).map<Order> { Order.GoTo(it) }.orElse(Order.Stand)
+            "attack" -> input.read("order_victim", UUIDUtil.CODEC).map<Order> { Order.Attack(it) }.orElse(Order.Stand)
+            else -> Order.Stand
+        }
+    }
 
     override fun defineSynchedData(builder: SynchedEntityData.Builder) {
         super.defineSynchedData(builder)

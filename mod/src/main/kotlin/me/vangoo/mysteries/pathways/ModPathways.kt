@@ -1,6 +1,8 @@
 package me.vangoo.mysteries.pathways
 
+import me.vangoo.domain.abilities.AbilitySpec
 import me.vangoo.domain.entities.Pathway
+import me.vangoo.domain.valueobjects.AbilityIdentity
 import me.vangoo.mysteries.pathways.death.Death
 import me.vangoo.mysteries.pathways.door.Door
 import me.vangoo.mysteries.pathways.error.Error
@@ -35,6 +37,11 @@ object ModPathways {
     val all: Collection<Pathway> get() = byName.values
 
     val names: List<String> get() = byName.keys.toList()
+
+    /** Any pathway's ability by its identity — how a save names a power it cannot hold itself. */
+    fun ability(identity: AbilityIdentity): AbilitySpec? = all.asSequence()
+        .flatMap { pathway -> (0 until Pathway.SEQUENCE_COUNT).asSequence().flatMap(pathway::abilitiesFor) }
+        .firstOrNull { it.identity == identity }
 
     /** Case does not matter: pathway names travel in commands typed by hand. */
     fun byName(name: String): Pathway? =

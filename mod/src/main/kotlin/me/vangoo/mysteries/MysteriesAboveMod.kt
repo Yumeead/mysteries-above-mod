@@ -5,6 +5,8 @@ import me.vangoo.mysteries.ability.runtime.AbilityServices
 import me.vangoo.mysteries.pathways.error.abilities.ConceptualTheft
 import me.vangoo.mysteries.beyonder.AbilityRequests
 import me.vangoo.mysteries.beyonder.BeyonderStatus
+import me.vangoo.mysteries.beyonder.BeyonderStore
+import me.vangoo.mysteries.pathways.fool.abilities.PaperDolls
 import me.vangoo.mysteries.effect.ModParticles
 import me.vangoo.mysteries.effect.ModSounds
 import me.vangoo.mysteries.entity.ModEntities
@@ -55,6 +57,7 @@ object MysteriesAboveMod : ModInitializer {
         // Fool's "hold paper, right-click, throw" has no cast and no menu — same reasoning
         // as ConceptualTheft above, only the registry it defers to is the Beyonder's own list.
         PaperThrowTrigger.install()
+        PaperDolls.register()
 
         // Fool's threads: orders and possession are not casts, so they have their own channel and
         // their own clock rather than a place in the ability pipeline.
@@ -72,6 +75,10 @@ object MysteriesAboveMod : ModInitializer {
         // Death's world-level memory: every death leaves a trace, every servant is a saved mob,
         // the Underworld gives back whoever it holds — none of that waits for a cast.
         Death.install()
+
+        // Last on purpose: the handlers above still change a Beyonder on the way out (a
+        // Marionettist leaving their puppet), and the save must see the result.
+        BeyonderStore.install()
 
         ModChannels.STATUS_REQUEST.receiveOnServer { _, context ->
             val player = context.player()

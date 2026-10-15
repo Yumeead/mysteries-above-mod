@@ -21,7 +21,13 @@ import me.vangoo.mysteries.net.payload.MarionetteStatePayload
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents
 import me.vangoo.mysteries.net.payload.ThreadSightPayload
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
+import com.mojang.serialization.Codec
+import me.vangoo.mysteries.modId
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents
+import net.minecraft.core.UUIDUtil
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
@@ -84,8 +90,22 @@ object Marionettes {
     /** Which one the owner is commanding right now. */
     private val chosen = ConcurrentHashMap<UUID, UUID>()
 
-    /** Puppet → when it dies of being out of control, in wall-clock millis. */
-    private val stranded = ConcurrentHashMap<UUID, Long>()
+    /**
+     * A seized mob's owner, written with its chunk. Player-made puppets save their own
+     * ([MarionetteEntity.ownerId]); a mob is vanilla's, so the mark rides on it as an attachment.
+     * Lazy: Fabric registers attachments through a mixin, and unit tests have none.
+     */
+    private val PUPPET_OF: AttachmentType<UUID> by lazy {
+        AttachmentRegistry.create(modId("puppet_of")) { it.persistent(UUIDUtil.CODEC) }
+    }
+
+    /**
+     * When a puppet out of control dies, in wall-clock millis — on the puppet, so a restart or an
+     * unloaded chunk does not wind the ten minutes back.
+     */
+    private val STRANDED_UNTIL: AttachmentType<Long> by lazy {
+        AttachmentRegistry.create(modId("stranded_until")) { it.persistent(Codec.LONG) }
+    }
 
     /** A seized mob's standing order. [MarionetteEntity] keeps its own — it steers itself every tick. */
     private val mobOrders = ConcurrentHashMap<UUID, MarionetteEntity.Order>()
@@ -200,6 +220,7 @@ object Marionettes {
         mob.targetSelector.removeAllGoals { true }
         mob.setTarget(null)
         mob.setPersistenceRequired()
+        mob.setAttached(PUPPET_OF, owner.uuid)
         register(owner.uuid, mob)
     }
 
@@ -249,6 +270,24 @@ object Marionettes {
             AbilityServices.beyonders.of(victim.uuid)?.let { BeyonderStatus.pushRoster(victim) }
         }
         return puppet
+    }
+
+    /**
+     * A puppet back from disk — a loaded chunk or a restart. Goals are not saved, so a mob gets
+     * its will back on load and loses it again here; the selection and orders are left alone.
+     */
+    private fun adopt(puppet: LivingEntity) {
+        val ownerId = (puppet as? MarionetteEntity)?.takeIf { it.capture != null }?.ownerId
+            ?: puppet.getAttached(PUPPET_OF)
+            ?: return
+        (puppet as? Mob)?.let {
+            it.targetSelector.removeAllGoals { true }
+            it.target = null
+            // Saved mid-possession by a crash: a possession never survives a restart, its NoAI must not either.
+            it.isNoAi = false
+        }
+        val puppets = byOwner.computeIfAbsent(ownerId) { mutableListOf() }
+        if (puppets.none { it === puppet }) puppets += puppet
     }
 
     private fun register(ownerId: UUID, puppet: LivingEntity) {
@@ -494,8 +533,9 @@ object Marionettes {
     }
 
     /**
-     * A join with a stash still attached: the server went down mid-possession. The puppet and the
-     * vessel did not survive it (neither is saved), so the player simply gets their own back.
+     * A join with a stash still attached: the server went down mid-possession. The vessel did not
+     * survive it (it is never saved) and the puppet came back driverless, so the player simply gets
+     * their own back.
      */
     private fun restoreStashed(owner: ServerPlayer) {
         val stash = owner.getAttached(BodyStash.TYPE) ?: return
@@ -622,7 +662,7 @@ object Marionettes {
                         is MarionetteEntity.Order.Follow -> MarionetteStatePayload.Order.FOLLOWING
                         is MarionetteEntity.Order.Attack -> MarionetteStatePayload.Order.ATTACKING
                     },
-                    strandSeconds = stranded[puppet.uuid]?.let { ((it - now) / 1000L).coerceAtLeast(0L).toInt() } ?: 0,
+                    strandSeconds = puppet.getAttached(STRANDED_UNTIL)?.let { ((it - now) / 1000L).coerceAtLeast(0L).toInt() } ?: 0,
                     distance = if (owner.level() === puppet.level()) owner.distanceTo(puppet).toInt() else -1,
                 )
             },
@@ -636,6 +676,15 @@ object Marionettes {
 
     fun install() {
         BodyStash.register()
+        PUPPET_OF
+        STRANDED_UNTIL
+
+        // The registry is rebuilt from the world: whatever loads with a mark rejoins its owner's
+        // row, whatever unloads leaves it until it loads again.
+        ServerEntityEvents.ENTITY_LOAD.register { entity, _ -> (entity as? LivingEntity)?.let(::adopt) }
+        ServerEntityEvents.ENTITY_UNLOAD.register { entity, _ ->
+            byOwner.values.forEach { list -> list.removeIf { it === entity } }
+        }
         ModChannels.MARIONETTE_ORDER.receiveOnServer { payload, context -> handle(context.player(), payload) }
 
         // The status screen heads the list with the pathway the lent powers come from.
@@ -794,7 +843,7 @@ object Marionettes {
             }
 
             val deadline = System.currentTimeMillis()
-            puppets.filter { (stranded[it.uuid] ?: Long.MAX_VALUE) <= deadline }
+            puppets.filter { (it.getAttached(STRANDED_UNTIL) ?: Long.MAX_VALUE) <= deadline }
                 .forEach { it.kill(it.level() as ServerLevel) }
 
             // The row of threads is redrawn on the same beat the numbers on it change: health,
@@ -806,8 +855,8 @@ object Marionettes {
     }
 
     private fun strand(puppet: LivingEntity) {
-        if (stranded.containsKey(puppet.uuid)) return
-        stranded[puppet.uuid] = System.currentTimeMillis() + STRAND_MILLIS
+        if (puppet.hasAttached(STRANDED_UNTIL)) return
+        puppet.setAttached(STRANDED_UNTIL, System.currentTimeMillis() + STRAND_MILLIS)
         ownerOf(puppet)?.let { ownerId ->
             AbilityServices.messaging.tell(
                 ownerId,
@@ -817,7 +866,7 @@ object Marionettes {
     }
 
     private fun recover(puppet: LivingEntity, owner: ServerPlayer?) {
-        if (stranded.remove(puppet.uuid) == null) return
+        if (puppet.removeAttached(STRANDED_UNTIL) == null) return
         owner?.let {
             AbilityServices.messaging.tell(it, Component.literal("Нитка знову тримає: ${nameOf(puppet)}"))
         }
@@ -849,7 +898,6 @@ object Marionettes {
         val where = puppet.position()
 
         byOwner[ownerId]?.removeIf { it === puppet }
-        stranded.remove(puppet.uuid)
         mobOrders.remove(puppet.uuid)
         if (possessions[ownerId]?.puppet === puppet) {
             player(ownerId)?.let { eject(it, Component.literal("Маріонетку розбито — вас викинуло у власне тіло")) }
@@ -931,11 +979,10 @@ object Marionettes {
     fun nameOf(puppet: LivingEntity): String =
         (puppet as? MarionetteEntity)?.capture?.name ?: puppet.name.string
 
-    /** Server shutdown or a fresh world: puppets do not outlive the server that held them. */
+    /** Server shutdown or a fresh world. The puppets themselves are on disk and rejoin on load. */
     fun reset() {
         byOwner.clear()
         chosen.clear()
-        stranded.clear()
         mobOrders.clear()
         possessions.clear()
         weaves.clear()

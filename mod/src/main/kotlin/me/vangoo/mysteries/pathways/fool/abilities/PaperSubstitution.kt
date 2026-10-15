@@ -1,5 +1,6 @@
 package me.vangoo.mysteries.pathways.fool.abilities
 
+import com.mojang.serialization.Codec
 import me.vangoo.domain.valueobjects.AbilityIdentity
 import me.vangoo.domain.valueobjects.DollBatch
 import me.vangoo.domain.valueobjects.Sequence
@@ -10,6 +11,9 @@ import me.vangoo.mysteries.ability.context.EVENT_FOREVER
 import me.vangoo.mysteries.ability.context.Subscription
 import me.vangoo.mysteries.ability.context.on
 import me.vangoo.mysteries.event.IncomingDamage
+import me.vangoo.mysteries.modId
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType
 import net.minecraft.core.BlockPos
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.chat.Component
@@ -38,7 +42,6 @@ class PaperSubstitution : ActiveAbility(AbilityIdentity.of("fool_paper_substitut
 
     override fun cooldownSeconds(sequence: Sequence): Int = BASE_COOLDOWN_SECONDS
 
-    private val dollCount = ConcurrentHashMap<UUID, Int>()
     private val protecting = ConcurrentHashMap.newKeySet<UUID>()
     private val absorbSubscriptions = ConcurrentHashMap<UUID, Subscription>()
 
@@ -59,7 +62,7 @@ class PaperSubstitution : ActiveAbility(AbilityIdentity.of("fool_paper_substitut
             chime(context, SoundEvents.IRON_DOOR_CLOSE, 1.4f)
             return AbilityOutcome.failed("Захист вимкнено")
         }
-        if (dollCount.getOrDefault(casterId, 0) <= 0) {
+        if (dollsOf(context) <= 0) {
             context.messaging.actionBar(context.caster, Component.literal("📜 Немає ляльок — спершу складіть партію"))
             return AbilityOutcome.failed("Немає ляльок")
         }
@@ -70,7 +73,7 @@ class PaperSubstitution : ActiveAbility(AbilityIdentity.of("fool_paper_substitut
             if (damage.victim.uuid != casterId || damage.amount < DollBatch.DAMAGE_THRESHOLD) return@on
             if (absorb(context)) damage.cancel()
         }
-        context.messaging.actionBar(context.caster, Component.literal("📜 Захист увімкнено (${dollCount[casterId]} ляльок)"))
+        context.messaging.actionBar(context.caster, Component.literal("📜 Захист увімкнено (${dollsOf(context)} ляльок)"))
         chime(context, SoundEvents.BEACON_ACTIVATE, 1.5f)
         return AbilityOutcome.failed("Захист увімкнено")
     }
@@ -78,7 +81,7 @@ class PaperSubstitution : ActiveAbility(AbilityIdentity.of("fool_paper_substitut
     private fun craftBatch(context: CastContext): AbilityOutcome {
         val casterId = context.caster.uuid
         val max = DollBatch.maxStored(context.sequence)
-        val current = dollCount.getOrDefault(casterId, 0)
+        val current = dollsOf(context)
         if (current >= max) return AbilityOutcome.failed("Ви вже накопичили максимум ляльок ($max)")
 
         val added = minOf(DollBatch.dollsPerCast(context.sequence), max - current)
@@ -88,7 +91,7 @@ class PaperSubstitution : ActiveAbility(AbilityIdentity.of("fool_paper_substitut
         }
 
         PaperInventory.consume(context.caster, paperNeeded)
-        dollCount[casterId] = current + added
+        context.caster.setAttached(PaperDolls.TYPE, current + added)
 
         craftAnimation(context)
         context.messaging.actionBar(context.caster, Component.literal("📜 Складено $added ляльок (усього ${current + added})"))
@@ -98,11 +101,11 @@ class PaperSubstitution : ActiveAbility(AbilityIdentity.of("fool_paper_substitut
     /** @return true if a doll took the hit. */
     private fun absorb(context: CastContext): Boolean {
         val casterId = context.caster.uuid
-        var dolls = dollCount.getOrDefault(casterId, 0)
+        var dolls = dollsOf(context)
         if (casterId !in protecting || dolls <= 0) return false
 
         dolls--
-        dollCount[casterId] = dolls
+        context.caster.setAttached(PaperDolls.TYPE, dolls)
         val origin = context.caster.position()
         scatter(context, origin)
 
@@ -162,8 +165,24 @@ class PaperSubstitution : ActiveAbility(AbilityIdentity.of("fool_paper_substitut
         context.level.playSound(null, at.x, at.y, at.z, sound, SoundSource.PLAYERS, 1.0f, pitch)
     }
 
+    private fun dollsOf(context: CastContext): Int = context.caster.getAttachedOrElse(PaperDolls.TYPE, 0)
+
     private companion object {
+
         const val BASE_COST = 60
         const val BASE_COOLDOWN_SECONDS = 8
+    }
+}
+
+/** How many dolls a Magician has folded — paper already spent, so it is saved with the player. */
+object PaperDolls {
+    // Lazy: Fabric registers attachments through a mixin, and unit tests have none.
+    val TYPE: AttachmentType<Int> by lazy {
+        AttachmentRegistry.create(modId("paper_dolls")) { it.persistent(Codec.INT).copyOnDeath() }
+    }
+
+    /** At mod init: an attachment unknown when a player loads is dropped from their save. */
+    fun register() {
+        TYPE
     }
 }

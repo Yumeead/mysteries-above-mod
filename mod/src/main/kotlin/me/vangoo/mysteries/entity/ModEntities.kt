@@ -17,7 +17,7 @@ object ModEntities {
     /**
      * Fool, Seq. 5: a body someone else walks in.
      *
-     * `noSave()` on purpose — see [MarionetteEntity]. `noSummon()` keeps it out of `/summon` and
+     * Saved with its chunk, but only as a real puppet — see [MarionetteEntity]. `noSummon()` keeps it out of `/summon` and
      * out of spawn eggs: a puppet with no owner and no face is not a thing the game should be
      * able to make on its own.
      */
@@ -25,7 +25,6 @@ object ModEntities {
         EntityType.Builder.of(::MarionetteEntity, MobCategory.MISC)
             .sized(0.6f, 1.8f)
             .eyeHeight(Avatar.DEFAULT_EYE_HEIGHT)
-            .noSave()
             .noSummon()
             .clientTrackingRange(TRACKING_CHUNKS)
             .build(key)

@@ -1,6 +1,8 @@
 package me.vangoo.mysteries.world
 
 import me.vangoo.mysteries.modId
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.minecraft.core.BlockPos
 import net.minecraft.core.registries.Registries
@@ -11,7 +13,6 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.level.GameType
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.levelgen.Heightmap
-import java.util.UUID
 import kotlin.math.floor
 
 /**
@@ -56,7 +57,7 @@ object SpiritWorld {
      * (`GameType.updatePlayerAbilities`), so flight is granted after it, not before.
      */
     fun enter(player: ServerPlayer, spirit: ServerLevel) {
-        modes.putIfAbsent(player.uuid, player.gameMode())
+        if (!player.hasAttached(RETURN_MODE)) player.setAttached(RETURN_MODE, player.gameMode())
         place(player, spirit)
         player.setGameMode(GameType.ADVENTURE)
         player.abilities.mayfly = true
@@ -67,9 +68,9 @@ object SpiritWorld {
     /** Takes the player back to [home] — again to the same X/Z, in their own mode and their own weight. */
     fun leave(player: ServerPlayer, home: ServerLevel) {
         place(player, home)
-        // The server's mode is a fallback for exactly one case: the server was restarted while
-        // the player was in the white, and the memory of their mode did not survive it.
-        player.setGameMode(modes.remove(player.uuid) ?: home.server.defaultGameType)
+        // The mode is saved with the player, so a restart mid-journey still brings back their own;
+        // the server's default only covers a player who somehow never entered through [enter].
+        player.setGameMode(player.removeAttached(RETURN_MODE) ?: home.server.defaultGameType)
         player.abilities.flying = false
         player.abilities.setFlyingSpeed(VANILLA_FLY_SPEED)
         player.onUpdateAbilities()
@@ -128,6 +129,7 @@ object SpiritWorld {
      * session goes out together with their connection, and there is nobody left to bring them back.
      */
     fun guardStranded() {
+        RETURN_MODE
         ServerPlayConnectionEvents.JOIN.register { handler, _, server ->
             val player = handler.player
             if (holds(player)) leave(player, server.overworld())
@@ -141,13 +143,13 @@ object SpiritWorld {
     }
 
     /**
-     * Whose mode to restore when the player leaves.
-     *
-     * It lives purely in the server's memory: a journey is shorter than that, and a player who
-     * left the game in the middle of one is brought back by [guardStranded] — with the server's
-     * mode by then.
+     * The mode to restore when the player leaves — on the player and saved with them, so a player
+     * who left the game mid-journey is brought back by [guardStranded] in their own mode.
+     * Lazy: Fabric registers attachments through a mixin, and unit tests have none.
      */
-    private val modes = HashMap<UUID, GameType>()
+    private val RETURN_MODE: AttachmentType<GameType> by lazy {
+        AttachmentRegistry.create(modId("spirit_world_return_mode")) { it.persistent(GameType.CODEC) }
+    }
 
     /** How many speed notches the wheel gives: exactly as many as there are hotbar slots. */
     private const val NOTCHES = 9

@@ -4,6 +4,7 @@ import me.vangoo.mysteries.MOD_ID
 import me.vangoo.mysteries.ability.AbilityExecutor
 import me.vangoo.mysteries.beyonder.AbilityStatePump
 import me.vangoo.mysteries.beyonder.BeyonderStatus
+import me.vangoo.mysteries.beyonder.BeyonderStore
 import me.vangoo.mysteries.beyonder.TheftRegistry
 import net.minecraft.network.chat.Component
 import me.vangoo.mysteries.event.AbilityCast
@@ -136,10 +137,11 @@ object AbilityServices {
             if (s.tickCount % THEFT_SWEEP_TICKS == 0) TheftRegistry.sweep(revoke = ::takeBackStolen)
         }
 
-        // Joining a world: permanent passives will not switch themselves on. Until phase 09 the
-        // registry is empty at startup, so this only fires for those the potion filled this session.
+        // Joining a world: the saved Beyonder comes back first, then its passives switch on —
+        // they will not do that by themselves.
         ServerPlayConnectionEvents.JOIN.register { handler, _, _ ->
             val player = handler.player
+            BeyonderStore.load(player)
             passives.activate(player)
             // The client has no other way of learning the ability list: the roster flies on
             // change, and joining a world is a change from "nothing" to "here is what there is".

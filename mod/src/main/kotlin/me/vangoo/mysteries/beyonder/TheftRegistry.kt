@@ -1,6 +1,10 @@
 package me.vangoo.mysteries.beyonder
 
+import com.mojang.serialization.Codec
+import com.mojang.serialization.codecs.RecordCodecBuilder
 import me.vangoo.domain.valueobjects.AbilityIdentity
+import net.minecraft.core.UUIDUtil
+import java.util.Optional
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -39,13 +43,11 @@ import java.util.concurrent.ConcurrentHashMap
  * Sessions and toggles the victim had already started keep running: the `if` gates **new**
  * casts only. That is the correct behaviour by construction, not by extra code.
  *
- * ## Not persisted — yet, and that is consistent
+ * ## Saved with the world
  *
- * In the plugin this registry had to be a file, because a stolen ability was persisted on its
- * own and without the timer it stayed with the thief forever. Here nothing persists at all: a
- * restart takes everyone's Beyonder status with it, so a theft dying alongside is not a hole.
- * Phase 09 stores this the same way it stores everything else — the shape above is already the
- * one a save wants, so nothing here changes when it lands.
+ * [CODEC] writes the whole registry; `BeyonderStore` keeps it on the overworld. The stolen power
+ * itself is never saved with the thief — it is handed back on join while the record still holds
+ * it, so a theft can only ever end by its own clock, never by being written down twice.
  */
 object TheftRegistry {
 
@@ -71,10 +73,10 @@ object TheftRegistry {
          * terms — nobody outside Error should need to know its balance numbers.
          */
         var expiresAt: Long = expiresAt
-            private set
+            internal set
 
         var firstUsedAt: Long? = null
-            private set
+            internal set
 
         internal fun use(now: Long) {
             if (activeHold <= 0 || firstUsedAt != null) return
@@ -88,6 +90,33 @@ object TheftRegistry {
     }
 
     private val byThief = ConcurrentHashMap<UUID, Theft>()
+
+    val CODEC: Codec<List<Theft>> = RecordCodecBuilder.create<Theft> { row ->
+        row.group(
+            UUIDUtil.CODEC.fieldOf("thief").forGetter(Theft::thiefId),
+            UUIDUtil.CODEC.fieldOf("victim").forGetter(Theft::victimId),
+            Codec.STRING.fieldOf("identity").forGetter { it.identity.id },
+            Codec.LONG.fieldOf("stolen_at").forGetter(Theft::stolenAt),
+            Codec.LONG.fieldOf("expires_at").forGetter(Theft::expiresAt),
+            Codec.LONG.fieldOf("suppression_ends_at").forGetter(Theft::suppressionEndsAt),
+            Codec.LONG.fieldOf("active_hold").forGetter(Theft::activeHold),
+            Codec.LONG.optionalFieldOf("first_used_at").forGetter { Optional.ofNullable(it.firstUsedAt) },
+            Codec.BOOL.fieldOf("revoked").forGetter(Theft::revoked),
+        ).apply(row) { thief, victim, identity, stolenAt, expiresAt, suppressionEndsAt, activeHold, firstUsedAt, revoked ->
+            Theft(thief, victim, AbilityIdentity.of(identity), stolenAt, expiresAt, suppressionEndsAt, activeHold).also {
+                it.firstUsedAt = firstUsedAt.orElse(null)
+                it.revoked = revoked
+            }
+        }
+    }.listOf()
+
+    fun snapshot(): List<Theft> = byThief.values.toList()
+
+    /** A fresh server: the saved records replace whatever the last one left. */
+    fun restore(thefts: List<Theft>) {
+        byThief.clear()
+        thefts.forEach { byThief[it.thiefId] = it }
+    }
 
     /** Whether this thief's single slot is taken. */
     fun heldBy(thiefId: UUID): Theft? = byThief[thiefId]

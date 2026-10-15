@@ -13,6 +13,7 @@ import me.vangoo.mysteries.ability.context.on
 import me.vangoo.mysteries.beyonder.BeyonderStatus
 import me.vangoo.mysteries.effect.ModParticles
 import me.vangoo.mysteries.event.AbilityCast
+import me.vangoo.mysteries.pathways.ModPathways
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
@@ -153,7 +154,7 @@ class Record : ActiveAbility(AbilityIdentity.of("door_record")) {
      * power the donor has.
      */
     private class OneShot(private val inner: ActiveAbility) :
-        ActiveAbility(AbilityIdentity.of("door_recorded_${inner.identity.id}")) {
+        ActiveAbility(AbilityIdentity.of("$PAGE_PREFIX${inner.identity.id}")) {
 
         override val displayName: Component =
             Component.literal("${inner.displayName.string} (запис)")
@@ -185,11 +186,21 @@ class Record : ActiveAbility(AbilityIdentity.of("door_record")) {
         }
     }
 
-    private companion object {
-        const val RANGE = 15.0
-        const val COOLDOWN_SECONDS = 60
-        const val WATCH_TICKS = 10 * TICKS_PER_SECOND
-        val FORBIDDEN = setOf(
+    companion object {
+        private const val RANGE = 15.0
+        private const val COOLDOWN_SECONDS = 60
+        private const val WATCH_TICKS = 10 * TICKS_PER_SECOND
+        private const val PAGE_PREFIX = "door_recorded_"
+
+        fun isPage(spec: AbilitySpec): Boolean = spec is OneShot
+
+        /** A saved page, written again around whatever power it recorded — the notebook outlives a restart. */
+        fun page(identity: AbilityIdentity): AbilitySpec? {
+            val recorded = identity.id.removePrefix(PAGE_PREFIX).takeIf { it != identity.id } ?: return null
+            return (ModPathways.ability(AbilityIdentity.of(recorded)) as? ActiveAbility)?.let(::OneShot)
+        }
+
+        private val FORBIDDEN = setOf(
             "door_record",
             "whitetower_analysis",
             "whitetower_spellcasting",

@@ -1,5 +1,6 @@
 package me.vangoo.mysteries.beyonder
 
+import com.mojang.serialization.JsonOps
 import me.vangoo.domain.valueobjects.AbilityIdentity
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -112,5 +113,24 @@ class TheftRegistryTest {
 
         assertNull(TheftRegistry.heldBy(thief))
         assertFalse(TheftRegistry.isSuppressed(victim, power, start))
+    }
+
+    @Test
+    @DisplayName("Збережений реєстр після рестарту тримає ті самі строки, що й до нього")
+    fun savedRegistrySurvivesARestart() {
+        TheftRegistry.steal(thief, victim, power, hold, suppression, now = start, activeHold = 60_000)
+        TheftRegistry.markUsed(thief, power, now = start + 5_000)
+        TheftRegistry.sweep(now = start + 70_000) { }
+
+        val json = TheftRegistry.CODEC.encodeStart(JsonOps.INSTANCE, TheftRegistry.snapshot()).getOrThrow()
+        TheftRegistry.reset()
+        TheftRegistry.restore(TheftRegistry.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow())
+
+        val back = TheftRegistry.heldBy(thief)!!
+        assertEquals(power, back.identity)
+        assertEquals(start + 65_000, back.expiresAt)
+        assertEquals(start + 5_000, back.firstUsedAt)
+        assertTrue(back.revoked)
+        assertTrue(TheftRegistry.isSuppressed(victim, power, start + hold))
     }
 }

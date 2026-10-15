@@ -101,6 +101,7 @@ object Ascension {
         AbilityServices.cooldowns.forget(player.uuid)
         AbilityServices.selection.forget(player.uuid)
         AbilityServices.beyonders.forget(player.uuid)
+        BeyonderStore.erase(player)
         AbilityServices.statePump.forget(player.uuid)
         BeyonderStatus.push(player)
         // An empty roster **is** the message "you are no longer a Beyonder": no state flies
