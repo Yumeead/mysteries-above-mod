@@ -70,7 +70,7 @@ class AbilityGroup(
  * about how the player works, not what they may do. A hotkey is a shortcut to an identity, not a
  * right to cast it: the server verifies the identity it is sent the same way it would any other.
  *
- * Groups and hotkeys are edited in `AbilityBookScreen`; the rest is the file for now (M7).
+ * Groups and hotkeys are edited in `AbilityBookScreen`; the rest lives in the file only.
  */
 object ClientOptions {
 
@@ -88,7 +88,7 @@ object ClientOptions {
 
     var anchor: HudAnchor by persisted(HudAnchor.LEFT_CENTER)
 
-    /** A multiplier on top of the vanilla `guiScale`. */
+    /** A multiplier on top of the vanilla `guiScale`, for the HUD and the wheel alike. */
     var hudScale: Float by persisted(1.0f) { it.coerceIn(MIN_SCALE, MAX_SCALE) }
 
     /** Panel opacity: 0 — invisible, 1 — solid. */
@@ -106,6 +106,7 @@ object ClientOptions {
 
     var showDescriptions: Boolean by persisted(true)
 
+    /** Turns the HUD fade into an instant switch; the cooldown veil stays, it shows state. */
     var reducedMotion: Boolean by persisted(false)
 
     /** Index 0 is always the built-in "all" group. */

@@ -119,7 +119,8 @@ object AbilityHud : HudElement {
         }
 
         val awake = ClientOptions.hud == HudMode.ALWAYS || idleTicks < IDLE_TICKS
-        fade = approach(fade, if (awake) 1f else 0f, 1f / FADE_TICKS)
+        val step = if (ClientOptions.reducedMotion) 1f else 1f / FADE_TICKS
+        fade = approach(fade, if (awake) 1f else 0f, step)
     }
 
     private fun shouldShow(client: Minecraft): Boolean =
@@ -152,8 +153,9 @@ object AbilityHud : HudElement {
         val entry = signature.identity?.let(ClientAbilityState::entry)
 
         val name = entry?.name ?: Component.translatable("hud.$MOD_ID.no_selection")
-        val price = entry?.let(::priceOf)
         val priceCritical = entry != null && entry.type == AbilityType.ACTIVE && !signature.affordable
+        // A shape as well as a colour, the same mark as the wheel's: readable without colour at all.
+        val price = entry?.let(::priceOf)?.let { if (priceCritical) Component.literal("✕ ").append(it) else it }
 
         val marker = when {
             signature.toggled -> Component.literal("●")

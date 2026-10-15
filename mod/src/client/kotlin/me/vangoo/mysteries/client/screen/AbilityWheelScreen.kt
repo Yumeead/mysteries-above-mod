@@ -94,21 +94,48 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
     // ── Input ───────────────────────────────────────────────────────────────────
 
     override fun mouseMoved(mouseX: Double, mouseY: Double) {
-        val picked = WheelLayout.pick(
-            mouseX - centerX,
-            mouseY - centerY,
+        // The wheel is drawn scaled about its centre, so the cursor is measured in the same units.
+        val scale = ClientOptions.hudScale
+        hover(WheelLayout.pick(
+            (mouseX - centerX) / scale,
+            (mouseY - centerY) / scale,
             onPage().size,
             ClientOptions.wheelDeadZoneRatio,
-        )
-        if (picked != hovered) {
-            hovered = picked
-            updateCaption()
-        }
+        ))
     }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, scrollX: Double, scrollY: Double): Boolean {
-        if (pages.size <= 1 || scrollY == 0.0) return false
-        page = Math.floorMod(page + if (scrollY < 0) 1 else -1, pages.size)
+        if (scrollY == 0.0) return false
+        return flip(if (scrollY < 0) 1 else -1)
+    }
+
+    /**
+     * The wheel without a mouse: left and right walk the ring, up and down turn the page, Enter uses
+     * the card. Escape is the vanilla close — the same as letting go in the centre.
+     */
+    override fun keyPressed(event: KeyEvent): Boolean {
+        val size = onPage().size
+        when {
+            event.isRight && size > 0 -> hover(Math.floorMod(hovered + 1, size))
+            event.isLeft && size > 0 -> hover(Math.floorMod(if (hovered < 0) -1 else hovered - 1, size))
+            event.isDown -> flip(1)
+            event.isUp -> flip(-1)
+            event.isConfirmation -> commit()
+            else -> return super.keyPressed(event)
+        }
+        return true
+    }
+
+    private fun hover(index: Int) {
+        if (index == hovered) return
+        hovered = index
+        updateCaption()
+    }
+
+    /** Next or previous page; the group of the page becomes the active one, its hotkeys with it. */
+    private fun flip(step: Int): Boolean {
+        if (pages.size <= 1) return false
+        page = Math.floorMod(page + step, pages.size)
         ClientOptions.activeGroup = pages[page].group
         hovered = -1
         updateCaption()
@@ -219,6 +246,13 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
     override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, partialTick: Float) {
         val alpha = ClientOptions.opacity
 
+        // The same size multiplier as the HUD, applied about the wheel's centre.
+        val scale = ClientOptions.hudScale
+        graphics.pose().pushMatrix()
+        graphics.pose().translate(centerX.toFloat(), centerY.toFloat())
+        graphics.pose().scale(scale, scale)
+        graphics.pose().translate(-centerX.toFloat(), -centerY.toFloat())
+
         // Pass one: panels and icons.
         for (card in cards) {
             val x = centerX + card.dx - CARD / 2
@@ -259,6 +293,8 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
             val color = if (line == 0 && hovered >= 0) UiTheme.TEXT else UiTheme.MUTED
             graphics.centeredText(font, text, centerX, ringBottom + line * (font.lineHeight + 1), UiTheme.argb(color, alpha))
         }
+
+        graphics.pose().popMatrix()
     }
 
     private companion object {
