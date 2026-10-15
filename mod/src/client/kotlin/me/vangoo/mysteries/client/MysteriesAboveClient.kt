@@ -15,7 +15,6 @@ import me.vangoo.mysteries.client.hud.MarionetteHud
 import me.vangoo.mysteries.client.hud.SpiritualityHud
 import me.vangoo.mysteries.client.input.ModKeys
 import me.vangoo.mysteries.client.net.receiveOnClient
-import me.vangoo.mysteries.client.screen.BeyonderStatusScreen
 import me.vangoo.mysteries.net.ModChannels
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
@@ -37,20 +36,8 @@ object MysteriesAboveClient : ClientModInitializer {
         // something that already exists.
         ClientOptions.load()
 
-        ModChannels.BEYONDER_STATUS.receiveOnClient { payload, context ->
-            // Fresh state updates an open screen in place; if there is no screen, it opens one.
-            // That way a single response serves both `/mysteries status` and the "Оновити" button.
-            // On 26.2 the current screen lives on Gui rather than on Minecraft:
-            // Minecraft.screen is gone, only gui.screen()/gui.setScreen() remain.
-            val gui = context.client().gui
-            when (val screen = gui.screen()) {
-                is BeyonderStatusScreen -> screen.update(payload)
-                else -> gui.setScreen(BeyonderStatusScreen(payload))
-            }
-        }
-
-        // Both snapshots land in the client store and nowhere else: the HUD draws from it, and
-        // from M4 the wheel will too.
+        // Both snapshots land in the client store and nowhere else: the HUD, the wheel and the
+        // book all draw from it.
         ModChannels.ABILITY_ROSTER.receiveOnClient { payload, _ -> ClientAbilityState.accept(payload) }
         ModChannels.ABILITY_STATE.receiveOnClient { payload, _ -> ClientAbilityState.accept(payload) }
 

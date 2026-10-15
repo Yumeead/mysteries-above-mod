@@ -10,6 +10,7 @@ import me.vangoo.mysteries.ability.context.Events
 import me.vangoo.mysteries.ability.context.Messaging
 import me.vangoo.mysteries.ability.context.Scheduling
 import me.vangoo.mysteries.ability.context.Targeting
+import me.vangoo.mysteries.ability.runtime.AbilityModes
 import me.vangoo.mysteries.ability.runtime.PendingChoices
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
@@ -94,6 +95,7 @@ interface AbilityContext {
     val events: Events
     val effects: Effects
     val pendingChoices: PendingChoices
+    val modes: AbilityModes
 }
 
 /**

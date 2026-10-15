@@ -3,11 +3,8 @@ package me.vangoo.mysteries.net
 import me.vangoo.mysteries.net.payload.AbilityActionPayload
 import me.vangoo.mysteries.net.payload.AbilityRosterPayload
 import me.vangoo.mysteries.net.payload.AbilityStatePayload
-import me.vangoo.mysteries.net.payload.BeyonderStatusPayload
-import me.vangoo.mysteries.net.payload.CastRequestPayload
 import me.vangoo.mysteries.net.payload.MarionetteOrderPayload
 import me.vangoo.mysteries.net.payload.MarionetteStatePayload
-import me.vangoo.mysteries.net.payload.StatusRequestPayload
 import me.vangoo.mysteries.net.payload.ThreadSightPayload
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.StreamCodec
@@ -29,18 +26,6 @@ object ModChannels {
 
     private val declared = mutableListOf<Channel<*>>()
     private var registered = false
-
-    /** The server hands the Beyonder's state to the client. */
-    val BEYONDER_STATUS: ClientboundChannel<BeyonderStatusPayload> =
-        clientbound(BeyonderStatusPayload.TYPE, BeyonderStatusPayload.CODEC)
-
-    /** The client asks the server to re-read the state. */
-    val STATUS_REQUEST: ServerboundChannel<StatusRequestPayload> =
-        serverbound(StatusRequestPayload.TYPE, StatusRequestPayload.CODEC)
-
-    /** The cast key: the client pulled the trigger, the server picks the ability. */
-    val CAST_REQUEST: ServerboundChannel<CastRequestPayload> =
-        serverbound(CastRequestPayload.TYPE, CastRequestPayload.CODEC)
 
     /**
      * The rare snapshot: the ability list, their descriptions, costs and icons.

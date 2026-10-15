@@ -1,5 +1,6 @@
 package me.vangoo.mysteries.pathways.death.abilities
 
+import me.vangoo.mysteries.ability.AbilityMode
 import me.vangoo.domain.valueobjects.AbilityIdentity
 import me.vangoo.domain.valueobjects.GatekeeperLore
 import me.vangoo.domain.valueobjects.Sequence
@@ -66,7 +67,8 @@ class DoorToTheUnderworld : ActiveAbility(AbilityIdentity.of("death_door_to_the_
 
     override fun cooldownSeconds(sequence: Sequence): Int = GatekeeperLore.doorCooldownSeconds(sequence)
 
-    private val modes = HashMap<UUID, Mode>()
+    override fun modes(sequence: Sequence): List<AbilityMode> =
+        Mode.entries.map { AbilityMode(it.name.lowercase(), Component.literal(it.title)) }
 
     override fun description(sequence: Sequence): Component = Component.literal(
         "Ви ставите двері до Загробного Світу туди, куди дивитесь (до ${GatekeeperLore.doorPlacementRange(sequence).toInt()} бл.), на $GATE_SECONDS с.\n" +
@@ -82,13 +84,12 @@ class DoorToTheUnderworld : ActiveAbility(AbilityIdentity.of("death_door_to_the_
     override fun cast(context: CastContext): AbilityOutcome {
         val caster = context.caster
         if (caster.isShiftKeyDown) {
-            val next = Mode.entries[((modes[caster.uuid] ?: Mode.DRAG).ordinal + 1) % Mode.entries.size]
-            modes[caster.uuid] = next
+            val next = context.modes.cycle(caster.uuid, this, context.sequence)
             context.level.playSound(null, caster.x, caster.y, caster.z, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.6f, 1.4f)
-            return AbilityOutcome.Awaiting(Component.literal("Двері: режим «${next.title}»"))
+            return AbilityOutcome.Awaiting(Component.literal("Двері: режим «${next?.name?.string}»"))
         }
 
-        val mode = modes[caster.uuid] ?: Mode.DRAG
+        val mode = Mode.entries.firstOrNull { it.name.lowercase() == mode(context) } ?: Mode.DRAG
         val range = GatekeeperLore.doorPlacementRange(context.sequence)
         val hit = caster.pick(range, 1.0f, false)
         val base = if (hit.type == HitResult.Type.BLOCK) hit.location else context.eye.add(context.look.scale(range))

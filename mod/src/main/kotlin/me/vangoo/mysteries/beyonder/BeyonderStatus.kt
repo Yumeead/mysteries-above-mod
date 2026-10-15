@@ -2,12 +2,12 @@ package me.vangoo.mysteries.beyonder
 
 import me.vangoo.domain.PathwayBranding
 import me.vangoo.domain.entities.Beyonder
+import me.vangoo.domain.entities.Pathway
 import me.vangoo.mysteries.ability.Ability
 import me.vangoo.mysteries.ability.runtime.AbilityServices
 import me.vangoo.mysteries.net.ModChannels
 import me.vangoo.mysteries.net.payload.AbilityRosterPayload
 import me.vangoo.mysteries.net.payload.AbilityStatePayload
-import me.vangoo.mysteries.net.payload.BeyonderStatusPayload
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
@@ -30,28 +30,13 @@ object BeyonderStatus {
 
     // ── Snapshots ───────────────────────────────────────────────────────────────
 
-    fun snapshot(player: ServerPlayer): BeyonderStatusPayload {
-        val beyonder = AbilityServices.beyonders.of(player.uuid)
-            ?: return BeyonderStatusPayload(null)
-
-        return BeyonderStatusPayload(
-            BeyonderStatusPayload.Beyonder(
-                pathwayId = beyonder.pathway.name,
-                sequence = beyonder.sequence,
-                spirituality = beyonder.spirituality,
-                worn = wornBody(player.uuid),
-            ),
-        )
-    }
-
     /**
      * The body a player is wearing, if any — set by the Marionettist's plumbing at install.
      *
-     * A lambda rather than a call into `pathways/fool`: the status snapshot belongs to every
-     * Beyonder, and possession is one pathway's business. The same seam `PassiveTicker` uses for
-     * toggle state.
+     * A lambda rather than a call into `pathways/fool`: the roster belongs to every Beyonder, and
+     * possession is one pathway's business. The same seam `PassiveTicker` uses for toggle state.
      */
-    var wornBody: (java.util.UUID) -> BeyonderStatusPayload.Worn? = { null }
+    var wornBody: (java.util.UUID) -> AbilityRosterPayload.Worn? = { null }
 
     /**
      * The ability list with everything the menu needs. The numbers are already computed for the
@@ -77,6 +62,7 @@ object BeyonderStatus {
                 entries = beyonder.abilities
                     .filterIsInstance<Ability>()
                     .map { entryOf(it, beyonder) },
+                worn = wornBody(beyonder.playerId),
             ),
         )
     }
@@ -95,18 +81,15 @@ object BeyonderStatus {
                 val readyAtTick = AbilityServices.cooldowns.readyAtTick(owner, spec.identity)
                 val toggled = AbilityServices.passives.isEnabled(owner, spec.identity)
                 val sustaining = AbilityServices.scheduling.isRunning(owner, spec.identity)
-                // Ready, switched off and not running — there is nothing to say about it.
-                if (readyAtTick == 0 && !toggled && !sustaining) return@mapNotNull null
-                AbilityStatePayload.Live(spec.identity.id, readyAtTick, toggled, sustaining)
+                val mode = (spec as? Ability)?.let { AbilityServices.modes.of(owner, it, beyonder.sequence) }?.id
+                // Ready, switched off, not running and one-way — there is nothing to say about it.
+                if (readyAtTick == 0 && !toggled && !sustaining && mode == null) return@mapNotNull null
+                AbilityStatePayload.Live(spec.identity.id, readyAtTick, toggled, sustaining, mode)
             },
         )
     }
 
     // ── Sending ─────────────────────────────────────────────────────────────────
-
-    fun push(player: ServerPlayer) {
-        ModChannels.BEYONDER_STATUS.sendTo(listOf(player), snapshot(player))
-    }
 
     /** The ability list changed: a potion, an ascension, a demotion, joining a world, `forget`. */
     fun pushRoster(player: ServerPlayer) {
@@ -132,7 +115,22 @@ object BeyonderStatus {
             upkeep = ability.periodicCost(sequence),
             cooldownSeconds = ability.cooldownSeconds(sequence),
             icon = tinted(ability.icon, beyonder.pathway.name),
+            modes = ability.modes(sequence).map { AbilityRosterPayload.Mode(it.id, it.name) },
+            origin = originOf(ability, beyonder),
         )
+    }
+
+    /**
+     * The Sequence a power first appears at on the owner's pathway — Seq. 9 for one carried up
+     * from the start, even if a later Sequence replaced it with a stronger version. A stolen or
+     * lent power is not on the pathway at all and has no origin.
+     */
+    private fun originOf(ability: Ability, beyonder: Beyonder): AbilityRosterPayload.Origin? {
+        val pathway = beyonder.pathway
+        val level = (Pathway.SEQUENCE_COUNT - 1 downTo 0).firstOrNull { level ->
+            pathway.abilitiesFor(level).any { it.identity == ability.identity }
+        } ?: return null
+        return AbilityRosterPayload.Origin(level, pathway.sequenceName(level))
     }
 
     /**

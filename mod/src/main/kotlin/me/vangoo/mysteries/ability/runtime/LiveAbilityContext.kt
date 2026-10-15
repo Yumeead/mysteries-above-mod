@@ -33,6 +33,7 @@ class AbilityContexts(
     private val scheduling: Scheduling,
     private val eventHub: EventHub,
     private val pendingChoices: PendingChoices,
+    private val modes: AbilityModes,
 ) {
 
     /** A context with no ticket: a passive's tick, switching a toggle on, a player joining and leaving. */
@@ -42,7 +43,7 @@ class AbilityContexts(
             beyonders, cooldowns, messaging, scheduling,
             LiveTargeting(caster), eventHub.scopeOf(caster.uuid, ability.identity),
             LiveEffects.of(scheduling, beyonder.pathway.name),
-            pendingChoices,
+            pendingChoices, modes,
         )
 
     /** The context of one cast: it lives exactly as long as the `cast` call. */
@@ -57,7 +58,7 @@ class AbilityContexts(
             beyonders, cooldowns, messaging, scheduling,
             LiveTargeting(caster), eventHub.scopeOf(caster.uuid, ability.identity),
             LiveEffects.of(scheduling, beyonder.pathway.name),
-            pendingChoices,
+            pendingChoices, modes,
         )
 }
 
@@ -73,6 +74,7 @@ internal class LiveAbilityContext(
     override val events: Events,
     override val effects: Effects,
     override val pendingChoices: PendingChoices,
+    override val modes: AbilityModes,
 ) : AbilityContext
 
 internal class LiveCastContext(
@@ -88,4 +90,5 @@ internal class LiveCastContext(
     override val events: Events,
     override val effects: Effects,
     override val pendingChoices: PendingChoices,
+    override val modes: AbilityModes,
 ) : CastContext

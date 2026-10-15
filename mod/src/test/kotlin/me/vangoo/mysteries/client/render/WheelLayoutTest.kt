@@ -63,4 +63,37 @@ class WheelLayoutTest {
         assertEquals(WheelLayout.WIDE_RADIUS, -WheelLayout.offset(0, 12)[1])
         assertEquals(WheelLayout.RADIUS, -WheelLayout.offset(0, 8)[1])
     }
+
+    @Test
+    fun modeColumnStandsAwayFromTheCentre() {
+        val right = WheelLayout.modeColumn(80, 0, 24, intArrayOf(40, 30))
+        assertEquals(80 + 12 + WheelLayout.MODE_OFFSET, right[0][0])
+        // Two pills of 12 with a gap of 2: 26 tall, centred on the card.
+        assertEquals(-13, right[0][1])
+        assertEquals(-13 + 14, right[1][1])
+
+        val left = WheelLayout.modeColumn(-80, 0, 24, intArrayOf(40))
+        assertEquals(-80 - 12 - WheelLayout.MODE_OFFSET - 40, left[0][0])
+    }
+
+    @Test
+    fun modePickAndCorridor() {
+        val pills = WheelLayout.modeColumn(80, 0, 24, intArrayOf(40, 40))
+        assertEquals(0, WheelLayout.pickMode(110.0, -8.0, pills))
+        assertEquals(1, WheelLayout.pickMode(110.0, 6.0, pills))
+        assertEquals(-1, WheelLayout.pickMode(60.0, 0.0, pills))
+        // Between the card and its pills: still the same card.
+        assertEquals(true, WheelLayout.inCorridor(95.0, 0.0, 80, 0, 24, pills))
+        assertEquals(false, WheelLayout.inCorridor(0.0, -80.0, 80, 0, 24, pills))
+        assertEquals(false, WheelLayout.inCorridor(0.0, 0.0, 80, 0, 24, emptyList()))
+    }
+
+    @Test
+    fun hourMarkStandsOutsideTheCard() {
+        // Straight up: above the card, half a line clear of it.
+        assertEquals(listOf(0, -80 - 12 - 4 - 3), WheelLayout.hourMark(0, -80, 24, 9).toList())
+        // Straight down: one more line further, past the price.
+        assertEquals(listOf(0, 80 + 12 + 4 + 3 + 9), WheelLayout.hourMark(0, 80, 24, 9).toList())
+        assertEquals(listOf(80 + 12 + 4 + 3, 0), WheelLayout.hourMark(80, 0, 24, 9).toList())
+    }
 }

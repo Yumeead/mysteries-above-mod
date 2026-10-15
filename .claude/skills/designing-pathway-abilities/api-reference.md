@@ -19,6 +19,10 @@ Kotlin/Fabric, not the plugin's Java/Spigot. Two halves, split across the module
 
 Every ability also declares `displayName`, `description(sequence)`, and — if active — `spiritualityCost` and `cooldownSeconds(sequence)`.
 
+**Several ways to use one power = modes, not a map in the ability.** Declare `modes(sequence)` (`AbilityMode(id, name)`, stable lowercase ids) and read the picked one with `mode(context)`; the wheel, the book and the hotkeys pick it, and `context.modes.cycle(...)` keeps crouch-and-cast as a fallback. A power that is already running and can change mode on the spot overrides `switchMode(context)` and returns `true` (see `WindFlight`). Never keep your own `HashMap<UUID, Mode>`.
+
+**`icon` is part of the ability's shape, not decoration.** It is what the wheel, the HUD and the book draw. The default is a shard by type (`AMETHYST_SHARD` active, `ECHO_SHARD` toggle, `PRISMARINE_SHARD` passive), dyed in the pathway colour by the roster builder. Override it with a one-liner when a vanilla item *says* what the power does — `Record` is a `WRITABLE_BOOK`, `DivinationArts` an `AMETHYST_CLUSTER`. Return a fresh `ItemStack` from a getter; an icon that declares its own `DYED_COLOR` keeps it.
+
 **A tick is a choice, not an inheritance.** Add `, Ticking` to the class header when the ability really needs a clock, and implement `tick(context: AbilityContext)` plus `tickPeriodTicks`. Ask first whether an event would do: `IllusoryScales` polled the water twice a second until it learned to wait for `IncomingDamage`; `ResistanceToHorror` still ticks, and rightly — a debuff expires on its own and there is no event to wait for.
 
 **A ticking passive declares its period, it doesn't count one.** `tickPeriodTicks` (1 = every tick, 20 = once a second) — the ticker skips the off-beats. Never keep a `runs++ % 20` counter in a field; it desyncs on relog.

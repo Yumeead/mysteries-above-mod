@@ -47,6 +47,8 @@ data class AbilityStatePayload(
         val readyAtTick: Int,
         val toggled: Boolean,
         val sustaining: Boolean,
+        /** The picked mode's id; `null` — the ability has no modes. */
+        val mode: String? = null,
     )
 
     override fun type(): CustomPacketPayload.Type<AbilityStatePayload> = TYPE
@@ -77,6 +79,8 @@ data class AbilityStatePayload(
                 buf.writeVarInt(live.readyAtTick)
                 buf.writeBoolean(live.toggled)
                 buf.writeBoolean(live.sustaining)
+                buf.writeBoolean(live.mode != null)
+                live.mode?.let(buf::writeUtf)
             }
         }
 
@@ -93,6 +97,7 @@ data class AbilityStatePayload(
                     readyAtTick = buf.readVarInt(),
                     toggled = buf.readBoolean(),
                     sustaining = buf.readBoolean(),
+                    mode = if (buf.readBoolean()) buf.readUtf() else null,
                 )
             }
             return AbilityStatePayload(serverTick, Spirituality(current, maximum), sanityLoss, selected, live)

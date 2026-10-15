@@ -10,15 +10,19 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 /**
  * Client → server: one player intent for every way of expressing it.
  *
- * A generalisation of the empty [CastRequestPayload] rather than a second path beside it:
- * `identity == null` means "whatever is already selected" — exactly today's empty packet.
- * When the new path has been walked by hand, the old one goes (milestone M8).
+ * `identity == null` means "whatever is already selected": the tapped cast key sends no identity,
+ * and the server picks, as it did with the empty cast packet this one absorbed.
  *
  * **The identity here is a request, not a right.** The client may send any string; the server
  * looks it up in `Beyonder.abilities` with the same search it would use for the selected one.
  * A slot on the client is a shortcut to an identity, and it is verified like any other.
  */
-data class AbilityActionPayload(val action: Action, val identity: String?) : CustomPacketPayload {
+data class AbilityActionPayload(
+    val action: Action,
+    val identity: String?,
+    /** The mode to use (or, with [Action.MODE], only to pick); `null` — whatever is picked already. */
+    val mode: String? = null,
+) : CustomPacketPayload {
 
     enum class Action {
         /** Put the ability "in hand". */
@@ -32,6 +36,9 @@ data class AbilityActionPayload(val action: Action, val identity: String?) : Cus
 
         /** Flip a toggle. */
         TOGGLE,
+
+        /** Only pick [mode] for the ability — the book's mode rows. */
+        MODE,
     }
 
     override fun type(): CustomPacketPayload.Type<AbilityActionPayload> = TYPE
@@ -54,12 +61,15 @@ data class AbilityActionPayload(val action: Action, val identity: String?) : Cus
             buf.writeVarInt(payload.action.ordinal)
             buf.writeBoolean(payload.identity != null)
             payload.identity?.let(buf::writeUtf)
+            buf.writeBoolean(payload.mode != null)
+            payload.mode?.let(buf::writeUtf)
         }
 
         private fun read(buf: RegistryFriendlyByteBuf): AbilityActionPayload {
             val action = action(buf.readVarInt())
             val identity = if (buf.readBoolean()) buf.readUtf() else null
-            return AbilityActionPayload(action, identity)
+            val mode = if (buf.readBoolean()) buf.readUtf() else null
+            return AbilityActionPayload(action, identity, mode)
         }
 
         /** A number off the network is foreign: the bounds are checked here, not by an `entries[]` crash. */

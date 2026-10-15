@@ -31,14 +31,17 @@ enum class HudAnchor { LEFT_CENTER, RIGHT_CENTER, LEFT_TOP, RIGHT_TOP }
 class AbilityGroup(
     var name: String,
     val abilities: MutableList<String>?,
-    /** `InputConstants.Key` name (`key.keyboard.c`, `key.mouse.4`) → ability identity. */
+    /**
+     * `InputConstants.Key` name (`key.keyboard.c`, `key.mouse.4`) → target: an ability identity,
+     * or `identity#mode` for one mode of it (see [target]).
+     */
     val hotkeys: MutableMap<String, String> = LinkedHashMap(),
 ) {
     val isAll: Boolean get() = abilities == null
 
     fun contains(identity: String): Boolean = abilities?.contains(identity) ?: true
 
-    fun keyOf(identity: String): String? = hotkeys.entries.firstOrNull { it.value == identity }?.key
+    fun keyOf(target: String): String? = hotkeys.entries.firstOrNull { it.value == target }?.key
 
     /** One key casts one ability, and one ability has one key: binding moves both. */
     fun bind(key: String, identity: String) {
@@ -46,14 +49,23 @@ class AbilityGroup(
         hotkeys[key] = identity
     }
 
-    fun unbind(identity: String) {
-        hotkeys.values.removeAll { it == identity }
+    fun unbind(target: String) {
+        hotkeys.values.removeAll { it == target }
     }
 
-    /** Add or remove; a removed ability loses its key in this group too. */
+    /** Add or remove; a removed ability loses its keys in this group too, its modes' among them. */
     fun toggle(identity: String) {
         val list = abilities ?: return
-        if (!list.remove(identity)) list.add(identity) else unbind(identity)
+        if (!list.remove(identity)) list.add(identity) else hotkeys.values.removeAll { abilityOf(it) == identity }
+    }
+
+    companion object {
+        /** What a hotkey casts: the ability as it stands, or one of its modes. */
+        fun target(identity: String, mode: String?): String = if (mode == null) identity else "$identity#$mode"
+
+        fun abilityOf(target: String): String = target.substringBefore('#')
+
+        fun modeOf(target: String): String? = target.substringAfter('#', "").ifEmpty { null }
     }
 }
 

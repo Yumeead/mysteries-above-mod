@@ -7,6 +7,7 @@ import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.context.CommandContext
 import me.vangoo.domain.abilities.AbilitySpec
 import me.vangoo.domain.abilities.AbilityType
+import me.vangoo.domain.entities.Beyonder
 import me.vangoo.domain.entities.Pathway
 import me.vangoo.domain.valueobjects.AbilityIdentity
 import me.vangoo.domain.valueobjects.Mastery
@@ -97,30 +98,29 @@ object MysteriesCommand {
 
     private fun status(context: CommandContext<CommandSourceStack>): Int {
         val player = context.source.playerOrException
-        BeyonderStatus.push(player)
         // A full re-read: both the rare snapshot and the frequent one. Sending one extra packet
         // on an explicit request is cheaper than leaving the client with a stale list.
         BeyonderStatus.pushRoster(player)
         AbilityServices.statePump.pushNow(player.uuid)
-        context.source.sendSuccess({ Component.literal("Стан надіслано клієнту.") }, false)
+        // Printed as well as sent: a command that shows the state outlives any UI and is the
+        // first thing to reach for when the network is what is being debugged.
+        val beyonder = AbilityServices.beyonders.of(player.uuid)
+        context.source.sendSuccess({ beyonder?.let(::summary) ?: Component.literal("Ви не Потойбічний") }, false)
         return 1
     }
+
+    private fun summary(beyonder: Beyonder): Component = Component.literal(
+        "${beyonder.pathway.name} · Посл. ${beyonder.sequenceLevel} " +
+            "(${beyonder.pathway.sequenceName(beyonder.sequenceLevel)}) · " +
+            "духовність ${beyonder.spirituality} · засвоєння ${beyonder.mastery}",
+    )
 
     private fun abilities(context: CommandContext<CommandSourceStack>): Int {
         val player = context.source.playerOrException
         val beyonder = AbilityServices.beyonders.of(player.uuid)
             ?: return fail(context, "Ви не Потойбічний")
 
-        context.source.sendSuccess(
-            {
-                Component.literal(
-                    "${beyonder.pathway.name} · Посл. ${beyonder.sequenceLevel} " +
-                        "(${beyonder.pathway.sequenceName(beyonder.sequenceLevel)}) · " +
-                        "духовність ${beyonder.spirituality} · засвоєння ${beyonder.mastery}",
-                )
-            },
-            false,
-        )
+        context.source.sendSuccess({ summary(beyonder) }, false)
 
         val selected = AbilityServices.selection.of(player.uuid)
         beyonder.abilities.forEach { spec ->
@@ -234,7 +234,6 @@ object MysteriesCommand {
 
         beyonder.setMastery(Mastery.of(DoubleArgumentType.getDouble(context, "percent")))
         // Mastery moves the spirituality ceiling — that is already a number from the state snapshot.
-        BeyonderStatus.push(player)
         AbilityServices.statePump.pushNow(player.uuid)
         context.source.sendSuccess({ Component.literal("Засвоєння: ${beyonder.mastery}") }, false)
         return 1

@@ -125,6 +125,9 @@ object ClientAbilityState {
 
     fun isSustaining(identity: String): Boolean = live[identity]?.sustaining == true
 
+    /** The mode the server says is picked, else the first; `null` — the ability has none. */
+    fun modeOf(identity: String): String? = live[identity]?.mode ?: entry(identity)?.modes?.firstOrNull()?.id
+
     /** How many ticks of cooldown are left; `0` — the ability is ready. */
     fun remainingTicks(identity: String): Int {
         if (!anchored) return 0

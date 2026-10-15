@@ -65,6 +65,18 @@ class AbilityPayloadCodecTest {
         assertEquals(9, roster.sequence.level)
         assertEquals("Клоун", roster.sequenceName.string)
         assertTrue(roster.entries.isEmpty())
+        assertNull(roster.worn)
+    }
+
+    @Test
+    @DisplayName("Ростер у ляльці везе шлях тіла, яке носить Маріонетист")
+    fun wornBodyRoundTrips() {
+        val worn = AbilityRosterPayload.Worn("Door", Sequence(7))
+        val payload = AbilityRosterPayload(
+            AbilityRosterPayload.Roster("Fool", Sequence(5), Component.literal("Маріонетист"), emptyList(), worn),
+        )
+
+        assertEquals(worn, requireNotNull(roundTrip(payload, AbilityRosterPayload.CODEC).roster).worn)
     }
 
     @Test

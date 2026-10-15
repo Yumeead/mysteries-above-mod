@@ -1,5 +1,6 @@
 package me.vangoo.mysteries.pathways.tyrant.abilities
 
+import me.vangoo.mysteries.ability.AbilityMode
 import me.vangoo.domain.services.SequenceScaler
 import me.vangoo.domain.valueobjects.AbilityIdentity
 import me.vangoo.domain.valueobjects.Sequence
@@ -14,7 +15,6 @@ import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.phys.Vec3
-import java.util.UUID
 
 /**
  * Tyrant, Seq. 6 (Wind-Blessed): **Water Control**.
@@ -36,7 +36,7 @@ class WaterControl : ActiveAbility(AbilityIdentity.of("tyrant_water_control")) {
             "▪ Струмінь: ${jetDamage(sequence)} шкоди й відкид цілі\n" +
             "▪ Щит: водяна завіса, Опір і Регенерація на ${SHIELD_TICKS / 20} с\n" +
             "▪ Просочення: ${soakDamage(sequence)} шкоди, сповільнення й збите полум'я\n" +
-            "▪ Shift+каст — перемкнути режим",
+            "▪ Присід + застосування — перемкнути режим",
     )
 
     override fun cast(context: CastContext): AbilityOutcome {
@@ -44,24 +44,24 @@ class WaterControl : ActiveAbility(AbilityIdentity.of("tyrant_water_control")) {
         val owner = caster.uuid
 
         if (caster.isShiftKeyDown) {
-            val next = mode(owner).next()
-            modes[owner] = next
+            val next = context.modes.cycle(owner, this, context.sequence)
             caster.playSound(SoundEvents.BUCKET_FILL, 0.8f, 1.4f)
-            return AbilityOutcome.Awaiting(Component.literal("Режим води: ${next.label}"))
+            return AbilityOutcome.Awaiting(Component.literal("Режим води: ${next?.name?.string}"))
         }
 
         if (!nearWater(context)) {
             return AbilityOutcome.failed("Поруч немає води — і дощу теж")
         }
 
-        return when (mode(owner)) {
+        return when (Mode.entries.firstOrNull { it.name.lowercase() == mode(context) } ?: Mode.JET) {
             Mode.JET -> jet(context)
             Mode.SHIELD -> shield(context)
             Mode.SOAK -> soak(context)
         }
     }
 
-    private fun mode(owner: UUID): Mode = modes.getOrDefault(owner, Mode.JET)
+    override fun modes(sequence: Sequence): List<AbilityMode> =
+        Mode.entries.map { AbilityMode(it.name.lowercase(), Component.literal(it.label)) }
 
     /** In water, under open-sky rain, or a water block within a small scan radius. */
     private fun nearWater(context: CastContext): Boolean {
@@ -140,11 +140,7 @@ class WaterControl : ActiveAbility(AbilityIdentity.of("tyrant_water_control")) {
     private fun jetDamage(sequence: Sequence): Int = scale(BASE_JET_DAMAGE, sequence, SequenceScaler.ScalingStrategy.MODERATE)
     private fun soakDamage(sequence: Sequence): Int = scale(BASE_SOAK_DAMAGE, sequence, SequenceScaler.ScalingStrategy.MODERATE)
 
-    private enum class Mode(val label: String) {
-        JET("Струмінь"), SHIELD("Щит"), SOAK("Просочення");
-
-        fun next(): Mode = entries[(ordinal + 1) % entries.size]
-    }
+    private enum class Mode(val label: String) { JET("Струмінь"), SHIELD("Щит"), SOAK("Просочення") }
 
     private companion object {
         const val BASE_JET_DAMAGE = 7
@@ -155,8 +151,5 @@ class WaterControl : ActiveAbility(AbilityIdentity.of("tyrant_water_control")) {
         const val SOAK_TICKS = 100
         const val WATER_SCAN_RADIUS = 4
         const val COOLDOWN_SECONDS = 8
-
-        /** Which of the three outlets each player last picked. Not backed by any vanilla state. */
-        val modes = mutableMapOf<UUID, Mode>()
     }
 }

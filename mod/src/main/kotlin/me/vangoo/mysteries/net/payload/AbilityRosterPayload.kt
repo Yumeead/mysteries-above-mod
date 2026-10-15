@@ -21,8 +21,7 @@ import net.minecraft.world.item.ItemStack
  * merging the two would mean sending the full description text of every ability every second.
  *
  * `roster == null` — the player is not a Beyonder. The pathway, the Sequence and the list are
- * either all there or all absent; the format cannot express "a list with no pathway" — the same
- * trick already used in [BeyonderStatusPayload].
+ * either all there or all absent; the format cannot express "a list with no pathway".
  */
 data class AbilityRosterPayload(val roster: Roster?) : CustomPacketPayload {
 
@@ -33,7 +32,12 @@ data class AbilityRosterPayload(val roster: Roster?) : CustomPacketPayload {
         /** The canonical Sequence name, e.g. "Sailor". */
         val sequenceName: Component,
         val entries: List<Entry>,
+        /** The body a possessing Marionettist wears, if it was a Beyonder's: its powers are on the list. */
+        val worn: Worn? = null,
     )
+
+    /** Whose pathway the lent powers come from while inside a puppet. */
+    data class Worn(val pathwayId: String, val sequence: Sequence)
 
     /**
      * An ability as the menu draws it.
@@ -57,7 +61,16 @@ data class AbilityRosterPayload(val roster: Roster?) : CustomPacketPayload {
         /** The full cooldown length — the client computes the fill proportion from it. */
         val cooldownSeconds: Int,
         val icon: ItemStack,
+        /** The ways to use it, in order; empty — there is only one. */
+        val modes: List<Mode> = emptyList(),
+        /** The Sequence of the owner's pathway it awoke at; `null` — off the pathway (stolen, lent). */
+        val origin: Origin? = null,
     )
+
+    /** "Seq. 7 · Seafarer": where on the pathway a power comes from. */
+    data class Origin(val level: Int, val name: String)
+
+    data class Mode(val id: String, val name: Component)
 
     override fun type(): CustomPacketPayload.Type<AbilityRosterPayload> = TYPE
 
@@ -94,6 +107,19 @@ data class AbilityRosterPayload(val roster: Roster?) : CustomPacketPayload {
                 buf.writeVarInt(entry.upkeep)
                 buf.writeVarInt(entry.cooldownSeconds)
                 ItemStack.STREAM_CODEC.encode(buf, entry.icon)
+                buf.writeVarInt(entry.modes.size)
+                for (mode in entry.modes) {
+                    buf.writeUtf(mode.id)
+                    ComponentSerialization.STREAM_CODEC.encode(buf, mode.name)
+                }
+                buf.writeVarInt(entry.origin?.level ?: -1)
+                entry.origin?.let { buf.writeUtf(it.name) }
+            }
+
+            buf.writeBoolean(roster.worn != null)
+            roster.worn?.let {
+                buf.writeUtf(it.pathwayId)
+                buf.writeVarInt(it.sequence.level)
             }
         }
 
@@ -114,9 +140,12 @@ data class AbilityRosterPayload(val roster: Roster?) : CustomPacketPayload {
                     upkeep = buf.readVarInt(),
                     cooldownSeconds = buf.readVarInt(),
                     icon = ItemStack.STREAM_CODEC.decode(buf),
+                    modes = List(buf.readVarInt()) { Mode(buf.readUtf(), ComponentSerialization.STREAM_CODEC.decode(buf)) },
+                    origin = buf.readVarInt().takeIf { it >= 0 }?.let { Origin(it, buf.readUtf()) },
                 )
             }
-            return AbilityRosterPayload(Roster(pathwayId, sequence, sequenceName, entries))
+            val worn = if (buf.readBoolean()) Worn(buf.readUtf(), Sequence(buf.readVarInt())) else null
+            return AbilityRosterPayload(Roster(pathwayId, sequence, sequenceName, entries, worn))
         }
 
         /** The type travels as an ordinal — both sides come from one jar; a foreign number is caught here. */

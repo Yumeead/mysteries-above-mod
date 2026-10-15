@@ -5,6 +5,7 @@ import me.vangoo.domain.abilities.AbilityType
 import me.vangoo.domain.services.SequenceScaler
 import me.vangoo.domain.valueobjects.AbilityIdentity
 import me.vangoo.domain.valueobjects.Sequence
+import me.vangoo.mysteries.ability.runtime.AbilityModes
 import net.minecraft.network.chat.Component
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.item.ItemStack
@@ -49,6 +50,26 @@ abstract class Ability(
         AbilityType.TOGGLEABLE_PASSIVE -> ItemStack(Items.ECHO_SHARD)
         AbilityType.PERMANENT_PASSIVE -> ItemStack(Items.PRISMARINE_SHARD)
     }
+
+    /**
+     * The ways this one power can be used — the Underworld door's four, the water's three. Empty
+     * for the many that have one way only.
+     *
+     * The wheel opens them as an arc beside the card and the book as rows under it; the server
+     * keeps which one each player last picked ([AbilityModes]). An ability reads it with [mode].
+     */
+    open fun modes(sequence: Sequence): List<AbilityMode> = emptyList()
+
+    /**
+     * The player picked another mode while this power is already running. Return `true` if the
+     * running power took the new mode on the spot — then nothing is cast. The default `false`
+     * means "the mode is for the next cast", and the cast goes ahead as asked.
+     */
+    open fun switchMode(context: AbilityContext): Boolean = false
+
+    /** The mode this player has picked, or the first one; `null` — the ability has none. */
+    protected fun mode(context: AbilityContext): String? =
+        context.modes.of(context.caster.uuid, this, context.sequence)?.id
 
     override val spiritualityCost: Int get() = 0
 
@@ -152,3 +173,6 @@ abstract class ToggleablePassiveAbility(
 
     abstract fun onDisable(context: AbilityContext)
 }
+
+/** One way of using an ability: a stable [id] for the wire and the config, a [name] for the player. */
+data class AbilityMode(val id: String, val name: Component)

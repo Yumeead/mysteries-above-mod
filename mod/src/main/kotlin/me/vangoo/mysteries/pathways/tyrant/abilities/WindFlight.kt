@@ -3,6 +3,8 @@ package me.vangoo.mysteries.pathways.tyrant.abilities
 import me.vangoo.domain.services.SequenceScaler
 import me.vangoo.domain.valueobjects.AbilityIdentity
 import me.vangoo.domain.valueobjects.Sequence
+import me.vangoo.mysteries.ability.AbilityContext
+import me.vangoo.mysteries.ability.AbilityMode
 import me.vangoo.mysteries.ability.AbilityOutcome
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
@@ -51,14 +53,27 @@ class WindFlight : ActiveAbility(AbilityIdentity.of("tyrant_wind_flight")) {
     override fun description(sequence: Sequence): Component = Component.literal(
         "Вітер підіймає вас у небо.\n" +
             "▪ Політ тримає в повітрі повністю; Ковзання лише лагідно опускає\n" +
-            "▪ Shift+каст перемикає режим; Витрата: ${periodicCost(sequence)} духовності/с\n" +
-            "▪ Повторний каст без Shift вимикає",
+            "▪ Присід + застосування перемикає режим; Витрата: ${periodicCost(sequence)} духовності/с\n" +
+            "▪ Повторне застосування без присіду вимикає",
     )
+
+    override fun modes(sequence: Sequence): List<AbilityMode> = listOf(
+        AbilityMode(FLY, Component.literal("Політ")),
+        AbilityMode(GLIDE, Component.literal("Ковзання")),
+    )
+
+    /** Picking the other mode mid-air changes how the wind holds you, not whether it does. */
+    override fun switchMode(context: AbilityContext): Boolean {
+        if (!context.sessionRunning) return false
+        switchTo(context.caster, mode(context) == GLIDE)
+        return true
+    }
 
     override fun cast(context: CastContext): AbilityOutcome {
         if (context.sessionRunning) {
             if (context.caster.isShiftKeyDown) {
-                switchTo(context.caster, !glide.contains(context.caster.uuid))
+                val next = context.modes.cycle(context.caster.uuid, this, context.sequence)
+                switchTo(context.caster, next?.id == GLIDE)
                 return AbilityOutcome.Awaiting(Component.literal("Режим змінено"))
             }
             context.stopSession()
@@ -67,7 +82,8 @@ class WindFlight : ActiveAbility(AbilityIdentity.of("tyrant_wind_flight")) {
 
         val messaging = context.messaging
         val casterId = context.caster.uuid
-        if (context.caster.isShiftKeyDown) glide.add(casterId) else glide.remove(casterId)
+        if (context.caster.isShiftKeyDown) context.modes.cycle(casterId, this, context.sequence)
+        if (mode(context) == GLIDE) glide.add(casterId) else glide.remove(casterId)
 
         context.session {
             try {
@@ -94,6 +110,8 @@ class WindFlight : ActiveAbility(AbilityIdentity.of("tyrant_wind_flight")) {
         val owner = player.uuid
         if (toGlide) glide.add(owner) else glide.remove(owner)
         if (toGlide) grounded(player)
+        // At once, not on the next upkeep beat a second away.
+        hold(player, toGlide)
         player.playSound(SoundEvents.PHANTOM_FLAP, 1.0f, 1.4f)
     }
 
@@ -122,6 +140,8 @@ class WindFlight : ActiveAbility(AbilityIdentity.of("tyrant_wind_flight")) {
         const val COOLDOWN_SECONDS = 3
         /** Over ten seconds so the effect does not lapse between upkeep beats. */
         const val GLIDE_TICKS = 10 * TICKS_PER_SECOND
+        const val FLY = "fly"
+        const val GLIDE = "glide"
 
         /** Which players currently prefer Glide over Flight. Not backed by any vanilla state. */
         val glide = mutableSetOf<java.util.UUID>()

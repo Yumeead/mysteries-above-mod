@@ -1,5 +1,6 @@
 package me.vangoo.mysteries.pathways.tyrant.abilities
 
+import me.vangoo.mysteries.ability.AbilityMode
 import me.vangoo.domain.services.SequenceScaler
 import me.vangoo.domain.valueobjects.AbilityIdentity
 import me.vangoo.domain.valueobjects.RgbColor
@@ -19,8 +20,6 @@ import net.minecraft.tags.EntityTypeTags
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.LivingEntity
-import java.util.UUID
-import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Tyrant, Seq. 5 (Ocean Songster): **Lightning Strike**.
@@ -48,20 +47,19 @@ class LightningStrike : ActiveAbility(AbilityIdentity.of("tyrant_lightning_strik
             "×2 по нежиті, параліч і розряд на $MAX_CHAINS сусідів\n" +
             "▪ Насичення: зброя ${INFUSION_TICKS / 20} с додає ${infusedDamage(sequence)} шкоди й параліч " +
             "наступним $INFUSION_HITS ударам\n" +
-            "▪ Shift+каст — перемкнути режим",
+            "▪ Присід + застосування — перемкнути режим",
     )
 
     override fun cast(context: CastContext): AbilityOutcome {
         val owner = context.caster.uuid
 
         if (context.caster.isShiftKeyDown) {
-            val next = modes.getOrDefault(owner, Mode.STRIKE).next()
-            modes[owner] = next
+            val next = context.modes.cycle(owner, this, context.sequence)
             context.caster.playSound(SoundEvents.AMETHYST_BLOCK_CHIME, 0.8f, 1.6f)
-            return AbilityOutcome.Awaiting(Component.literal("Режим блискавки: ${next.label}"))
+            return AbilityOutcome.Awaiting(Component.literal("Режим блискавки: ${next?.name?.string}"))
         }
 
-        return if (modes.getOrDefault(owner, Mode.STRIKE) == Mode.INFUSE) {
+        return if (mode(context) == Mode.INFUSE.name.lowercase()) {
             infuse(context)
         } else {
             strike(context)
@@ -131,11 +129,10 @@ class LightningStrike : ActiveAbility(AbilityIdentity.of("tyrant_lightning_strik
     private fun damage(sequence: Sequence): Int = scale(BASE_DAMAGE, sequence, SequenceScaler.ScalingStrategy.MODERATE)
     private fun infusedDamage(sequence: Sequence): Int = scale(BASE_INFUSED_DAMAGE, sequence, SequenceScaler.ScalingStrategy.MODERATE)
 
-    private enum class Mode(val label: String) {
-        STRIKE("Удар"), INFUSE("Насичення");
+    override fun modes(sequence: Sequence): List<AbilityMode> =
+        Mode.entries.map { AbilityMode(it.name.lowercase(), Component.literal(it.label)) }
 
-        fun next(): Mode = entries[(ordinal + 1) % entries.size]
-    }
+    private enum class Mode(val label: String) { STRIKE("Удар"), INFUSE("Насичення") }
 
     internal companion object {
         const val BASE_DAMAGE = 9
@@ -149,8 +146,6 @@ class LightningStrike : ActiveAbility(AbilityIdentity.of("tyrant_lightning_strik
         const val INFUSION_TICKS = 600
         const val INFUSION_HITS = 5
         const val COOLDOWN_SECONDS = 30
-
-        private val modes = ConcurrentHashMap<UUID, Mode>()
 
         /**
          * A discharge into one target: damage (doubled against the undead via

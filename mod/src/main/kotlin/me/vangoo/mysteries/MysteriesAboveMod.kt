@@ -4,7 +4,6 @@ import me.vangoo.mysteries.ability.Disguise
 import me.vangoo.mysteries.ability.runtime.AbilityServices
 import me.vangoo.mysteries.pathways.error.abilities.ConceptualTheft
 import me.vangoo.mysteries.beyonder.AbilityRequests
-import me.vangoo.mysteries.beyonder.BeyonderStatus
 import me.vangoo.mysteries.beyonder.BeyonderStore
 import me.vangoo.mysteries.pathways.fool.abilities.PaperDolls
 import me.vangoo.mysteries.pathways.sun.Oaths
@@ -84,19 +83,8 @@ object MysteriesAboveMod : ModInitializer {
         // Marionettist leaving their puppet), and the save must see the result.
         BeyonderStore.install()
 
-        ModChannels.STATUS_REQUEST.receiveOnServer { _, context ->
-            val player = context.player()
-            BeyonderStatus.push(player)
-            BeyonderStatus.pushRoster(player)
-            AbilityServices.statePump.pushNow(player.uuid)
-        }
-
-        // The cast key. The server picks the ability — see `CastRequestPayload`.
-        ModChannels.CAST_REQUEST.receiveOnServer { _, context ->
-            AbilityRequests.castSelected(context.player())
-        }
-
-        // The wheel (and, from M5, the slots): select, cast, or both, by identity.
+        // Every player intent: the cast key, the wheel, Z/X and the group hotkeys. An absent
+        // identity means "whatever is selected" — the server picks it, as it always has.
         ModChannels.ABILITY_ACTION.receiveOnServer { payload, context ->
             AbilityRequests.act(context.player(), payload)
         }

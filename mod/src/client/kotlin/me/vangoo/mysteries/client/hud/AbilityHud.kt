@@ -78,6 +78,8 @@ object AbilityHud : HudElement {
         val showCooldownNumbers: Boolean,
         /** The hotkey's name in the active group, not its label: the label is built when the panel rebuilds. */
         val hotkey: String?,
+        /** The picked mode's id, so the panel follows a mode change made from the wheel or the book. */
+        val mode: String?,
     )
 
     private var signature: Signature? = null
@@ -145,6 +147,7 @@ object AbilityHud : HudElement {
             affordable = entry?.let(ClientAbilityState::canAfford) ?: true,
             showCooldownNumbers = ClientOptions.showCooldownNumbers,
             hotkey = identity?.let { ClientOptions.group.keyOf(it) },
+            mode = identity?.let(ClientAbilityState::modeOf),
         )
     }
 
@@ -152,7 +155,12 @@ object AbilityHud : HudElement {
         val font = client.font
         val entry = signature.identity?.let(ClientAbilityState::entry)
 
-        val name = entry?.name ?: Component.translatable("hud.$MOD_ID.no_selection")
+        val mode = entry?.modes?.firstOrNull { it.id == signature.mode }
+        val name = when {
+            entry == null -> Component.translatable("hud.$MOD_ID.no_selection")
+            mode != null -> entry.name.copy().append(Component.literal(" · ").append(mode.name).withColor(UiTheme.MUTED))
+            else -> entry.name
+        }
         val priceCritical = entry != null && entry.type == AbilityType.ACTIVE && !signature.affordable
         // A shape as well as a colour, the same mark as the wheel's: readable without colour at all.
         val price = entry?.let(::priceOf)?.let { if (priceCritical) Component.literal("✕ ").append(it) else it }

@@ -17,7 +17,6 @@ import me.vangoo.mysteries.net.ModChannels
 import me.vangoo.mysteries.net.payload.AbilityActionPayload
 import me.vangoo.mysteries.net.payload.AbilityActionPayload.Action
 import me.vangoo.mysteries.net.payload.AbilityRosterPayload
-import me.vangoo.mysteries.net.payload.CastRequestPayload
 import me.vangoo.mysteries.net.payload.MarionetteOrderPayload
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper
@@ -43,11 +42,9 @@ import org.lwjgl.glfw.GLFW
  *
  * ## Why not "cast on R, menu on key X"
  *
- * That is how it was, and that is exactly what the flaw grew out of: the menu opened
- * **together** with the cast. Not because of the key — because the server's cast path sent
- * `BEYONDER_STATUS`, and the client opens a screen on that packet. The keys are only half the
- * fix; the other half is in `AbilityRequests`, which no longer sends a status snapshot after
- * every blow.
+ * That is how it was, and the menu kept opening **together** with the cast: a server packet
+ * after every blow unfolded a screen. One key with two gestures leaves no second key to reach
+ * for and no packet that opens anything.
  *
  * ## The decision is made on release, not on press
  *
@@ -157,7 +154,7 @@ object ModKeys {
 
             // The key was released. A cast only if this was a click, not a hold.
             if (heldTicks in 1 until holdTicks() && !opened) {
-                ModChannels.CAST_REQUEST.sendToServer(CastRequestPayload.INSTANCE)
+                ModChannels.ABILITY_ACTION.sendToServer(AbilityActionPayload.castSelected())
             }
             heldTicks = 0
             opened = false
@@ -209,7 +206,8 @@ object ModKeys {
             return
         }
         val window = client.window
-        for ((name, identity) in ClientOptions.group.hotkeys) {
+        for ((name, target) in ClientOptions.group.hotkeys) {
+            val identity = AbilityGroup.abilityOf(target)
             val key = InputConstants.getKey(name)
             val down = when (key.type) {
                 InputConstants.Type.MOUSE -> GLFW.glfwGetMouseButton(window.handle(), key.value) == GLFW.GLFW_PRESS
@@ -218,7 +216,7 @@ object ModKeys {
             if (!down) {
                 heldHotkeys.remove(name)
             } else if (heldHotkeys.add(name) && ClientAbilityState.entry(identity) != null) {
-                use(identity)
+                use(identity, AbilityGroup.modeOf(target))
             }
         }
     }
@@ -229,9 +227,9 @@ object ModKeys {
     fun visible(group: AbilityGroup = ClientOptions.group): List<AbilityRosterPayload.Entry> =
         ClientAbilityState.entries.filter { group.contains(it.identity) }
 
-    /** The active group's hotkey label for [identity], or `null` if it has none. */
-    fun hotkeyLabel(identity: String, group: AbilityGroup = ClientOptions.group): Component? =
-        group.keyOf(identity)?.let { InputConstants.getKey(it).displayName }
+    /** The active group's hotkey label for [identity] (or one [mode] of it), or `null` if it has none. */
+    fun hotkeyLabel(identity: String, mode: String? = null, group: AbilityGroup = ClientOptions.group): Component? =
+        group.keyOf(AbilityGroup.target(identity, mode))?.let { InputConstants.getKey(it).displayName }
 
     /**
      * Use one ability straight away — a hotkey or the wheel's release.
@@ -239,15 +237,15 @@ object ModKeys {
      * A toggle is flipped with `TOGGLE` rather than selected: it is set and forgotten, and taking
      * the cast key's place would leave the player tapping a switch mid-fight. A permanent passive
      * has nothing to use. An identity the roster no longer knows still goes out: the server says
-     * `NotOwned`, the client decides nothing.
+     * `NotOwned`, the client decides nothing. [mode] — cast in that mode; `null` — in the picked one.
      */
-    fun use(identity: String) {
+    fun use(identity: String, mode: String? = null) {
         val action = when (ClientAbilityState.entry(identity)?.type) {
             AbilityType.PERMANENT_PASSIVE -> return
             AbilityType.TOGGLEABLE_PASSIVE -> Action.TOGGLE
             else -> Action.SELECT_AND_CAST
         }
-        ModChannels.ABILITY_ACTION.sendToServer(AbilityActionPayload(action, identity))
+        ModChannels.ABILITY_ACTION.sendToServer(AbilityActionPayload(action, identity, mode))
     }
 
     /**

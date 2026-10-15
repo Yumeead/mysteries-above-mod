@@ -61,7 +61,6 @@ object Ascension {
         }
 
         aftertaste(player)
-        BeyonderStatus.push(player)
         // The ability list is different now — the roster flies exactly here and nowhere else.
         BeyonderStatus.pushRoster(player)
         AbilityServices.statePump.pushNow(player.uuid)
@@ -85,7 +84,6 @@ object Ascension {
         AbilityServices.beyonders.register(Beyonder(player.uuid, sequence, pathway))
         AbilityServices.passives.activate(player)
 
-        BeyonderStatus.push(player)
         BeyonderStatus.pushRoster(player)
         AbilityServices.statePump.pushNow(player.uuid)
     }
@@ -100,10 +98,10 @@ object Ascension {
         AbilityServices.scheduling.stopAll(player.uuid)
         AbilityServices.cooldowns.forget(player.uuid)
         AbilityServices.selection.forget(player.uuid)
+        AbilityServices.modes.forget(player.uuid)
         AbilityServices.beyonders.forget(player.uuid)
         BeyonderStore.erase(player)
         AbilityServices.statePump.forget(player.uuid)
-        BeyonderStatus.push(player)
         // An empty roster **is** the message "you are no longer a Beyonder": no state flies
         // after it, because state only makes sense for someone who is one.
         BeyonderStatus.pushRoster(player)

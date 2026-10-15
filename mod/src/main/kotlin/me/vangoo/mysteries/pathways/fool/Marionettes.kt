@@ -16,7 +16,7 @@ import me.vangoo.mysteries.entity.ModEntities
 import me.vangoo.mysteries.item.ModItems
 import me.vangoo.mysteries.net.ModChannels
 import me.vangoo.mysteries.net.payload.MarionetteOrderPayload
-import me.vangoo.mysteries.net.payload.BeyonderStatusPayload
+import me.vangoo.mysteries.net.payload.AbilityRosterPayload
 import me.vangoo.mysteries.net.payload.MarionetteStatePayload
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents
 import me.vangoo.mysteries.net.payload.ThreadSightPayload
@@ -687,12 +687,12 @@ object Marionettes {
         }
         ModChannels.MARIONETTE_ORDER.receiveOnServer { payload, context -> handle(context.player(), payload) }
 
-        // The status screen heads the list with the pathway the lent powers come from.
+        // The ability book heads the list with the pathway the lent powers come from.
         BeyonderStatus.wornBody = { ownerId ->
             (possessions[ownerId]?.puppet as? MarionetteEntity)?.capture?.let { capture ->
                 val pathway = capture.pathway ?: return@let null
                 val sequence = capture.sequence ?: return@let null
-                BeyonderStatusPayload.Worn(pathway, Sequence(sequence))
+                AbilityRosterPayload.Worn(pathway, Sequence(sequence))
             }
         }
 

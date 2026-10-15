@@ -1,5 +1,6 @@
 package me.vangoo.mysteries.pathways.fool.abilities
 
+import me.vangoo.mysteries.ability.AbilityMode
 import me.vangoo.domain.valueobjects.AbilityIdentity
 import me.vangoo.domain.valueobjects.IllusionKind
 import me.vangoo.domain.valueobjects.Sequence
@@ -12,8 +13,6 @@ import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.world.phys.Vec3
-import java.util.UUID
-import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Fool, Seq. 7 (Magician): **Illusion Creation**.
@@ -32,33 +31,31 @@ class IllusionCreation : ActiveAbility(AbilityIdentity.of("fool_illusion_creatio
 
     override fun cooldownSeconds(sequence: Sequence): Int = BASE_COOLDOWN_SECONDS
 
-    private val selectedMode = ConcurrentHashMap<UUID, Int>()
+    override fun modes(sequence: Sequence): List<AbilityMode> =
+        IllusionKind.entries.map { AbilityMode(it.name.lowercase(), Component.literal(it.displayName)) } +
+            AbilityMode(SOUND_MODE, Component.literal("Фальшивий звук (на ціль)"))
 
     override fun description(sequence: Sequence): Component = Component.literal(
-        "ПКМ — виконує обраний режим ілюзії. Shift+ПКМ — безкоштовно перемикає режим.\n" +
+        "Виконує обраний режим ілюзії. Присід + застосування — безкоштовно перемикає режим.\n" +
             "▪ Локальна: вибух, кроки чи пожежа в точці погляду\n" +
             "▪ Фальшивий звук «нізвідки» на гравця під прицілом",
     )
 
     override fun cast(context: CastContext): AbilityOutcome {
-        val casterId = context.caster.uuid
         if (context.caster.isShiftKeyDown) {
-            val next = (selectedMode.getOrDefault(casterId, 0) + 1).mod(MODE_COUNT)
-            selectedMode[casterId] = next
+            val next = context.modes.cycle(context.caster.uuid, this, context.sequence)
             context.level.playSound(
                 null, context.origin.x, context.origin.y, context.origin.z,
                 SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.PLAYERS, 0.7f, 1.5f,
             )
-            context.messaging.actionBar(context.caster, Component.literal("🎭 Режим: ${modeName(next)}"))
+            context.messaging.actionBar(context.caster, Component.literal("🎭 Режим: ${next?.name?.string}"))
             return AbilityOutcome.failed("Режим перемкнуто")
         }
 
-        val mode = selectedMode.getOrDefault(casterId, 0)
-        return if (mode == SOUND_MODE) soundProjection(context) else localIllusion(context, IllusionKind.entries[mode])
+        val mode = mode(context)
+        val kind = IllusionKind.entries.firstOrNull { it.name.lowercase() == mode }
+        return if (kind == null) soundProjection(context) else localIllusion(context, kind)
     }
-
-    private fun modeName(mode: Int): String =
-        if (mode == SOUND_MODE) "Фальшивий звук (на ціль)" else IllusionKind.entries[mode].displayName
 
     private fun localIllusion(context: CastContext, kind: IllusionKind): AbilityOutcome {
         val at = illusionLocation(context)
@@ -115,7 +112,6 @@ class IllusionCreation : ActiveAbility(AbilityIdentity.of("fool_illusion_creatio
         const val BASE_COOLDOWN_SECONDS = 5
         const val LOOK_RANGE = 20.0
         const val TARGET_RANGE = 20.0
-        val MODE_COUNT = IllusionKind.entries.size + 1
-        val SOUND_MODE = IllusionKind.entries.size
+        const val SOUND_MODE = "sound"
     }
 }
