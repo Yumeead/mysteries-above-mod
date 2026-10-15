@@ -12,6 +12,7 @@ import me.vangoo.mysteries.item.ModComponents
 import me.vangoo.mysteries.item.ModItems
 import me.vangoo.mysteries.net.ModChannels
 import me.vangoo.mysteries.pathways.ModPathways
+import me.vangoo.mysteries.pathways.death.Death
 import me.vangoo.mysteries.pathways.fool.Marionettes
 import me.vangoo.mysteries.pathways.fool.PaperThrowTrigger
 import me.vangoo.mysteries.server.MysteriesCommand
@@ -67,6 +68,10 @@ object MysteriesAboveMod : ModInitializer {
         // stay there forever: the session that could bring them back goes out together with
         // their connection.
         SpiritWorld.guardStranded()
+
+        // Death's world-level memory: every death leaves a trace, every servant is a saved mob,
+        // the Underworld gives back whoever it holds — none of that waits for a cast.
+        Death.install()
 
         ModChannels.STATUS_REQUEST.receiveOnServer { _, context ->
             val player = context.player()

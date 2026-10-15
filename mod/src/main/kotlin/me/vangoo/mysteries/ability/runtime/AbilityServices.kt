@@ -11,6 +11,10 @@ import me.vangoo.mysteries.event.EvidenceLog
 import me.vangoo.mysteries.event.GameEvent
 import me.vangoo.mysteries.event.GameEventBridge
 import me.vangoo.mysteries.event.IncomingDamage
+import me.vangoo.mysteries.event.MobTargeting
+import me.vangoo.mysteries.pathways.common.SoulWard
+import me.vangoo.mysteries.pathways.death.Death
+import me.vangoo.mysteries.pathways.death.Retinue
 import me.vangoo.mysteries.pathways.fool.Marionettes
 import me.vangoo.mysteries.pathways.fool.PaperWeaponHits
 import me.vangoo.mysteries.pathways.fool.RecentDamageLedger
@@ -68,7 +72,10 @@ object AbilityServices {
 
     val messaging = ServerMessaging { server }
 
-    val scheduling: SessionHost = SessionHost(scheduler, beyonders, players, onError)
+    // A session that ends changes what the client shows (the HUD's "◐", the Spirit Vision's grey
+    // world), so its end marks the owner dirty — otherwise a player at full spirituality, who
+    // generates no other change, would keep seeing a power that has already gone out.
+    val scheduling: SessionHost = SessionHost(scheduler, beyonders, players, onError) { id -> statePump.markDirty(id) }
 
     /**
      * Abilities' subscriptions to game events. The clock is the same as the sessions' — the
@@ -201,6 +208,8 @@ object AbilityServices {
             RecentDamageLedger.record(event)
             PaperWeaponHits.onDamage(event)
         }
+        // A servant has no will: whatever it tries to pick other than its ordered victim is refused.
+        if (event is MobTargeting) Retinue.onTargeting(event)
         events.publish(event)
     }
 
@@ -222,6 +231,8 @@ object AbilityServices {
         RecentDamageLedger.reset()
         TheftRegistry.reset()
         Marionettes.reset()
+        Death.reset()
+        SoulWard.reset()
         events.clear()
         scheduling.shutdown()
         // One farewell tick. Cancellation only takes a session out of its wait — unwinding the

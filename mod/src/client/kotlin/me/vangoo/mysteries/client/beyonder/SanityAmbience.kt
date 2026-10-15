@@ -62,6 +62,8 @@ object SanityAmbience {
     // ── Screen ──────────────────────────────────────────────────────────────────
 
     private fun chainFor(scale: SanityLoss): Identifier? = when {
+        // Death's grey sight outranks the shaking mind: it is chosen, the other merely suffered.
+        GREY_SIGHT.any(ClientAbilityState::isSustaining) -> DEATH_SIGHT
         scale.isCritical() || scale.isExtreme() -> BROKEN
         scale.isSevere() -> STRAINED
         else -> null
@@ -124,6 +126,10 @@ object SanityAmbience {
 
     private val STRAINED: Identifier = modId("sanity_strained")
     private val BROKEN: Identifier = modId("sanity_broken")
+    private val DEATH_SIGHT: Identifier = modId("death_sight")
+
+    /** Death's powers that turn the world grey for as long as their session runs (`SpiritVision`, `EyeOfDeath`). */
+    private val GREY_SIGHT = listOf("death_spirit_vision", "death_eye_of_death")
 
     private const val WHISPER_VOLUME = 0.6f
     private const val HEARTBEAT_VOLUME = 0.8f

@@ -1,0 +1,11 @@
+{
+  "type": "mysteries_above:underworld",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "mysteries_above:underworld",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "mysteries_above:underworld"
+    }
+  }
+}

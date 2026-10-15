@@ -727,7 +727,7 @@ javap -cp "$MCM:$MCC" net.minecraft.client.gui.screens.Screen
   `/mysteries sanity`. Активи: перша власна текстура (`textures/particle/spirit_mote.png`),
   `sounds.json`, `shaders/post/sanity.fsh`, два `post_effect/*.json`.
   Разом 40 тест-класів / 304 тести зелені.
-- 🔄 **Фаза 08** — шар здібностей, усі 9 шляхів. **Закрито 8 з 9** — лишився `death`.
+- ✅ **Фаза 08** — шар здібностей, усі 9 шляхів. **Закрито 9 з 9** (Death — 15.10.2026, у грі ще не перевірено).
   - **WhiteTower** (Посл. 9–5): `pathways/common` (`RitualMagic`, `CombatProficiency`,
     `PhysicalEnhancement`), `pathways/whitetower` (`EnhancedMind`, `Deduction`, `Agility`,
     `CrimeReconstruction`, `Analysis`, `Spellcasting`, `MirrorCurse`), `ability/AttributeGrant`.
@@ -828,7 +828,52 @@ javap -cp "$MCM:$MCC" net.minecraft.client.gui.screens.Screen
     **першим рендерером** (`client/render/MarionetteRenderer`), другий предмет
     (`ModItems.CHARACTERISTIC` + компонент), два канали (`MARIONETTE_STATE` / `MARIONETTE_ORDER`),
     ряд ниток у HUD (`client/hud/MarionetteHud`) і клавіша «Нитки». Розгорнуто нижче.
-  Далі: death.
+  - **Death** (Посл. 9–5, 20 здібностей): `UndeadKnowledge`, `CadavericResilience`, `GloomyPresence`,
+    `DeathSight`, `SpiritVision` (9); `SpiritCommunication`, `EyeOfDeath` (8); `SpiritPerception`,
+    `VoiceOfTheDead`, `SpiritChanneling`, `CorpseGuise` + `RitualMagic` (7); `SpiritWorldKnowledge`,
+    `LanguageOfTheDead`, `Resurrection`, `SpiritPact` (6); `GatekeeperStep`, `DoorToTheUnderworld`,
+    `InternalUnderworld` (5). Приїхали **другий власний вимір** (`mysteries_above:underworld`, датапак +
+    `pathways/death/Underworld.kt`), **журнал смертей** (`DeathTraces`), **почет** (`Retinue`), `Spirits`,
+    `payBranch`, `common/SoulWard` (читає й `MarionetteControl`) і третій екранний ланцюг
+    (`post_effect/death_sight.json` + `shaders/post/death_sight.fsh`). Розгорнуто нижче.
+  Разом 43 тест-класи / 322 тести зелені (нових тест-класів не додано; ростер Смерті перевіряє `ModPathwaysTest`).
+
+### Смерть (Посл. 9–5) — світ пам'ятає мертвих сам
+
+Плагін тримав два реєстри, які здібності передавали одна одній конструктором (`LingeringSouls`,
+`UndeadRetinue`), а смерть записував лише тоді, коли онлайн був Медіум. Тут обидва стали записами
+**світу**:
+
+| плагін | мод | чому так |
+|---|---|---|
+| `LingeringSouls` пише пасивка Медіума; розтин читає CoreProtect | `DeathTraces`: одна Fabric-подія, кожна смерть, ванільне повідомлення про смерть | розтин читає *як* померли; ніхто не помирає «непоміченим» |
+| `retinue.json` + респавн слуг з опису | слуга — моб із постійним attachment `servant_of`; гра сама зберігає його з чанком | нічого не описується, не губиться на краші |
+| ховання = деспавн/респавн з опису | ховання = ванільне `mob.save()` у attachment власника | слуга повертається рівно таким, яким пішов |
+| «без волі» = скидання цілі щопівсекунди | `MobTargeting` відмовляє будь-яку ціль, крім наказаної | подія, а не опитування |
+| два меню-скрині (Прикликання, Домовленість) | предмет у другій руці обирає духа; погляд віддає наказ почту | параметр у світі, як у Дверей |
+| `DRAG` ставить здоров'я на нуль | проковтнутого гравця забирає справжній вимір Загробного Світу на 8 с | двері ведуть кудись |
+| Трупна личина — пакети бібліотеки маскування | справжній ванільний зомбі-оболонка + `SelectiveVisibility` (прийом вселення) | вдень горить сам, шолом рятує, як і справжнього |
+| Мова мертвих — Citizens-NPC | `MarionetteEntity` з обличчям жертви (як посудина вселення) | `Avatar` уже вміє тіло гравця |
+| окупант ВЗС — істоти MythicMobs | окупант **за природою** ванільного типу (вікс, утоплений, скелет, візер, фантом, зомбі-житель…) | рушій істот — фаза 12 |
+| ерозія запікається в `baseValue` | транзієнтний модифікатор, окупант — постійний attachment | рестарт не лишає вічної рани |
+
+**Відкладено свідомо, не забуто:** гілка Голосу мертвих «душа віддає рецепт» чекає на варіння
+(рецептів у моді ще немає) — зараз лише допит живих; домовленість з істотами Світу Духів чекає на
+фазу 12 — зараз домовитись можна з вільним віксом. Буйство (Rampage) у «мертвих душах» з'явиться разом
+із Rampage.
+
+⚠ **`AttachmentRegistry.create` — лише ледачим полем і з `install()`.** Fabric реєструє attachment
+через міксин, а юніт-тести міксинів не мають: статична ініціалізація валила `ModPathwaysTest`
+(`UnsupportedOperationException: Implemented via mixin` з `AttachmentSync`). Поля — `by lazy`,
+`install()` торкається їх під час ініціалізації мода.
+
+⚠ **Тимчасові сутності мода мітяться `Spirits.EPHEMERAL` *після* `addFreshEntity`.** Інакше подія
+завантаження власного спавну побачила б тег і знищила сутність. Тег потрібен, щоб оболонка личини чи
+зв'язаний дух, збережені з чанком, не повернулись із диску (вікс — із відновленими ворожими гоалами).
+
+**Сесія, що згасла, бруднить стан клієнта.** `SessionHost` отримав `onEnded`, `AbilityServices` віддає
+туди `statePump::markDirty`. Без цього гравець із повною духовністю бачив «◐» і сірий світ після того,
+як сила згасла: інших змін, що штовхнули б пакет, не було.
 
 ### Маріонетник (Fool, Посл. 5) — чотири костилі й чим вони стали
 

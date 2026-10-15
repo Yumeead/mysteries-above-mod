@@ -52,7 +52,7 @@ class SessionHostTest {
     private val errors = mutableListOf<String>()
     private val scheduler = TickScheduler()
     private val roster = Roster()
-    private val host = SessionHost(scheduler, roster, players = { null }) { what, _ -> errors += what }
+    private val host = SessionHost(scheduler, roster, players = { null }, onError = { what, _ -> errors += what })
 
     private val owner: UUID = UUID.randomUUID()
     private val wind = Spec(AbilityIdentity.of("wind"), upkeep = 10)

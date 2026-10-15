@@ -1,6 +1,7 @@
 package me.vangoo.mysteries.pathways
 
 import me.vangoo.domain.entities.Pathway
+import me.vangoo.mysteries.pathways.death.Death
 import me.vangoo.mysteries.pathways.door.Door
 import me.vangoo.mysteries.pathways.error.Error
 import me.vangoo.mysteries.pathways.fool.Fool
@@ -28,7 +29,7 @@ object ModPathways {
     private val byName: Map<String, Pathway> =
         listOf(
             Tyrant.create(), Sun.create(), WhiteTower.create(), Door.create(), Error.create(), Visionary.create(),
-            Justiciar.create(), Fool.create(),
+            Justiciar.create(), Fool.create(), Death.create(),
         ).associateBy { it.name }
 
     val all: Collection<Pathway> get() = byName.values

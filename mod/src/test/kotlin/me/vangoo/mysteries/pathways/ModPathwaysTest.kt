@@ -189,7 +189,7 @@ class ModPathwaysTest {
     @DisplayName("Пошук шляху не зважає на регістр, невідомого — немає")
     fun lookupIsCaseInsensitive() {
         assertEquals("Tyrant", ModPathways.byName("tYrAnT")?.name)
-        assertNull(ModPathways.byName("Death"))
+        assertNull(ModPathways.byName("Darkness"))
     }
 
     private fun identity(id: String) = AbilityIdentity.of(id)

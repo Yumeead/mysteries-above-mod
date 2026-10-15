@@ -38,6 +38,8 @@ class SessionHost(
     private val beyonders: Beyonders,
     private val players: (UUID) -> ServerPlayer?,
     private val onError: (String, Throwable) -> Unit = { _, _ -> },
+    /** Told whose session just ended, however it ended. */
+    private val onEnded: (UUID) -> Unit = {},
 ) : Scheduling {
 
     private val dispatcher = ServerTickDispatcher(scheduler)
@@ -74,6 +76,7 @@ class SessionHost(
         sessions[key] = session
         job.invokeOnCompletion { error ->
             if (sessions[key] === session) sessions.remove(key)
+            onEnded(owner)
             if (error != null && error !is CancellationException) {
                 onError("Session ${ability.identity} of player $owner threw", error)
             }

@@ -14,6 +14,7 @@ import me.vangoo.mysteries.ability.session
 import me.vangoo.mysteries.ability.sessionRunning
 import me.vangoo.mysteries.ability.stopSession
 import me.vangoo.mysteries.event.IncomingDamage
+import me.vangoo.mysteries.pathways.common.SoulWard
 import me.vangoo.mysteries.pathways.fool.Marionettes
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.chat.Component
@@ -101,6 +102,10 @@ class MarionetteControl : ActiveAbility(AbilityIdentity.of("fool_marionettist_co
         }
         if (target !is ServerPlayer && target !is Mob) {
             return AbilityOutcome.failed("За це тіло нитки не беруться")
+        }
+        // Death's Spirit Swap: the soul body here is a servant's, and a thread has nothing to tie to.
+        if (SoulWard.isWarded(target.uuid, context.scheduling.tick)) {
+            return AbilityOutcome.failed("Нитка ковзає: душа цілі підмінена мерцем")
         }
 
         weave(context, target)
