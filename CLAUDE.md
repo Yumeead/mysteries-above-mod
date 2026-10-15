@@ -718,7 +718,12 @@ javap -cp "$MCM:$MCC" net.minecraft.client.gui.screens.Screen
   `render/UiTheme` (палітра + панель, волосок, бар, тінь перепочинку, бейдж),
   `hud/AbilityHud` через `HudElementRegistry.attachElementBefore(CHAT, …)`.
   Тестів не додалось — віха перевіряється оком.
-- ✅ Фаза 06 — події. `mod`: `event` (`GameEvent`, `IncomingDamage`, `GameEventBridge`),
+- ✅ **Колесо Потойбічного, M4** (15.10.2026) — колесо. `client/render/WheelLayout` (чиста геометрія,
+  `WheelLayoutTest` — тест-сорссет `mod` тепер бачить вихід `client`), `client/screen/AbilityWheelScreen`
+  (утримання R → колесо з кешу без запиту до сервера, відпускання → `ABILITY_ACTION(SELECT_AND_CAST)`,
+  центр скасовує, коліщатко гортає сторінки по 12, без розмиття фону й без паузи), сервер слухає
+  `ABILITY_ACTION` через `AbilityRequests.act`. `CastGesture` окремим класом не з'явився — жест і так
+  живе в `ModKeys`. Тап R і `CAST_REQUEST` не змінились. Перевірено в грі. `mod`: `event` (`GameEvent`, `IncomingDamage`, `GameEventBridge`),
   `ability/context/Events` + `Subscription` + `on<E>()`, `ability/runtime/EventHub`,
   **перший міксин** (`mixin/LivingEntityDamageMixin`, `mysteries_above.mixins.json`);
   `PermanentPassiveAbility` більше не зобов'язана цокати; смерть гасить сесії, респавн
@@ -878,7 +883,7 @@ javap -cp "$MCM:$MCC" net.minecraft.client.gui.screens.Screen
     посеред `TravellersDoor` перенесена місцевість лишається в білому.
   ⚠ Будь-який новий attachment мусить бути **зареєстрований під час ініціалізації мода** (ледаче поле +
   дотик в `install()`/`register()`): невідомий на момент завантаження гравця attachment Fabric відкидає
-  з його збереження. Разом 45 тест-класів / 327 тестів зелені. У грі ще не перевірено.
+  з його збереження. Разом 46 тест-класів / 332 тести зелені (з M4 колеса). У грі ще не перевірено.
 
 ### Смерть (Посл. 9–5) — світ пам'ятає мертвих сам
 

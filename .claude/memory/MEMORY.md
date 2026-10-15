@@ -9,3 +9,4 @@
 - [Ability visuals: pixel and on-theme](ability-visuals-pixel-and-on-theme.md) — no smooth geometry, no default ground circles; the effect must depict the ability
 - [Ability visuals must not clutter](ability-visuals-must-not-clutter.md) — persistent visuals sparse and fading; ThreadSight was rejected as screen-filling
 - [Death: deferred parts](death-pathway-deferred.md) — Spirit World creatures → phase 12, recipe theft → brewing; underworld dimension, zombie shell
+- [Stale dev server drops new packets](stale-dev-server-drops-new-packets.md) — restart runServer after server-side changes before debugging "nothing happens"
