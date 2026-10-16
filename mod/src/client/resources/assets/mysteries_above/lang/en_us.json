@@ -37,7 +37,6 @@
   "wheel.mysteries_above.cancel": "Release here to cancel",
   "wheel.mysteries_above.modes_hint": "Rest the cursor here for modes",
   "hud.mysteries_above.no_selection": "Nothing selected",
-  "hud.mysteries_above.spirituality": "Spirituality: %s / %s",
   "subtitles.mysteries_above.whisper": "Voices that aren't there",
   "subtitles.mysteries_above.heartbeat": "Your own heart"
 }
