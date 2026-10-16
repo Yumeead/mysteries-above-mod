@@ -3,6 +3,7 @@ package me.vangoo.mysteries.pathways.visionary.abilities
 import me.vangoo.domain.services.SequenceScaler
 import me.vangoo.domain.valueobjects.AbilityIdentity
 import me.vangoo.domain.valueobjects.Sequence
+import me.vangoo.mysteries.ability.AbilityMode
 import me.vangoo.mysteries.ability.AbilityOutcome
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
@@ -25,12 +26,11 @@ import kotlin.math.roundToInt
  * Touch a player and plant one psychological block in them for a minute: hunger, sloth,
  * pacifism, silence or apathy.
  *
- * ## A choice offered in chat, not a menu — on purpose, and on request
+ * ## The cue is a mode, picked before the touch
  *
- * This is one of the three abilities carrying the pending-choice seam
- * ([me.vangoo.mysteries.ability.runtime.PendingChoices]) rather than an item-based redesign: a
- * real screen is coming in phase 11, and this ability is written against that seam now so the
- * swap later touches only [cast], not its callers.
+ * The plugin opened a menu after the cast, i.e. with the target already in arm's reach. Here the
+ * five cues are the ability's modes: picked ahead of time on the wheel (or by sneak + cast), so
+ * the touch itself plants the cue at once — the whole point of a 3-block contact power.
  *
  * ## The plugin's sixth option is not here yet
  *
@@ -53,34 +53,25 @@ class PsychicCue : ActiveAbility(AbilityIdentity.of("visionary_psychic_cue")) {
 
     override fun description(sequence: Sequence): Component = Component.literal(
         "Навіює цілі психологічну установку через прямий контакт. Діє ${DURATION_TICKS / TICKS_PER_SECOND} с.\n" +
-            "▪ Оберіть навіювання: /mysteries choose <n>\n" +
+            "▪ Навіювання обирається режимом наперед; присід + застосування перемикає\n" +
             "▪ Дальність $RANGE бл.",
     )
 
+    override fun modes(sequence: Sequence): List<AbilityMode> =
+        Cue.entries.map { AbilityMode(it.name.lowercase(), Component.literal(it.label.substringBefore(" — "))) }
+
     override fun cast(context: CastContext): AbilityOutcome {
+        if (context.caster.isShiftKeyDown) {
+            val next = context.modes.cycle(context.caster.uuid, this, context.sequence)
+            return AbilityOutcome.Awaiting(Component.literal("Навіювання: ${next?.name?.string}"))
+        }
+
         val target = context.targeting.lookingAt(RANGE) as? ServerPlayer
             ?: return AbilityOutcome.failed("Ціль має бути гравцем поруч")
 
-        val labels = Cue.entries.map { it.label }
-        context.messaging.tell(context.caster, Component.literal("Оберіть навіювання — /mysteries choose <n>:"))
-        labels.forEachIndexed { i, label -> context.messaging.tell(context.caster, Component.literal("${i + 1}. $label")) }
-
-        val ticket = context.cast
-        val messaging = context.messaging
-        val events = context.events
-        val cooldowns = context.cooldowns
-        val server = context.level.server
-        val casterId = context.caster.uuid
-        val targetId = target.uuid
-
-        context.pendingChoices.offer(casterId, labels) { index ->
-            val cue = Cue.entries[index]
-            cue.apply(server, events, cooldowns, targetId)
-            messaging.actionBar(casterId, Component.literal("Навіяно: ${cue.label}"))
-            ticket.complete()
-        }
-
-        return AbilityOutcome.Awaiting(Component.literal("Оберіть навіювання: /mysteries choose <n>"))
+        val cue = Cue.entries.first { it.name.lowercase() == mode(context) }
+        cue.apply(context.level.server, context.events, context.cooldowns, target.uuid)
+        return AbilityOutcome.done("Навіяно: ${cue.label}")
     }
 
     private enum class Cue(val label: String) {

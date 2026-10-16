@@ -40,11 +40,10 @@ import net.minecraft.world.effect.MobEffects
  *
  * **Filled for Seq. 9–5** — as much as the plugin filled.
  *
- * ## Two of sixteen carry the pending-choice seam, and say so
+ * ## No chest menus
  *
- * `PsychicCue` and `Alteration` both used to draw a chest menu; both now offer their choice in
- * chat through [me.vangoo.mysteries.ability.runtime.PendingChoices] and `/mysteries choose <n>`,
- * a real service standing in for phase 11's screens rather than a placeholder. `DreamTraversal`'s
+ * `PsychicCue`'s cue became a mode, picked before the touch; `Alteration` asks for its trigger
+ * and effect on a screen ([me.vangoo.mysteries.ability.runtime.PendingChoices]). `DreamTraversal`'s
  * menu is not carried forward at all — see its own doc for why the choice itself was cut.
  *
  * ## Battle Hypnotism needed new ground, not a borrowed effect
