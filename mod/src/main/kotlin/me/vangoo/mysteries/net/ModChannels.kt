@@ -3,6 +3,8 @@ package me.vangoo.mysteries.net
 import me.vangoo.mysteries.net.payload.AbilityActionPayload
 import me.vangoo.mysteries.net.payload.AbilityRosterPayload
 import me.vangoo.mysteries.net.payload.AbilityStatePayload
+import me.vangoo.mysteries.net.payload.ChoiceAnswerPayload
+import me.vangoo.mysteries.net.payload.ChoiceOfferPayload
 import me.vangoo.mysteries.net.payload.MarionetteOrderPayload
 import me.vangoo.mysteries.net.payload.MarionetteStatePayload
 import me.vangoo.mysteries.net.payload.ThreadSightPayload
@@ -56,6 +58,14 @@ object ModChannels {
     /** Spirit Vision (Fool, Seq. 5): who holds whom. Twice a second, to Marionettists only. */
     val THREAD_SIGHT: ClientboundChannel<ThreadSightPayload> =
         clientbound(ThreadSightPayload.TYPE, ThreadSightPayload.CODEC)
+
+    /** An ability waiting on the caster's pick: opens the choice screen. */
+    val CHOICE_OFFER: ClientboundChannel<ChoiceOfferPayload> =
+        clientbound(ChoiceOfferPayload.TYPE, ChoiceOfferPayload.CODEC)
+
+    /** The pick, or the screen closed without one. */
+    val CHOICE_ANSWER: ServerboundChannel<ChoiceAnswerPayload> =
+        serverbound(ChoiceAnswerPayload.TYPE, ChoiceAnswerPayload.CODEC)
 
     /** Every declared channel — for logs and tests. */
     val all: List<Channel<*>> get() = declared.toList()

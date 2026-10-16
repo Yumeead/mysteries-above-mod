@@ -5,6 +5,7 @@ import me.vangoo.mysteries.client.beyonder.ClientAbilityState
 import me.vangoo.mysteries.client.beyonder.ClientMarionettes
 import me.vangoo.mysteries.client.beyonder.SanityAmbience
 import me.vangoo.mysteries.client.render.MarionetteRenderer
+import me.vangoo.mysteries.client.screen.ChoiceScreen
 import me.vangoo.mysteries.client.render.SpiritGlyphParticle
 import me.vangoo.mysteries.client.render.SpiritMoteParticle
 import me.vangoo.mysteries.client.render.SpiritThreads
@@ -46,6 +47,9 @@ object MysteriesAboveClient : ClientModInitializer {
         // puppets, and never at all for anybody else.
         ModChannels.MARIONETTE_STATE.receiveOnClient { payload, _ -> ClientMarionettes.accept(payload) }
         ModChannels.THREAD_SIGHT.receiveOnClient { payload, _ -> SpiritThreads.accept(payload) }
+
+        // An ability waiting on a pick. The screen holds the whole offer; nothing is stored here.
+        ModChannels.CHOICE_OFFER.receiveOnClient { payload, context -> context.client().gui.setScreen(ChoiceScreen(payload)) }
 
         // The cooldown clock. The client tick, not wall time: a paused single-player game stands
         // still — the server and the countdown along with it.

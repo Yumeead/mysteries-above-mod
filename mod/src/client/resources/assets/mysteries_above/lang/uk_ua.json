@@ -10,6 +10,8 @@
   "key.mysteries_above.toggle_hud": "Показати / сховати панель",
   "key.mysteries_above.book": "Книга здібностей",
   "book.mysteries_above.title": "Книга здібностей",
+  "choice.mysteries_above.text": "Послання",
+  "choice.mysteries_above.text_hint": "Ваші слова (можна й без них)",
   "book.mysteries_above.all": "Усі",
   "book.mysteries_above.group_name": "Назва групи",
   "book.mysteries_above.delete_group": "Видалити групу",

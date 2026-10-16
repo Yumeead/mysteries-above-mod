@@ -31,10 +31,10 @@ import java.util.concurrent.ConcurrentHashMap
  * Plants a trap in someone's own behaviour: pick what sets it off, pick what happens, and three
  * minutes later it is still waiting, invisible until it fires.
  *
- * ## Two choices in chat, not three menus
+ * ## Two screens, not three menus
  *
- * Same seam as [PsychicCue]: [PendingChoices] offers the trigger, then the effect, both via
- * `/mysteries choose <n>`, ready to become a real screen in phase 11 without touching [cast].
+ * [PendingChoices] asks for the trigger, then the effect — the second screen opens the moment the
+ * first is answered. Closing either leaves the ticket unsettled: no trap, nothing paid.
  *
  * ## Nine triggers became two
  *
@@ -61,7 +61,7 @@ class Alteration : ActiveAbility(AbilityIdentity.of("visionary_alteration")) {
     override fun description(sequence: Sequence): Component = Component.literal(
         "Непомітно закладає у ціль тригер і наслідок: коли тригер спрацює, ціль відчує наслідок.\n" +
             "▪ Тримається ${MODIFICATION_DURATION_TICKS / TICKS_PER_SECOND / 60} хв, не більше $MAX_PER_TARGET на цілі\n" +
-            "▪ Оберіть тригер і наслідок: /mysteries choose <n>",
+            "▪ Після застосування оберіть тригер і наслідок",
     )
 
     override fun cast(context: CastContext): AbilityOutcome {
@@ -72,10 +72,6 @@ class Alteration : ActiveAbility(AbilityIdentity.of("visionary_alteration")) {
             return AbilityOutcome.failed("На цій цілі вже досягнуто ліміт видозмін")
         }
 
-        val triggerLabels = Trigger.entries.map { it.label }
-        context.messaging.tell(context.caster, Component.literal("Оберіть тригер — /mysteries choose <n>:"))
-        triggerLabels.forEachIndexed { i, label -> context.messaging.tell(context.caster, Component.literal("${i + 1}. $label")) }
-
         val ticket = context.cast
         val messaging = context.messaging
         val events = context.events
@@ -84,12 +80,12 @@ class Alteration : ActiveAbility(AbilityIdentity.of("visionary_alteration")) {
         val casterId = context.caster.uuid
         val targetId = target.uuid
 
-        pendingChoices.offer(casterId, triggerLabels) { triggerIndex ->
+        pendingChoices.offer(casterId, Component.literal("Видозміна: тригер"), Trigger.entries.map { Component.literal(it.label) }) { triggerIndex, _ ->
             val trigger = Trigger.entries[triggerIndex]
             offerEffect(messaging, events, scheduling, pendingChoices, casterId, targetId, trigger, ticket)
         }
 
-        return AbilityOutcome.Awaiting(Component.literal("Оберіть тригер: /mysteries choose <n>"))
+        return AbilityOutcome.Awaiting()
     }
 
     private fun offerEffect(
@@ -102,11 +98,8 @@ class Alteration : ActiveAbility(AbilityIdentity.of("visionary_alteration")) {
         trigger: Trigger,
         ticket: PendingCast,
     ) {
-        val effectLabels = Effect.entries.map { it.label }
-        messaging.tell(casterId, Component.literal("Оберіть наслідок — /mysteries choose <n>:"))
-        effectLabels.forEachIndexed { i, label -> messaging.tell(casterId, Component.literal("${i + 1}. $label")) }
-
-        pendingChoices.offer(casterId, effectLabels) { effectIndex ->
+        val title = Component.literal("Видозміна: ${trigger.label.lowercase()} →")
+        pendingChoices.offer(casterId, title, Effect.entries.map { Component.literal(it.label) }) { effectIndex, _ ->
             plant(messaging, events, scheduling, casterId, targetId, trigger, Effect.entries[effectIndex])
             ticket.complete()
         }

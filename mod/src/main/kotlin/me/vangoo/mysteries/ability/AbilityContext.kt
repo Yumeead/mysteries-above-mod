@@ -57,11 +57,9 @@ import net.minecraft.world.phys.Vec3
  * | `ui` — choice screens and input | 11 |
  * | `summons` — data-driven creatures | 12 |
  *
- * [pendingChoices] arrived ahead of that table on purpose: `PsychicCue`, `Alteration` and
- * `DreamTraversal` all need to offer a choice **now**, in phase 08, years before a screen exists
- * to draw it. It is the same kind of stand-in [me.vangoo.mysteries.ability.runtime.AbilitySelection]
- * already is for the ability wheel — a real service, not a placeholder, that phase 11 will
- * replace by changing what the offering ability calls, not by growing the context further.
+ * [pendingChoices] is that `ui`: an ability that must ask mid-cast (`Alteration`, `ThunderVoice`)
+ * offers the options and the caster's client opens a screen. A choice known before the cast is
+ * a mode instead ([me.vangoo.mysteries.ability.Ability.modes]).
  */
 interface AbilityContext {
 

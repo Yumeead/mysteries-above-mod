@@ -13,6 +13,7 @@ import me.vangoo.mysteries.event.GameEvent
 import me.vangoo.mysteries.event.GameEventBridge
 import me.vangoo.mysteries.event.IncomingDamage
 import me.vangoo.mysteries.event.MobTargeting
+import me.vangoo.mysteries.net.ModChannels
 import me.vangoo.mysteries.pathways.common.SoulWard
 import me.vangoo.mysteries.pathways.death.Death
 import me.vangoo.mysteries.pathways.death.Retinue
@@ -84,14 +85,14 @@ object AbilityServices {
      */
     val events = EventHub({ scheduler.tick }, onError)
 
-    /** Which ability the player holds under the key. Until phase 11 this is all the selection there is. */
+    /** Which ability the player holds under the cast key — the wheel and the book pick it. */
     val selection = AbilitySelection()
 
     /** Which mode each player picked for the abilities that have several. */
     val modes = AbilityModes()
 
-    /** A choice an ability is waiting on, until phase 11's real menus exist. */
-    val pendingChoices = PendingChoices()
+    /** A choice an ability is waiting on; the caster's client draws it as a screen. */
+    val pendingChoices = PendingChoices { id, offer -> players(id)?.let { ModChannels.CHOICE_OFFER.sendTo(it, offer) } }
 
     val contexts: AbilityContexts = AbilityContexts(beyonders, cooldowns, messaging, scheduling, events, pendingChoices, modes)
 
@@ -122,6 +123,8 @@ object AbilityServices {
 
         // One mod tick: the scheduler first (sessions wake up), then the passives' tick.
         // The order is exactly this so that a passive sees the world after the sessions changed it.
+        ModChannels.CHOICE_ANSWER.receiveOnServer { answer, context -> pendingChoices.answer(context.player().uuid, answer) }
+
         ServerTickEvents.END_SERVER_TICK.register { s ->
             scheduler.advance()
             passives.tick(scheduler.tick)

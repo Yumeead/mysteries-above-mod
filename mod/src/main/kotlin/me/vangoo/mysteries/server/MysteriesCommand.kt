@@ -31,10 +31,10 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.ItemStack
 
 /**
- * `/mysteries` — all interaction with the mod until phase 11.
+ * `/mysteries` — the operator's tools and a few debugging branches.
  *
- * Half the branches are temporary: `cast` and `select` will be replaced by the ability wheel,
- * `potion` and `mastery` by brewing and real mastery. But until those exist, the cycle "grant a
+ * Half the branches are temporary: `cast` and `select` stay only for debugging (the wheel and
+ * the book are the real way), `potion` and `mastery` will be replaced by brewing and real mastery. But until those exist, the cycle "grant a
  * pathway → drink a potion → cast" has to be closed with something **in the game**, not in the
  * tests — and that is the whole point of phase 05.
  *
@@ -60,12 +60,6 @@ object MysteriesCommand {
                 .then(
                     Commands.literal("select").then(
                         abilityArgument().executes { context -> select(context) },
-                    ),
-                )
-                .then(
-                    Commands.literal("choose").then(
-                        Commands.argument("option", IntegerArgumentType.integer(1))
-                            .executes { context -> choose(context) },
                     ),
                 )
                 .then(
@@ -202,20 +196,6 @@ object MysteriesCommand {
             return fail(context, "У вас немає здібності «$identity»")
         }
         context.source.sendSuccess({ Component.literal("Обрано: $identity") }, false)
-        return 1
-    }
-
-    /**
-     * Answers whatever choice is pending for the player — the stand-in for a menu click until
-     * phase 11. `option` is 1-based (as printed in chat), [PendingChoices.choose] takes the
-     * 0-based index.
-     */
-    private fun choose(context: CommandContext<CommandSourceStack>): Int {
-        val player = context.source.playerOrException
-        val option = IntegerArgumentType.getInteger(context, "option")
-        if (!AbilityServices.pendingChoices.choose(player.uuid, option - 1)) {
-            return fail(context, "Немає на що відповідати")
-        }
         return 1
     }
 

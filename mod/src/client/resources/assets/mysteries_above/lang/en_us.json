@@ -10,6 +10,8 @@
   "key.mysteries_above.toggle_hud": "Show / hide the panel",
   "key.mysteries_above.book": "Ability book",
   "book.mysteries_above.title": "Ability book",
+  "choice.mysteries_above.text": "Message",
+  "choice.mysteries_above.text_hint": "Your words (optional)",
   "book.mysteries_above.all": "All",
   "book.mysteries_above.group_name": "Group name",
   "book.mysteries_above.delete_group": "Delete group",
