@@ -1,5 +1,6 @@
 package me.vangoo.mysteries.client.beyonder
 
+import me.vangoo.domain.valueobjects.Mastery
 import me.vangoo.domain.valueobjects.SanityLoss
 import me.vangoo.domain.valueobjects.Spirituality
 import me.vangoo.mysteries.net.payload.AbilityRosterPayload
@@ -49,6 +50,10 @@ object ClientAbilityState {
     var sanityLoss: SanityLoss = SanityLoss.none()
         private set
 
+    /** Potion mastery; at 100 % the next potion can be drunk. */
+    var mastery: Mastery = Mastery.zero()
+        private set
+
     /** The identity of the selected ability; the server holds the selection, this is only its echo. */
     var selected: String? = null
         private set
@@ -94,6 +99,7 @@ object ClientAbilityState {
 
         spirituality = payload.spirituality
         sanityLoss = payload.sanityLoss
+        mastery = payload.mastery
         selected = payload.selected
 
         // The snapshot is complete by design: the packet holds only those with something to say,
@@ -111,6 +117,7 @@ object ClientAbilityState {
     private fun resetState() {
         spirituality = null
         sanityLoss = SanityLoss.none()
+        mastery = Mastery.zero()
         selected = null
         live.clear()
         anchored = false

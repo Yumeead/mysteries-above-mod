@@ -86,6 +86,7 @@ object BeyonderStatus {
                 if (readyAtTick == 0 && !toggled && !sustaining && mode == null) return@mapNotNull null
                 AbilityStatePayload.Live(spec.identity.id, readyAtTick, toggled, sustaining, mode)
             },
+            mastery = beyonder.mastery,
         )
     }
 

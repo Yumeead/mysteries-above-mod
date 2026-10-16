@@ -176,7 +176,8 @@ object ModKeys {
 
         var book = false
         while (BOOK.consumeClick()) book = true
-        if (book && client.gui.screen() == null && ClientAbilityState.entries.isNotEmpty()) {
+        // Any Beyonder opens it: a pathway whose powers have not awoken yet still has an overview.
+        if (book && client.gui.screen() == null && ClientAbilityState.isBeyonder) {
             client.gui.setScreen(AbilityBookScreen())
         }
 

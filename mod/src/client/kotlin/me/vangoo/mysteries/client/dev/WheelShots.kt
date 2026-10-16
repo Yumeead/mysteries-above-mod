@@ -3,6 +3,7 @@ package me.vangoo.mysteries.client.dev
 import me.vangoo.domain.valueobjects.AbilityIdentity
 import me.vangoo.domain.valueobjects.Spirituality
 import me.vangoo.mysteries.ability.runtime.AbilityServices
+import me.vangoo.mysteries.client.AbilityGroup
 import me.vangoo.mysteries.client.ClientOptions
 import me.vangoo.mysteries.client.HudMode
 import me.vangoo.mysteries.client.beyonder.ClientAbilityState
@@ -10,6 +11,7 @@ import me.vangoo.mysteries.client.input.ModKeys
 import me.vangoo.mysteries.client.net.sendToServer
 import me.vangoo.mysteries.client.render.WheelLayout
 import me.vangoo.mysteries.client.render.WheelSkin
+import me.vangoo.mysteries.client.screen.AbilityBookScreen
 import me.vangoo.mysteries.client.screen.AbilityWheelScreen
 import me.vangoo.mysteries.net.ModChannels
 import me.vangoo.mysteries.net.payload.AbilityActionPayload
@@ -18,6 +20,8 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.Minecraft
 import net.minecraft.client.Screenshot
 import net.minecraft.client.gui.screens.TitleScreen
+import net.minecraft.client.input.MouseButtonEvent
+import net.minecraft.client.input.MouseButtonInfo
 import org.slf4j.LoggerFactory
 
 /**
@@ -154,6 +158,95 @@ object WheelShots {
         }
     }
 
+
+    /** Opens the grimoire on [page]; with [captureRow] it also clicks that row of the keys list. */
+    private fun openBook(mc: Minecraft, page: AbilityBookScreen.Page, captureRow: Int = -1) {
+        val screen = AbilityBookScreen(page)
+        mc.gui.setScreen(screen)
+        screen.mouseMoved(0.0, 0.0)
+        if (captureRow >= 0) {
+            // The same geometry the screen computes: cover, spine, header, first row.
+            val bw = minOf(screen.width - 12, 560)
+            val bh = minOf(screen.height - 10, 330)
+            val x = (screen.width - bw) / 2 + 36 + 40
+            val y = (screen.height - bh) / 2 + 30 + 6 + 18 * captureRow + 9
+            screen.mouseClicked(MouseButtonEvent(x.toDouble(), y.toDouble(), MouseButtonInfo(0, 0)), false)
+        }
+    }
+
+    /**
+     * The grimoire: every section at GUI 2, 3 and 4 on a day and a night sky, plus the edge
+     * states — a key clash, a capture in progress, a long group name, other pathways' emblems.
+     */
+    private fun planBook(originalScale: Int) {
+        val savedGroups = ClientOptions.groups.map { AbilityGroup(it.name, it.abilities?.toMutableList(), LinkedHashMap(it.hotkeys)) }
+        val savedActive = ClientOptions.activeGroup
+        then(100) { mc ->
+            command(mc, "mysteries become Sun 5 @a")
+            command(mc, "weather clear")
+            command(mc, "mysteries sanity 47 @a")
+            command(mc, "mysteries mastery 63.5 @a")
+        }
+        then(40) { mc ->
+            spirituality(mc, 0.62f)
+            cooldowns(mc, true)
+            val all = ClientAbilityState.entries.filter { it.type != me.vangoo.domain.abilities.AbilityType.PERMANENT_PASSIVE }
+            ClientOptions.editGroups {
+                while (ClientOptions.groups.size > 1) ClientOptions.groups.removeAt(1)
+                val fight = AbilityGroup("Бойовий набір для довгих нічних полювань", all.take(6).map { it.identity }.toMutableList())
+                // E is vanilla's inventory: a deliberate clash to show.
+                all.getOrNull(0)?.let { fight.bind("key.keyboard.e", it.identity) }
+                all.getOrNull(1)?.let { fight.bind("key.keyboard.c", it.identity) }
+                all.getOrNull(2)?.let { fight.bind("key.mouse.4", it.identity) }
+                ClientOptions.groups += fight
+                ClientOptions.groups += AbilityGroup("Подорож", all.drop(6).take(3).map { it.identity }.toMutableList())
+                ClientOptions.activeGroup = 1
+            }
+            all.getOrNull(3)?.let { ModChannels.ABILITY_ACTION.sendToServer(AbilityActionPayload(AbilityActionPayload.Action.SELECT, it.identity, null)) }
+        }
+        for (scale in listOf(2, 3, 4)) {
+            then(20) { mc -> mc.options.guiScale().set(scale); mc.resizeGui() }
+            for (night in listOf(false, true)) {
+                val bg = if (night) "night" else "day"
+                then(20) { mc ->
+                    command(mc, if (night) "time set midnight" else "time set noon")
+                    mc.player!!.setXRot(if (night) -35f else 10f)
+                }
+                for (page in AbilityBookScreen.Page.entries) {
+                    then(8) { mc -> openBook(mc, page) }
+                    then(2) { mc -> shot(mc, "book_gs${scale}_${bg}_${page.name.lowercase()}") }
+                }
+                if (!night) {
+                    then(8) { mc -> openBook(mc, AbilityBookScreen.Page.KEYS, captureRow = 1) }
+                    then(2) { mc -> shot(mc, "book_gs${scale}_${bg}_keys_capture") }
+                    then(4) { mc -> ClientOptions.activeGroup = 0; openBook(mc, AbilityBookScreen.Page.GROUPS) }
+                    then(2) { mc -> shot(mc, "book_gs${scale}_${bg}_groups_all"); ClientOptions.activeGroup = 1 }
+                }
+            }
+            then(2) { mc -> mc.gui.setScreen(null) }
+        }
+        // Other pathways at GUI 3: emblems, modes and a bigger roster.
+        then(10) { mc -> mc.options.guiScale().set(3); mc.resizeGui(); command(mc, "time set noon") }
+        for (pathway in listOf("Tyrant", "Death", "Fool", "Door", "Error", "Visionary", "WhiteTower", "Justiciar", "Hermit")) {
+            then(40) { mc -> mc.gui.setScreen(null); command(mc, "mysteries become $pathway 5 @a") }
+            then(20) { mc -> spirituality(mc, 0.9f); openBook(mc, AbilityBookScreen.Page.STATUS) }
+            then(2) { mc -> shot(mc, "book_path_${pathway.lowercase()}_status") }
+            then(8) { mc -> openBook(mc, AbilityBookScreen.Page.LIBRARY) }
+            then(2) { mc -> shot(mc, "book_path_${pathway.lowercase()}_library") }
+        }
+        then(10) { mc ->
+            mc.gui.setScreen(null)
+            ClientOptions.editGroups {
+                ClientOptions.groups.clear()
+                ClientOptions.groups += savedGroups
+                ClientOptions.activeGroup = savedActive
+            }
+            mc.options.guiScale().set(originalScale)
+            log.info("wheel shots done")
+            mc.stop()
+        }
+    }
+
     private enum class State { NORMAL, HOVER, COOLDOWN, NO_SPIRITUALITY }
 
     private fun plan() {
@@ -161,6 +254,7 @@ object WheelShots {
         val originalScale = Minecraft.getInstance().options.guiScale().get()
         // `MYSTERIES_WHEEL_SHOTS=hud` shoots the HUD instead; anything else compares the wheel skins.
         if (System.getenv("MYSTERIES_WHEEL_SHOTS") == "hud") return planHud(originalSkin, originalScale)
+        if (System.getenv("MYSTERIES_WHEEL_SHOTS") == "book") return planBook(originalScale)
         val skins = WheelSkin.entries
         val states = State.entries
         then(100) { mc ->
