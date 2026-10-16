@@ -2,6 +2,7 @@ package me.vangoo.mysteries.client
 
 import me.vangoo.mysteries.MOD_ID
 import me.vangoo.mysteries.client.beyonder.ClientAbilityState
+import me.vangoo.mysteries.client.dev.WheelShots
 import me.vangoo.mysteries.client.beyonder.ClientMarionettes
 import me.vangoo.mysteries.client.beyonder.SanityAmbience
 import me.vangoo.mysteries.client.render.MarionetteRenderer
@@ -36,6 +37,7 @@ object MysteriesAboveClient : ClientModInitializer {
         // The first thing done: after this both the HUD and the keys read the settings as
         // something that already exists.
         ClientOptions.load()
+        if (System.getenv("MYSTERIES_WHEEL_SHOTS") != null) WheelShots.install()
 
         // Both snapshots land in the client store and nowhere else: the HUD, the wheel and the
         // book all draw from it.
