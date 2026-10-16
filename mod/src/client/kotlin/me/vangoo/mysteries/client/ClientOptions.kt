@@ -3,6 +3,7 @@ package me.vangoo.mysteries.client
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParseException
 import me.vangoo.mysteries.MOD_ID
+import me.vangoo.mysteries.client.render.WheelSkin
 import net.fabricmc.loader.api.FabricLoader
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -121,6 +122,9 @@ object ClientOptions {
     /** Turns the HUD fade into an instant switch; the cooldown veil stays, it shows state. */
     var reducedMotion: Boolean by persisted(false)
 
+    /** The wheel's look; geometry and input are the same for every skin. */
+    var wheelSkin: WheelSkin by persisted(WheelSkin.ATMOSPHERIC)
+
     /** Index 0 is always the built-in "all" group. */
     val groups: MutableList<AbilityGroup> = mutableListOf(AbilityGroup("", null))
 
@@ -169,6 +173,7 @@ object ClientOptions {
             dto.showSpirituality?.let { showSpirituality = it }
             dto.showDescriptions?.let { showDescriptions = it }
             dto.reducedMotion?.let { reducedMotion = it }
+            dto.wheelSkin?.let { name -> wheelSkin = enumOrNull<WheelSkin>(name) ?: wheelSkin }
 
             dto.groups?.let { saved ->
                 groups.clear()
@@ -203,6 +208,7 @@ object ClientOptions {
             it.showSpirituality = showSpirituality
             it.showDescriptions = showDescriptions
             it.reducedMotion = reducedMotion
+            it.wheelSkin = wheelSkin.name
             it.groups = groups.map { group -> GroupDto(group.name, group.abilities, group.hotkeys) }
             it.activeGroup = activeGroup
         }
@@ -260,6 +266,7 @@ object ClientOptions {
         var showSpirituality: Boolean? = null
         var showDescriptions: Boolean? = null
         var reducedMotion: Boolean? = null
+        var wheelSkin: String? = null
         var groups: List<GroupDto>? = null
         var activeGroup: Int? = null
     }

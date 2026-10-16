@@ -60,8 +60,11 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
         val entry: AbilityRosterPayload.Entry,
         val dx: Int,
         val dy: Int,
+        /** The cost numbers; [spirit] — they are spirituality, so the icon goes in front. */
         val price: Component?,
+        val spirit: Boolean,
         val critical: Boolean,
+        val selected: Boolean,
         val marker: Component?,
         val cooldown: Component?,
         val remaining: Float,
@@ -336,8 +339,10 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
                 entry = entry,
                 dx = dx,
                 dy = dy,
-                price = priceOf(entry, affordable),
+                price = priceOf(entry),
+                spirit = entry.cost > 0 || entry.upkeep > 0,
                 critical = entry.type == AbilityType.ACTIVE && !affordable,
+                selected = entry.identity == ClientAbilityState.selected,
                 marker = when {
                     ClientAbilityState.isToggled(entry.identity) -> Component.literal("●")
                     entry.type == AbilityType.TOGGLEABLE_PASSIVE -> Component.literal("○")
@@ -357,15 +362,14 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
         if (caption.isEmpty()) updateCaption()
     }
 
-    /** Same wording as the HUD: one-off, upkeep, or both. A shape (✕) as well as a colour. */
-    private fun priceOf(entry: AbilityRosterPayload.Entry, affordable: Boolean): Component? {
+    /** Same wording as the HUD: one-off, upkeep, or both. The spirituality icon is drawn, not typed. */
+    private fun priceOf(entry: AbilityRosterPayload.Entry): Component? {
         val parts = buildList {
-            if (entry.cost > 0) add("✦ ${entry.cost}")
-            if (entry.upkeep > 0) add("✦ ${entry.upkeep}/с")
+            if (entry.cost > 0) add("${entry.cost}")
+            if (entry.upkeep > 0) add("${entry.upkeep}/с")
         }
         if (parts.isEmpty()) return if (entry.type == AbilityType.PERMANENT_PASSIVE) Component.literal("—") else null
-        val text = parts.joinToString(" · ")
-        return Component.literal(if (entry.type == AbilityType.ACTIVE && !affordable) "✕ $text" else text)
+        return Component.literal(parts.joinToString(" · "))
     }
 
     // ── Frame ───────────────────────────────────────────────────────────────────
@@ -384,13 +388,17 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
         graphics.pose().scale(scale, scale)
         graphics.pose().translate(-centerX.toFloat(), -centerY.toFloat())
 
+        val skin = ClientOptions.wheelSkin
+        if (cards.isNotEmpty()) skin.ring(graphics, centerX, centerY, WheelLayout.radius(cards.size), cards.size, alpha, accent)
+        val pathway = ClientAbilityState.roster?.pathwayId
+
         // Pass one: panels and icons.
         cards.forEachIndexed { index, card ->
             val x = centerX + card.dx - CARD / 2
             val y = centerY + card.dy - CARD / 2
             val a = if (card.dim) alpha * DIM else alpha
             grown(graphics, card, if (index == hovered) grow else 1f) {
-                UiTheme.panel(graphics, x, y, CARD, CARD, a)
+                skin.body(graphics, x, y, a)
                 graphics.item(card.entry.icon, x + ICON_INSET, y + ICON_INSET)
             }
         }
@@ -404,21 +412,20 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
             val a = if (card.dim) alpha * DIM else alpha
             grown(graphics, card, if (index == hovered) grow else 1f) {
                 UiTheme.cooldownVeil(graphics, x + ICON_INSET, y + ICON_INSET, ICON, card.remaining, a)
+                skin.emblem(graphics, x, y, pathway, accent, a)
                 card.cooldown?.let { graphics.centeredText(font, it, x + CARD / 2, y + CARD / 2 - 4, UiTheme.argb(UiTheme.TEXT, a)) }
                 card.marker?.let { graphics.text(font, it, x + CARD - 5, y - 3, UiTheme.argb(UiTheme.ACCENT, a)) }
                 card.slot?.let { graphics.text(font, it, x - 2, y - 3, UiTheme.argb(UiTheme.MUTED, a)) }
                 card.price?.let {
-                    val color = if (card.critical) UiTheme.CRITICAL else UiTheme.MUTED
-                    graphics.centeredText(font, it, x + CARD / 2, y + CARD + 2, UiTheme.argb(color, a))
+                    val width = UiTheme.priceWidth(font, it, card.spirit)
+                    UiTheme.price(graphics, font, it, card.critical, card.spirit, x + CARD / 2 - width / 2, y + CARD + 2, a)
                 }
                 card.numeral?.let {
                     val seal = if (index == hovered) alpha else a * NUMERAL_ALPHA
                     graphics.centeredText(font, it, centerX + card.numeralX, centerY + card.numeralY - font.lineHeight / 2, UiTheme.argb(accent, seal))
                 }
-                if (index == hovered) {
-                    // The pathway colour appears here and nowhere else in the wheel.
-                    graphics.outline(x - 1, y - 1, CARD + 2, CARD + 2, UiTheme.argb(accent, alpha))
-                }
+                // The pathway colour appears in the hover outline, the hour marks and the skin's centre ornament.
+                skin.marks(graphics, x, y, index == hovered, card.selected, card.critical, if (index == hovered) alpha else a, accent)
             }
         }
 

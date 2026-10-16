@@ -1,8 +1,11 @@
 package me.vangoo.mysteries.client.render
 
+import me.vangoo.mysteries.MOD_ID
 import net.minecraft.client.gui.Font
 import net.minecraft.client.gui.GuiGraphicsExtractor
+import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.network.chat.Component
+import net.minecraft.resources.Identifier
 import net.minecraft.util.ARGB
 
 /**
@@ -121,6 +124,50 @@ object UiTheme {
     }
 
     fun badgeWidth(font: Font, text: Component): Int = font.width(text) + BADGE_PADDING * 2
+
+    private val SPIRIT: Identifier = Identifier.fromNamespaceAndPath(MOD_ID, "spirit/droplet")
+
+    /** The same drop, emptied and cracked: "cannot afford" as a shape, not only a colour. */
+    private val DRAINED: Identifier = Identifier.fromNamespaceAndPath(MOD_ID, "spirit/drained")
+    private const val SPIRIT_WIDTH = 5
+    private const val SPIRIT_HEIGHT = 7
+    private const val SPIRIT_ADVANCE = SPIRIT_WIDTH + 2
+
+    fun priceWidth(font: Font, text: Component, spirit: Boolean): Int =
+        (if (spirit) SPIRIT_ADVANCE else 0) + font.width(text)
+
+    /**
+     * A price line: a drop and the number. The drop is a pixel sprite, not a `✦` glyph — the glyph
+     * comes from the unicode fallback font and lands blurred and off the digits' baseline. When the
+     * price cannot be paid, the drop is drawn empty and cracked and the number turns red.
+     */
+    fun price(graphics: GuiGraphicsExtractor, font: Font, text: Component, critical: Boolean, spirit: Boolean, x: Int, y: Int, alpha: Float) {
+        var left = x
+        if (spirit) {
+            if (critical) {
+                shadowed(graphics, DRAINED, left, y, SPIRIT_WIDTH, SPIRIT_HEIGHT, 0xFFFFFF, alpha)
+            } else {
+                shadowed(graphics, SPIRIT, left, y, SPIRIT_WIDTH, SPIRIT_HEIGHT, ACCENT, alpha)
+            }
+            left += SPIRIT_ADVANCE
+        }
+        graphics.text(font, text, left, y, argb(if (critical) CRITICAL else MUTED, alpha))
+    }
+
+    /** A sprite with the font's shadow: the same shape a pixel down-right at a quarter brightness. */
+    private fun shadowed(graphics: GuiGraphicsExtractor, id: Identifier, x: Int, y: Int, w: Int, h: Int, tint: Int, alpha: Float) {
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, id, x + 1, y + 1, w, h, argb(ARGB.scaleRGB(tint, 0.25f), alpha))
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, id, x, y, w, h, argb(tint, alpha))
+    }
+
+    fun priceBadgeWidth(font: Font, text: Component, spirit: Boolean): Int =
+        priceWidth(font, text, spirit) + BADGE_PADDING * 2
+
+    /** [price] on a badge backing. */
+    fun priceBadge(graphics: GuiGraphicsExtractor, font: Font, text: Component, critical: Boolean, spirit: Boolean, x: Int, y: Int, alpha: Float) {
+        graphics.fill(x, y, x + priceBadgeWidth(font, text, spirit), y + BADGE_HEIGHT, argb(TRACK, TRACK_ALPHA * alpha))
+        price(graphics, font, text, critical, spirit, x + BADGE_PADDING, y + 2, alpha)
+    }
 
     /** A badge: a backing and the text. A cost, a slot key caption, a page counter. */
     fun badge(
