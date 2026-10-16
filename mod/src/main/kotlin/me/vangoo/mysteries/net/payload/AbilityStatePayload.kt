@@ -1,5 +1,6 @@
 package me.vangoo.mysteries.net.payload
 
+import me.vangoo.domain.valueobjects.Mastery
 import me.vangoo.domain.valueobjects.SanityLoss
 import me.vangoo.domain.valueobjects.Spirituality
 import me.vangoo.mysteries.modId
@@ -32,6 +33,8 @@ data class AbilityStatePayload(
     val selected: String?,
     /** Only the abilities with something to say: the rest are ready, switched off and not running. */
     val live: List<Live>,
+    /** Potion mastery: it grows with casts, so it rides the frequent snapshot. */
+    val mastery: Mastery = Mastery.zero(),
 ) : CustomPacketPayload {
 
     /**
@@ -82,6 +85,8 @@ data class AbilityStatePayload(
                 buf.writeBoolean(live.mode != null)
                 live.mode?.let(buf::writeUtf)
             }
+            // Hundredths: `Mastery` keeps two decimals, so this is lossless.
+            buf.writeVarInt(Math.round(payload.mastery.value * 100).toInt())
         }
 
         private fun read(buf: RegistryFriendlyByteBuf): AbilityStatePayload {
@@ -100,7 +105,8 @@ data class AbilityStatePayload(
                     mode = if (buf.readBoolean()) buf.readUtf() else null,
                 )
             }
-            return AbilityStatePayload(serverTick, Spirituality(current, maximum), sanityLoss, selected, live)
+            val mastery = Mastery.of(buf.readVarInt() / 100.0)
+            return AbilityStatePayload(serverTick, Spirituality(current, maximum), sanityLoss, selected, live, mastery)
         }
     }
 }

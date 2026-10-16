@@ -7,6 +7,7 @@ import me.vangoo.domain.valueobjects.Spirituality
 import me.vangoo.mysteries.GameRegistries
 import me.vangoo.mysteries.net.payload.AbilityActionPayload
 import me.vangoo.mysteries.net.payload.AbilityRosterPayload
+import me.vangoo.domain.valueobjects.Mastery
 import me.vangoo.domain.valueobjects.SanityLoss
 import me.vangoo.mysteries.net.payload.AbilityStatePayload
 import net.minecraft.core.RegistryAccess
@@ -136,6 +137,7 @@ class AbilityPayloadCodecTest {
                 AbilityStatePayload.Live("tyrant_storm_eye", 0, true, false),
                 AbilityStatePayload.Live("tyrant_illusory_scales", 0, false, true),
             ),
+            mastery = Mastery.of(42.37),
         )
 
         // The state is flat numbers and strings, so plain equality works here.
