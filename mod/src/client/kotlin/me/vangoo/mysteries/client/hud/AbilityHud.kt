@@ -51,6 +51,7 @@ object AbilityHud : HudElement {
         val name: Component,
         val price: Component?,
         val priceCritical: Boolean,
+        val spirit: Boolean,
         val marker: Component?,
         val slot: Component?,
         val cooldownLabel: Component?,
@@ -162,8 +163,7 @@ object AbilityHud : HudElement {
             else -> entry.name
         }
         val priceCritical = entry != null && entry.type == AbilityType.ACTIVE && !signature.affordable
-        // A shape as well as a colour, the same mark as the wheel's: readable without colour at all.
-        val price = entry?.let(::priceOf)?.let { if (priceCritical) Component.literal("✕ ").append(it) else it }
+        val price = entry?.let(::priceOf)
 
         val marker = when {
             signature.toggled -> Component.literal("●")
@@ -180,7 +180,7 @@ object AbilityHud : HudElement {
         }
 
         // The width fits the longer of the two: the name, or the cost line with the status mark.
-        val detailWidth = (price?.let { UiTheme.badgeWidth(font, it) } ?: 0) +
+        val detailWidth = (price?.let { UiTheme.priceBadgeWidth(font, it, true) } ?: 0) +
             (marker?.let { MARKER_GAP + font.width(it) } ?: 0) +
             (slot?.let { MARKER_GAP + font.width(it) } ?: 0)
         val content = (if (entry != null) ICON + GAP else 0) +
@@ -195,6 +195,7 @@ object AbilityHud : HudElement {
             name = name,
             price = price,
             priceCritical = priceCritical,
+            spirit = price != null,
             marker = marker,
             slot = slot,
             cooldownLabel = cooldownLabel,
@@ -209,17 +210,17 @@ object AbilityHud : HudElement {
      * The ability's cost — one-off, upkeep, or both.
      *
      * The upkeep used to be shown only for toggles, while a power that goes out on its own (a
-     * session with `upkeep`) is declared **active** — and the result was "✦ 0" where two dozen
+     * session with `upkeep`) is declared **active** — and the result was "0" where two dozen
      * points were in fact being spent every second. The ability type has nothing to do with it:
      * the question is simply which of the two prices are non-zero.
      */
     private fun priceOf(entry: AbilityRosterPayload.Entry): Component? {
         val parts = buildList {
-            if (entry.cost > 0) add("✦ ${entry.cost}")
-            if (entry.upkeep > 0) add("✦ ${entry.upkeep}/с")
+            if (entry.cost > 0) add("${entry.cost}")
+            if (entry.upkeep > 0) add("${entry.upkeep}/с")
         }
         if (parts.isNotEmpty()) return Component.literal(parts.joinToString(" · "))
-        return if (entry.type == AbilityType.ACTIVE) Component.literal("✦ 0") else null
+        return if (entry.type == AbilityType.ACTIVE) Component.literal("0") else null
     }
 
     private fun approach(current: Float, target: Float, step: Float): Float =
@@ -279,9 +280,8 @@ object AbilityHud : HudElement {
 
         var detailX = textLeft
         panel.price?.let {
-            val color = if (panel.priceCritical) UiTheme.CRITICAL else UiTheme.MUTED
-            UiTheme.badge(graphics, font, it, detailX, y + PADDING + DETAIL_OFFSET, color, alpha)
-            detailX += UiTheme.badgeWidth(font, it) + MARKER_GAP
+            UiTheme.priceBadge(graphics, font, it, panel.priceCritical, panel.spirit, detailX, y + PADDING + DETAIL_OFFSET, alpha)
+            detailX += UiTheme.priceBadgeWidth(font, it, panel.spirit) + MARKER_GAP
         }
         panel.marker?.let {
             graphics.text(font, it, detailX, y + PADDING + DETAIL_OFFSET + 2, UiTheme.argb(UiTheme.ACCENT, alpha))
