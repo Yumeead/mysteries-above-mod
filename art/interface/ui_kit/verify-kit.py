@@ -21,6 +21,10 @@ with zipfile.ZipFile(Path.home() / '.gradle/caches/fabric-loom/26.2/minecraft-cl
             assert Image.open(own).size == Image.open(io.BytesIO(archive.read(original))).size, source
     for record in manifest['generated']:
         assert hashlib.sha256((ROOT / record['path']).read_bytes()).hexdigest() == record['sha256'], record['path']
+        if '/creative_inventory/tab_' in record['path'] and '/sprites/' in record['path']:
+            image = Image.open(ROOT / record['path']).convert('RGBA')
+            expected = kit.GOLD['light'] if '_selected_' in record['path'] else kit.GOLD['mid']
+            assert image.getpixel((image.width - 2, image.height // 2))[:3] == ImageColor.getrgb(expected), record['path']
     for name, slots in manifest['nativeSlots'].items():
         native = 'assets/minecraft/textures/gui/container/' + (name if name.endswith('.png') else name + '.png')
         original = Image.open(io.BytesIO(archive.read(native))).convert('RGBA')

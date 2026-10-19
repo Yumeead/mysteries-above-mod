@@ -1,0 +1,19 @@
+import groovy.json.JsonOutput
+
+gradle.projectsEvaluated {
+    def mod = gradle.rootProject.project(':mod')
+    mod.tasks.register('writeMenuReviewLaunch') {
+        doLast {
+            def run = mod.tasks.named('runClient').get()
+            def target = new File(gradle.rootProject.projectDir, 'art/interface/inventories-menus-v1/live-preview/launch.json')
+            target.text = JsonOutput.prettyPrint(JsonOutput.toJson([
+                java: run.javaLauncher.get().executablePath.asFile.absolutePath,
+                classpath: run.classpath.asPath,
+                jvmArgs: run.allJvmArgs,
+                main: run.mainClass.get(),
+                args: run.args,
+                environment: run.environment.findAll { k, v -> k.startsWith('FABRIC_') }
+            ]))
+        }
+    }
+}

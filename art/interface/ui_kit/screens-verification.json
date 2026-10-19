@@ -1,0 +1,1749 @@
+{
+  "passed": true,
+  "game": "26.2",
+  "reviewPack": false,
+  "helperSkinHooks": false,
+  "captures": [
+    {
+      "file": "double-chest-vanilla-gs3.png",
+      "screen": "double-chest",
+      "guiScale": 3,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.ContainerScreen 640x360",
+      "sha256": "6f62045fcb4480dabc0cabb65111cdf968fb7e69d06be3942ac6e1f7585f86c8",
+      "edited": false,
+      "panel": [
+        232,
+        96,
+        176,
+        168
+      ]
+    },
+    {
+      "file": "options-mod-gs3.png",
+      "screen": "options",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.options.OptionsScreen 640x360",
+      "sha256": "b8738109b91215a066ab65fd6c99f9ea2a5dd8926b9b5eb8a4629dc52d3dcae2",
+      "edited": false
+    },
+    {
+      "file": "pause-vanilla-gs3.png",
+      "screen": "pause",
+      "guiScale": 3,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.PauseScreen 640x360",
+      "sha256": "43136feafd72a4b1b5843d1d83d3dd94a65a5a18e5cc1d88515534c023f4eff6",
+      "edited": false
+    },
+    {
+      "file": "options-vanilla-gs3.png",
+      "screen": "options",
+      "guiScale": 3,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.options.OptionsScreen 640x360",
+      "sha256": "7d6a6cf683395fd6b576586117dfcb418293bdb14fb292399ec0aeb240db4556",
+      "edited": false
+    },
+    {
+      "file": "pause-focus-vanilla-gs3.png",
+      "screen": "pause-focus",
+      "guiScale": 3,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.PauseScreen 640x360",
+      "sha256": "73b3bb793fea2d9cea676c969f2bff2e80d2092c23ead55cfb0ba3326c793643",
+      "edited": false
+    },
+    {
+      "file": "options-mod-gs2.png",
+      "screen": "options",
+      "guiScale": 2,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.options.OptionsScreen 960x540",
+      "sha256": "a9222cf49227d63b33e1c8df95cf44eea5dc3523fdfb5914f1fa2e23057b3866",
+      "edited": false
+    },
+    {
+      "file": "pause-vanilla-gs2.png",
+      "screen": "pause",
+      "guiScale": 2,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.PauseScreen 960x540",
+      "sha256": "71813a0a86b8bfba6cb1a329cbc2ee978b236559a6f3a9242e19468616d4dc0c",
+      "edited": false
+    },
+    {
+      "file": "options-vanilla-gs2.png",
+      "screen": "options",
+      "guiScale": 2,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.options.OptionsScreen 960x540",
+      "sha256": "49e778f48fd115004d0cb81f9f8415eeea14dc4ae9a10082e7978e5424b754c0",
+      "edited": false
+    },
+    {
+      "file": "crafting-page2-mod-gs2.png",
+      "screen": "crafting-page2",
+      "guiScale": 2,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CraftingScreen 960x540",
+      "sha256": "9a0af1546882f3a49e6aa825d3c6fdb69ae9a0aa84f47decc967f06baa2439ba",
+      "edited": false,
+      "panel": [
+        469,
+        187,
+        176,
+        166
+      ],
+      "pagination": {
+        "page": 2,
+        "total": 29,
+        "textInsideFrame": true
+      }
+    },
+    {
+      "file": "chest-vanilla-gs2.png",
+      "screen": "chest",
+      "guiScale": 2,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.ContainerScreen 960x540",
+      "sha256": "9d07b821d10432e7be6d847a9645f8cbe32d07a0e2e3760ee51e1e430ee32d1c",
+      "edited": false,
+      "panel": [
+        392,
+        186,
+        176,
+        168
+      ]
+    },
+    {
+      "file": "crafting-vanilla-gs2.png",
+      "screen": "crafting",
+      "guiScale": 2,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CraftingScreen 960x540",
+      "sha256": "92b253c8176644075fac76322ee524289068c906e85587287ee1f2dd4704b295",
+      "edited": false,
+      "panel": [
+        469,
+        187,
+        176,
+        166
+      ],
+      "pagination": {
+        "page": 1,
+        "total": 29,
+        "textInsideFrame": false
+      }
+    },
+    {
+      "file": "crafting-page2-vanilla-gs2.png",
+      "screen": "crafting-page2",
+      "guiScale": 2,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CraftingScreen 960x540",
+      "sha256": "2f3250a3e91c86e1f6eb854d4ff24877c624c3b336947244b030fac57636fe2f",
+      "edited": false,
+      "panel": [
+        469,
+        187,
+        176,
+        166
+      ],
+      "pagination": {
+        "page": 2,
+        "total": 29,
+        "textInsideFrame": false
+      }
+    },
+    {
+      "file": "furnace-vanilla-gs2.png",
+      "screen": "furnace",
+      "guiScale": 2,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.FurnaceScreen 960x540",
+      "sha256": "8141bd441eea33782c60fed826057e1f9fd7f37d7b0e04c33e195eb6bfc0cbfb",
+      "edited": false,
+      "panel": [
+        392,
+        187,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "crafting-page2-mod-gs3.png",
+      "screen": "crafting-page2",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CraftingScreen 640x360",
+      "sha256": "e79c52f9678d99c40c705436f0a57c3cc220692a4ec292a88dd79975f2c09dea",
+      "edited": false,
+      "panel": [
+        309,
+        97,
+        176,
+        166
+      ],
+      "pagination": {
+        "page": 2,
+        "total": 29,
+        "textInsideFrame": true
+      }
+    },
+    {
+      "file": "chest-vanilla-gs3.png",
+      "screen": "chest",
+      "guiScale": 3,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.ContainerScreen 640x360",
+      "sha256": "87d8b0c4515a64d17865cd81d6712a9818d9b34aa9121eabecbeaafb86a08ec7",
+      "edited": false,
+      "panel": [
+        232,
+        96,
+        176,
+        168
+      ]
+    },
+    {
+      "file": "crafting-vanilla-gs3.png",
+      "screen": "crafting",
+      "guiScale": 3,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CraftingScreen 640x360",
+      "sha256": "474913d4e8d6c4f34dbaca1921a55ca556b99c5bb205fa128733e1abdceeb622",
+      "edited": false,
+      "panel": [
+        309,
+        97,
+        176,
+        166
+      ],
+      "pagination": {
+        "page": 1,
+        "total": 29,
+        "textInsideFrame": false
+      }
+    },
+    {
+      "file": "crafting-page2-vanilla-gs3.png",
+      "screen": "crafting-page2",
+      "guiScale": 3,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CraftingScreen 640x360",
+      "sha256": "06574cf73fee2188e49ce661ac82ef24922d2981f69af11872d6f2c5c92f8add",
+      "edited": false,
+      "panel": [
+        309,
+        97,
+        176,
+        166
+      ],
+      "pagination": {
+        "page": 2,
+        "total": 29,
+        "textInsideFrame": false
+      }
+    },
+    {
+      "file": "furnace-vanilla-gs3.png",
+      "screen": "furnace",
+      "guiScale": 3,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.FurnaceScreen 640x360",
+      "sha256": "800db6ebc14a570772ae45961728d1f68db548d3e8917bcc2d2d86003a8bd776",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "creative-vanilla-gs2.png",
+      "screen": "creative",
+      "scene": "day",
+      "guiScale": 2,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen 960x540",
+      "sha256": "ca022d8d563929bfa27f6e40c4959887d81a93c21f07f894af456c726063ac0a",
+      "edited": false,
+      "panel": [
+        382,
+        202,
+        195,
+        136
+      ]
+    },
+    {
+      "file": "creative-search-vanilla-gs2.png",
+      "screen": "creative-search",
+      "scene": "day",
+      "guiScale": 2,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen 960x540",
+      "sha256": "e5d3461f0c14eb29d66eadb3817d208abf06eb8145ce96b8937dfc4d3ef2a7e3",
+      "edited": false,
+      "panel": [
+        382,
+        202,
+        195,
+        136
+      ]
+    },
+    {
+      "file": "creative-inventory-vanilla-gs2.png",
+      "screen": "creative-inventory",
+      "scene": "day",
+      "guiScale": 2,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen 960x540",
+      "sha256": "feac4ee2e9c55742086841dab5e08a32d77c1a0d00a4f3a5838de130814fed44",
+      "edited": false,
+      "panel": [
+        382,
+        202,
+        195,
+        136
+      ]
+    },
+    {
+      "file": "creative-vanilla-gs3.png",
+      "screen": "creative",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen 640x360",
+      "sha256": "f0770d3cd8c7efab09e90416954d2eeac7d186d665d0cc01335ed3a060e760c2",
+      "edited": false,
+      "panel": [
+        222,
+        112,
+        195,
+        136
+      ]
+    },
+    {
+      "file": "creative-search-vanilla-gs3.png",
+      "screen": "creative-search",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen 640x360",
+      "sha256": "30a41ebdd8848d1584ebc888cf0eacf3e300c59c9ad0b40fda7d302296cbcac5",
+      "edited": false,
+      "panel": [
+        222,
+        112,
+        195,
+        136
+      ]
+    },
+    {
+      "file": "creative-inventory-vanilla-gs3.png",
+      "screen": "creative-inventory",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen 640x360",
+      "sha256": "fec37bab5d5e42d2df37ef3df0669973e43759a36ab8db725310d5873e48d5a3",
+      "edited": false,
+      "panel": [
+        222,
+        112,
+        195,
+        136
+      ]
+    },
+    {
+      "file": "double-chest-mod-gs3.png",
+      "screen": "double-chest",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.ContainerScreen 640x360",
+      "sha256": "782500e2c79cc00a5e9fbe05d00ca40074d0840931cbbb5ebcf4064414ff30ae",
+      "edited": false,
+      "panel": [
+        232,
+        96,
+        176,
+        168
+      ]
+    },
+    {
+      "file": "blast-furnace-mod-gs3.png",
+      "screen": "blast-furnace",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.BlastFurnaceScreen 640x360",
+      "sha256": "825865798ca47fabeb415946e4f9ed78bce4446e3e96690ccc38bbf6d9f4cc07",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "smoker-mod-gs3.png",
+      "screen": "smoker",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.SmokerScreen 640x360",
+      "sha256": "00bfa041ab74b4421f099646a65e4153bd5f5af400971830e979c341fd7399ed",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "anvil-mod-gs3.png",
+      "screen": "anvil",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.AnvilScreen 640x360",
+      "sha256": "157d76d5978e7dbeaa6b5635932da01ef1bb082c27c9f87aa24313726f1df608",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "enchanting-mod-gs3.png",
+      "screen": "enchanting",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.EnchantmentScreen 640x360",
+      "sha256": "9e983bdda8a242edcd9bde793ac0caaeebcfd51f27e63037e7de55aee747fc1a",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "smithing-mod-gs3.png",
+      "screen": "smithing",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.SmithingScreen 640x360",
+      "sha256": "b51e2f077d56ad88274acdacf5e0d65feb268392110035606630baaa2f60c6dc",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "grindstone-mod-gs3.png",
+      "screen": "grindstone",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.GrindstoneScreen 640x360",
+      "sha256": "f990d0279f4b5d903d59afc3b774ec55400878fa26bf75743fb7e5fb65b75ced",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "loom-mod-gs3.png",
+      "screen": "loom",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.LoomScreen 640x360",
+      "sha256": "a8a76846f5e12cd25d45b3554ed29a84e99491253e9efd2955b52d0b032db608",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "cartography-mod-gs3.png",
+      "screen": "cartography",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CartographyTableScreen 640x360",
+      "sha256": "02b58e5bca76979e54ab30884ff4924a340e89fdffd472249abe7938d6dbd4de",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "stonecutter-mod-gs3.png",
+      "screen": "stonecutter",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.StonecutterScreen 640x360",
+      "sha256": "626993b68f88c3c00f607778b603e300c81efb2a44231811601c7cd68428e95b",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "brewing-mod-gs3.png",
+      "screen": "brewing",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.BrewingStandScreen 640x360",
+      "sha256": "74e0a030c54308b54ca080bbcb90fbb8938e789939532635a6e9a6775a5101bb",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "beacon-mod-gs3.png",
+      "screen": "beacon",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.BeaconScreen 640x360",
+      "sha256": "a29c47fb7e046e7d6afaadfdd8462c1a4b27c017e89cca09bdc2b0fd955f9c6c",
+      "edited": false,
+      "panel": [
+        205,
+        70,
+        230,
+        219
+      ]
+    },
+    {
+      "file": "hopper-mod-gs3.png",
+      "screen": "hopper",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.HopperScreen 640x360",
+      "sha256": "d9e9f0c0b8d68fab54d1a460451113c1d83a21e817afa03600bc5300b8275725",
+      "edited": false,
+      "panel": [
+        232,
+        113,
+        176,
+        133
+      ]
+    },
+    {
+      "file": "dispenser-mod-gs3.png",
+      "screen": "dispenser",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.DispenserScreen 640x360",
+      "sha256": "335f6257f6cc7ee292236e2489a52a9733e8bb08204dade8345f504fc49019b6",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "dropper-mod-gs3.png",
+      "screen": "dropper",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.DispenserScreen 640x360",
+      "sha256": "f5e03a8236fa3133034bc303375a53fac4a3ec776d058d85edaa9e8ddda352d4",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "shulker-mod-gs3.png",
+      "screen": "shulker",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.ShulkerBoxScreen 640x360",
+      "sha256": "af73b35dae5b0e3cf9d2e2a23ba81e7b149affbd1893168af1600b317be6bcf7",
+      "edited": false,
+      "panel": [
+        232,
+        96,
+        176,
+        167
+      ]
+    },
+    {
+      "file": "barrel-mod-gs3.png",
+      "screen": "barrel",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.ContainerScreen 640x360",
+      "sha256": "c93baac26a9389b973d1eaaa8a58fc5a37fb289c95072bac99302341f934a925",
+      "edited": false,
+      "panel": [
+        232,
+        96,
+        176,
+        168
+      ]
+    },
+    {
+      "file": "ender-chest-mod-gs3.png",
+      "screen": "ender-chest",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.ContainerScreen 640x360",
+      "sha256": "568330230cf8283637e7ef3d71246f38445c4bd355040fcfcfb2f19e19663b32",
+      "edited": false,
+      "panel": [
+        232,
+        96,
+        176,
+        168
+      ]
+    },
+    {
+      "file": "crafter-mod-gs3.png",
+      "screen": "crafter",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CrafterScreen 640x360",
+      "sha256": "5855046a779740d92ec50f243d17c1f7f2b8e16f63d0f88c55348819abdcb5c7",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "trading-mod-gs3.png",
+      "screen": "trading",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.MerchantScreen 640x360",
+      "sha256": "6bf345ccf2c9501c7d205c7116e91f29bd6c819736d2d61faf3d76d101d88ec6",
+      "edited": false,
+      "panel": [
+        182,
+        97,
+        276,
+        166
+      ]
+    },
+    {
+      "file": "horse-mod-gs3.png",
+      "screen": "horse",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.HorseInventoryScreen 640x360",
+      "sha256": "e7b8f59b2219c7e21eb23019c35a37c87e8bf3db3ab7ed86eb8f8caad1ccdaa6",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "llama-mod-gs3.png",
+      "screen": "llama",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.HorseInventoryScreen 640x360",
+      "sha256": "c3ac626e0fef4c6d42fa8c68452f35c03303e0a9958d60d9f5d7fb5efd6bb45a",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "nautilus-mod-gs3.png",
+      "screen": "nautilus",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.NautilusInventoryScreen 640x360",
+      "sha256": "1cb611ddbfb8988fa5a9b24b01e27cb51a4cf39bd11927f0ba8e97b14c1db3b6",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "horse-vanilla-gs3.png",
+      "screen": "horse",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.HorseInventoryScreen 640x360",
+      "sha256": "63b4f1aa0a02ab2deb28ed82975820a20da0288277d2d8c442abd00ac9075344",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "llama-vanilla-gs3.png",
+      "screen": "llama",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.HorseInventoryScreen 640x360",
+      "sha256": "46c3cd0f925b1293b4c11c9406c09121eefcf70217b836dfef4b717a28170ba3",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "nautilus-vanilla-gs3.png",
+      "screen": "nautilus",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.NautilusInventoryScreen 640x360",
+      "sha256": "bc945102b1f28f8d19c5aec2c58a3c54b9e41bd5018120788680f1a65c2a37d8",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "chest-mod-gs2.png",
+      "screen": "chest",
+      "scene": "day",
+      "guiScale": 2,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.ContainerScreen 960x540",
+      "sha256": "15790d798737c8c59908cdc1316c3fe0eb8f52036d439ec6154b54d874d7e0d0",
+      "edited": false,
+      "panel": [
+        392,
+        186,
+        176,
+        168
+      ]
+    },
+    {
+      "file": "crafting-mod-gs2.png",
+      "screen": "crafting",
+      "scene": "day",
+      "guiScale": 2,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CraftingScreen 960x540",
+      "sha256": "87f7038cfd946324c85fad670552c2ad95965633c6304d81cc97019fcf255f31",
+      "edited": false,
+      "panel": [
+        469,
+        187,
+        176,
+        166
+      ],
+      "pagination": {
+        "page": 1,
+        "total": 29,
+        "textInsideFrame": true
+      }
+    },
+    {
+      "file": "furnace-mod-gs2.png",
+      "screen": "furnace",
+      "scene": "day",
+      "guiScale": 2,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.FurnaceScreen 960x540",
+      "sha256": "33c55d0b3cd9e565566c9d207b1a7c4142dc65fdb4649e4046c35b65e571fe38",
+      "edited": false,
+      "panel": [
+        392,
+        187,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "pause-mod-gs2.png",
+      "screen": "pause",
+      "scene": "day",
+      "guiScale": 2,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.PauseScreen 960x540",
+      "sha256": "7d84967cff406a3669842889d51a7aa9098a7c5ff3f660c884c65b3a33385d29",
+      "edited": false
+    },
+    {
+      "file": "pause-focus-mod-gs2.png",
+      "screen": "pause-focus",
+      "scene": "day",
+      "guiScale": 2,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.PauseScreen 960x540",
+      "sha256": "2a22dd70f9ffa72b89834ccc33da61a36020cb71ebfc3a7414f992a71e9f69a6",
+      "edited": false
+    },
+    {
+      "file": "chest-mod-gs3.png",
+      "screen": "chest",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.ContainerScreen 640x360",
+      "sha256": "c61729dd76c42fc3093939e1e16eaa1b24f6780d694be7b587a2c6a1e90cc13f",
+      "edited": false,
+      "panel": [
+        232,
+        96,
+        176,
+        168
+      ]
+    },
+    {
+      "file": "crafting-mod-gs3.png",
+      "screen": "crafting",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CraftingScreen 640x360",
+      "sha256": "602f76720b6e8b603bf08677af8e9c794ef3cb681657e5a1d5b5ee4309506bef",
+      "edited": false,
+      "panel": [
+        309,
+        97,
+        176,
+        166
+      ],
+      "pagination": {
+        "page": 1,
+        "total": 29,
+        "textInsideFrame": true
+      }
+    },
+    {
+      "file": "furnace-mod-gs3.png",
+      "screen": "furnace",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.FurnaceScreen 640x360",
+      "sha256": "9d394fbff2f9dc2696b1fabef42baeefab271d9aaf2b8a709620630f00014c27",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "pause-mod-gs3.png",
+      "screen": "pause",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.PauseScreen 640x360",
+      "sha256": "e9baaefeeb8cc442b51c6f3cf3512147b4cbb976115fa9b39bedbbd311f39c6a",
+      "edited": false
+    },
+    {
+      "file": "pause-focus-mod-gs3.png",
+      "screen": "pause-focus",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.PauseScreen 640x360",
+      "sha256": "53dc746b2078f3634efc4b119962128b97eb150a743e88c6e83af51bbed5da1b",
+      "edited": false
+    },
+    {
+      "file": "inventory-mod-gs2.png",
+      "screen": "inventory",
+      "scene": "day",
+      "guiScale": 2,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.InventoryScreen 960x540",
+      "sha256": "c09b1b6d44f1fa1de08bb97144851a5c27cc700a60e119854d7253903d62f571",
+      "edited": false,
+      "panel": [
+        392,
+        187,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "tooltip-mod-gs2.png",
+      "screen": "tooltip",
+      "scene": "day",
+      "guiScale": 2,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.InventoryScreen 960x540",
+      "sha256": "266e3692e67550d6b9601fd19c3fbc724388f6cfcd63ccd32ee4fcf06d52fa03",
+      "edited": false,
+      "panel": [
+        392,
+        187,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "inventory-vanilla-gs2.png",
+      "screen": "inventory",
+      "scene": "day",
+      "guiScale": 2,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.InventoryScreen 960x540",
+      "sha256": "0139fce64a17ccdaa518607ad849e952e0590d6a40fb80b3c37f7e95e6d08703",
+      "edited": false,
+      "panel": [
+        392,
+        187,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "tooltip-vanilla-gs2.png",
+      "screen": "tooltip",
+      "scene": "day",
+      "guiScale": 2,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.InventoryScreen 960x540",
+      "sha256": "680d8b266434de568ff67a371820769ad7534428d878f682b47f9d69a2c74b1d",
+      "edited": false,
+      "panel": [
+        392,
+        187,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "inventory-mod-gs3.png",
+      "screen": "inventory",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.InventoryScreen 640x360",
+      "sha256": "3aa944fe82bca458b5b07b532ebea7721b5c4ad1ce7c6f0dea6a7d775f32838e",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "tooltip-mod-gs3.png",
+      "screen": "tooltip",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.InventoryScreen 640x360",
+      "sha256": "93f7b6ad982014d3c1481eba85db80bf4ec2d8df2c3e6b7b3fd763122edb7d0d",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "inventory-vanilla-gs3.png",
+      "screen": "inventory",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.InventoryScreen 640x360",
+      "sha256": "a29663c89c674e511cfe23b5bac96b284d655b1988622bb6d08130c5a6ac316d",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "tooltip-vanilla-gs3.png",
+      "screen": "tooltip",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.InventoryScreen 640x360",
+      "sha256": "e34f6e48f544abf3faa97c2e99244ade95e290c26f5db428281f7a1fbc9f44b5",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "inventory-cave-mod-gs2.png",
+      "screen": "inventory-cave",
+      "scene": "cave",
+      "guiScale": 2,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.InventoryScreen 960x540",
+      "sha256": "4a6fede508377c1434262fa45dcbc817692938dc9e7f17825feeaca45e1d729b",
+      "edited": false,
+      "panel": [
+        392,
+        187,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "chest-cave-mod-gs2.png",
+      "screen": "chest-cave",
+      "scene": "cave",
+      "guiScale": 2,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.ContainerScreen 960x540",
+      "sha256": "f8f8353b8ae06d79f2d82b67fe5c2990bef460abd32e0915523cd80442a198dd",
+      "edited": false,
+      "panel": [
+        392,
+        186,
+        176,
+        168
+      ]
+    },
+    {
+      "file": "crafting-cave-mod-gs2.png",
+      "screen": "crafting-cave",
+      "scene": "cave",
+      "guiScale": 2,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CraftingScreen 960x540",
+      "sha256": "343c517325c00574f49b172372cce819f6d498069d90d1f4353419d3e6c1a5e4",
+      "edited": false,
+      "panel": [
+        469,
+        187,
+        176,
+        166
+      ],
+      "pagination": {
+        "page": 1,
+        "total": 29,
+        "textInsideFrame": true
+      }
+    },
+    {
+      "file": "furnace-cave-mod-gs2.png",
+      "screen": "furnace-cave",
+      "scene": "cave",
+      "guiScale": 2,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.FurnaceScreen 960x540",
+      "sha256": "60710cb118557a8193fb4c1bc8bc4b99b171276d8263b04d2b2bcae14c1e6bb2",
+      "edited": false,
+      "panel": [
+        392,
+        187,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "tooltip-cave-mod-gs2.png",
+      "screen": "tooltip-cave",
+      "scene": "cave",
+      "guiScale": 2,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.InventoryScreen 960x540",
+      "sha256": "eab8c336405a038b033b953fd922449b27ff9ab4641d295205fd0c0f26cfbf11",
+      "edited": false,
+      "panel": [
+        392,
+        187,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "pause-cave-mod-gs2.png",
+      "screen": "pause-cave",
+      "scene": "cave",
+      "guiScale": 2,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.PauseScreen 960x540",
+      "sha256": "a289a82a5e7b50bf6efb7cdf8044654add2daf44091400354f32401a93f14dd3",
+      "edited": false
+    },
+    {
+      "file": "creative-cave-mod-gs2.png",
+      "screen": "creative-cave",
+      "scene": "cave",
+      "guiScale": 2,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen 960x540",
+      "sha256": "e316ea9d9d09f1a3e3bedacc2a1968dbf6209214ba73102aeab57a7094046c0c",
+      "edited": false,
+      "panel": [
+        382,
+        202,
+        195,
+        136
+      ]
+    },
+    {
+      "file": "creative-search-cave-mod-gs2.png",
+      "screen": "creative-search-cave",
+      "scene": "cave",
+      "guiScale": 2,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen 960x540",
+      "sha256": "f0b02116b68b60642882eaf9438c25e2824ce011d52e3ca202c99094de7f5fce",
+      "edited": false,
+      "panel": [
+        382,
+        202,
+        195,
+        136
+      ]
+    },
+    {
+      "file": "inventory-cave-mod-gs3.png",
+      "screen": "inventory-cave",
+      "scene": "cave",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.InventoryScreen 640x360",
+      "sha256": "46dcc950073065f968aead26be7d6a4102e76f49351f0f1920e76b7cc918f8de",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "chest-cave-mod-gs3.png",
+      "screen": "chest-cave",
+      "scene": "cave",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.ContainerScreen 640x360",
+      "sha256": "4eec3f4d9df505001f7cf6c136276f30c05e9a516d963fb5c6db049ba7b8613d",
+      "edited": false,
+      "panel": [
+        232,
+        96,
+        176,
+        168
+      ]
+    },
+    {
+      "file": "crafting-cave-mod-gs3.png",
+      "screen": "crafting-cave",
+      "scene": "cave",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CraftingScreen 640x360",
+      "sha256": "a8a32a90d7cd24f84eac01feabc9d5966f21c543ca108698a4957c697922c75b",
+      "edited": false,
+      "panel": [
+        309,
+        97,
+        176,
+        166
+      ],
+      "pagination": {
+        "page": 1,
+        "total": 29,
+        "textInsideFrame": true
+      }
+    },
+    {
+      "file": "furnace-cave-mod-gs3.png",
+      "screen": "furnace-cave",
+      "scene": "cave",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.FurnaceScreen 640x360",
+      "sha256": "ee34b483e55988e6b98fb4a2b63ef0201705b621d93cee2713a01a91d14a7a0b",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "tooltip-cave-mod-gs3.png",
+      "screen": "tooltip-cave",
+      "scene": "cave",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.InventoryScreen 640x360",
+      "sha256": "064c4638e8071d7a6ea857d495cec355ceff00b81b0463386487e98e73b97887",
+      "edited": false,
+      "panel": [
+        232,
+        97,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "pause-cave-mod-gs3.png",
+      "screen": "pause-cave",
+      "scene": "cave",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.PauseScreen 640x360",
+      "sha256": "f33c279a9d5b2753d9e514ab024913e426fc4c8b147ec8e13f040b2a7b967a89",
+      "edited": false
+    },
+    {
+      "file": "creative-cave-mod-gs3.png",
+      "screen": "creative-cave",
+      "scene": "cave",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen 640x360",
+      "sha256": "753e55dab3f410552a102d473d733e51ea55d750f6c273e4ce21232f4f257310",
+      "edited": false,
+      "panel": [
+        222,
+        112,
+        195,
+        136
+      ]
+    },
+    {
+      "file": "creative-search-cave-mod-gs3.png",
+      "screen": "creative-search-cave",
+      "scene": "cave",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen 640x360",
+      "sha256": "7ebc87a4c9ddd5d9cd777336e6dde86dda15c7d7d9ead58170e52826301a54dd",
+      "edited": false,
+      "panel": [
+        222,
+        112,
+        195,
+        136
+      ]
+    },
+    {
+      "file": "creative-mod-gs2.png",
+      "screen": "creative",
+      "scene": "day",
+      "guiScale": 2,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen 960x540",
+      "sha256": "090665912fa4d313650f81b57185b2a9bea0e7d8f4324c5f27f06c788f540ba8",
+      "edited": false,
+      "panel": [
+        382,
+        202,
+        195,
+        136
+      ]
+    },
+    {
+      "file": "creative-search-mod-gs2.png",
+      "screen": "creative-search",
+      "scene": "day",
+      "guiScale": 2,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen 960x540",
+      "sha256": "493d7e50172dc22c278a785e03b404e7d892d4e0652f39b9852f6cd7e7510e60",
+      "edited": false,
+      "panel": [
+        382,
+        202,
+        195,
+        136
+      ]
+    },
+    {
+      "file": "creative-inventory-mod-gs2.png",
+      "screen": "creative-inventory",
+      "scene": "day",
+      "guiScale": 2,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen 960x540",
+      "sha256": "593a8418920d3715870b6a5b007d21f2c5722e9a07fd24641a916dfe04a5c3d6",
+      "edited": false,
+      "panel": [
+        382,
+        202,
+        195,
+        136
+      ]
+    },
+    {
+      "file": "creative-mod-gs3.png",
+      "screen": "creative",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen 640x360",
+      "sha256": "4e70a34c1c6d54eec7af6a5903ef183ef5b66cffcaa7f1605d77c15c27af3b0d",
+      "edited": false,
+      "panel": [
+        222,
+        112,
+        195,
+        136
+      ]
+    },
+    {
+      "file": "creative-search-mod-gs3.png",
+      "screen": "creative-search",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen 640x360",
+      "sha256": "db57c0d638109dd6ac83489f284ff87c7d7e27a6382298a09afd0cf18edc5dd8",
+      "edited": false,
+      "panel": [
+        222,
+        112,
+        195,
+        136
+      ]
+    },
+    {
+      "file": "creative-inventory-mod-gs3.png",
+      "screen": "creative-inventory",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen 640x360",
+      "sha256": "3cbf4fa8da682396b01fa09517dd04316d3f50396c9caa3a27fe95a6d323ce3a",
+      "edited": false,
+      "panel": [
+        222,
+        112,
+        195,
+        136
+      ]
+    },
+    {
+      "file": "inventory-mod-gs1.png",
+      "screen": "inventory",
+      "scene": "day",
+      "guiScale": 1,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.InventoryScreen 1920x1080",
+      "sha256": "3b67fd0c90726d33cac78271d7d901929f0f23a6356e330d12f846e808397a54",
+      "edited": false,
+      "panel": [
+        872,
+        457,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "crafting-mod-gs1.png",
+      "screen": "crafting",
+      "scene": "day",
+      "guiScale": 1,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CraftingScreen 1920x1080",
+      "sha256": "a0fc8e8b29a0a4ec39b538b2dfdeb4e18ebb0764e2f405418b028a5f4857f92a",
+      "edited": false,
+      "panel": [
+        949,
+        457,
+        176,
+        166
+      ],
+      "pagination": {
+        "page": 1,
+        "total": 29,
+        "textInsideFrame": true
+      }
+    },
+    {
+      "file": "pause-mod-gs1.png",
+      "screen": "pause",
+      "scene": "day",
+      "guiScale": 1,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.PauseScreen 1920x1080",
+      "sha256": "52535afbb991d20e91332e460761540ecd34804d18eda660e9f5a8e514d82d99",
+      "edited": false
+    },
+    {
+      "file": "creative-mod-gs1.png",
+      "screen": "creative",
+      "scene": "day",
+      "guiScale": 1,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen 1920x1080",
+      "sha256": "8bed3d4a73e499e331b9984dfca59d3a4a7a391eeab57a0e9f9b1ba2ec7cde77",
+      "edited": false,
+      "panel": [
+        862,
+        472,
+        195,
+        136
+      ]
+    },
+    {
+      "file": "inventory-mod-gs4.png",
+      "screen": "inventory",
+      "scene": "day",
+      "guiScale": 4,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.InventoryScreen 480x270",
+      "sha256": "c4c1a7fac71d3856f38372b7ac32094f9f6c5ac526201765b151cf86b1d47060",
+      "edited": false,
+      "panel": [
+        152,
+        52,
+        176,
+        166
+      ]
+    },
+    {
+      "file": "crafting-mod-gs4.png",
+      "screen": "crafting",
+      "scene": "day",
+      "guiScale": 4,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CraftingScreen 480x270",
+      "sha256": "2b60e0577590a390c2249ee72149f9ae3921534fc0eee88e8932a1d83080ff43",
+      "edited": false,
+      "panel": [
+        229,
+        52,
+        176,
+        166
+      ],
+      "pagination": {
+        "page": 1,
+        "total": 29,
+        "textInsideFrame": true
+      }
+    },
+    {
+      "file": "pause-mod-gs4.png",
+      "screen": "pause",
+      "scene": "day",
+      "guiScale": 4,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.PauseScreen 480x270",
+      "sha256": "2d7ed4ec8e0b520aeec92af6e3898992005ca2b81164a21e738095c047fd0ed6",
+      "edited": false
+    },
+    {
+      "file": "creative-mod-gs4.png",
+      "screen": "creative",
+      "scene": "day",
+      "guiScale": 4,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen 480x270",
+      "sha256": "2b16de9401c27c926772fb4cc2257e617d0e4a8e29755e422136963542732e5e",
+      "edited": false,
+      "panel": [
+        142,
+        67,
+        195,
+        136
+      ]
+    },
+    {
+      "file": "settings-mod-gs2.png",
+      "screen": "settings",
+      "scene": "day",
+      "guiScale": 2,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.options.SoundOptionsScreen 960x540",
+      "sha256": "60141041519fd546383373018b011e19efe1433269bcba6283a4a618610a3525",
+      "edited": false
+    },
+    {
+      "file": "settings-hover-mod-gs2.png",
+      "screen": "settings-hover",
+      "scene": "day",
+      "guiScale": 2,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.options.SoundOptionsScreen 960x540",
+      "sha256": "13f7f762aa9508b949b99686503a7d288b03c60a2f028e1b220908807aabef26",
+      "edited": false
+    },
+    {
+      "file": "settings-pressed-mod-gs2.png",
+      "screen": "settings-pressed",
+      "scene": "day",
+      "guiScale": 2,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.options.SoundOptionsScreen 960x540",
+      "sha256": "5512af73bf8386a0ac650e77900a3ec03be299e2a391144f909ed0d7c9026d3f",
+      "edited": false
+    },
+    {
+      "file": "language-mod-gs2.png",
+      "screen": "language",
+      "scene": "day",
+      "guiScale": 2,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.options.LanguageSelectScreen 960x540",
+      "sha256": "32f456116db007eb6f62ac2453541bd7295ecebc526dffe3d0155f590afe8b49",
+      "edited": false
+    },
+    {
+      "file": "settings-vanilla-gs2.png",
+      "screen": "settings",
+      "scene": "day",
+      "guiScale": 2,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.options.SoundOptionsScreen 960x540",
+      "sha256": "cdc339710a9bdea772c2cd128d7cb5cef9d995d213b518d43dc343155790ceb4",
+      "edited": false
+    },
+    {
+      "file": "settings-hover-vanilla-gs2.png",
+      "screen": "settings-hover",
+      "scene": "day",
+      "guiScale": 2,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.options.SoundOptionsScreen 960x540",
+      "sha256": "7c5cab619b6266722c29b2e88ff9f79f2dbae3d8e734b637c46415cc575cf716",
+      "edited": false
+    },
+    {
+      "file": "settings-pressed-vanilla-gs2.png",
+      "screen": "settings-pressed",
+      "scene": "day",
+      "guiScale": 2,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.options.SoundOptionsScreen 960x540",
+      "sha256": "1d3b142889233e55d54f2cc0a72185b2b09bcaa5f2ca037442c2ebbbcc6456c0",
+      "edited": false
+    },
+    {
+      "file": "language-vanilla-gs2.png",
+      "screen": "language",
+      "scene": "day",
+      "guiScale": 2,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.options.LanguageSelectScreen 960x540",
+      "sha256": "d116d140246127d7c50ef689fcaec835cb07272cfea2fbe52aae356f2bbff1e0",
+      "edited": false
+    },
+    {
+      "file": "settings-mod-gs3.png",
+      "screen": "settings",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.options.SoundOptionsScreen 640x360",
+      "sha256": "1ee7231272e96acb5e0b44d9387add40cc44550d85f7560986700426520a56c0",
+      "edited": false
+    },
+    {
+      "file": "settings-hover-mod-gs3.png",
+      "screen": "settings-hover",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.options.SoundOptionsScreen 640x360",
+      "sha256": "bdb2e3ab5cc5850928d0046ca936aaf3b016598bab361fc9a6a0bafbeca8a8c9",
+      "edited": false
+    },
+    {
+      "file": "settings-pressed-mod-gs3.png",
+      "screen": "settings-pressed",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.options.SoundOptionsScreen 640x360",
+      "sha256": "0c170483a05194baa662f3203aa86090002a5eaa3325013303642c45c21afb81",
+      "edited": false
+    },
+    {
+      "file": "language-mod-gs3.png",
+      "screen": "language",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.options.LanguageSelectScreen 640x360",
+      "sha256": "131fc36bcc06c92cdc07787ea2309cb68dfe8c9effa4360039a9062ee45c84d7",
+      "edited": false
+    },
+    {
+      "file": "settings-vanilla-gs3.png",
+      "screen": "settings",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.options.SoundOptionsScreen 640x360",
+      "sha256": "20366973aa0a736e5642d9bd75d8c10e3a0e3ddaead2778101f4bb1ecc6a343b",
+      "edited": false
+    },
+    {
+      "file": "settings-hover-vanilla-gs3.png",
+      "screen": "settings-hover",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.options.SoundOptionsScreen 640x360",
+      "sha256": "4124457193e5f5ad6cd79913cbf1ea2269d26d281d977752591bca3a3dc2558a",
+      "edited": false
+    },
+    {
+      "file": "settings-pressed-vanilla-gs3.png",
+      "screen": "settings-pressed",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.options.SoundOptionsScreen 640x360",
+      "sha256": "7813b5c37fe14c7156ef53a9f70627116cc759024ba4cebea5adb38465a6cc70",
+      "edited": false
+    },
+    {
+      "file": "language-vanilla-gs3.png",
+      "screen": "language",
+      "scene": "day",
+      "guiScale": 3,
+      "style": "vanilla",
+      "nativeScreen": "net.minecraft.client.gui.screens.options.LanguageSelectScreen 640x360",
+      "sha256": "6140b6c1273a8b08d2f85fed25eb690997c287b3938f44d3c1875c0f717fa123",
+      "edited": false
+    },
+    {
+      "file": "settings-mod-gs1.png",
+      "screen": "settings",
+      "scene": "day",
+      "guiScale": 1,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.options.SoundOptionsScreen 1920x1080",
+      "sha256": "72a78a36887f4cfd07ad15ab7bdbf21f1c9d928fc632e6a1c0fbec0d0623f8c4",
+      "edited": false
+    },
+    {
+      "file": "settings-mod-gs4.png",
+      "screen": "settings",
+      "scene": "day",
+      "guiScale": 4,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.options.SoundOptionsScreen 480x270",
+      "sha256": "4727dd469745f12c133d08fb2499e779e18778187fd6482708b2ad3e9fb21780",
+      "edited": false
+    },
+    {
+      "file": "settings-cave-mod-gs2.png",
+      "screen": "settings-cave",
+      "scene": "cave",
+      "guiScale": 2,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.options.SoundOptionsScreen 960x540",
+      "sha256": "1265c5f2a23f3446822fa792569fbd5ba4d69528ab2db90d9b877d7f3074dac0",
+      "edited": false
+    },
+    {
+      "file": "settings-cave-mod-gs3.png",
+      "screen": "settings-cave",
+      "scene": "cave",
+      "guiScale": 3,
+      "style": "mod",
+      "nativeScreen": "net.minecraft.client.gui.screens.options.SoundOptionsScreen 640x360",
+      "sha256": "c40383641b0b576cd90142fe36d979de3090394564c5852992987464266e739a",
+      "edited": false
+    }
+  ],
+  "validation": {
+    "nativeGuiScales": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "mainGuiScalesBothStyles": [
+      2,
+      3
+    ],
+    "caveGuiScales": [
+      2,
+      3
+    ],
+    "captureCount": 118,
+    "modUnitTestsPassed": 129,
+    "jarSha256": "9925332531cea6e358d569994f4f81bff47f5bc76802663b4dd6a541558e0582",
+    "thirdPartyRecipeAddonsTested": false,
+    "fullBuild": "Blocked by unrelated CreatureGameTests.kt:147-148 RED_BED"
+  }
+}

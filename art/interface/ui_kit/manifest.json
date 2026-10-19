@@ -4,7 +4,8 @@
     1,
     2,
     3,
-    4
+    4,
+    5
   ],
   "jarSha256": "40896ee9f1e2bec3c934daac7e93d41e9e3d9c2f8ae0ca366d52ffbfd1afa290",
   "generated": [
@@ -175,6 +176,38 @@
         20
       ],
       "sha256": "d62b6a44123f574ffb337703898004a559948c89391edbd991aec111be9c2e27"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/interface/menu/header_separator.png",
+      "size": [
+        32,
+        2
+      ],
+      "sha256": "5f3ed15b5a11327f48ce4953cff36d29307976912531e6c52516f24ee76ccea4"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/interface/menu/footer_separator.png",
+      "size": [
+        32,
+        2
+      ],
+      "sha256": "5f3ed15b5a11327f48ce4953cff36d29307976912531e6c52516f24ee76ccea4"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/interface/menu/inworld_header_separator.png",
+      "size": [
+        32,
+        2
+      ],
+      "sha256": "5f3ed15b5a11327f48ce4953cff36d29307976912531e6c52516f24ee76ccea4"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/interface/menu/inworld_footer_separator.png",
+      "size": [
+        32,
+        2
+      ],
+      "sha256": "5f3ed15b5a11327f48ce4953cff36d29307976912531e6c52516f24ee76ccea4"
     },
     {
       "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/interface/inventory.png",
@@ -681,6 +714,30 @@
       "sha256": "09fc363afd031f171ee77471728184d604859a770226b68b8f6210219394b68a"
     },
     {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/interface/container/creative_inventory/tab_inventory.png",
+      "size": [
+        256,
+        256
+      ],
+      "sha256": "0469e23aac75d1b17b0a1966ae818de59f8c9576a51a069eea6b53098d673eb9"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/interface/container/creative_inventory/tab_item_search.png",
+      "size": [
+        256,
+        256
+      ],
+      "sha256": "8c0861e5c6cc6c1eca432625e58aca0ed76fc94ed04ef09897e4ce3fc53c7d56"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/interface/container/creative_inventory/tab_items.png",
+      "size": [
+        256,
+        256
+      ],
+      "sha256": "60bd1d56ff235ece599e7c9bb17db56b6b863f93caab81b0fe3c7f79e5fbab50"
+    },
+    {
       "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/interface/recipe_book.png",
       "size": [
         256,
@@ -937,6 +994,246 @@
       "sha256": "c74db7bbd436c19220bfa0f32dff29956b0b9448ae0ab9245029486c6df1c476"
     },
     {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/scroller.png",
+      "size": [
+        12,
+        15
+      ],
+      "sha256": "1fc8a7e0734c9545fb8e8d182f2123de690775d2c319f50178d606025e0320f8"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/scroller_disabled.png",
+      "size": [
+        12,
+        15
+      ],
+      "sha256": "a4a02c8791fe7fc4433ada9f8fb1233d10f0ab67c630286b0249de6dd451b544"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_bottom_selected_1.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "4006e297b9665cd0328dec821874cee3f9328076452bfeff3b586a425c909066"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_bottom_selected_2.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "4006e297b9665cd0328dec821874cee3f9328076452bfeff3b586a425c909066"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_bottom_selected_3.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "4006e297b9665cd0328dec821874cee3f9328076452bfeff3b586a425c909066"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_bottom_selected_4.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "4006e297b9665cd0328dec821874cee3f9328076452bfeff3b586a425c909066"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_bottom_selected_5.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "4006e297b9665cd0328dec821874cee3f9328076452bfeff3b586a425c909066"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_bottom_selected_6.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "4006e297b9665cd0328dec821874cee3f9328076452bfeff3b586a425c909066"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_bottom_selected_7.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "4006e297b9665cd0328dec821874cee3f9328076452bfeff3b586a425c909066"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_bottom_unselected_1.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "bff02595440337e9aa013ebec62c4c3b9f61f3f127a7d6c8056df668ad18c441"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_bottom_unselected_2.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "bff02595440337e9aa013ebec62c4c3b9f61f3f127a7d6c8056df668ad18c441"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_bottom_unselected_3.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "bff02595440337e9aa013ebec62c4c3b9f61f3f127a7d6c8056df668ad18c441"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_bottom_unselected_4.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "bff02595440337e9aa013ebec62c4c3b9f61f3f127a7d6c8056df668ad18c441"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_bottom_unselected_5.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "bff02595440337e9aa013ebec62c4c3b9f61f3f127a7d6c8056df668ad18c441"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_bottom_unselected_6.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "bff02595440337e9aa013ebec62c4c3b9f61f3f127a7d6c8056df668ad18c441"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_bottom_unselected_7.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "bff02595440337e9aa013ebec62c4c3b9f61f3f127a7d6c8056df668ad18c441"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_top_selected_1.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "e4371993089fbb9f8dc3cfb3f139c25260adaa3d84a1f27f0f507dcc38be19d1"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_top_selected_2.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "e4371993089fbb9f8dc3cfb3f139c25260adaa3d84a1f27f0f507dcc38be19d1"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_top_selected_3.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "e4371993089fbb9f8dc3cfb3f139c25260adaa3d84a1f27f0f507dcc38be19d1"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_top_selected_4.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "e4371993089fbb9f8dc3cfb3f139c25260adaa3d84a1f27f0f507dcc38be19d1"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_top_selected_5.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "e4371993089fbb9f8dc3cfb3f139c25260adaa3d84a1f27f0f507dcc38be19d1"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_top_selected_6.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "e4371993089fbb9f8dc3cfb3f139c25260adaa3d84a1f27f0f507dcc38be19d1"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_top_selected_7.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "e4371993089fbb9f8dc3cfb3f139c25260adaa3d84a1f27f0f507dcc38be19d1"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_top_unselected_1.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "48d339181df76312d1172af6cbf086703d878c6a0631dc06d0e95a7d7594e938"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_top_unselected_2.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "48d339181df76312d1172af6cbf086703d878c6a0631dc06d0e95a7d7594e938"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_top_unselected_3.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "48d339181df76312d1172af6cbf086703d878c6a0631dc06d0e95a7d7594e938"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_top_unselected_4.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "48d339181df76312d1172af6cbf086703d878c6a0631dc06d0e95a7d7594e938"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_top_unselected_5.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "48d339181df76312d1172af6cbf086703d878c6a0631dc06d0e95a7d7594e938"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_top_unselected_6.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "48d339181df76312d1172af6cbf086703d878c6a0631dc06d0e95a7d7594e938"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/creative_inventory/tab_top_unselected_7.png",
+      "size": [
+        26,
+        32
+      ],
+      "sha256": "48d339181df76312d1172af6cbf086703d878c6a0631dc06d0e95a7d7594e938"
+    },
+    {
       "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/enchanting_table/enchantment_slot.png",
       "size": [
         108,
@@ -1086,7 +1383,7 @@
         12,
         15
       ],
-      "sha256": "1fc8a7e0734c9545fb8e8d182f2123de690775d2c319f50178d606025e0320f8"
+      "sha256": "a4a02c8791fe7fc4433ada9f8fb1233d10f0ab67c630286b0249de6dd451b544"
     },
     {
       "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/slot/amethyst_shard.png",
@@ -1390,7 +1687,7 @@
         12,
         15
       ],
-      "sha256": "1fc8a7e0734c9545fb8e8d182f2123de690775d2c319f50178d606025e0320f8"
+      "sha256": "a4a02c8791fe7fc4433ada9f8fb1233d10f0ab67c630286b0249de6dd451b544"
     },
     {
       "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/villager/discount_strikethrough.png",
@@ -1446,7 +1743,7 @@
         6,
         27
       ],
-      "sha256": "955ba30375777c47bc92569ac0da845821b51e97e3df721648b26f7ab00c9fe4"
+      "sha256": "b2e09e7e6c0a299f8df82d039ae42d672a3792bca2246dfa371e523eb451a24d"
     },
     {
       "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/villager/trade_arrow.png",
@@ -6459,6 +6756,762 @@
       [
         251,
         141,
+        18
+      ]
+    ],
+    "creative_inventory/tab_inventory.png": [
+      [
+        53,
+        5,
+        18
+      ],
+      [
+        107,
+        5,
+        18
+      ],
+      [
+        34,
+        19,
+        18
+      ],
+      [
+        53,
+        32,
+        18
+      ],
+      [
+        107,
+        32,
+        18
+      ],
+      [
+        8,
+        53,
+        18
+      ],
+      [
+        26,
+        53,
+        18
+      ],
+      [
+        44,
+        53,
+        18
+      ],
+      [
+        62,
+        53,
+        18
+      ],
+      [
+        80,
+        53,
+        18
+      ],
+      [
+        98,
+        53,
+        18
+      ],
+      [
+        116,
+        53,
+        18
+      ],
+      [
+        134,
+        53,
+        18
+      ],
+      [
+        152,
+        53,
+        18
+      ],
+      [
+        8,
+        71,
+        18
+      ],
+      [
+        26,
+        71,
+        18
+      ],
+      [
+        44,
+        71,
+        18
+      ],
+      [
+        62,
+        71,
+        18
+      ],
+      [
+        80,
+        71,
+        18
+      ],
+      [
+        98,
+        71,
+        18
+      ],
+      [
+        116,
+        71,
+        18
+      ],
+      [
+        134,
+        71,
+        18
+      ],
+      [
+        152,
+        71,
+        18
+      ],
+      [
+        8,
+        89,
+        18
+      ],
+      [
+        26,
+        89,
+        18
+      ],
+      [
+        44,
+        89,
+        18
+      ],
+      [
+        62,
+        89,
+        18
+      ],
+      [
+        80,
+        89,
+        18
+      ],
+      [
+        98,
+        89,
+        18
+      ],
+      [
+        116,
+        89,
+        18
+      ],
+      [
+        134,
+        89,
+        18
+      ],
+      [
+        152,
+        89,
+        18
+      ],
+      [
+        8,
+        111,
+        18
+      ],
+      [
+        26,
+        111,
+        18
+      ],
+      [
+        44,
+        111,
+        18
+      ],
+      [
+        62,
+        111,
+        18
+      ],
+      [
+        80,
+        111,
+        18
+      ],
+      [
+        98,
+        111,
+        18
+      ],
+      [
+        116,
+        111,
+        18
+      ],
+      [
+        134,
+        111,
+        18
+      ],
+      [
+        152,
+        111,
+        18
+      ],
+      [
+        172,
+        111,
+        18
+      ]
+    ],
+    "creative_inventory/tab_item_search.png": [
+      [
+        8,
+        17,
+        18
+      ],
+      [
+        26,
+        17,
+        18
+      ],
+      [
+        44,
+        17,
+        18
+      ],
+      [
+        62,
+        17,
+        18
+      ],
+      [
+        80,
+        17,
+        18
+      ],
+      [
+        98,
+        17,
+        18
+      ],
+      [
+        116,
+        17,
+        18
+      ],
+      [
+        134,
+        17,
+        18
+      ],
+      [
+        152,
+        17,
+        18
+      ],
+      [
+        8,
+        35,
+        18
+      ],
+      [
+        26,
+        35,
+        18
+      ],
+      [
+        44,
+        35,
+        18
+      ],
+      [
+        62,
+        35,
+        18
+      ],
+      [
+        80,
+        35,
+        18
+      ],
+      [
+        98,
+        35,
+        18
+      ],
+      [
+        116,
+        35,
+        18
+      ],
+      [
+        134,
+        35,
+        18
+      ],
+      [
+        152,
+        35,
+        18
+      ],
+      [
+        8,
+        53,
+        18
+      ],
+      [
+        26,
+        53,
+        18
+      ],
+      [
+        44,
+        53,
+        18
+      ],
+      [
+        62,
+        53,
+        18
+      ],
+      [
+        80,
+        53,
+        18
+      ],
+      [
+        98,
+        53,
+        18
+      ],
+      [
+        116,
+        53,
+        18
+      ],
+      [
+        134,
+        53,
+        18
+      ],
+      [
+        152,
+        53,
+        18
+      ],
+      [
+        8,
+        71,
+        18
+      ],
+      [
+        26,
+        71,
+        18
+      ],
+      [
+        44,
+        71,
+        18
+      ],
+      [
+        62,
+        71,
+        18
+      ],
+      [
+        80,
+        71,
+        18
+      ],
+      [
+        98,
+        71,
+        18
+      ],
+      [
+        116,
+        71,
+        18
+      ],
+      [
+        134,
+        71,
+        18
+      ],
+      [
+        152,
+        71,
+        18
+      ],
+      [
+        8,
+        89,
+        18
+      ],
+      [
+        26,
+        89,
+        18
+      ],
+      [
+        44,
+        89,
+        18
+      ],
+      [
+        62,
+        89,
+        18
+      ],
+      [
+        80,
+        89,
+        18
+      ],
+      [
+        98,
+        89,
+        18
+      ],
+      [
+        116,
+        89,
+        18
+      ],
+      [
+        134,
+        89,
+        18
+      ],
+      [
+        152,
+        89,
+        18
+      ],
+      [
+        8,
+        111,
+        18
+      ],
+      [
+        26,
+        111,
+        18
+      ],
+      [
+        44,
+        111,
+        18
+      ],
+      [
+        62,
+        111,
+        18
+      ],
+      [
+        80,
+        111,
+        18
+      ],
+      [
+        98,
+        111,
+        18
+      ],
+      [
+        116,
+        111,
+        18
+      ],
+      [
+        134,
+        111,
+        18
+      ],
+      [
+        152,
+        111,
+        18
+      ]
+    ],
+    "creative_inventory/tab_items.png": [
+      [
+        8,
+        17,
+        18
+      ],
+      [
+        26,
+        17,
+        18
+      ],
+      [
+        44,
+        17,
+        18
+      ],
+      [
+        62,
+        17,
+        18
+      ],
+      [
+        80,
+        17,
+        18
+      ],
+      [
+        98,
+        17,
+        18
+      ],
+      [
+        116,
+        17,
+        18
+      ],
+      [
+        134,
+        17,
+        18
+      ],
+      [
+        152,
+        17,
+        18
+      ],
+      [
+        8,
+        35,
+        18
+      ],
+      [
+        26,
+        35,
+        18
+      ],
+      [
+        44,
+        35,
+        18
+      ],
+      [
+        62,
+        35,
+        18
+      ],
+      [
+        80,
+        35,
+        18
+      ],
+      [
+        98,
+        35,
+        18
+      ],
+      [
+        116,
+        35,
+        18
+      ],
+      [
+        134,
+        35,
+        18
+      ],
+      [
+        152,
+        35,
+        18
+      ],
+      [
+        8,
+        53,
+        18
+      ],
+      [
+        26,
+        53,
+        18
+      ],
+      [
+        44,
+        53,
+        18
+      ],
+      [
+        62,
+        53,
+        18
+      ],
+      [
+        80,
+        53,
+        18
+      ],
+      [
+        98,
+        53,
+        18
+      ],
+      [
+        116,
+        53,
+        18
+      ],
+      [
+        134,
+        53,
+        18
+      ],
+      [
+        152,
+        53,
+        18
+      ],
+      [
+        8,
+        71,
+        18
+      ],
+      [
+        26,
+        71,
+        18
+      ],
+      [
+        44,
+        71,
+        18
+      ],
+      [
+        62,
+        71,
+        18
+      ],
+      [
+        80,
+        71,
+        18
+      ],
+      [
+        98,
+        71,
+        18
+      ],
+      [
+        116,
+        71,
+        18
+      ],
+      [
+        134,
+        71,
+        18
+      ],
+      [
+        152,
+        71,
+        18
+      ],
+      [
+        8,
+        89,
+        18
+      ],
+      [
+        26,
+        89,
+        18
+      ],
+      [
+        44,
+        89,
+        18
+      ],
+      [
+        62,
+        89,
+        18
+      ],
+      [
+        80,
+        89,
+        18
+      ],
+      [
+        98,
+        89,
+        18
+      ],
+      [
+        116,
+        89,
+        18
+      ],
+      [
+        134,
+        89,
+        18
+      ],
+      [
+        152,
+        89,
+        18
+      ],
+      [
+        8,
+        111,
+        18
+      ],
+      [
+        26,
+        111,
+        18
+      ],
+      [
+        44,
+        111,
+        18
+      ],
+      [
+        62,
+        111,
+        18
+      ],
+      [
+        80,
+        111,
+        18
+      ],
+      [
+        98,
+        111,
+        18
+      ],
+      [
+        116,
+        111,
+        18
+      ],
+      [
+        134,
+        111,
+        18
+      ],
+      [
+        152,
+        111,
         18
       ]
     ]

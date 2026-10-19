@@ -88,6 +88,9 @@ def build(jar):
                    kit.slider_sprite(8 if handle else 200, 20, highlighted, handle), border)
 
     with zipfile.ZipFile(jar) as archive:
+        for name in ('header_separator', 'footer_separator', 'inworld_header_separator', 'inworld_footer_separator'):
+            original = Image.open(io.BytesIO(archive.read('assets/minecraft/textures/gui/' + name + '.png')))
+            images['interface/menu/' + name + '.png'] = (kit.canvas(*original.size), None)
         for name, height in [('inventory', 166), ('generic_54', 222)]:
             original = Image.open(io.BytesIO(archive.read('assets/minecraft/textures/gui/container/' + name + '.png'))).convert('RGBA')
             target = recolor(original)
@@ -157,13 +160,22 @@ def build(jar):
             if not path.startswith(root + 'container/') or not path.endswith('.png'):
                 continue
             name = path[len(root + 'container/'):]
-            if name in ('inventory.png', 'generic_54.png', 'gamemode_switcher.png') or name.startswith('creative_inventory/'):
+            if name in ('inventory.png', 'generic_54.png', 'gamemode_switcher.png'):
                 continue
             original = Image.open(io.BytesIO(archive.read(path))).convert('RGBA')
             target = recolor(original)
             slots[name] = native_slots(original, target)
             _, _, w, h = original.getchannel('A').getbbox()
             kit.metal_frame(target, 0, 0, w, h)
+            if name == 'creative_inventory/tab_inventory.png':
+                kit.slot(target, 172, 111)
+                slots[name].append((172, 111, 18))
+                for y in range(113, 127):
+                    for x in range(174, 188):
+                        if original.getpixel((x, y))[:3] == (55, 55, 55):
+                            target.putpixel((x, y), (*ImageColor.getrgb(kit.GOLD['dark']), 255))
+            elif name == 'creative_inventory/tab_item_search.png':
+                kit.rect(target, 81, 5, 88, 10, kit.DARK)
             if name == 'crafting_table.png':
                 kit.rect(target, 89, 32, 25, 19, kit.BODY)
                 kit.arrow(target, 89, 33)
@@ -183,7 +195,7 @@ def build(jar):
             if not path.startswith(prefix) or not path.endswith('.png'):
                 continue
             name = path[len(prefix):-4]
-            if not name.startswith(('container/', 'recipe_book/', 'tooltip/')) or name.startswith('container/creative_inventory/'):
+            if not name.startswith(('container/', 'recipe_book/', 'tooltip/')):
                 continue
             original = Image.open(io.BytesIO(archive.read(path))).convert('RGBA')
             target = recolor(original)
@@ -212,6 +224,15 @@ def build(jar):
                         if a: target.putpixel((x, y), (*ImageColor.getrgb(kit.GOLD['dark']), a))
             elif name.endswith('/chest_slots'):
                 native_slots(original, target)
+            elif name.startswith('container/creative_inventory/tab_'):
+                target = kit.canvas(*original.size)
+                selected = '_selected_' in name
+                top = '_top' in name
+                kit.panel(target, 0, 0 if selected or not top else 2, target.width,
+                          target.height if selected else target.height - 2)
+                if selected:
+                    kit.metal_frame(target, 0, 0, *target.size, highlighted=True)
+                    kit.rect(target, 2, target.height - 2 if top else 0, target.width - 4, 2, kit.BODY)
             elif name.startswith('recipe_book/page_'):
                 target = kit.page_arrow('backward' in name, '_highlighted' in name)
             elif name in ('recipe_book/tab', 'recipe_book/tab_selected'):
@@ -228,7 +249,9 @@ def build(jar):
             elif '/scroller' in name:
                 target = kit.canvas(*original.size)
                 kit.scrollbar(target, 0, 0, target.height, target.height, w=target.width)
-                if 'disabled' in name: target = recolor(target)
+                if 'disabled' in name:
+                    kit.rect(target, 0, 0, *target.size, kit.DARK)
+                    kit.metal_frame(target, 0, 0, *target.size, disabled=True)
             elif name.startswith('container/beacon/button') or '/enchantment_slot' in name:
                 target = kit.canvas(*original.size)
                 state = 'disabled' if 'disabled' in name else 'hover' if 'highlighted' in name else 'normal'
@@ -275,11 +298,17 @@ def main():
         elif relative in ('interface/inventory.png', 'interface/generic_54.png'):
             registry['textures/gui/container/' + relative.split('/')[-1]] = 'textures/gui/' + relative
         elif relative == 'interface/recipe_book.png': registry['textures/gui/recipe_book.png'] = 'textures/gui/' + relative
+        elif relative.startswith('interface/menu/'):
+            registry['textures/gui/' + relative.split('/')[-1]] = 'textures/gui/' + relative
     registry_path = OUT.parents[1] / 'interface-textures.json'
     registry_raw = json.dumps(registry, ensure_ascii=False, indent=2) + '\n'
     if args.check: assert registry_path.read_text(encoding='utf-8') == registry_raw
     else: registry_path.write_text(registry_raw, encoding='utf-8')
-    report = dict(minecraft='26.2', stages=[1, 2, 3, 4], jarSha256=hashlib.sha256(args.minecraft_jar.read_bytes()).hexdigest(),
+    palette_path = registry_path.with_name('interface-palette.json')
+    palette_raw = json.dumps({'goldLight': 0xFF000000 | int(kit.GOLD['light'][1:], 16)}, indent=2) + '\n'
+    if args.check: assert palette_path.read_text(encoding='utf-8') == palette_raw
+    else: palette_path.write_text(palette_raw, encoding='utf-8')
+    report = dict(minecraft='26.2', stages=[1, 2, 3, 4, 5], jarSha256=hashlib.sha256(args.minecraft_jar.read_bytes()).hexdigest(),
                   generated=manifest, nativeSlots=slots, globalMinecraftOverrides=False)
     serialized = json.dumps(report, ensure_ascii=False, indent=2) + '\n'
     if args.check: assert (HERE / 'manifest.json').read_text(encoding='utf-8') == serialized

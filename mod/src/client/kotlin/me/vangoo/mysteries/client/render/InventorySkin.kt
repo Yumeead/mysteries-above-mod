@@ -22,14 +22,16 @@ object InventorySkin {
     private val screens = setOf("InventoryScreen", "ContainerScreen", "CraftingScreen", "FurnaceScreen",
         "BlastFurnaceScreen", "SmokerScreen", "AnvilScreen", "EnchantmentScreen", "SmithingScreen", "GrindstoneScreen",
         "LoomScreen", "CartographyTableScreen", "StonecutterScreen", "BrewingStandScreen", "BeaconScreen",
-        "HopperScreen", "DispenserScreen", "MerchantScreen", "HorseInventoryScreen", "ShulkerBoxScreen", "CrafterScreen")
+        "HopperScreen", "DispenserScreen", "MerchantScreen", "HorseInventoryScreen", "ShulkerBoxScreen", "CrafterScreen",
+        "CreativeModeInventoryScreen", "NautilusInventoryScreen")
         .mapTo(hashSetOf()) { "net.minecraft.client.gui.screens.inventory.$it" }
     private val textures = checkNotNull(javaClass.getResourceAsStream("/assets/mysteries_above/interface-textures.json"))
         .bufferedReader().use { reader -> JsonParser.parseReader(reader).asJsonObject.entrySet()
             .associate { (key, value) -> Identifier.withDefaultNamespace(key) to modId(value.asString) } }
 
     private val widgets = java.util.ArrayDeque<AbstractWidget>()
-    private const val GOLD = 0xFFDFC28B.toInt()
+    private val gold = checkNotNull(javaClass.getResourceAsStream("/assets/mysteries_above/interface-palette.json"))
+        .bufferedReader().use { JsonParser.parseReader(it).asJsonObject.get("goldLight").asInt }
 
     fun allows(screen: Screen?): Boolean {
         val name = screen?.javaClass?.name ?: return false
@@ -43,7 +45,8 @@ object InventorySkin {
         if (!enabled || original.namespace != "minecraft") return original
         val name = original.path
         if (Minecraft.getInstance().gui.screen()?.javaClass?.name !in screens &&
-            !name.startsWith("widget/") && !name.startsWith("tooltip/") && !name.startsWith("pause_menu/") && name != "friends/friends") return original
+            !name.startsWith("widget/") && !name.startsWith("tooltip/") && !name.startsWith("pause_menu/") &&
+            !name.endsWith("_separator.png") && name != "friends/friends") return original
         val widget = widgets.peekLast()
         if (widget != null && !widget.javaClass.name.startsWith("net.minecraft.client.")) return original
         if (name.startsWith("widget/button") && widget is AbstractButton && widget.active && widget.isHovered &&
@@ -66,8 +69,9 @@ object InventorySkin {
             ScreenEvents.afterBackground(screen).register { _, graphics, _, _, _ ->
                 if (enabled) {
                     val width = if (pauseY != null) 204 else minOf(Minecraft.getInstance().font.width(title.message) + 16, screen.width - 16)
+                    val top = maxOf(0, title.y - 6)
                     graphics.blitSprite(RenderPipelines.GUI_TEXTURED, modId("interface/panel_dark"),
-                        (screen.width - width) / 2, title.y - 6, width, 20)
+                        (screen.width - width) / 2, top, width, minOf(20, title.y + 14 - top))
                 }
             }
         }
@@ -89,12 +93,12 @@ object InventorySkin {
         for ((sx, dx) in listOf(x to 1, widget.x + widget.width - 4 to -1)) {
             for ((sy, dy) in listOf(y to 1, widget.y + widget.height - 4 to -1)) {
                 for (n in 0..2) {
-                    graphics.fill(sx + dx * n, sy, sx + dx * n + 1, sy + 1, GOLD)
-                    graphics.fill(sx, sy + dy * n, sx + 1, sy + dy * n + 1, GOLD)
+                    graphics.fill(sx + dx * n, sy, sx + dx * n + 1, sy + 1, gold)
+                    graphics.fill(sx, sy + dy * n, sx + 1, sy + dy * n + 1, gold)
                 }
             }
         }
     }
 
-    @JvmStatic fun selectionColor(original: Int): Int = if (enabled) (original and -0x1000000) or 0xDFC28B else original
+    @JvmStatic fun selectionColor(original: Int): Int = if (enabled) (original and -0x1000000) or (gold and 0xFFFFFF) else original
 }

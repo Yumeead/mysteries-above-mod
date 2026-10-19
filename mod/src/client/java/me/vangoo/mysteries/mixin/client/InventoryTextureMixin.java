@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 @Mixin(GuiGraphicsExtractor.class)
 abstract class InventoryTextureMixin {
     @ModifyVariable(method = "blit(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIFFIIII)V",
-        at = @At("HEAD"), argsOnly = true, ordinal = 0)
+        at = @At("HEAD"), argsOnly = true, require = 1)
     private Identifier mysteries_above$inventoryTexture(Identifier texture) {
         return InventorySkin.texture(texture);
     }
@@ -19,7 +19,7 @@ abstract class InventoryTextureMixin {
     @ModifyVariable(method = {
         "blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIIII)V",
         "blitSprite(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIIIIIIII)V"
-    }, at = @At("HEAD"), argsOnly = true, ordinal = 0, require = 2)
+    }, at = @At("HEAD"), argsOnly = true, require = 2)
     private Identifier mysteries_above$inventorySprite(Identifier sprite) {
         return InventorySkin.texture(sprite);
     }
