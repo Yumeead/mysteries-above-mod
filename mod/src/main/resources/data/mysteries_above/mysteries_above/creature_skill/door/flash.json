@@ -1,0 +1,28 @@
+{
+  "beyonders_only": true,
+  "target": [
+    {
+      "type": "effect",
+      "effect": "minecraft:blindness",
+      "duration": 35,
+      "amplifier": 1
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:flash",
+          "color": -1
+        },
+        "count": 1,
+        "y": 1
+      }
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.firework_rocket.blast",
+      "volume": 1,
+      "pitch": 1.4
+    }
+  ]
+}

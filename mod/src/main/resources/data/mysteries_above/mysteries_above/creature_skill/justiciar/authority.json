@@ -1,0 +1,22 @@
+{
+  "beyonders_only": true,
+  "target": [
+    {
+      "type": "effect",
+      "effect": "minecraft:slowness",
+      "duration": 40,
+      "amplifier": 1
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:weakness",
+      "duration": 40
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.wither.ambient",
+      "volume": 0.6,
+      "pitch": 1.6
+    }
+  ]
+}

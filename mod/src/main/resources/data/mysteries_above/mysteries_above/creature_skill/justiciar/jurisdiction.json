@@ -1,0 +1,19 @@
+{
+  "beyonders_only": true,
+  "target": [
+    {
+      "type": "effect",
+      "effect": "minecraft:slowness",
+      "duration": 50,
+      "amplifier": 1
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:mining_fatigue",
+      "duration": 50,
+      "amplifier": 1
+    }
+  ],
+  "area": 6,
+  "around_self": true
+}

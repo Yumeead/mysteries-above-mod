@@ -1,0 +1,36 @@
+{
+  "body": {
+    "entity": "minecraft:wolf",
+    "name": {
+      "text": "Фантомний Пітон",
+      "color": "dark_gray"
+    },
+    "scale": 1.2,
+    "aura": {
+      "particle": {
+        "type": "minecraft:end_rod"
+      },
+      "count": 4,
+      "spread": 0.3,
+      "rise": 0.5,
+      "y": 1,
+      "speed": 0.01
+    }
+  },
+  "stats": {
+    "health": 140,
+    "damage": 12,
+    "speed": 0.27
+  },
+  "kit": "mysteries_above:whitetower_7",
+  "pathway": "WhiteTower",
+  "sequence": 7,
+  "spawn": {
+    "biomes": [
+      "minecraft:taiga",
+      "minecraft:forest"
+    ],
+    "chance": 0.0025,
+    "structures": 0.0025
+  }
+}

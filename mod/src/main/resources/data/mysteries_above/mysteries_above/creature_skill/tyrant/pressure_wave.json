@@ -1,0 +1,38 @@
+{
+  "target": [
+    {
+      "type": "damage",
+      "amount": 9
+    },
+    {
+      "type": "knockback",
+      "strength": 1.08,
+      "up": 0.4
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:slowness",
+      "duration": 30,
+      "amplifier": 1
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:cloud"
+        },
+        "count": 26,
+        "spread": 0.6,
+        "rise": 0.4,
+        "y": 1,
+        "speed": 0.1
+      }
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.breeze.wind_burst",
+      "volume": 1,
+      "pitch": 0.9
+    }
+  ]
+}

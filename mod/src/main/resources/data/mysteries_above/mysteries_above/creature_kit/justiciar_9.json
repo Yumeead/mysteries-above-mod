@@ -1,0 +1,14 @@
+{
+  "skills": [
+    {
+      "skill": "mysteries_above:justiciar/authority",
+      "cooldown": 200
+    },
+    {
+      "skill": "mysteries_above:justiciar/arbiters_gaze",
+      "cooldown": 240
+    }
+  ],
+  "gcd": 120,
+  "range": 12
+}

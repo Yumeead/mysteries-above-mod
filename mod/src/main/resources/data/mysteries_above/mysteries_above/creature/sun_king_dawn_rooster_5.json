@@ -1,0 +1,37 @@
+{
+  "body": {
+    "entity": "minecraft:chicken",
+    "name": {
+      "text": "Король Світанкових Півнів",
+      "color": "red"
+    },
+    "scale": 1.8,
+    "aura": {
+      "particle": {
+        "type": "minecraft:end_rod"
+      },
+      "count": 6,
+      "spread": 0.3,
+      "rise": 0.5,
+      "y": 1,
+      "speed": 0.01
+    }
+  },
+  "stats": {
+    "health": 288,
+    "damage": 21,
+    "speed": 0.32
+  },
+  "kit": "mysteries_above:sun_5",
+  "pathway": "Sun",
+  "sequence": 5,
+  "apex": true,
+  "spawn": {
+    "biomes": [
+      "minecraft:sunflower_plains",
+      "minecraft:savanna_plateau"
+    ],
+    "chance": 0.00075,
+    "structures": 0.00075
+  }
+}

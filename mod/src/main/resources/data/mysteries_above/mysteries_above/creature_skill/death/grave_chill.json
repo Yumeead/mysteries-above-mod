@@ -1,0 +1,38 @@
+{
+  "target": [
+    {
+      "type": "damage",
+      "amount": 9
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:slowness",
+      "duration": 50,
+      "amplifier": 1
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:weakness",
+      "duration": 50
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:soul"
+        },
+        "count": 14,
+        "spread": 0.3,
+        "rise": 0.5,
+        "y": 1,
+        "speed": 0.02
+      }
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:block.soul_sand.break",
+      "volume": 0.9,
+      "pitch": 0.6
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "skills": [
+    {
+      "skill": "mysteries_above:tyrant/sea_lunge",
+      "cooldown": 160
+    }
+  ],
+  "reactions": [
+    {
+      "when": "hurt",
+      "skill": "mysteries_above:tyrant/illusory_scales",
+      "cooldown": 240
+    }
+  ],
+  "gcd": 120,
+  "range": 12
+}

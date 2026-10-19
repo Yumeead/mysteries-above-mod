@@ -1,0 +1,32 @@
+{
+  "skills": [
+    {
+      "skill": "mysteries_above:fool/air_bullet",
+      "cooldown": 200
+    },
+    {
+      "skill": "mysteries_above:fool/paper_cutter",
+      "cooldown": 140
+    }
+  ],
+  "reactions": [
+    {
+      "when": "near",
+      "skill": "mysteries_above:fool/flame_jump",
+      "cooldown": 160,
+      "distance": 3.0
+    },
+    {
+      "when": "hurt",
+      "skill": "mysteries_above:fool/danger_intuition",
+      "cooldown": 200
+    }
+  ],
+  "gcd": 120,
+  "range": 12,
+  "haste": 1,
+  "stance": {
+    "min": 5,
+    "max": 11
+  }
+}

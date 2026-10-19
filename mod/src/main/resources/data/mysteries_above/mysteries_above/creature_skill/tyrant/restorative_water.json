@@ -1,0 +1,26 @@
+{
+  "self": [
+    {
+      "type": "heal",
+      "amount": 7
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:falling_water"
+        },
+        "count": 18,
+        "spread": 0.4,
+        "rise": 0.7,
+        "y": 1.2
+      }
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:block.water.ambient",
+      "volume": 1,
+      "pitch": 1.4
+    }
+  ]
+}

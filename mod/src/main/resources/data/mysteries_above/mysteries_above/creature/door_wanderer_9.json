@@ -1,0 +1,25 @@
+{
+  "body": {
+    "entity": "minecraft:enderman",
+    "name": {
+      "text": "Вимірний Блукач",
+      "color": "light_purple"
+    }
+  },
+  "stats": {
+    "health": 53,
+    "damage": 7,
+    "speed": 0.25
+  },
+  "kit": "mysteries_above:door_9",
+  "pathway": "Door",
+  "sequence": 9,
+  "spawn": {
+    "biomes": [
+      "minecraft:plains",
+      "minecraft:desert"
+    ],
+    "chance": 0.005,
+    "structures": 0.005
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "self": [
+    {
+      "type": "leap",
+      "strength": 0.8,
+      "up": 0.3
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:speed",
+      "duration": 40
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:cloud"
+        },
+        "count": 6,
+        "spread": 0.3,
+        "rise": 0.3,
+        "y": 0.5
+      }
+    }
+  ]
+}

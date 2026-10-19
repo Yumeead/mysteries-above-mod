@@ -1,0 +1,37 @@
+{
+  "target": [
+    {
+      "type": "knockback",
+      "strength": -0.96,
+      "up": 0.25
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:slowness",
+      "duration": 40,
+      "amplifier": 1
+    },
+    {
+      "type": "chance",
+      "chance": 0.2,
+      "then": [
+        {
+          "type": "drain_sanity",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:witch"
+        },
+        "count": 10,
+        "spread": 0.4,
+        "rise": 0.6,
+        "y": 1
+      }
+    }
+  ]
+}

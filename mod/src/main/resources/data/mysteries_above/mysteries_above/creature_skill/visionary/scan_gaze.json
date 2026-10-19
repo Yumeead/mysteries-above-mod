@@ -1,0 +1,23 @@
+{
+  "beyonders_only": true,
+  "target": [
+    {
+      "type": "effect",
+      "effect": "minecraft:glowing",
+      "duration": 60
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:end_rod"
+        },
+        "count": 6,
+        "spread": 0.2,
+        "rise": 0.4,
+        "y": 1,
+        "speed": 0.01
+      }
+    }
+  ]
+}

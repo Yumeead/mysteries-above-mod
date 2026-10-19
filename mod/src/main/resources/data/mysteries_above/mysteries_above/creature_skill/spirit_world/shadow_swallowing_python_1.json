@@ -1,0 +1,11 @@
+{
+  "area": 8,
+  "around_self": true,
+  "target": [
+    {
+      "type": "effect",
+      "effect": "minecraft:glowing",
+      "duration": 80
+    }
+  ]
+}

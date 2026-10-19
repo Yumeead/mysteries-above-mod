@@ -1,0 +1,39 @@
+{
+  "body": {
+    "entity": "minecraft:drowned",
+    "name": {
+      "text": "Богиня Озера",
+      "color": "dark_aqua"
+    },
+    "scale": 1.1,
+    "sun_proof": true,
+    "aura": {
+      "particle": {
+        "type": "minecraft:falling_water"
+      },
+      "count": 8,
+      "spread": 0.6,
+      "rise": 0.5,
+      "y": 1.2
+    }
+  },
+  "stats": {
+    "health": 140,
+    "damage": 11,
+    "speed": 0.26,
+    "armor": 4
+  },
+  "mind": {
+    "temperament": "willless",
+    "fearless": true
+  },
+  "kit": "mysteries_above:lake_goddess",
+  "sequence": 6,
+  "spawn": {
+    "biomes": [
+      "minecraft:soul_sand_valley",
+      "minecraft:basalt_deltas"
+    ],
+    "chance": 0.008
+  }
+}

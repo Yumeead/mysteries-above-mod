@@ -1,0 +1,36 @@
+{
+  "body": {
+    "entity": "minecraft:enderman",
+    "name": {
+      "text": "Сфінкс",
+      "color": "blue"
+    },
+    "scale": 1.2,
+    "aura": {
+      "particle": {
+        "type": "minecraft:smoke"
+      },
+      "count": 6,
+      "spread": 0.3,
+      "rise": 0.5,
+      "y": 1,
+      "speed": 0.01
+    }
+  },
+  "stats": {
+    "health": 140,
+    "damage": 12,
+    "speed": 0.27
+  },
+  "kit": "mysteries_above:error_7",
+  "pathway": "Error",
+  "sequence": 7,
+  "spawn": {
+    "biomes": [
+      "minecraft:desert",
+      "minecraft:badlands"
+    ],
+    "chance": 0.0025,
+    "structures": 0.0025
+  }
+}

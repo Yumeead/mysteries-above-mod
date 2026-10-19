@@ -1,0 +1,36 @@
+{
+  "body": {
+    "entity": "minecraft:wolf",
+    "name": {
+      "text": "Темновізерункова Чорна Пантера",
+      "color": "dark_gray"
+    },
+    "scale": 1.2,
+    "aura": {
+      "particle": {
+        "type": "minecraft:witch"
+      },
+      "count": 4,
+      "spread": 0.3,
+      "rise": 0.5,
+      "y": 1
+    }
+  },
+  "stats": {
+    "health": 140,
+    "damage": 12,
+    "speed": 0.32
+  },
+  "kit": "mysteries_above:fool_7",
+  "pathway": "Fool",
+  "sequence": 7,
+  "spawn": {
+    "biomes": [
+      "minecraft:jungle",
+      "minecraft:sparse_jungle",
+      "minecraft:forest"
+    ],
+    "chance": 0.0025,
+    "structures": 0.0025
+  }
+}

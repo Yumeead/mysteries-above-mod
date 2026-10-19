@@ -1,0 +1,28 @@
+{
+  "self": [
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:flame"
+        },
+        "count": 20,
+        "spread": 0.4,
+        "rise": 0.6,
+        "y": 0.5,
+        "speed": 0.02
+      }
+    },
+    {
+      "type": "leap",
+      "strength": 1.4,
+      "up": 0.5
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.blaze.shoot",
+      "volume": 1,
+      "pitch": 1.2
+    }
+  ]
+}

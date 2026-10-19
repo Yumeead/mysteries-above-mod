@@ -1,0 +1,34 @@
+{
+  "body": {
+    "entity": "minecraft:witch",
+    "name": {
+      "text": "Тисячоликий Мисливець",
+      "color": "dark_purple"
+    },
+    "scale": 1.35,
+    "aura": {
+      "particle": {
+        "type": "minecraft:witch"
+      },
+      "count": 4,
+      "spread": 0.3,
+      "rise": 0.5,
+      "y": 1
+    }
+  },
+  "stats": {
+    "health": 198,
+    "damage": 16,
+    "speed": 0.28
+  },
+  "kit": "mysteries_above:fool_6",
+  "pathway": "Fool",
+  "sequence": 6,
+  "spawn": {
+    "biomes": [
+      "minecraft:swamp"
+    ],
+    "chance": 0.0015,
+    "structures": 0.0015
+  }
+}

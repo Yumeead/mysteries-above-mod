@@ -1,0 +1,34 @@
+{
+  "body": {
+    "entity": "minecraft:husk",
+    "name": {
+      "text": "Тінь у Людській Шкірі",
+      "color": "dark_gray"
+    },
+    "aura": {
+      "particle": {
+        "type": "minecraft:witch"
+      },
+      "count": 4,
+      "spread": 0.3,
+      "rise": 0.5,
+      "y": 1
+    }
+  },
+  "stats": {
+    "health": 198,
+    "damage": 16,
+    "speed": 0.27
+  },
+  "kit": "mysteries_above:fool_6",
+  "pathway": "Fool",
+  "sequence": 6,
+  "spawn": {
+    "biomes": [
+      "minecraft:dark_forest",
+      "minecraft:swamp"
+    ],
+    "chance": 0.0015,
+    "structures": 0.0015
+  }
+}

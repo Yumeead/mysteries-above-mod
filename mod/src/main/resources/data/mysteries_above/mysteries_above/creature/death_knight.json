@@ -1,0 +1,42 @@
+{
+  "body": {
+    "entity": "minecraft:wither_skeleton",
+    "name": {
+      "text": "Лицар Смерті",
+      "color": "dark_gray"
+    },
+    "scale": 1.2,
+    "sun_proof": true,
+    "equipment": {
+      "mainhand": "minecraft:iron_sword",
+      "chest": "minecraft:chainmail_chestplate",
+      "head": "minecraft:chainmail_helmet"
+    },
+    "aura": {
+      "particle": {
+        "type": "minecraft:dripping_dripstone_lava"
+      },
+      "count": 1,
+      "spread": 0.3,
+      "rise": 0.4,
+      "y": 1
+    }
+  },
+  "stats": {
+    "health": 120,
+    "damage": 14,
+    "speed": 0.24,
+    "armor": 8
+  },
+  "mind": {
+    "temperament": "willless",
+    "fearless": true
+  },
+  "sequence": 6,
+  "spawn": {
+    "biomes": [
+      "minecraft:nether_wastes"
+    ],
+    "chance": 0.01
+  }
+}

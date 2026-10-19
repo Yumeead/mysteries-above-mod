@@ -1,0 +1,9 @@
+{
+  "reactions": [
+    {
+      "when": "pulse",
+      "skill": "mysteries_above:spirit_world/shadow_swallowing_python_1",
+      "every": 80
+    }
+  ]
+}

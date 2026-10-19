@@ -1,0 +1,42 @@
+{
+  "skills": [
+    {
+      "skill": "mysteries_above:fool/marionette",
+      "cooldown": 240
+    },
+    {
+      "skill": "mysteries_above:fool/air_bullet",
+      "cooldown": 160
+    },
+    {
+      "skill": "mysteries_above:fool/paper_cutter",
+      "cooldown": 100
+    }
+  ],
+  "reactions": [
+    {
+      "when": "hurt",
+      "skill": "mysteries_above:fool/puppets",
+      "cooldown": 600,
+      "below": 0.35
+    },
+    {
+      "when": "near",
+      "skill": "mysteries_above:fool/flame_jump",
+      "cooldown": 160,
+      "distance": 3.0
+    },
+    {
+      "when": "hurt",
+      "skill": "mysteries_above:fool/danger_intuition",
+      "cooldown": 200
+    }
+  ],
+  "gcd": 80,
+  "range": 12,
+  "haste": 1,
+  "stance": {
+    "min": 5,
+    "max": 11
+  }
+}

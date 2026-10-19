@@ -1,0 +1,38 @@
+{
+  "body": {
+    "entity": "minecraft:bee",
+    "name": {
+      "text": "Кров'яно-плямистий комар",
+      "color": "dark_gray"
+    },
+    "aura": {
+      "particle": {
+        "type": "minecraft:smoke"
+      },
+      "count": 6,
+      "spread": 0.3,
+      "rise": 0.5,
+      "y": 1,
+      "speed": 0.01
+    }
+  },
+  "stats": {
+    "health": 44,
+    "damage": 7,
+    "speed": 0.28
+  },
+  "mind": {
+    "combat": "own"
+  },
+  "kit": "mysteries_above:error_9",
+  "pathway": "Error",
+  "sequence": 9,
+  "spawn": {
+    "biomes": [
+      "minecraft:swamp",
+      "minecraft:mangrove_swamp"
+    ],
+    "chance": 0.005,
+    "structures": 0.005
+  }
+}

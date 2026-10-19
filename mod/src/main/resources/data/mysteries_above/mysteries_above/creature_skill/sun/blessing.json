@@ -1,0 +1,31 @@
+{
+  "self": [
+    {
+      "type": "heal",
+      "amount": 6
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:regeneration",
+      "duration": 60
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:glow"
+        },
+        "count": 14,
+        "spread": 0.4,
+        "rise": 0.6,
+        "y": 1
+      }
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:block.beacon.power_select",
+      "volume": 0.6,
+      "pitch": 1.8
+    }
+  ]
+}

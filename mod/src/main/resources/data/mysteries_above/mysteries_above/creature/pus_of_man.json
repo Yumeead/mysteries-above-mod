@@ -1,0 +1,38 @@
+{
+  "body": {
+    "entity": "minecraft:husk",
+    "name": {
+      "text": "Гній Людини",
+      "color": "black"
+    },
+    "scale": 0.6,
+    "aura": {
+      "particle": {
+        "type": "minecraft:squid_ink"
+      },
+      "count": 3,
+      "spread": 0.2,
+      "rise": 0.1,
+      "y": 0.5,
+      "speed": 0.005
+    }
+  },
+  "stats": {
+    "health": 55,
+    "damage": 5,
+    "speed": 0.2,
+    "follow_range": 24
+  },
+  "mind": {
+    "temperament": "willless",
+    "fearless": true
+  },
+  "sequence": 5,
+  "spawn": {
+    "biomes": [
+      "minecraft:basalt_deltas",
+      "minecraft:soul_sand_valley"
+    ],
+    "chance": 0.012
+  }
+}

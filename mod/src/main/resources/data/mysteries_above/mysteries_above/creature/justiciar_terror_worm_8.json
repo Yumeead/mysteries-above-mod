@@ -1,0 +1,34 @@
+{
+  "body": {
+    "entity": "minecraft:zoglin",
+    "name": {
+      "text": "Жахний Демон-Черв'як",
+      "color": "red"
+    },
+    "scale": 1.1,
+    "aura": {
+      "particle": {
+        "type": "minecraft:wax_off"
+      },
+      "count": 3,
+      "spread": 0.4,
+      "rise": 0.4,
+      "y": 1
+    }
+  },
+  "stats": {
+    "health": 80,
+    "damage": 9,
+    "speed": 0.26
+  },
+  "kit": "mysteries_above:justiciar_8",
+  "pathway": "Justiciar",
+  "sequence": 8,
+  "spawn": {
+    "biomes": [
+      "minecraft:taiga"
+    ],
+    "chance": 0.00375,
+    "structures": 0.00375
+  }
+}

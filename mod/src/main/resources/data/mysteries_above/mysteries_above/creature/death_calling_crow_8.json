@@ -1,0 +1,35 @@
+{
+  "body": {
+    "entity": "minecraft:parrot",
+    "name": {
+      "text": "Смертозивна ворона",
+      "color": "dark_gray"
+    },
+    "aura": {
+      "particle": {
+        "type": "minecraft:soul"
+      },
+      "count": 5,
+      "spread": 0.3,
+      "rise": 0.5,
+      "y": 1,
+      "speed": 0.01
+    }
+  },
+  "stats": {
+    "health": 80,
+    "damage": 9,
+    "speed": 0.3
+  },
+  "kit": "mysteries_above:death_8",
+  "pathway": "Death",
+  "sequence": 8,
+  "spawn": {
+    "biomes": [
+      "minecraft:dark_forest",
+      "minecraft:swamp"
+    ],
+    "chance": 0.00375,
+    "structures": 0.00375
+  }
+}

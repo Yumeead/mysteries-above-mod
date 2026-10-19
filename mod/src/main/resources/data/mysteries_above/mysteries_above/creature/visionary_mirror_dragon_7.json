@@ -1,0 +1,25 @@
+{
+  "body": {
+    "entity": "minecraft:ravager",
+    "name": {
+      "text": "Дзеркальний Дракон",
+      "color": "blue"
+    },
+    "scale": 1.2
+  },
+  "stats": {
+    "health": 140,
+    "damage": 12,
+    "speed": 0.27
+  },
+  "kit": "mysteries_above:visionary_7",
+  "pathway": "Visionary",
+  "sequence": 7,
+  "spawn": {
+    "biomes": [
+      "minecraft:jungle"
+    ],
+    "chance": 0.0025,
+    "structures": 0.0025
+  }
+}

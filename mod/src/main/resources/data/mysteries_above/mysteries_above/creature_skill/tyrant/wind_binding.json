@@ -1,0 +1,30 @@
+{
+  "beyonders_only": true,
+  "target": [
+    {
+      "type": "effect",
+      "effect": "minecraft:slowness",
+      "duration": 40,
+      "amplifier": 4
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:mining_fatigue",
+      "duration": 60,
+      "amplifier": 1
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:cloud"
+        },
+        "count": 24,
+        "spread": 0.3,
+        "rise": 0.2,
+        "y": 0.3,
+        "speed": 0.1
+      }
+    }
+  ]
+}

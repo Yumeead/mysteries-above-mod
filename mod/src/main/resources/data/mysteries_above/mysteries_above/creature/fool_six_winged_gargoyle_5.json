@@ -1,0 +1,37 @@
+{
+  "body": {
+    "entity": "minecraft:vex",
+    "name": {
+      "text": "Шестикрила Горгулья",
+      "color": "gray"
+    },
+    "scale": 1.4,
+    "aura": {
+      "particle": {
+        "type": "minecraft:witch"
+      },
+      "count": 4,
+      "spread": 0.3,
+      "rise": 0.5,
+      "y": 1
+    }
+  },
+  "stats": {
+    "health": 240,
+    "damage": 19,
+    "speed": 0.26
+  },
+  "kit": "mysteries_above:fool_six_winged_gargoyle_5",
+  "pathway": "Fool",
+  "sequence": 5,
+  "apex": true,
+  "spawn": {
+    "biomes": [
+      "minecraft:windswept_hills",
+      "minecraft:jagged_peaks",
+      "minecraft:stony_peaks"
+    ],
+    "chance": 0.00075,
+    "structures": 0.00075
+  }
+}

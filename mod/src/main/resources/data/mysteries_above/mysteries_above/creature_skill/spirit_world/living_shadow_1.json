@@ -1,0 +1,14 @@
+{
+  "target": [
+    {
+      "type": "effect",
+      "effect": "minecraft:blindness",
+      "duration": 40
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:weakness",
+      "duration": 80
+    }
+  ]
+}

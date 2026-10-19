@@ -1,0 +1,27 @@
+{
+  "skills": [
+    {
+      "skill": "mysteries_above:visionary/hypnosis",
+      "cooldown": 200
+    },
+    {
+      "skill": "mysteries_above:visionary/scan_gaze",
+      "cooldown": 200
+    }
+  ],
+  "reactions": [
+    {
+      "when": "pulse",
+      "skill": "mysteries_above:visionary/surge",
+      "every": 120
+    },
+    {
+      "when": "hurt",
+      "skill": "mysteries_above:visionary/danger_sense",
+      "cooldown": 200
+    }
+  ],
+  "gcd": 80,
+  "range": 12,
+  "stalker": true
+}

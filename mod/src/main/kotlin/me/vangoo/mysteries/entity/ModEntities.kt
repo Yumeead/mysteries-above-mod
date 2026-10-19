@@ -30,9 +30,24 @@ object ModEntities {
             .build(key)
     }
 
+    /**
+     * A person of the creature engine: citizen, guard, wild Beyonder. `noSummon()` for the same
+     * reason as the marionette — a human without a creature spec has no mind; they are made by
+     * `/mysteries creature spawn` or by the engine itself.
+     */
+    val HUMAN: EntityType<HumanEntity> = register("human") { key ->
+        EntityType.Builder.of(::HumanEntity, MobCategory.CREATURE)
+            .sized(0.6f, 1.8f)
+            .eyeHeight(Avatar.DEFAULT_EYE_HEIGHT)
+            .noSummon()
+            .clientTrackingRange(TRACKING_CHUNKS)
+            .build(key)
+    }
+
     /** Forces the class to initialise before the registries close. */
     fun register() {
         FabricDefaultAttributeRegistry.register(MARIONETTE, MarionetteEntity.attributes())
+        FabricDefaultAttributeRegistry.register(HUMAN, HumanEntity.attributes())
     }
 
     /**

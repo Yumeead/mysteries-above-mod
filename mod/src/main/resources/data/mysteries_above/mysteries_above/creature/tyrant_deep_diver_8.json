@@ -1,0 +1,38 @@
+{
+  "body": {
+    "entity": "minecraft:drowned",
+    "name": {
+      "text": "Глибинний Пірнальник",
+      "color": "dark_aqua"
+    },
+    "sun_proof": true,
+    "scale": 1.2,
+    "aura": {
+      "particle": {
+        "type": "minecraft:bubble"
+      },
+      "count": 5,
+      "spread": 0.3,
+      "rise": 0.5,
+      "y": 1,
+      "speed": 0.01
+    }
+  },
+  "stats": {
+    "health": 90,
+    "damage": 11,
+    "speed": 0.26
+  },
+  "kit": "mysteries_above:tyrant_8",
+  "pathway": "Tyrant",
+  "sequence": 8,
+  "spawn": {
+    "biomes": [
+      "minecraft:deep_ocean",
+      "minecraft:deep_lukewarm_ocean",
+      "minecraft:cold_ocean"
+    ],
+    "chance": 0.00375,
+    "structures": 0.00375
+  }
+}

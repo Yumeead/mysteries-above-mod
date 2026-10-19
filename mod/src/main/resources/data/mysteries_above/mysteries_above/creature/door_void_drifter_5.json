@@ -1,0 +1,26 @@
+{
+  "body": {
+    "entity": "minecraft:enderman",
+    "name": {
+      "text": "Блукач Порожнечі",
+      "color": "black"
+    },
+    "scale": 1.55
+  },
+  "stats": {
+    "health": 304,
+    "damage": 21,
+    "speed": 0.3
+  },
+  "kit": "mysteries_above:door_5",
+  "pathway": "Door",
+  "sequence": 5,
+  "apex": true,
+  "spawn": {
+    "biomes": [
+      "minecraft:plains"
+    ],
+    "chance": 0.00075,
+    "structures": 0.00075
+  }
+}

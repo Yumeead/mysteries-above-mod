@@ -1,0 +1,37 @@
+{
+  "body": {
+    "entity": "minecraft:zombie",
+    "name": {
+      "text": "Мандрівник Загробного світу",
+      "color": "dark_gray"
+    },
+    "scale": 1.1,
+    "aura": {
+      "particle": {
+        "type": "minecraft:soul"
+      },
+      "count": 8,
+      "spread": 0.4,
+      "rise": 0.6,
+      "y": 1,
+      "speed": 0.02
+    }
+  },
+  "stats": {
+    "health": 224,
+    "damage": 18,
+    "speed": 0.26
+  },
+  "kit": "mysteries_above:death_5",
+  "pathway": "Death",
+  "sequence": 5,
+  "apex": true,
+  "spawn": {
+    "biomes": [
+      "minecraft:swamp",
+      "minecraft:dark_forest"
+    ],
+    "chance": 0.00075,
+    "structures": 0.00075
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "self": [
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:portal"
+        },
+        "count": 30,
+        "spread": 0.4,
+        "rise": 0.8,
+        "y": 1,
+        "speed": 0.1
+      }
+    },
+    {
+      "type": "scatter",
+      "radius": 7
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.enderman.teleport",
+      "volume": 1,
+      "pitch": 1
+    }
+  ]
+}

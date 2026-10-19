@@ -1,0 +1,36 @@
+{
+  "body": {
+    "entity": "minecraft:magma_cube",
+    "name": {
+      "text": "Магмовий Титан",
+      "color": "red"
+    },
+    "scale": 1.2,
+    "aura": {
+      "particle": {
+        "type": "minecraft:end_rod"
+      },
+      "count": 5,
+      "spread": 0.3,
+      "rise": 0.5,
+      "y": 1,
+      "speed": 0.01
+    }
+  },
+  "stats": {
+    "health": 90,
+    "damage": 11,
+    "speed": 0.24
+  },
+  "kit": "mysteries_above:sun_8",
+  "pathway": "Sun",
+  "sequence": 8,
+  "spawn": {
+    "biomes": [
+      "minecraft:basalt_deltas",
+      "minecraft:nether_wastes"
+    ],
+    "chance": 0.00375,
+    "structures": 0.00375
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "beyonders_only": true,
+  "target": [
+    {
+      "type": "scatter",
+      "radius": 4
+    },
+    {
+      "type": "chance",
+      "chance": 0.1,
+      "then": [
+        {
+          "type": "drain_sanity",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:smoke"
+        },
+        "count": 10,
+        "spread": 0.3,
+        "rise": 0.5,
+        "y": 1,
+        "speed": 0.02
+      }
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.enderman.teleport",
+      "volume": 0.8,
+      "pitch": 0.7
+    }
+  ]
+}

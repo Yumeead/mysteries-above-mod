@@ -1,0 +1,39 @@
+{
+  "skills": [
+    {
+      "skill": "mysteries_above:error/conceptual_theft",
+      "cooldown": 340
+    },
+    {
+      "skill": "mysteries_above:error/power_theft_5",
+      "cooldown": 300
+    },
+    {
+      "skill": "mysteries_above:error/decryption",
+      "cooldown": 160
+    },
+    {
+      "skill": "mysteries_above:error/mind_lock",
+      "cooldown": 160
+    },
+    {
+      "skill": "mysteries_above:error/swindler_charm",
+      "cooldown": 120
+    },
+    {
+      "skill": "mysteries_above:error/shadow_theft",
+      "cooldown": 80
+    }
+  ],
+  "reactions": [
+    {
+      "when": "near",
+      "skill": "mysteries_above:error/pickpocket",
+      "cooldown": 40,
+      "distance": 3.0
+    }
+  ],
+  "gcd": 80,
+  "range": 12,
+  "haste": 2
+}

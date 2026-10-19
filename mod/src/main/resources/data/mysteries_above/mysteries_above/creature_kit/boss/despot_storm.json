@@ -1,0 +1,16 @@
+{
+  "gcd": 70,
+  "range": 18,
+  "skills": [
+    { "skill": "mysteries_above:boss/storm_mark", "cooldown": 120 },
+    { "skill": "mysteries_above:tyrant/lightning_strike", "cooldown": 200 },
+    { "skill": "mysteries_above:tyrant/windblades", "cooldown": 120 },
+    { "skill": "mysteries_above:tyrant/azure_wave", "cooldown": 140 },
+    { "skill": "mysteries_above:tyrant/pressure_wave", "cooldown": 160 }
+  ],
+  "reactions": [
+    { "when": "near", "skill": "mysteries_above:tyrant/raging_blow", "cooldown": 100, "distance": 3 },
+    { "when": "hurt", "skill": "mysteries_above:tyrant/illusory_scales", "cooldown": 240 }
+  ],
+  "haste": 1
+}

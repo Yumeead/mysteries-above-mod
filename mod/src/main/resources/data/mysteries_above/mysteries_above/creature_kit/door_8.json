@@ -1,0 +1,33 @@
+{
+  "skills": [
+    {
+      "skill": "mysteries_above:door/shock",
+      "cooldown": 160
+    },
+    {
+      "skill": "mysteries_above:door/flash",
+      "cooldown": 200
+    },
+    {
+      "skill": "mysteries_above:door/burning",
+      "cooldown": 240
+    },
+    {
+      "skill": "mysteries_above:door/seal",
+      "cooldown": 280
+    }
+  ],
+  "reactions": [
+    {
+      "when": "hurt",
+      "skill": "mysteries_above:door/escape_trick",
+      "cooldown": 300
+    }
+  ],
+  "gcd": 120,
+  "range": 12,
+  "stance": {
+    "min": 5,
+    "max": 11
+  }
+}

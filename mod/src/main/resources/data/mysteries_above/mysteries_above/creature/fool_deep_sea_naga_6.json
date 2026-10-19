@@ -1,0 +1,38 @@
+{
+  "body": {
+    "entity": "minecraft:drowned",
+    "name": {
+      "text": "Глибоководна Нага",
+      "color": "dark_aqua"
+    },
+    "sun_proof": true,
+    "scale": 1.3,
+    "aura": {
+      "particle": {
+        "type": "minecraft:witch"
+      },
+      "count": 4,
+      "spread": 0.3,
+      "rise": 0.5,
+      "y": 1
+    }
+  },
+  "stats": {
+    "health": 180,
+    "damage": 14,
+    "speed": 0.24
+  },
+  "kit": "mysteries_above:fool_6",
+  "pathway": "Fool",
+  "sequence": 6,
+  "spawn": {
+    "biomes": [
+      "minecraft:ocean",
+      "minecraft:deep_ocean",
+      "minecraft:warm_ocean",
+      "minecraft:lukewarm_ocean"
+    ],
+    "chance": 0.002,
+    "structures": 0.002
+  }
+}

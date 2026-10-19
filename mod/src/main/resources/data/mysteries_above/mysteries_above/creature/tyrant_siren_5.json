@@ -1,0 +1,37 @@
+{
+  "body": {
+    "entity": "minecraft:drowned",
+    "name": {
+      "text": "Морська Сирена",
+      "color": "aqua"
+    },
+    "sun_proof": true,
+    "aura": {
+      "particle": {
+        "type": "minecraft:bubble"
+      },
+      "count": 6,
+      "spread": 0.5,
+      "rise": 0.6,
+      "y": 1,
+      "speed": 0.01
+    }
+  },
+  "stats": {
+    "health": 288,
+    "damage": 21,
+    "speed": 0.3
+  },
+  "kit": "mysteries_above:tyrant_5",
+  "pathway": "Tyrant",
+  "sequence": 5,
+  "apex": true,
+  "spawn": {
+    "biomes": [
+      "minecraft:deep_ocean",
+      "minecraft:deep_frozen_ocean"
+    ],
+    "chance": 0.00075,
+    "structures": 0.00075
+  }
+}

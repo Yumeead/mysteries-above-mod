@@ -1,0 +1,29 @@
+{
+  "self": [
+    {
+      "type": "summon",
+      "creature": "mysteries_above:tyrant_murloc_9",
+      "count": 2,
+      "radius": 3
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.elder_guardian.curse",
+      "volume": 1,
+      "pitch": 0.8
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:bubble_column_up"
+        },
+        "count": 40,
+        "spread": 2.5,
+        "rise": 0.4,
+        "y": 0.2,
+        "speed": 0.1
+      }
+    }
+  ]
+}

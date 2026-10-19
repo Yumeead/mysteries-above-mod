@@ -1,0 +1,13 @@
+{
+  "body": {
+    "entity": "minecraft:zombie",
+    "name": {
+      "text": "Лялька",
+      "color": "dark_gray"
+    }
+  },
+  "stats": {
+    "health": 18
+  },
+  "sequence": 9
+}

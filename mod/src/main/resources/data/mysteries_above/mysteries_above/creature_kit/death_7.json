@@ -1,0 +1,18 @@
+{
+  "skills": [
+    {
+      "skill": "mysteries_above:death/frost",
+      "cooldown": 200
+    },
+    {
+      "skill": "mysteries_above:death/grave_chill",
+      "cooldown": 160
+    },
+    {
+      "skill": "mysteries_above:death/decay",
+      "cooldown": 120
+    }
+  ],
+  "gcd": 120,
+  "range": 12
+}

@@ -1,0 +1,48 @@
+{
+  "beyonders_only": true,
+  "target": [
+    {
+      "type": "effect",
+      "effect": "minecraft:nausea",
+      "duration": 70,
+      "amplifier": 1
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:blindness",
+      "duration": 30,
+      "amplifier": 1
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:darkness",
+      "duration": 60,
+      "amplifier": 1
+    },
+    {
+      "type": "chance",
+      "chance": 0.2,
+      "then": [
+        {
+          "type": "drain_sanity",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:squid_ink"
+        },
+        "count": 8,
+        "spread": 0.3,
+        "rise": 0.5,
+        "y": 1,
+        "speed": 0.01
+      }
+    }
+  ],
+  "area": 4,
+  "around_self": true
+}

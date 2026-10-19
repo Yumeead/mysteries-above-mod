@@ -1,0 +1,37 @@
+{
+  "target": [
+    {
+      "type": "damage",
+      "amount": 19
+    },
+    {
+      "type": "knockback",
+      "strength": 0.96,
+      "up": 0.3
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:blindness",
+      "duration": 40
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:end_rod"
+        },
+        "count": 40,
+        "spread": 0.8,
+        "rise": 0.8,
+        "y": 1,
+        "speed": 0.1
+      }
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.lightning_bolt.thunder",
+      "volume": 0.6,
+      "pitch": 1.8
+    }
+  ]
+}
