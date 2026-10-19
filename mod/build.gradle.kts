@@ -46,6 +46,18 @@ loom {
     }
 }
 
+// Game tests: a real world for what a unit test cannot reach — a creature's mind on a living body
+// (phase 12). Their own source set (`src/gametest`) and their own tiny mod, so nothing of them ships.
+// `runGameTest` runs the server tests headless; `runClientGameTest` opens a real client and takes
+// screenshots of what the creatures look like.
+fabricApi {
+    configureTests {
+        createSourceSet = true
+        modId = "mysteries_above_gametest"
+        eula = true
+    }
+}
+
 dependencies {
     // Рядка `mappings` тут навмисно немає: на 26.x гра вже не обфускована
     // (yarn зупинився на 1.21.11, intermediary віддає сентинел 0.0.0), і loom
