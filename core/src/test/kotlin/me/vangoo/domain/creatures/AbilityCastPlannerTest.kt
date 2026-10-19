@@ -72,6 +72,21 @@ internal class AbilityCastPlannerTest {
     }
 
     @Test
+    fun unusableSkillSpendsNeitherItsCooldownNorTheGcd() {
+        val p = planner(1)
+        assertEquals("filler", p.pickNext(0) { it == "filler" })
+        // the GCD started with the filler; the signature was skipped, so it is ready the moment the GCD is
+        assertEquals("signature", p.pickNext(120))
+    }
+
+    @Test
+    fun nothingUsableMeansNoCastAndNoGcd() {
+        val p = planner(1)
+        assertNull(p.pickNext(0) { false })
+        assertNotNull(p.pickNext(1))
+    }
+
+    @Test
     fun skillCooldownsAreIndependentPerPlannerInstance() {
         planner(1).pickNext(0)
         assertNotNull(planner(1).pickNext(0))
