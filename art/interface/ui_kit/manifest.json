@@ -1,0 +1,913 @@
+{
+  "minecraft": "26.2",
+  "stages": [
+    1,
+    2
+  ],
+  "jarSha256": "40896ee9f1e2bec3c934daac7e93d41e9e3d9c2f8ae0ca366d52ffbfd1afa290",
+  "generated": [
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/panel_light.png",
+      "size": [
+        24,
+        24
+      ],
+      "sha256": "e73faaa36a64ac0bc8ab6c38c478728ca1e4c70d1fc64c4c3cde14ed219fad77"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/panel_dark.png",
+      "size": [
+        24,
+        24
+      ],
+      "sha256": "d29db22c635fbd76896a7f163f05cf90b7129b95279b5b6963af9763fc6d710c"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/slot.png",
+      "size": [
+        18,
+        18
+      ],
+      "sha256": "295d85aaf9a5b060ea18b81e96e36d28a48ab397837c78af152d8534822376d9"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/crafting_arrow_small.png",
+      "size": [
+        18,
+        15
+      ],
+      "sha256": "56c6fba5324b9843da80c6632651b489d7ea765af510c7983d0c177236555eb9"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/crafting_arrow.png",
+      "size": [
+        22,
+        15
+      ],
+      "sha256": "57e39b6fbb39f489bb74bd16899662da3e923c9d71ef4ba4f6018cee15d8771f"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/magnifier.png",
+      "size": [
+        13,
+        15
+      ],
+      "sha256": "82ddae78c86b7556fa83bf86697110571bcc46e4ff79fcfac3e642b58d87bc95"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/page_counter.png",
+      "size": [
+        38,
+        17
+      ],
+      "sha256": "a7beb3e8fb10e5be38c2c355684897997b8e15c51fac9e36dd276772e4c71542"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/scroller.png",
+      "size": [
+        6,
+        32
+      ],
+      "sha256": "a60dc122747ef56c724e91b0d8f463820a2ff894f0c3f44a3dda94bfd6296846"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/button_normal.png",
+      "size": [
+        200,
+        20
+      ],
+      "sha256": "6acae530ece83b43102ebab39395c8d927982a11e98dbb50a67b96a43f4932ee"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/button_hover.png",
+      "size": [
+        200,
+        20
+      ],
+      "sha256": "5b29f3f921738aa33ce8ba6c413632b546d40cf8f49d1bfbb7c5ead5ae1b5777"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/button_pressed.png",
+      "size": [
+        200,
+        20
+      ],
+      "sha256": "9fa0c1d75af23a1cc1a86ed2bc6bebe0bf61a8a2e6c2b96f7e2333b85ef6e029"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/button_focus.png",
+      "size": [
+        200,
+        20
+      ],
+      "sha256": "1e545fe549b4a03c8afdc86fc239fc68b19d327d48c8b7aa64615fbbe0d0a6e5"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/button_disabled.png",
+      "size": [
+        200,
+        20
+      ],
+      "sha256": "8386caf2bbdf278663ec0dceb7301133a7ae92d6af3caa9a0dd5a28f12a23d2c"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/page_forward.png",
+      "size": [
+        12,
+        17
+      ],
+      "sha256": "7008e447464872f737e9a1a0e7d6199a8c19bae1a79edd6d90c6e077dbd6dd1e"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/page_forward_highlighted.png",
+      "size": [
+        12,
+        17
+      ],
+      "sha256": "53a3172b01144491b082b613dd4605b64d1c45bf457fb411187a7cfd521cc788"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/page_backward.png",
+      "size": [
+        12,
+        17
+      ],
+      "sha256": "d93bb33446f718435ec4245ba7eba8eb7d34339dacbf84ed106a01c61d77183c"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/page_backward_highlighted.png",
+      "size": [
+        12,
+        17
+      ],
+      "sha256": "17b94656c7acb132961afcb0d8c5c2af39ded4212eed7ccb84e9f43a20811bd8"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/slider.png",
+      "size": [
+        200,
+        20
+      ],
+      "sha256": "6acae530ece83b43102ebab39395c8d927982a11e98dbb50a67b96a43f4932ee"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/slider_highlighted.png",
+      "size": [
+        200,
+        20
+      ],
+      "sha256": "f9586bb81d3766ea8670098a073fc4cf5d84456074c5aeca482b3fe3b642df50"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/slider_handle.png",
+      "size": [
+        8,
+        20
+      ],
+      "sha256": "1964668e426228e4aea39423cce02b89b46418292e4d76c61f5b7dba0d607bd7"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/slider_handle_highlighted.png",
+      "size": [
+        8,
+        20
+      ],
+      "sha256": "d62b6a44123f574ffb337703898004a559948c89391edbd991aec111be9c2e27"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/interface/inventory.png",
+      "size": [
+        256,
+        256
+      ],
+      "sha256": "caf54e8e7f4e3ce18f9440fbd2f0e69d6397cc0a8b86c148b5a863be34e1b285"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/interface/generic_54.png",
+      "size": [
+        256,
+        256
+      ],
+      "sha256": "a4c2e58d2aead48ff05705efb7d0732f60aa61cb5c33bc1c052c2e03f3247fa0"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/inventory/effect_background.png",
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "ddf714a6c80899862e56b29886cc67dfb1e31fd77f72985d1f5a0ffd69782ff0"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/container/inventory/effect_background_ambient.png",
+      "size": [
+        32,
+        32
+      ],
+      "sha256": "ddf714a6c80899862e56b29886cc67dfb1e31fd77f72985d1f5a0ffd69782ff0"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/recipe_book/button.png",
+      "size": [
+        20,
+        18
+      ],
+      "sha256": "cacd3c7f89deeb68b2089395bc096139e7935ac829be4ec8ba249d5bcfe1dc8e"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/recipe_book/button_highlighted.png",
+      "size": [
+        20,
+        18
+      ],
+      "sha256": "c65eab6298afb83849d9325683852d32a7411ecc82858f594ca0e4d6bef07c6a"
+    }
+  ],
+  "nativeSlots": {
+    "inventory": [
+      [
+        7,
+        7,
+        18
+      ],
+      [
+        97,
+        17,
+        18
+      ],
+      [
+        115,
+        17,
+        18
+      ],
+      [
+        7,
+        25,
+        18
+      ],
+      [
+        153,
+        27,
+        18
+      ],
+      [
+        97,
+        35,
+        18
+      ],
+      [
+        115,
+        35,
+        18
+      ],
+      [
+        7,
+        43,
+        18
+      ],
+      [
+        7,
+        61,
+        18
+      ],
+      [
+        76,
+        61,
+        18
+      ],
+      [
+        7,
+        83,
+        18
+      ],
+      [
+        25,
+        83,
+        18
+      ],
+      [
+        43,
+        83,
+        18
+      ],
+      [
+        61,
+        83,
+        18
+      ],
+      [
+        79,
+        83,
+        18
+      ],
+      [
+        97,
+        83,
+        18
+      ],
+      [
+        115,
+        83,
+        18
+      ],
+      [
+        133,
+        83,
+        18
+      ],
+      [
+        151,
+        83,
+        18
+      ],
+      [
+        7,
+        101,
+        18
+      ],
+      [
+        25,
+        101,
+        18
+      ],
+      [
+        43,
+        101,
+        18
+      ],
+      [
+        61,
+        101,
+        18
+      ],
+      [
+        79,
+        101,
+        18
+      ],
+      [
+        97,
+        101,
+        18
+      ],
+      [
+        115,
+        101,
+        18
+      ],
+      [
+        133,
+        101,
+        18
+      ],
+      [
+        151,
+        101,
+        18
+      ],
+      [
+        7,
+        119,
+        18
+      ],
+      [
+        25,
+        119,
+        18
+      ],
+      [
+        43,
+        119,
+        18
+      ],
+      [
+        61,
+        119,
+        18
+      ],
+      [
+        79,
+        119,
+        18
+      ],
+      [
+        97,
+        119,
+        18
+      ],
+      [
+        115,
+        119,
+        18
+      ],
+      [
+        133,
+        119,
+        18
+      ],
+      [
+        151,
+        119,
+        18
+      ],
+      [
+        7,
+        141,
+        18
+      ],
+      [
+        25,
+        141,
+        18
+      ],
+      [
+        43,
+        141,
+        18
+      ],
+      [
+        61,
+        141,
+        18
+      ],
+      [
+        79,
+        141,
+        18
+      ],
+      [
+        97,
+        141,
+        18
+      ],
+      [
+        115,
+        141,
+        18
+      ],
+      [
+        133,
+        141,
+        18
+      ],
+      [
+        151,
+        141,
+        18
+      ]
+    ],
+    "generic_54": [
+      [
+        7,
+        17,
+        18
+      ],
+      [
+        25,
+        17,
+        18
+      ],
+      [
+        43,
+        17,
+        18
+      ],
+      [
+        61,
+        17,
+        18
+      ],
+      [
+        79,
+        17,
+        18
+      ],
+      [
+        97,
+        17,
+        18
+      ],
+      [
+        115,
+        17,
+        18
+      ],
+      [
+        133,
+        17,
+        18
+      ],
+      [
+        151,
+        17,
+        18
+      ],
+      [
+        7,
+        35,
+        18
+      ],
+      [
+        25,
+        35,
+        18
+      ],
+      [
+        43,
+        35,
+        18
+      ],
+      [
+        61,
+        35,
+        18
+      ],
+      [
+        79,
+        35,
+        18
+      ],
+      [
+        97,
+        35,
+        18
+      ],
+      [
+        115,
+        35,
+        18
+      ],
+      [
+        133,
+        35,
+        18
+      ],
+      [
+        151,
+        35,
+        18
+      ],
+      [
+        7,
+        53,
+        18
+      ],
+      [
+        25,
+        53,
+        18
+      ],
+      [
+        43,
+        53,
+        18
+      ],
+      [
+        61,
+        53,
+        18
+      ],
+      [
+        79,
+        53,
+        18
+      ],
+      [
+        97,
+        53,
+        18
+      ],
+      [
+        115,
+        53,
+        18
+      ],
+      [
+        133,
+        53,
+        18
+      ],
+      [
+        151,
+        53,
+        18
+      ],
+      [
+        7,
+        71,
+        18
+      ],
+      [
+        25,
+        71,
+        18
+      ],
+      [
+        43,
+        71,
+        18
+      ],
+      [
+        61,
+        71,
+        18
+      ],
+      [
+        79,
+        71,
+        18
+      ],
+      [
+        97,
+        71,
+        18
+      ],
+      [
+        115,
+        71,
+        18
+      ],
+      [
+        133,
+        71,
+        18
+      ],
+      [
+        151,
+        71,
+        18
+      ],
+      [
+        7,
+        89,
+        18
+      ],
+      [
+        25,
+        89,
+        18
+      ],
+      [
+        43,
+        89,
+        18
+      ],
+      [
+        61,
+        89,
+        18
+      ],
+      [
+        79,
+        89,
+        18
+      ],
+      [
+        97,
+        89,
+        18
+      ],
+      [
+        115,
+        89,
+        18
+      ],
+      [
+        133,
+        89,
+        18
+      ],
+      [
+        151,
+        89,
+        18
+      ],
+      [
+        7,
+        107,
+        18
+      ],
+      [
+        25,
+        107,
+        18
+      ],
+      [
+        43,
+        107,
+        18
+      ],
+      [
+        61,
+        107,
+        18
+      ],
+      [
+        79,
+        107,
+        18
+      ],
+      [
+        97,
+        107,
+        18
+      ],
+      [
+        115,
+        107,
+        18
+      ],
+      [
+        133,
+        107,
+        18
+      ],
+      [
+        151,
+        107,
+        18
+      ],
+      [
+        7,
+        139,
+        18
+      ],
+      [
+        25,
+        139,
+        18
+      ],
+      [
+        43,
+        139,
+        18
+      ],
+      [
+        61,
+        139,
+        18
+      ],
+      [
+        79,
+        139,
+        18
+      ],
+      [
+        97,
+        139,
+        18
+      ],
+      [
+        115,
+        139,
+        18
+      ],
+      [
+        133,
+        139,
+        18
+      ],
+      [
+        151,
+        139,
+        18
+      ],
+      [
+        7,
+        157,
+        18
+      ],
+      [
+        25,
+        157,
+        18
+      ],
+      [
+        43,
+        157,
+        18
+      ],
+      [
+        61,
+        157,
+        18
+      ],
+      [
+        79,
+        157,
+        18
+      ],
+      [
+        97,
+        157,
+        18
+      ],
+      [
+        115,
+        157,
+        18
+      ],
+      [
+        133,
+        157,
+        18
+      ],
+      [
+        151,
+        157,
+        18
+      ],
+      [
+        7,
+        175,
+        18
+      ],
+      [
+        25,
+        175,
+        18
+      ],
+      [
+        43,
+        175,
+        18
+      ],
+      [
+        61,
+        175,
+        18
+      ],
+      [
+        79,
+        175,
+        18
+      ],
+      [
+        97,
+        175,
+        18
+      ],
+      [
+        115,
+        175,
+        18
+      ],
+      [
+        133,
+        175,
+        18
+      ],
+      [
+        151,
+        175,
+        18
+      ],
+      [
+        7,
+        197,
+        18
+      ],
+      [
+        25,
+        197,
+        18
+      ],
+      [
+        43,
+        197,
+        18
+      ],
+      [
+        61,
+        197,
+        18
+      ],
+      [
+        79,
+        197,
+        18
+      ],
+      [
+        97,
+        197,
+        18
+      ],
+      [
+        115,
+        197,
+        18
+      ],
+      [
+        133,
+        197,
+        18
+      ],
+      [
+        151,
+        197,
+        18
+      ]
+    ]
+  },
+  "globalMinecraftOverrides": false
+}
