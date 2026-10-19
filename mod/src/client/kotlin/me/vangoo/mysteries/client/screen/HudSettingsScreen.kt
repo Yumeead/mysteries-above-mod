@@ -31,7 +31,7 @@ class HudSettingsScreen(private val parent: Screen) : Screen(tr("settings")) {
         panelHeight = minOf(312, height - 12)
         left = if (width >= 760) width / 2 + 4 else (width - panelWidth) / 2
         top = (height - panelHeight) / 2
-        contentHeight = when (tab) { 0 -> 280; 1 -> 160; else -> 130 }
+        contentHeight = when (tab) { 0 -> 280; 1 -> 160; else -> 100 }
         scroll = scroll.coerceIn(0,(contentHeight-viewport).coerceAtLeast(0))
         val tabWidth = (panelWidth - 32) / 3
         listOf("look", "number_tab", "symbol_tab").forEachIndexed { index, key ->
@@ -93,12 +93,12 @@ class HudSettingsScreen(private val parent: Screen) : Screen(tr("settings")) {
                 row++
             }
             2 -> {
-                for (index in 0..2) { labels += tr("aux.$index") to (contentTop + row * 30 - scroll); row++ }
-                labels += tr("aux_hidden") to (contentTop + 96 - scroll)
-                labels += tr("aux_recent") to (contentTop + 112 - scroll)
+                for (index in 0..1) { labels += tr("aux.$index") to (contentTop + row * 30 - scroll); row++ }
+                labels += tr("aux_live") to (contentTop + 68 - scroll)
+                labels += tr("aux_zero") to (contentTop + 84 - scroll)
             }
         }
-        contentHeight = if (tab == 2) 130 else row * 40
+        contentHeight = if (tab == 2) 100 else row * 40
         addRenderableWidget(GrimoireButton(left + 12, top + panelHeight - 27, 66, 19, tr("back"), goldSelection = true) { onClose() })
         addRenderableWidget(GrimoireButton(left + 86, top + panelHeight - 27, panelWidth - 98, 19, tr("move"), goldSelection = true) {
             minecraft.gui.setScreen(HudEditorScreen(this))

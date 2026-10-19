@@ -1,0 +1,158 @@
+{
+  "editedTextures": 24,
+  "editedPixels": 440,
+  "unmodifiedOriginalResources": 249,
+  "changes": [
+    {
+      "pathway": "WheelOfFortune",
+      "state": "full",
+      "pixelsChanged": 42,
+      "firstRepairedRow": 47
+    },
+    {
+      "pathway": "WheelOfFortune",
+      "state": "third",
+      "pixelsChanged": 42,
+      "firstRepairedRow": 47
+    },
+    {
+      "pathway": "WheelOfFortune",
+      "state": "low",
+      "pixelsChanged": 42,
+      "firstRepairedRow": 47
+    },
+    {
+      "pathway": "WheelOfFortune",
+      "state": "minimum",
+      "pixelsChanged": 42,
+      "firstRepairedRow": 47
+    },
+    {
+      "pathway": "Visionary",
+      "state": "full",
+      "pixelsChanged": 8,
+      "firstRepairedRow": 49
+    },
+    {
+      "pathway": "Visionary",
+      "state": "third",
+      "pixelsChanged": 8,
+      "firstRepairedRow": 49
+    },
+    {
+      "pathway": "Visionary",
+      "state": "low",
+      "pixelsChanged": 8,
+      "firstRepairedRow": 49
+    },
+    {
+      "pathway": "Visionary",
+      "state": "minimum",
+      "pixelsChanged": 8,
+      "firstRepairedRow": 49
+    },
+    {
+      "pathway": "Death",
+      "state": "full",
+      "pixelsChanged": 22,
+      "firstRepairedRow": 48
+    },
+    {
+      "pathway": "Death",
+      "state": "third",
+      "pixelsChanged": 22,
+      "firstRepairedRow": 48
+    },
+    {
+      "pathway": "Death",
+      "state": "low",
+      "pixelsChanged": 22,
+      "firstRepairedRow": 48
+    },
+    {
+      "pathway": "Death",
+      "state": "minimum",
+      "pixelsChanged": 22,
+      "firstRepairedRow": 48
+    },
+    {
+      "pathway": "Darkness",
+      "state": "full",
+      "pixelsChanged": 8,
+      "firstRepairedRow": 49
+    },
+    {
+      "pathway": "Darkness",
+      "state": "third",
+      "pixelsChanged": 8,
+      "firstRepairedRow": 49
+    },
+    {
+      "pathway": "Darkness",
+      "state": "low",
+      "pixelsChanged": 8,
+      "firstRepairedRow": 49
+    },
+    {
+      "pathway": "Darkness",
+      "state": "minimum",
+      "pixelsChanged": 8,
+      "firstRepairedRow": 49
+    },
+    {
+      "pathway": "Chained",
+      "state": "full",
+      "pixelsChanged": 22,
+      "firstRepairedRow": 48
+    },
+    {
+      "pathway": "Chained",
+      "state": "third",
+      "pixelsChanged": 22,
+      "firstRepairedRow": 48
+    },
+    {
+      "pathway": "Chained",
+      "state": "low",
+      "pixelsChanged": 22,
+      "firstRepairedRow": 48
+    },
+    {
+      "pathway": "Chained",
+      "state": "minimum",
+      "pixelsChanged": 22,
+      "firstRepairedRow": 48
+    },
+    {
+      "pathway": "BlackEmperor",
+      "state": "full",
+      "pixelsChanged": 8,
+      "firstRepairedRow": 49
+    },
+    {
+      "pathway": "BlackEmperor",
+      "state": "third",
+      "pixelsChanged": 8,
+      "firstRepairedRow": 49
+    },
+    {
+      "pathway": "BlackEmperor",
+      "state": "low",
+      "pixelsChanged": 8,
+      "firstRepairedRow": 49
+    },
+    {
+      "pathway": "BlackEmperor",
+      "state": "minimum",
+      "pixelsChanged": 8,
+      "firstRepairedRow": 49
+    }
+  ],
+  "removedStripeScreenPixels": 1192,
+  "pathwaysWithoutStripe": 22,
+  "repairedBaseScreenPixelsCompared": 6400,
+  "repairedBaseMismatches": 0,
+  "targetedTestsPassed": 21,
+  "nativeClientReviewPassed": true,
+  "jarSha256": "608769890a163ce0cc49aa821c7fc3e1ae89bb5da3c26451a2452827aea04241"
+}

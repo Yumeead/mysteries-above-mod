@@ -1,0 +1,1172 @@
+Compiled from "AbstractSelectionList.java"
+public abstract class net.minecraft.client.gui.components.AbstractSelectionList<E extends net.minecraft.client.gui.components.AbstractSelectionList$Entry<E>> extends net.minecraft.client.gui.components.AbstractContainerWidget {
+  private static final net.minecraft.resources.Identifier MENU_LIST_BACKGROUND;
+
+  private static final net.minecraft.resources.Identifier INWORLD_MENU_LIST_BACKGROUND;
+
+  private static final int SEPARATOR_HEIGHT;
+
+  protected final net.minecraft.client.Minecraft minecraft;
+
+  protected final int defaultEntryHeight;
+
+  private final java.util.List<E> children;
+
+  protected boolean centerListVertically;
+
+  private E selected;
+
+  private E hovered;
+
+  public net.minecraft.client.gui.components.AbstractSelectionList(net.minecraft.client.Minecraft, int, int, int, int);
+    Code:
+         0: aload_0
+         1: iconst_0
+         2: iload         4
+         4: iload_2
+         5: iload_3
+         6: getstatic     #1                  // Field net/minecraft/network/chat/CommonComponents.EMPTY:Lnet/minecraft/network/chat/Component;
+         9: iload         5
+        11: iconst_2
+        12: idiv
+        13: invokestatic  #7                  // Method net/minecraft/client/gui/components/AbstractScrollArea.defaultSettings:(I)Lnet/minecraft/client/gui/components/AbstractScrollArea$ScrollbarSettings;
+        16: invokespecial #13                 // Method net/minecraft/client/gui/components/AbstractContainerWidget."<init>":(IIIILnet/minecraft/network/chat/Component;Lnet/minecraft/client/gui/components/AbstractScrollArea$ScrollbarSettings;)V
+        19: aload_0
+        20: new           #19                 // class net/minecraft/client/gui/components/AbstractSelectionList$TrackedList
+        23: dup
+        24: aload_0
+        25: invokespecial #21                 // Method net/minecraft/client/gui/components/AbstractSelectionList$TrackedList."<init>":(Lnet/minecraft/client/gui/components/AbstractSelectionList;)V
+        28: putfield      #24                 // Field children:Ljava/util/List;
+        31: aload_0
+        32: iconst_1
+        33: putfield      #30                 // Field centerListVertically:Z
+        36: aload_0
+        37: aload_1
+        38: putfield      #34                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+        41: aload_0
+        42: iload         5
+        44: putfield      #38                 // Field defaultEntryHeight:I
+        47: return
+
+  public E getSelected();
+    Code:
+         0: aload_0
+         1: getfield      #42                 // Field selected:Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;
+         4: areturn
+
+  public void setSelected(E);
+    Code:
+         0: aload_0
+         1: aload_1
+         2: putfield      #42                 // Field selected:Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;
+         5: aload_1
+         6: ifnull        69
+         9: aload_1
+        10: invokevirtual #46                 // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.getContentY:()I
+        13: aload_0
+        14: invokevirtual #52                 // Method getY:()I
+        17: if_icmpge     24
+        20: iconst_1
+        21: goto          25
+        24: iconst_0
+        25: istore_2
+        26: aload_1
+        27: invokevirtual #55                 // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.getContentBottom:()I
+        30: aload_0
+        31: invokevirtual #58                 // Method getBottom:()I
+        34: if_icmple     41
+        37: iconst_1
+        38: goto          42
+        41: iconst_0
+        42: istore_3
+        43: aload_0
+        44: getfield      #34                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+        47: invokevirtual #61                 // Method net/minecraft/client/Minecraft.getLastInputType:()Lnet/minecraft/client/InputType;
+        50: invokevirtual #67                 // Method net/minecraft/client/InputType.isKeyboard:()Z
+        53: ifne          64
+        56: iload_2
+        57: ifne          64
+        60: iload_3
+        61: ifeq          69
+        64: aload_0
+        65: aload_1
+        66: invokevirtual #73                 // Method scrollToEntry:(Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;)V
+        69: return
+
+  public E getFocused();
+    Code:
+         0: aload_0
+         1: invokespecial #77                 // Method net/minecraft/client/gui/components/AbstractContainerWidget.getFocused:()Lnet/minecraft/client/gui/components/events/GuiEventListener;
+         4: checkcast     #47                 // class net/minecraft/client/gui/components/AbstractSelectionList$Entry
+         7: areturn
+
+  public final java.util.List<E> children();
+    Code:
+         0: aload_0
+         1: getfield      #24                 // Field children:Ljava/util/List;
+         4: invokestatic  #81                 // Method java/util/Collections.unmodifiableList:(Ljava/util/List;)Ljava/util/List;
+         7: areturn
+
+  protected void sort(java.util.Comparator<E>);
+    Code:
+         0: aload_0
+         1: getfield      #24                 // Field children:Ljava/util/List;
+         4: aload_1
+         5: invokeinterface #87,  2           // InterfaceMethod java/util/List.sort:(Ljava/util/Comparator;)V
+        10: aload_0
+        11: invokevirtual #93                 // Method repositionEntries:()V
+        14: return
+
+  protected void swap(int, int);
+    Code:
+         0: aload_0
+         1: getfield      #24                 // Field children:Ljava/util/List;
+         4: iload_1
+         5: iload_2
+         6: invokestatic  #97                 // Method java/util/Collections.swap:(Ljava/util/List;II)V
+         9: aload_0
+        10: invokevirtual #93                 // Method repositionEntries:()V
+        13: aload_0
+        14: aload_0
+        15: getfield      #24                 // Field children:Ljava/util/List;
+        18: iload_2
+        19: invokeinterface #101,  2          // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+        24: checkcast     #47                 // class net/minecraft/client/gui/components/AbstractSelectionList$Entry
+        27: invokevirtual #73                 // Method scrollToEntry:(Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;)V
+        30: return
+
+  protected void clearEntries();
+    Code:
+         0: aload_0
+         1: getfield      #24                 // Field children:Ljava/util/List;
+         4: invokeinterface #105,  1          // InterfaceMethod java/util/List.clear:()V
+         9: aload_0
+        10: aconst_null
+        11: putfield      #42                 // Field selected:Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;
+        14: return
+
+  protected void clearEntriesExcept(E);
+    Code:
+         0: aload_0
+         1: getfield      #24                 // Field children:Ljava/util/List;
+         4: aload_1
+         5: invokedynamic #108,  0            // InvokeDynamic #0:test:(Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;)Ljava/util/function/Predicate;
+        10: invokeinterface #112,  2          // InterfaceMethod java/util/List.removeIf:(Ljava/util/function/Predicate;)Z
+        15: pop
+        16: aload_0
+        17: getfield      #42                 // Field selected:Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;
+        20: aload_1
+        21: if_acmpeq     29
+        24: aload_0
+        25: aconst_null
+        26: invokevirtual #116                // Method setSelected:(Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;)V
+        29: return
+
+  public void replaceEntries(java.util.Collection<E>);
+    Code:
+         0: aload_0
+         1: invokevirtual #119                // Method clearEntries:()V
+         4: aload_1
+         5: invokeinterface #122,  1          // InterfaceMethod java/util/Collection.iterator:()Ljava/util/Iterator;
+        10: astore_2
+        11: aload_2
+        12: invokeinterface #128,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+        17: ifeq          39
+        20: aload_2
+        21: invokeinterface #133,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+        26: checkcast     #47                 // class net/minecraft/client/gui/components/AbstractSelectionList$Entry
+        29: astore_3
+        30: aload_0
+        31: aload_3
+        32: invokevirtual #137                // Method addEntry:(Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;)I
+        35: pop
+        36: goto          11
+        39: return
+
+  private int getFirstEntryY();
+    Code:
+         0: aload_0
+         1: invokevirtual #52                 // Method getY:()I
+         4: iconst_2
+         5: iadd
+         6: ireturn
+
+  public int getNextY();
+    Code:
+         0: aload_0
+         1: invokevirtual #141                // Method getFirstEntryY:()I
+         4: aload_0
+         5: invokevirtual #144                // Method scrollAmount:()D
+         8: d2i
+         9: isub
+        10: istore_1
+        11: aload_0
+        12: getfield      #24                 // Field children:Ljava/util/List;
+        15: invokeinterface #148,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+        20: astore_2
+        21: aload_2
+        22: invokeinterface #128,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+        27: ifeq          50
+        30: aload_2
+        31: invokeinterface #133,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+        36: checkcast     #47                 // class net/minecraft/client/gui/components/AbstractSelectionList$Entry
+        39: astore_3
+        40: iload_1
+        41: aload_3
+        42: invokevirtual #149                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.getHeight:()I
+        45: iadd
+        46: istore_1
+        47: goto          21
+        50: iload_1
+        51: ireturn
+
+  protected int addEntry(E);
+    Code:
+         0: aload_0
+         1: aload_1
+         2: aload_0
+         3: getfield      #38                 // Field defaultEntryHeight:I
+         6: invokevirtual #152                // Method addEntry:(Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;I)I
+         9: ireturn
+
+  protected int addEntry(E, int);
+    Code:
+         0: aload_1
+         1: aload_0
+         2: invokevirtual #155                // Method getRowLeft:()I
+         5: invokevirtual #158                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.setX:(I)V
+         8: aload_1
+         9: aload_0
+        10: invokevirtual #162                // Method getRowWidth:()I
+        13: invokevirtual #165                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.setWidth:(I)V
+        16: aload_1
+        17: aload_0
+        18: invokevirtual #168                // Method getNextY:()I
+        21: invokevirtual #171                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.setY:(I)V
+        24: aload_1
+        25: iload_2
+        26: invokevirtual #174                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.setHeight:(I)V
+        29: aload_0
+        30: getfield      #24                 // Field children:Ljava/util/List;
+        33: aload_1
+        34: invokeinterface #177,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+        39: pop
+        40: aload_0
+        41: getfield      #24                 // Field children:Ljava/util/List;
+        44: invokeinterface #181,  1          // InterfaceMethod java/util/List.size:()I
+        49: iconst_1
+        50: isub
+        51: ireturn
+
+  protected void addEntryToTop(E);
+    Code:
+         0: aload_0
+         1: aload_1
+         2: aload_0
+         3: getfield      #38                 // Field defaultEntryHeight:I
+         6: invokevirtual #184                // Method addEntryToTop:(Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;I)V
+         9: return
+
+  protected void addEntryToTop(E, int);
+    Code:
+         0: aload_0
+         1: invokevirtual #188                // Method maxScrollAmount:()I
+         4: i2d
+         5: aload_0
+         6: invokevirtual #144                // Method scrollAmount:()D
+         9: dsub
+        10: dstore_3
+        11: aload_1
+        12: iload_2
+        13: invokevirtual #174                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.setHeight:(I)V
+        16: aload_0
+        17: getfield      #24                 // Field children:Ljava/util/List;
+        20: aload_1
+        21: invokeinterface #191,  2          // InterfaceMethod java/util/List.addFirst:(Ljava/lang/Object;)V
+        26: aload_0
+        27: invokevirtual #93                 // Method repositionEntries:()V
+        30: aload_0
+        31: aload_0
+        32: invokevirtual #188                // Method maxScrollAmount:()I
+        35: i2d
+        36: dload_3
+        37: dsub
+        38: invokevirtual #195                // Method setScrollAmount:(D)V
+        41: return
+
+  private void repositionEntries();
+    Code:
+         0: aload_0
+         1: invokevirtual #141                // Method getFirstEntryY:()I
+         4: aload_0
+         5: invokevirtual #144                // Method scrollAmount:()D
+         8: d2i
+         9: isub
+        10: istore_1
+        11: aload_0
+        12: getfield      #24                 // Field children:Ljava/util/List;
+        15: invokeinterface #148,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+        20: astore_2
+        21: aload_2
+        22: invokeinterface #128,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+        27: ifeq          71
+        30: aload_2
+        31: invokeinterface #133,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+        36: checkcast     #47                 // class net/minecraft/client/gui/components/AbstractSelectionList$Entry
+        39: astore_3
+        40: aload_3
+        41: iload_1
+        42: invokevirtual #171                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.setY:(I)V
+        45: iload_1
+        46: aload_3
+        47: invokevirtual #149                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.getHeight:()I
+        50: iadd
+        51: istore_1
+        52: aload_3
+        53: aload_0
+        54: invokevirtual #155                // Method getRowLeft:()I
+        57: invokevirtual #158                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.setX:(I)V
+        60: aload_3
+        61: aload_0
+        62: invokevirtual #162                // Method getRowWidth:()I
+        65: invokevirtual #165                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.setWidth:(I)V
+        68: goto          21
+        71: return
+
+  protected void removeEntryFromTop(E);
+    Code:
+         0: aload_0
+         1: invokevirtual #188                // Method maxScrollAmount:()I
+         4: i2d
+         5: aload_0
+         6: invokevirtual #144                // Method scrollAmount:()D
+         9: dsub
+        10: dstore_2
+        11: aload_0
+        12: aload_1
+        13: invokevirtual #199                // Method removeEntry:(Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;)V
+        16: aload_0
+        17: aload_0
+        18: invokevirtual #188                // Method maxScrollAmount:()I
+        21: i2d
+        22: dload_2
+        23: dsub
+        24: invokevirtual #195                // Method setScrollAmount:(D)V
+        27: return
+
+  protected int getItemCount();
+    Code:
+         0: aload_0
+         1: invokevirtual #202                // Method children:()Ljava/util/List;
+         4: invokeinterface #181,  1          // InterfaceMethod java/util/List.size:()I
+         9: ireturn
+
+  protected boolean entriesCanBeSelected();
+    Code:
+         0: iconst_1
+         1: ireturn
+
+  protected final E getEntryAtPosition(double, double);
+    Code:
+         0: aload_0
+         1: getfield      #24                 // Field children:Ljava/util/List;
+         4: invokeinterface #148,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+         9: astore        5
+        11: aload         5
+        13: invokeinterface #128,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+        18: ifeq          49
+        21: aload         5
+        23: invokeinterface #133,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+        28: checkcast     #47                 // class net/minecraft/client/gui/components/AbstractSelectionList$Entry
+        31: astore        6
+        33: aload         6
+        35: dload_1
+        36: dload_3
+        37: invokevirtual #205                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.isMouseOver:(DD)Z
+        40: ifeq          46
+        43: aload         6
+        45: areturn
+        46: goto          11
+        49: aconst_null
+        50: areturn
+
+  public void updateSize(int, net.minecraft.client.gui.layouts.HeaderAndFooterLayout);
+    Code:
+         0: aload_0
+         1: iload_1
+         2: aload_2
+         3: invokevirtual #209                // Method net/minecraft/client/gui/layouts/HeaderAndFooterLayout.getContentHeight:()I
+         6: aload_2
+         7: invokevirtual #214                // Method net/minecraft/client/gui/layouts/HeaderAndFooterLayout.getHeaderHeight:()I
+        10: invokevirtual #217                // Method updateSizeAndPosition:(III)V
+        13: return
+
+  public void updateSizeAndPosition(int, int, int);
+    Code:
+         0: aload_0
+         1: iload_1
+         2: iload_2
+         3: iconst_0
+         4: iload_3
+         5: invokevirtual #221                // Method updateSizeAndPosition:(IIII)V
+         8: return
+
+  public void updateSizeAndPosition(int, int, int, int);
+    Code:
+         0: aload_0
+         1: iload_1
+         2: iload_2
+         3: invokevirtual #224                // Method setSize:(II)V
+         6: aload_0
+         7: iload_3
+         8: iload         4
+        10: invokevirtual #228                // Method setPosition:(II)V
+        13: aload_0
+        14: invokevirtual #93                 // Method repositionEntries:()V
+        17: aload_0
+        18: invokevirtual #231                // Method getSelected:()Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;
+        21: ifnull        32
+        24: aload_0
+        25: aload_0
+        26: invokevirtual #231                // Method getSelected:()Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;
+        29: invokevirtual #73                 // Method scrollToEntry:(Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;)V
+        32: aload_0
+        33: invokevirtual #235                // Method refreshScrollAmount:()V
+        36: return
+
+  protected int contentHeight();
+    Code:
+         0: iconst_0
+         1: istore_1
+         2: aload_0
+         3: getfield      #24                 // Field children:Ljava/util/List;
+         6: invokeinterface #148,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+        11: astore_2
+        12: aload_2
+        13: invokeinterface #128,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+        18: ifeq          41
+        21: aload_2
+        22: invokeinterface #133,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+        27: checkcast     #47                 // class net/minecraft/client/gui/components/AbstractSelectionList$Entry
+        30: astore_3
+        31: iload_1
+        32: aload_3
+        33: invokevirtual #149                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.getHeight:()I
+        36: iadd
+        37: istore_1
+        38: goto          12
+        41: iload_1
+        42: iconst_4
+        43: iadd
+        44: ireturn
+
+  public void extractWidgetRenderState(net.minecraft.client.gui.GuiGraphicsExtractor, int, int, float);
+    Code:
+         0: aload_0
+         1: aload_0
+         2: iload_2
+         3: i2d
+         4: iload_3
+         5: i2d
+         6: invokevirtual #238                // Method isMouseOver:(DD)Z
+         9: ifeq          23
+        12: aload_0
+        13: iload_2
+        14: i2d
+        15: iload_3
+        16: i2d
+        17: invokevirtual #239                // Method getEntryAtPosition:(DD)Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;
+        20: goto          24
+        23: aconst_null
+        24: putfield      #243                // Field hovered:Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;
+        27: aload_0
+        28: aload_1
+        29: invokevirtual #246                // Method extractListBackground:(Lnet/minecraft/client/gui/GuiGraphicsExtractor;)V
+        32: aload_0
+        33: aload_1
+        34: invokevirtual #250                // Method enableScissor:(Lnet/minecraft/client/gui/GuiGraphicsExtractor;)V
+        37: aload_0
+        38: aload_1
+        39: iload_2
+        40: iload_3
+        41: fload         4
+        43: invokevirtual #253                // Method extractListItems:(Lnet/minecraft/client/gui/GuiGraphicsExtractor;IIF)V
+        46: aload_1
+        47: invokevirtual #257                // Method net/minecraft/client/gui/GuiGraphicsExtractor.disableScissor:()V
+        50: aload_0
+        51: aload_1
+        52: invokevirtual #262                // Method extractListSeparators:(Lnet/minecraft/client/gui/GuiGraphicsExtractor;)V
+        55: aload_0
+        56: aload_1
+        57: iload_2
+        58: iload_3
+        59: invokevirtual #265                // Method extractScrollbar:(Lnet/minecraft/client/gui/GuiGraphicsExtractor;II)V
+        62: return
+
+  protected void extractListSeparators(net.minecraft.client.gui.GuiGraphicsExtractor);
+    Code:
+         0: aload_0
+         1: getfield      #34                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+         4: getfield      #269                // Field net/minecraft/client/Minecraft.level:Lnet/minecraft/client/multiplayer/ClientLevel;
+         7: ifnonnull     16
+        10: getstatic     #273                // Field net/minecraft/client/gui/screens/Screen.HEADER_SEPARATOR:Lnet/minecraft/resources/Identifier;
+        13: goto          19
+        16: getstatic     #279                // Field net/minecraft/client/gui/screens/Screen.INWORLD_HEADER_SEPARATOR:Lnet/minecraft/resources/Identifier;
+        19: astore_2
+        20: aload_0
+        21: getfield      #34                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+        24: getfield      #269                // Field net/minecraft/client/Minecraft.level:Lnet/minecraft/client/multiplayer/ClientLevel;
+        27: ifnonnull     36
+        30: getstatic     #282                // Field net/minecraft/client/gui/screens/Screen.FOOTER_SEPARATOR:Lnet/minecraft/resources/Identifier;
+        33: goto          39
+        36: getstatic     #285                // Field net/minecraft/client/gui/screens/Screen.INWORLD_FOOTER_SEPARATOR:Lnet/minecraft/resources/Identifier;
+        39: astore_3
+        40: aload_1
+        41: getstatic     #288                // Field net/minecraft/client/renderer/RenderPipelines.GUI_TEXTURED:Lcom/mojang/blaze3d/pipeline/RenderPipeline;
+        44: aload_2
+        45: aload_0
+        46: invokevirtual #294                // Method getX:()I
+        49: aload_0
+        50: invokevirtual #52                 // Method getY:()I
+        53: iconst_2
+        54: isub
+        55: fconst_0
+        56: fconst_0
+        57: aload_0
+        58: invokevirtual #297                // Method getWidth:()I
+        61: iconst_2
+        62: bipush        32
+        64: iconst_2
+        65: invokevirtual #300                // Method net/minecraft/client/gui/GuiGraphicsExtractor.blit:(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIFFIIII)V
+        68: aload_1
+        69: getstatic     #288                // Field net/minecraft/client/renderer/RenderPipelines.GUI_TEXTURED:Lcom/mojang/blaze3d/pipeline/RenderPipeline;
+        72: aload_3
+        73: aload_0
+        74: invokevirtual #294                // Method getX:()I
+        77: aload_0
+        78: invokevirtual #58                 // Method getBottom:()I
+        81: fconst_0
+        82: fconst_0
+        83: aload_0
+        84: invokevirtual #297                // Method getWidth:()I
+        87: iconst_2
+        88: bipush        32
+        90: iconst_2
+        91: invokevirtual #300                // Method net/minecraft/client/gui/GuiGraphicsExtractor.blit:(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIFFIIII)V
+        94: return
+
+  protected void extractListBackground(net.minecraft.client.gui.GuiGraphicsExtractor);
+    Code:
+         0: aload_0
+         1: getfield      #34                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+         4: getfield      #269                // Field net/minecraft/client/Minecraft.level:Lnet/minecraft/client/multiplayer/ClientLevel;
+         7: ifnonnull     16
+        10: getstatic     #304                // Field MENU_LIST_BACKGROUND:Lnet/minecraft/resources/Identifier;
+        13: goto          19
+        16: getstatic     #307                // Field INWORLD_MENU_LIST_BACKGROUND:Lnet/minecraft/resources/Identifier;
+        19: astore_2
+        20: aload_1
+        21: getstatic     #288                // Field net/minecraft/client/renderer/RenderPipelines.GUI_TEXTURED:Lcom/mojang/blaze3d/pipeline/RenderPipeline;
+        24: aload_2
+        25: aload_0
+        26: invokevirtual #294                // Method getX:()I
+        29: aload_0
+        30: invokevirtual #52                 // Method getY:()I
+        33: aload_0
+        34: invokevirtual #310                // Method getRight:()I
+        37: i2f
+        38: aload_0
+        39: invokevirtual #58                 // Method getBottom:()I
+        42: aload_0
+        43: invokevirtual #144                // Method scrollAmount:()D
+        46: d2i
+        47: iadd
+        48: i2f
+        49: aload_0
+        50: invokevirtual #297                // Method getWidth:()I
+        53: aload_0
+        54: invokevirtual #313                // Method getHeight:()I
+        57: bipush        32
+        59: bipush        32
+        61: invokevirtual #300                // Method net/minecraft/client/gui/GuiGraphicsExtractor.blit:(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIFFIIII)V
+        64: return
+
+  protected void enableScissor(net.minecraft.client.gui.GuiGraphicsExtractor);
+    Code:
+         0: aload_1
+         1: aload_0
+         2: invokevirtual #294                // Method getX:()I
+         5: iconst_0
+         6: aload_1
+         7: invokevirtual #314                // Method net/minecraft/client/gui/GuiGraphicsExtractor.guiWidth:()I
+        10: invokestatic  #317                // Method net/minecraft/util/Mth.clamp:(III)I
+        13: aload_0
+        14: invokevirtual #52                 // Method getY:()I
+        17: iconst_0
+        18: aload_1
+        19: invokevirtual #323                // Method net/minecraft/client/gui/GuiGraphicsExtractor.guiHeight:()I
+        22: invokestatic  #317                // Method net/minecraft/util/Mth.clamp:(III)I
+        25: aload_0
+        26: invokevirtual #310                // Method getRight:()I
+        29: iconst_0
+        30: aload_1
+        31: invokevirtual #314                // Method net/minecraft/client/gui/GuiGraphicsExtractor.guiWidth:()I
+        34: invokestatic  #317                // Method net/minecraft/util/Mth.clamp:(III)I
+        37: aload_0
+        38: invokevirtual #58                 // Method getBottom:()I
+        41: iconst_0
+        42: aload_1
+        43: invokevirtual #323                // Method net/minecraft/client/gui/GuiGraphicsExtractor.guiHeight:()I
+        46: invokestatic  #317                // Method net/minecraft/util/Mth.clamp:(III)I
+        49: invokevirtual #326                // Method net/minecraft/client/gui/GuiGraphicsExtractor.enableScissor:(IIII)V
+        52: return
+
+  protected void scrollToEntry(E);
+    Code:
+         0: aload_1
+         1: invokevirtual #328                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.getY:()I
+         4: aload_0
+         5: invokevirtual #52                 // Method getY:()I
+         8: isub
+         9: iconst_2
+        10: isub
+        11: istore_2
+        12: iload_2
+        13: ifge          21
+        16: aload_0
+        17: iload_2
+        18: invokevirtual #329                // Method scroll:(I)V
+        21: aload_0
+        22: invokevirtual #58                 // Method getBottom:()I
+        25: aload_1
+        26: invokevirtual #328                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.getY:()I
+        29: isub
+        30: aload_1
+        31: invokevirtual #149                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.getHeight:()I
+        34: isub
+        35: iconst_2
+        36: isub
+        37: istore_3
+        38: iload_3
+        39: ifge          48
+        42: aload_0
+        43: iload_3
+        44: ineg
+        45: invokevirtual #329                // Method scroll:(I)V
+        48: return
+
+  protected void centerScrollOn(E);
+    Code:
+         0: iconst_0
+         1: istore_2
+         2: aload_0
+         3: getfield      #24                 // Field children:Ljava/util/List;
+         6: invokeinterface #148,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+        11: astore_3
+        12: aload_3
+        13: invokeinterface #128,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+        18: ifeq          62
+        21: aload_3
+        22: invokeinterface #133,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+        27: checkcast     #47                 // class net/minecraft/client/gui/components/AbstractSelectionList$Entry
+        30: astore        4
+        32: aload         4
+        34: aload_1
+        35: if_acmpne     51
+        38: iload_2
+        39: aload         4
+        41: invokevirtual #149                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.getHeight:()I
+        44: iconst_2
+        45: idiv
+        46: iadd
+        47: istore_2
+        48: goto          62
+        51: iload_2
+        52: aload         4
+        54: invokevirtual #149                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.getHeight:()I
+        57: iadd
+        58: istore_2
+        59: goto          12
+        62: aload_0
+        63: iload_2
+        64: i2d
+        65: aload_0
+        66: getfield      #332                // Field height:I
+        69: i2d
+        70: ldc2_w        #335                // double 2.0d
+        73: ddiv
+        74: dsub
+        75: invokevirtual #195                // Method setScrollAmount:(D)V
+        78: return
+
+  private void scroll(int);
+    Code:
+         0: aload_0
+         1: aload_0
+         2: invokevirtual #144                // Method scrollAmount:()D
+         5: iload_1
+         6: i2d
+         7: dadd
+         8: invokevirtual #195                // Method setScrollAmount:(D)V
+        11: return
+
+  public void setScrollAmount(double);
+    Code:
+         0: aload_0
+         1: dload_1
+         2: invokespecial #337                // Method net/minecraft/client/gui/components/AbstractContainerWidget.setScrollAmount:(D)V
+         5: aload_0
+         6: invokevirtual #93                 // Method repositionEntries:()V
+         9: return
+
+  protected int scrollBarX();
+    Code:
+         0: aload_0
+         1: invokevirtual #338                // Method getRowRight:()I
+         4: aload_0
+         5: invokevirtual #341                // Method scrollbarWidth:()I
+         8: iadd
+         9: iconst_2
+        10: iadd
+        11: ireturn
+
+  public java.util.Optional<net.minecraft.client.gui.components.events.GuiEventListener> getChildAt(double, double);
+    Code:
+         0: aload_0
+         1: dload_1
+         2: dload_3
+         3: invokevirtual #239                // Method getEntryAtPosition:(DD)Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;
+         6: invokestatic  #344                // Method java/util/Optional.ofNullable:(Ljava/lang/Object;)Ljava/util/Optional;
+         9: areturn
+
+  public void setFocused(net.minecraft.client.gui.components.events.GuiEventListener);
+    Code:
+         0: aload_0
+         1: invokevirtual #350                // Method getFocused:()Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;
+         4: astore_2
+         5: aload_2
+         6: aload_1
+         7: if_acmpeq     29
+        10: aload_2
+        11: instanceof    #352                // class net/minecraft/client/gui/components/events/ContainerEventHandler
+        14: ifeq          29
+        17: aload_2
+        18: checkcast     #352                // class net/minecraft/client/gui/components/events/ContainerEventHandler
+        21: astore_3
+        22: aload_3
+        23: aconst_null
+        24: invokeinterface #354,  2          // InterfaceMethod net/minecraft/client/gui/components/events/ContainerEventHandler.setFocused:(Lnet/minecraft/client/gui/components/events/GuiEventListener;)V
+        29: aload_0
+        30: aload_1
+        31: invokespecial #358                // Method net/minecraft/client/gui/components/AbstractContainerWidget.setFocused:(Lnet/minecraft/client/gui/components/events/GuiEventListener;)V
+        34: aload_0
+        35: getfield      #24                 // Field children:Ljava/util/List;
+        38: aload_1
+        39: invokeinterface #359,  2          // InterfaceMethod java/util/List.indexOf:(Ljava/lang/Object;)I
+        44: istore_3
+        45: iload_3
+        46: iflt          70
+        49: aload_0
+        50: getfield      #24                 // Field children:Ljava/util/List;
+        53: iload_3
+        54: invokeinterface #101,  2          // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+        59: checkcast     #47                 // class net/minecraft/client/gui/components/AbstractSelectionList$Entry
+        62: astore        4
+        64: aload_0
+        65: aload         4
+        67: invokevirtual #116                // Method setSelected:(Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;)V
+        70: return
+
+  protected E nextEntry(net.minecraft.client.gui.navigation.ScreenDirection);
+    Code:
+         0: aload_0
+         1: aload_1
+         2: invokedynamic #363,  0            // InvokeDynamic #1:test:()Ljava/util/function/Predicate;
+         7: invokevirtual #366                // Method nextEntry:(Lnet/minecraft/client/gui/navigation/ScreenDirection;Ljava/util/function/Predicate;)Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;
+        10: areturn
+
+  protected E nextEntry(net.minecraft.client.gui.navigation.ScreenDirection, java.util.function.Predicate<E>);
+    Code:
+         0: aload_0
+         1: aload_1
+         2: aload_2
+         3: aload_0
+         4: invokevirtual #231                // Method getSelected:()Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;
+         7: invokevirtual #370                // Method nextEntry:(Lnet/minecraft/client/gui/navigation/ScreenDirection;Ljava/util/function/Predicate;Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;)Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;
+        10: areturn
+
+  protected E nextEntry(net.minecraft.client.gui.navigation.ScreenDirection, java.util.function.Predicate<E>, E);
+    Code:
+         0: getstatic     #373                // Field net/minecraft/client/gui/components/AbstractSelectionList$1.$SwitchMap$net$minecraft$client$gui$navigation$ScreenDirection:[I
+         3: aload_1
+         4: invokevirtual #379                // Method net/minecraft/client/gui/navigation/ScreenDirection.ordinal:()I
+         7: iaload
+         8: tableswitch   { // 1 to 4
+
+                       1: 50
+
+                       2: 50
+
+                       3: 54
+
+                       4: 58
+                 default: 40
+            }
+        40: new           #384                // class java/lang/MatchException
+        43: dup
+        44: aconst_null
+        45: aconst_null
+        46: invokespecial #386                // Method java/lang/MatchException."<init>":(Ljava/lang/String;Ljava/lang/Throwable;)V
+        49: athrow
+        50: iconst_0
+        51: goto          59
+        54: iconst_m1
+        55: goto          59
+        58: iconst_1
+        59: istore        4
+        61: aload_0
+        62: invokevirtual #202                // Method children:()Ljava/util/List;
+        65: invokeinterface #389,  1          // InterfaceMethod java/util/List.isEmpty:()Z
+        70: ifne          185
+        73: iload         4
+        75: ifeq          185
+        78: aload_3
+        79: ifnonnull     107
+        82: iload         4
+        84: ifle          91
+        87: iconst_0
+        88: goto          102
+        91: aload_0
+        92: invokevirtual #202                // Method children:()Ljava/util/List;
+        95: invokeinterface #181,  1          // InterfaceMethod java/util/List.size:()I
+       100: iconst_1
+       101: isub
+       102: istore        5
+       104: goto          122
+       107: aload_0
+       108: invokevirtual #202                // Method children:()Ljava/util/List;
+       111: aload_3
+       112: invokeinterface #359,  2          // InterfaceMethod java/util/List.indexOf:(Ljava/lang/Object;)I
+       117: iload         4
+       119: iadd
+       120: istore        5
+       122: iload         5
+       124: istore        6
+       126: iload         6
+       128: iflt          185
+       131: iload         6
+       133: aload_0
+       134: getfield      #24                 // Field children:Ljava/util/List;
+       137: invokeinterface #181,  1          // InterfaceMethod java/util/List.size:()I
+       142: if_icmpge     185
+       145: aload_0
+       146: invokevirtual #202                // Method children:()Ljava/util/List;
+       149: iload         6
+       151: invokeinterface #101,  2          // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+       156: checkcast     #47                 // class net/minecraft/client/gui/components/AbstractSelectionList$Entry
+       159: astore        7
+       161: aload_2
+       162: aload         7
+       164: invokeinterface #392,  2          // InterfaceMethod java/util/function/Predicate.test:(Ljava/lang/Object;)Z
+       169: ifeq          175
+       172: aload         7
+       174: areturn
+       175: iload         6
+       177: iload         4
+       179: iadd
+       180: istore        6
+       182: goto          126
+       185: aconst_null
+       186: areturn
+
+  protected void extractListItems(net.minecraft.client.gui.GuiGraphicsExtractor, int, int, float);
+    Code:
+         0: aload_0
+         1: getfield      #24                 // Field children:Ljava/util/List;
+         4: invokeinterface #148,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+         9: astore        5
+        11: aload         5
+        13: invokeinterface #128,  1          // InterfaceMethod java/util/Iterator.hasNext:()Z
+        18: ifeq          77
+        21: aload         5
+        23: invokeinterface #133,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+        28: checkcast     #47                 // class net/minecraft/client/gui/components/AbstractSelectionList$Entry
+        31: astore        6
+        33: aload         6
+        35: invokevirtual #328                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.getY:()I
+        38: aload         6
+        40: invokevirtual #149                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.getHeight:()I
+        43: iadd
+        44: aload_0
+        45: invokevirtual #52                 // Method getY:()I
+        48: if_icmplt     74
+        51: aload         6
+        53: invokevirtual #328                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.getY:()I
+        56: aload_0
+        57: invokevirtual #58                 // Method getBottom:()I
+        60: if_icmpgt     74
+        63: aload_0
+        64: aload_1
+        65: iload_2
+        66: iload_3
+        67: fload         4
+        69: aload         6
+        71: invokevirtual #396                // Method extractItem:(Lnet/minecraft/client/gui/GuiGraphicsExtractor;IIFLnet/minecraft/client/gui/components/AbstractSelectionList$Entry;)V
+        74: goto          11
+        77: return
+
+  protected void extractItem(net.minecraft.client.gui.GuiGraphicsExtractor, int, int, float, E);
+    Code:
+         0: aload_0
+         1: invokevirtual #400                // Method entriesCanBeSelected:()Z
+         4: ifeq          41
+         7: aload_0
+         8: invokevirtual #231                // Method getSelected:()Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;
+        11: aload         5
+        13: if_acmpne     41
+        16: aload_0
+        17: invokevirtual #403                // Method isFocused:()Z
+        20: ifeq          27
+        23: iconst_m1
+        24: goto          30
+        27: ldc_w         #408                // int -8355712
+        30: istore        6
+        32: aload_0
+        33: aload_1
+        34: aload         5
+        36: iload         6
+        38: invokevirtual #409                // Method extractSelection:(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;I)V
+        41: aload         5
+        43: aload_1
+        44: iload_2
+        45: iload_3
+        46: aload_0
+        47: getfield      #243                // Field hovered:Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;
+        50: aload         5
+        52: invokestatic  #413                // Method java/util/Objects.equals:(Ljava/lang/Object;Ljava/lang/Object;)Z
+        55: fload         4
+        57: invokevirtual #419                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.extractContent:(Lnet/minecraft/client/gui/GuiGraphicsExtractor;IIZF)V
+        60: return
+
+  protected void extractSelection(net.minecraft.client.gui.GuiGraphicsExtractor, E, int);
+    Code:
+         0: aload_2
+         1: invokevirtual #423                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.getX:()I
+         4: istore        4
+         6: aload_2
+         7: invokevirtual #328                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.getY:()I
+        10: istore        5
+        12: iload         4
+        14: aload_2
+        15: invokevirtual #424                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.getWidth:()I
+        18: iadd
+        19: istore        6
+        21: iload         5
+        23: aload_2
+        24: invokevirtual #149                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.getHeight:()I
+        27: iadd
+        28: istore        7
+        30: aload_1
+        31: iload         4
+        33: iload         5
+        35: iload         6
+        37: iload         7
+        39: iload_3
+        40: invokevirtual #425                // Method net/minecraft/client/gui/GuiGraphicsExtractor.fill:(IIIII)V
+        43: aload_1
+        44: iload         4
+        46: iconst_1
+        47: iadd
+        48: iload         5
+        50: iconst_1
+        51: iadd
+        52: iload         6
+        54: iconst_1
+        55: isub
+        56: iload         7
+        58: iconst_1
+        59: isub
+        60: ldc_w         #429                // int -16777216
+        63: invokevirtual #425                // Method net/minecraft/client/gui/GuiGraphicsExtractor.fill:(IIIII)V
+        66: return
+
+  public int getRowLeft();
+    Code:
+         0: aload_0
+         1: invokevirtual #294                // Method getX:()I
+         4: aload_0
+         5: getfield      #430                // Field width:I
+         8: iconst_2
+         9: idiv
+        10: iadd
+        11: aload_0
+        12: invokevirtual #162                // Method getRowWidth:()I
+        15: iconst_2
+        16: idiv
+        17: isub
+        18: ireturn
+
+  public int getRowRight();
+    Code:
+         0: aload_0
+         1: invokevirtual #155                // Method getRowLeft:()I
+         4: aload_0
+         5: invokevirtual #162                // Method getRowWidth:()I
+         8: iadd
+         9: ireturn
+
+  public int getRowTop(int);
+    Code:
+         0: aload_0
+         1: getfield      #24                 // Field children:Ljava/util/List;
+         4: iload_1
+         5: invokeinterface #101,  2          // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+        10: checkcast     #47                 // class net/minecraft/client/gui/components/AbstractSelectionList$Entry
+        13: invokevirtual #328                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.getY:()I
+        16: ireturn
+
+  public int getRowBottom(int);
+    Code:
+         0: aload_0
+         1: getfield      #24                 // Field children:Ljava/util/List;
+         4: iload_1
+         5: invokeinterface #101,  2          // InterfaceMethod java/util/List.get:(I)Ljava/lang/Object;
+        10: checkcast     #47                 // class net/minecraft/client/gui/components/AbstractSelectionList$Entry
+        13: astore_2
+        14: aload_2
+        15: invokevirtual #328                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.getY:()I
+        18: aload_2
+        19: invokevirtual #149                // Method net/minecraft/client/gui/components/AbstractSelectionList$Entry.getHeight:()I
+        22: iadd
+        23: ireturn
+
+  public int getRowWidth();
+    Code:
+         0: sipush        220
+         3: ireturn
+
+  public net.minecraft.client.gui.narration.NarratableEntry$NarrationPriority narrationPriority();
+    Code:
+         0: aload_0
+         1: invokevirtual #403                // Method isFocused:()Z
+         4: ifeq          11
+         7: getstatic     #433                // Field net/minecraft/client/gui/narration/NarratableEntry$NarrationPriority.FOCUSED:Lnet/minecraft/client/gui/narration/NarratableEntry$NarrationPriority;
+        10: areturn
+        11: aload_0
+        12: getfield      #243                // Field hovered:Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;
+        15: ifnull        22
+        18: getstatic     #439                // Field net/minecraft/client/gui/narration/NarratableEntry$NarrationPriority.HOVERED:Lnet/minecraft/client/gui/narration/NarratableEntry$NarrationPriority;
+        21: areturn
+        22: getstatic     #442                // Field net/minecraft/client/gui/narration/NarratableEntry$NarrationPriority.NONE:Lnet/minecraft/client/gui/narration/NarratableEntry$NarrationPriority;
+        25: areturn
+
+  protected void removeEntries(java.util.List<E>);
+    Code:
+         0: aload_1
+         1: aload_0
+         2: invokedynamic #445,  0            // InvokeDynamic #2:accept:(Lnet/minecraft/client/gui/components/AbstractSelectionList;)Ljava/util/function/Consumer;
+         7: invokeinterface #449,  2          // InterfaceMethod java/util/List.forEach:(Ljava/util/function/Consumer;)V
+        12: return
+
+  protected void removeEntry(E);
+    Code:
+         0: aload_0
+         1: getfield      #24                 // Field children:Ljava/util/List;
+         4: aload_1
+         5: invokeinterface #453,  2          // InterfaceMethod java/util/List.remove:(Ljava/lang/Object;)Z
+        10: istore_2
+        11: iload_2
+        12: ifeq          32
+        15: aload_0
+        16: invokevirtual #93                 // Method repositionEntries:()V
+        19: aload_1
+        20: aload_0
+        21: invokevirtual #231                // Method getSelected:()Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;
+        24: if_acmpne     32
+        27: aload_0
+        28: aconst_null
+        29: invokevirtual #116                // Method setSelected:(Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;)V
+        32: return
+
+  protected E getHovered();
+    Code:
+         0: aload_0
+         1: getfield      #243                // Field hovered:Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;
+         4: areturn
+
+  private void bindEntryToSelf(net.minecraft.client.gui.components.AbstractSelectionList$Entry<E>);
+    Code:
+         0: aload_1
+         1: aload_0
+         2: putfield      #456                // Field net/minecraft/client/gui/components/AbstractSelectionList$Entry.list:Lnet/minecraft/client/gui/components/AbstractSelectionList;
+         5: return
+
+  protected void narrateListElementPosition(net.minecraft.client.gui.narration.NarrationElementOutput, E);
+    Code:
+         0: aload_0
+         1: invokevirtual #202                // Method children:()Ljava/util/List;
+         4: astore_3
+         5: aload_3
+         6: invokeinterface #181,  1          // InterfaceMethod java/util/List.size:()I
+        11: iconst_1
+        12: if_icmple     71
+        15: aload_3
+        16: aload_2
+        17: invokeinterface #359,  2          // InterfaceMethod java/util/List.indexOf:(Ljava/lang/Object;)I
+        22: istore        4
+        24: iload         4
+        26: iconst_m1
+        27: if_icmpeq     71
+        30: aload_1
+        31: getstatic     #460                // Field net/minecraft/client/gui/narration/NarratedElementType.POSITION:Lnet/minecraft/client/gui/narration/NarratedElementType;
+        34: ldc_w         #466                // String narrator.position.list
+        37: iconst_2
+        38: anewarray     #468                // class java/lang/Object
+        41: dup
+        42: iconst_0
+        43: iload         4
+        45: iconst_1
+        46: iadd
+        47: invokestatic  #470                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+        50: aastore
+        51: dup
+        52: iconst_1
+        53: aload_3
+        54: invokeinterface #181,  1          // InterfaceMethod java/util/List.size:()I
+        59: invokestatic  #470                // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+        62: aastore
+        63: invokestatic  #476                // InterfaceMethod net/minecraft/network/chat/Component.translatable:(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;
+        66: invokeinterface #482,  3          // InterfaceMethod net/minecraft/client/gui/narration/NarrationElementOutput.add:(Lnet/minecraft/client/gui/narration/NarratedElementType;Lnet/minecraft/network/chat/Component;)V
+        71: return
+
+  public net.minecraft.client.gui.components.events.GuiEventListener getFocused();
+    Code:
+         0: aload_0
+         1: invokevirtual #350                // Method getFocused:()Lnet/minecraft/client/gui/components/AbstractSelectionList$Entry;
+         4: areturn
+
+  private static boolean lambda$nextEntry$0(net.minecraft.client.gui.components.AbstractSelectionList$Entry);
+    Code:
+         0: iconst_1
+         1: ireturn
+
+  private static boolean lambda$clearEntriesExcept$0(net.minecraft.client.gui.components.AbstractSelectionList$Entry, net.minecraft.client.gui.components.AbstractSelectionList$Entry);
+    Code:
+         0: aload_1
+         1: aload_0
+         2: if_acmpeq     9
+         5: iconst_1
+         6: goto          10
+         9: iconst_0
+        10: ireturn
+
+  static {};
+    Code:
+         0: ldc_w         #487                // String textures/gui/menu_list_background.png
+         3: invokestatic  #489                // Method net/minecraft/resources/Identifier.withDefaultNamespace:(Ljava/lang/String;)Lnet/minecraft/resources/Identifier;
+         6: putstatic     #304                // Field MENU_LIST_BACKGROUND:Lnet/minecraft/resources/Identifier;
+         9: ldc_w         #495                // String textures/gui/inworld_menu_list_background.png
+        12: invokestatic  #489                // Method net/minecraft/resources/Identifier.withDefaultNamespace:(Ljava/lang/String;)Lnet/minecraft/resources/Identifier;
+        15: putstatic     #307                // Field INWORLD_MENU_LIST_BACKGROUND:Lnet/minecraft/resources/Identifier;
+        18: return
+}

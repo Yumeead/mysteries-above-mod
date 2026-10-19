@@ -41,15 +41,14 @@ object BottomHud : HudElement {
     private var foodText = ""
     private var tick = 0
     private var owner: java.util.UUID? = null
-    var auxiliarySource: AuxiliaryHudSource = PreviewAuxiliaryHudSource
-    private var auxiliary = listOf(0, 0, 0)
-    private val auxiliaryRecent = IntArray(3)
-    private var auxiliaryInitialized = false
 
     private val symbols = mapOf(
-        "sanity" to listOf("..###...", ".#...#..", "#..#..#.", "#.###.#.", "#..#..#.", ".#...#..", "..#.#...", "...#...."),
-        "potion" to listOf("..#.#...", "..#.#...", ".#####..", ".#...#..", ".#.#.#..", "..###...", "...#....", "..###..."),
-        "empty" to listOf("...#....", "..#.#...", ".#...#..", "#.....#.", ".#...#..", "..#.#...", "...#....", "........"),
+        "sanity" to listOf("...##..##...", "..########..", ".###.##.###.", ".##..##..##.",
+            "###.####.###", "##..#..#..##", "###.####.###", ".##..##..##.", ".###.##.###.",
+            "..########..", "....####....", ".....##....."),
+        "potion" to listOf("....####....", "....#..#....", "....#..#....", "...##..##...",
+            "..##....##..", "..#......#..", ".##......##.", ".#..####..#.", ".#..####..#.",
+            ".#..####..#.", "..#......#..", "...######..."),
         "rune" to listOf("...#...", "..#.#..", ".#...#.", "#..#..#", ".#...#.", "..#.#..", "...#..."))
 
     fun register() {
@@ -94,8 +93,7 @@ object BottomHud : HudElement {
             val player = client.player
             if (owner != player?.uuid) {
                 owner = player?.uuid
-                healthDisplay.reset(); foodDisplay.reset(); auxiliaryInitialized = false
-                auxiliaryRecent.fill(0)
+                healthDisplay.reset(); foodDisplay.reset()
             }
             if (player == null || client.isPaused) return@register
             tick++
@@ -103,13 +101,6 @@ object BottomHud : HudElement {
             foodDisplay.tick(player.foodData.foodLevel, 20)
             healthText = "${ceil(player.health).toInt()}/${ceil(player.maxHealth).toInt()}"
             foodText = "${player.foodData.foodLevel}/20"
-            val fresh = auxiliarySource.snapshot().clamped().asList()
-            for (i in 0..2) {
-                if (auxiliaryRecent[i] > 0) auxiliaryRecent[i]--
-                if (auxiliaryInitialized && auxiliary[i] != fresh[i]) auxiliaryRecent[i] = 50
-            }
-            auxiliary = fresh
-            auxiliaryInitialized = true
         }
     }
 
@@ -157,8 +148,13 @@ object BottomHud : HudElement {
                 boxes[part]?.let { occupied += it.rect }
             }
             boxes[HudPart.MARIONETTES]?.let { occupied += it.rect }
-            if (auxiliary.indices.any { auxiliary[it]!=0 || auxiliaryRecent[it]>0 })
-                boxes[HudPart.AUXILIARY]?.let { occupied += it.rect }
+            boxes[HudPart.AUXILIARY]?.let { occupied += it.rect }
+            boxes[HudPart.ABILITY]?.let { slot ->
+                val name = ClientAbilityState.selected?.let(ClientAbilityState::entry)?.name
+                    ?: Component.translatable("hud.mysteries_above.no_selection")
+                val textHeight = ceil(client.font.split(name,143).size * 5.4f).toInt()
+                occupied += BottomPanel.abilityLabel(width,height,slot.rect,textHeight)
+            }
         }
         val chatRight = net.minecraft.client.gui.components.ChatComponent.getWidth(client.options.chatWidth().get())+8
         return BottomPanel.chatRise(height,chatRight,occupied)
@@ -167,9 +163,7 @@ object BottomHud : HudElement {
     private fun drawSelection(g: GuiGraphicsExtractor) {
         val player = Minecraft.getInstance().player ?: return
         if (player.isSpectator) return
-        corners(g, g.guiWidth() / 2 - 91 + player.inventory.selectedSlot * 20, g.guiHeight() - 22, 22, 22, accent())
-        val marker = g.guiWidth() / 2 - 88 + player.inventory.selectedSlot * 20
-        g.fill(marker,g.guiHeight()-21,marker+4,g.guiHeight()-20,opaque(0xDFC28B))
+        corners(g, g.guiWidth() / 2 - 91 + player.inventory.selectedSlot * 20, g.guiHeight() - 22, 22, 22, 0xDFC28B)
     }
 
     private fun drawResourceBar(g: GuiGraphicsExtractor, player: Player, health: Boolean) {
@@ -229,6 +223,17 @@ object BottomHud : HudElement {
         val x = box.rect.x; val y = box.rect.y
         frame(g, x, y, 20, 20)
         val entry = ClientAbilityState.selected?.let(ClientAbilityState::entry)
+        val font = Minecraft.getInstance().font
+        val name = entry?.name ?: Component.translatable("hud.mysteries_above.no_selection")
+        val lines = font.split(name, 143)
+        val labelHeight = ceil(lines.size * 9 * .6f).toInt()
+        val label = BottomPanel.abilityLabel(g.guiWidth(),g.guiHeight(),box.rect,labelHeight)
+        g.pose().pushMatrix()
+        g.pose().translate(label.x.toFloat(),label.y.toFloat())
+        g.pose().scale(.6f, .6f)
+        for ((index, line) in lines.withIndex())
+            g.text(font, line, 0, index * 9, opaque(UiTheme.TEXT), true)
+        g.pose().popMatrix()
         if (entry == null) { symbol(g, "rune", x + 7, y + 6, 0x65533A); return }
         g.item(entry.icon, x + 2, y + 2)
         g.nextStratum()
@@ -242,23 +247,38 @@ object BottomHud : HudElement {
     }
 
     fun drawAuxiliary(g: GuiGraphicsExtractor, box: HudBox, preview: Boolean = false) {
-        val visible = (0..2).filter { auxiliary[it] != 0 || auxiliaryRecent[it] > 0 }
-        for ((n, index) in visible.withIndex()) {
-            val x = box.rect.x; val y = box.rect.y + (3 - visible.size + n) * 10
-            symbol(g, listOf("sanity", "potion", "empty")[index], x, y, if (auxiliary[index] == 0) 0x65533A else 0xB99A61)
-            frame(g, x + 11, y, 26, 7)
-            val width = 22 * auxiliary[index] / 10000
+        val client = Minecraft.getInstance()
+        val values = ClientAbilityState.auxiliary.asList()
+        val captions = listOf("${ClientAbilityState.sanityLoss.scale}%", ClientAbilityState.mastery.toString())
+        for (index in 0..1) {
+            val x = box.rect.x; val y = box.rect.y + index * 22
+            val color = listOf(0xD58D9C, 0x94C987)[index]
+            symbol(g, listOf("sanity", "potion")[index], x, y + 4, color)
+            val title = Component.translatable("hud.mysteries_above.aux.$index")
+            val labelScale = minOf(.6f, 46f / client.font.width(title).coerceAtLeast(1))
+            g.pose().pushMatrix()
+            g.pose().translate((x + 16).toFloat(), y.toFloat())
+            g.pose().scale(labelScale, labelScale)
+            g.text(client.font, title, 0, 0, opaque(0xD8C6A0), false)
+            g.pose().popMatrix()
+            frame(g, x + 16, y + 8, 46, 12)
+            val width = 42 * values[index] / 10000
             if (width > 0) {
-                g.fill(x + 13, y + 2, x + 13 + width, y + 5, opaque(listOf(0xB77789, 0x93B66B, 0x9B8BBA)[index]))
-                g.fill(x + 13, y + 2, x + 13 + width, y + 3, opaque(0xD8D6BD))
-                g.fill(x + 13, y + 4, x + 13 + width, y + 5, opaque(0x4D5444))
+                g.fill(x + 18, y + 10, x + 18 + width, y + 18, opaque(color))
+                g.fill(x + 18, y + 10, x + 18 + width, y + 11, opaque(0xDFE8CD))
+                g.fill(x + 18, y + 17, x + 18 + width, y + 18, opaque(0x4D5444))
             }
-            val client = Minecraft.getInstance()
+            g.nextStratum()
+            g.pose().pushMatrix()
+            g.pose().translate(x + 39f - client.font.width(captions[index]) * .25f, y + 12f)
+            g.pose().scale(.5f, .5f)
+            text(g, captions[index], 0, 0)
+            g.pose().popMatrix()
             if (client.gui.screen() != null && !preview) {
                 val mx = (client.mouseHandler.xpos() * g.guiWidth() / client.window.screenWidth).toInt()
                 val my = (client.mouseHandler.ypos() * g.guiHeight() / client.window.screenHeight).toInt()
-                if (mx in x until x + 37 && my in y until y + 8) g.setTooltipForNextFrame(
-                    Component.translatable("hud.mysteries_above.aux.$index"), mx, my)
+                if (mx in x until x + 62 && my in y until y + 20) g.setTooltipForNextFrame(
+                    Component.translatable("hud.mysteries_above.aux.$index.tooltip", captions[index]), mx, my)
             }
         }
     }

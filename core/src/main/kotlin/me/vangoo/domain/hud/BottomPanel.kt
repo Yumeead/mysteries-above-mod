@@ -11,11 +11,24 @@ object BottomPanel {
         HudRect(width / 2 - 133, height - 67 - healthRise.coerceAtLeast(0) -
             if (armor) 8 else 0, 48, 44).clamped(width, height)
 
-    fun ability(width: Int, height: Int, leftHanded: Boolean): HudRect =
-        HudRect(width / 2 + if (leftHanded) -136 else 116, height - 21, 20, 20).clamped(width, height)
+    fun orbLabelX(textWidth: Int, originX: Int, screenWidth: Int): Int =
+        (21 - textWidth / 2).coerceIn(1 - originX, screenWidth - originX - textWidth - 1)
 
-    fun auxiliary(width: Int, height: Int): HudRect =
-        HudRect(width / 2 + 97, height - 57, 37, 27).clamped(width, height)
+    fun ability(width: Int, height: Int, leftHanded: Boolean): HudRect {
+        val preferred = width / 2 + if (leftHanded) -223 else 116
+        val beside = if (preferred >= 1) preferred else width / 2 + 123
+        val fits = beside + 86 <= width - 1
+        // Narrow viewports need the whole group above the hotbar instead of across its slots.
+        return HudRect(if (fits) beside else width - 87, height - if (fits) 21 else 80,
+            20, 20).clamped(width, height)
+    }
+
+    fun auxiliary(width: Int, height: Int, slot: HudRect = ability(width, height, false)): HudRect =
+        HudRect(slot.right + 4, slot.bottom - 42, 62, 42).clamped(width, height)
+
+    fun abilityLabel(width: Int, height: Int, slot: HudRect, textHeight: Int): HudRect =
+        HudRect(slot.x, if (slot.y >= textHeight + 24) slot.y - textHeight - 24 else slot.y + 44,
+            86, textHeight).clamped(width, height)
 
     fun chatRise(height: Int, chatRight: Int, occupied: List<HudRect>): Int =
         // Top placements must not push the whole chat above the screen.
@@ -41,40 +54,19 @@ class ResourceNumberDisplay {
     fun reset() { previous = null; remaining = 0 }
 }
 
-data class AuxiliaryValues(val sanityLoss: Int, val potionDigestion: Int, val unassigned: Int) {
-    fun clamped(): AuxiliaryValues = AuxiliaryValues(sanityLoss.coerceIn(0, 10000),
-        potionDigestion.coerceIn(0, 10000), unassigned.coerceIn(0, 10000))
-    fun asList(): List<Int> = listOf(sanityLoss, potionDigestion, unassigned)
+data class AuxiliaryValues(val sanityLoss: Int, val potionDigestion: Int) {
+    fun asList(): List<Int> = listOf(sanityLoss, potionDigestion)
 }
 
-fun interface AuxiliaryHudSource { fun snapshot(): AuxiliaryValues }
+/** Every pathway uses Fool's aperture, regardless of transparency at the painting's edge. */
+object OrbMask {
+    const val x = 17
+    const val y = 22
+    const val size = 28
 
-/** Deliberately unconnected to gameplay; replace the source when the two systems are ready. */
-object PreviewAuxiliaryHudSource : AuxiliaryHudSource {
-    override fun snapshot() = AuxiliaryValues(5400, 7200, 0)
-}
-
-/** Fits a circular aperture to opaque source pixels, keeping the liquid's original bottom row. */
-data class OrbMask(val x: Int, val y: Int, val size: Int) {
     fun contains(column: Int, row: Int): Boolean {
         val dx = 2 * (column - x) - size + 1
         val dy = 2 * (row - y) - size + 1
         return column in x until x + size && row in y until y + size && dx * dx + dy * dy <= size * size
-    }
-
-    companion object {
-        fun fit(full: List<IntArray>, bottom: Int = 49): OrbMask {
-            require(full.size > bottom && full.all { it.size >= 50 }) { "Expected the original flask painting canvas" }
-            for (size in 28 downTo 8 step 2) {
-                val preferred = full.first().size / 2 - 1 - size / 2
-                for (x in (13..(49 - size)).sortedBy { kotlin.math.abs(it - preferred) }) {
-                    val mask = OrbMask(x, bottom + 1 - size, size)
-                    if ((mask.y..bottom).all { row -> (x until x + size).all { column ->
-                        !mask.contains(column, row) || full[row][column] ushr 24 == 255
-                    } }) return mask
-                }
-            }
-            error("No native circular liquid window fits the source painting")
-        }
     }
 }

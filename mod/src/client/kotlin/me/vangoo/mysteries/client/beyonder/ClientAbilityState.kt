@@ -3,10 +3,12 @@ package me.vangoo.mysteries.client.beyonder
 import me.vangoo.domain.valueobjects.Mastery
 import me.vangoo.domain.valueobjects.SanityLoss
 import me.vangoo.domain.valueobjects.Spirituality
+import me.vangoo.domain.hud.AuxiliaryValues
 import me.vangoo.mysteries.net.payload.AbilityRosterPayload
 import me.vangoo.mysteries.net.payload.AbilityStatePayload
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
 import kotlin.math.ceil
+import kotlin.math.roundToInt
 
 /**
  * Everything the client knows about the player's abilities.
@@ -53,6 +55,9 @@ object ClientAbilityState {
     /** Potion mastery; at 100 % the next potion can be drunk. */
     var mastery: Mastery = Mastery.zero()
         private set
+
+    val auxiliary: AuxiliaryValues
+        get() = AuxiliaryValues(sanityLoss.scale * 100, (mastery.value * 100).roundToInt())
 
     /** The identity of the selected ability; the server holds the selection, this is only its echo. */
     var selected: String? = null

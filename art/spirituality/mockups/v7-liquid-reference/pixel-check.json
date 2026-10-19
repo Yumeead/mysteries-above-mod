@@ -4,8 +4,9 @@
   "pathways": 22,
   "states": 2,
   "mismatches": 0,
-  "checkedLiquidPixels": 26081,
-  "checkedScreenshotPixels": 417296,
+  "checkedLiquidPixels": 25877,
+  "locallyRepairedBasePixels": 220,
+  "checkedScreenshotPixels": 414032,
   "results": [
     {
       "pathway": "Abyss",
@@ -14,6 +15,7 @@
       "checkedLiquidPixels": 359,
       "checkedScreenshotPixels": 5744,
       "pixelsCoveredByOriginalDecorations": 0,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         60,
@@ -28,9 +30,10 @@
       "pathway": "BlackEmperor",
       "level": 0.33,
       "label": "third",
-      "checkedLiquidPixels": 354,
-      "checkedScreenshotPixels": 5664,
+      "checkedLiquidPixels": 346,
+      "checkedScreenshotPixels": 5536,
       "pixelsCoveredByOriginalDecorations": 0,
+      "locallyRepairedBasePixels": 8,
       "mismatches": 0,
       "referenceOrigin": [
         2980,
@@ -45,9 +48,10 @@
       "pathway": "Chained",
       "level": 0.33,
       "label": "third",
-      "checkedLiquidPixels": 365,
-      "checkedScreenshotPixels": 5840,
+      "checkedLiquidPixels": 344,
+      "checkedScreenshotPixels": 5504,
       "pixelsCoveredByOriginalDecorations": 0,
+      "locallyRepairedBasePixels": 22,
       "mismatches": 0,
       "referenceOrigin": [
         1228,
@@ -62,9 +66,10 @@
       "pathway": "Darkness",
       "level": 0.33,
       "label": "third",
-      "checkedLiquidPixels": 366,
-      "checkedScreenshotPixels": 5856,
+      "checkedLiquidPixels": 358,
+      "checkedScreenshotPixels": 5728,
       "pixelsCoveredByOriginalDecorations": 0,
+      "locallyRepairedBasePixels": 8,
       "mismatches": 0,
       "referenceOrigin": [
         1228,
@@ -79,9 +84,10 @@
       "pathway": "Death",
       "level": 0.33,
       "label": "third",
-      "checkedLiquidPixels": 385,
-      "checkedScreenshotPixels": 6160,
+      "checkedLiquidPixels": 364,
+      "checkedScreenshotPixels": 5824,
       "pixelsCoveredByOriginalDecorations": 0,
+      "locallyRepairedBasePixels": 22,
       "mismatches": 0,
       "referenceOrigin": [
         1812,
@@ -99,6 +105,7 @@
       "checkedLiquidPixels": 298,
       "checkedScreenshotPixels": 4768,
       "pixelsCoveredByOriginalDecorations": 0,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         2396,
@@ -116,6 +123,7 @@
       "checkedLiquidPixels": 401,
       "checkedScreenshotPixels": 6416,
       "pixelsCoveredByOriginalDecorations": 0,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         1228,
@@ -133,6 +141,7 @@
       "checkedLiquidPixels": 297,
       "checkedScreenshotPixels": 4752,
       "pixelsCoveredByOriginalDecorations": 0,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         644,
@@ -150,6 +159,7 @@
       "checkedLiquidPixels": 342,
       "checkedScreenshotPixels": 5472,
       "pixelsCoveredByOriginalDecorations": 0,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         60,
@@ -167,6 +177,7 @@
       "checkedLiquidPixels": 296,
       "checkedScreenshotPixels": 4736,
       "pixelsCoveredByOriginalDecorations": 0,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         2980,
@@ -184,6 +195,7 @@
       "checkedLiquidPixels": 361,
       "checkedScreenshotPixels": 5776,
       "pixelsCoveredByOriginalDecorations": 0,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         644,
@@ -201,6 +213,7 @@
       "checkedLiquidPixels": 340,
       "checkedScreenshotPixels": 5440,
       "pixelsCoveredByOriginalDecorations": 0,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         2396,
@@ -218,6 +231,7 @@
       "checkedLiquidPixels": 327,
       "checkedScreenshotPixels": 5232,
       "pixelsCoveredByOriginalDecorations": 0,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         644,
@@ -235,6 +249,7 @@
       "checkedLiquidPixels": 293,
       "checkedScreenshotPixels": 4688,
       "pixelsCoveredByOriginalDecorations": 0,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         60,
@@ -252,6 +267,7 @@
       "checkedLiquidPixels": 358,
       "checkedScreenshotPixels": 5728,
       "pixelsCoveredByOriginalDecorations": 0,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         644,
@@ -269,6 +285,7 @@
       "checkedLiquidPixels": 368,
       "checkedScreenshotPixels": 5888,
       "pixelsCoveredByOriginalDecorations": 0,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         2980,
@@ -286,6 +303,7 @@
       "checkedLiquidPixels": 320,
       "checkedScreenshotPixels": 5120,
       "pixelsCoveredByOriginalDecorations": 0,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         1228,
@@ -303,6 +321,7 @@
       "checkedLiquidPixels": 359,
       "checkedScreenshotPixels": 5744,
       "pixelsCoveredByOriginalDecorations": 0,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         2396,
@@ -320,6 +339,7 @@
       "checkedLiquidPixels": 360,
       "checkedScreenshotPixels": 5760,
       "pixelsCoveredByOriginalDecorations": 0,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         1812,
@@ -334,9 +354,10 @@
       "pathway": "Visionary",
       "level": 0.33,
       "label": "third",
-      "checkedLiquidPixels": 534,
-      "checkedScreenshotPixels": 8544,
+      "checkedLiquidPixels": 526,
+      "checkedScreenshotPixels": 8416,
       "pixelsCoveredByOriginalDecorations": 0,
+      "locallyRepairedBasePixels": 8,
       "mismatches": 0,
       "referenceOrigin": [
         1812,
@@ -351,9 +372,10 @@
       "pathway": "WheelOfFortune",
       "level": 0.33,
       "label": "third",
-      "checkedLiquidPixels": 483,
-      "checkedScreenshotPixels": 7728,
+      "checkedLiquidPixels": 449,
+      "checkedScreenshotPixels": 7184,
       "pixelsCoveredByOriginalDecorations": 0,
+      "locallyRepairedBasePixels": 42,
       "mismatches": 0,
       "referenceOrigin": [
         1812,
@@ -371,6 +393,7 @@
       "checkedLiquidPixels": 405,
       "checkedScreenshotPixels": 6480,
       "pixelsCoveredByOriginalDecorations": 0,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         60,
@@ -388,6 +411,7 @@
       "checkedLiquidPixels": 837,
       "checkedScreenshotPixels": 13392,
       "pixelsCoveredByOriginalDecorations": 5,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         340,
@@ -402,9 +426,10 @@
       "pathway": "BlackEmperor",
       "level": 1.0,
       "label": "full",
-      "checkedLiquidPixels": 827,
-      "checkedScreenshotPixels": 13232,
+      "checkedLiquidPixels": 819,
+      "checkedScreenshotPixels": 13104,
       "pixelsCoveredByOriginalDecorations": 3,
+      "locallyRepairedBasePixels": 8,
       "mismatches": 0,
       "referenceOrigin": [
         3260,
@@ -419,9 +444,10 @@
       "pathway": "Chained",
       "level": 1.0,
       "label": "full",
-      "checkedLiquidPixels": 831,
-      "checkedScreenshotPixels": 13296,
+      "checkedLiquidPixels": 809,
+      "checkedScreenshotPixels": 12944,
       "pixelsCoveredByOriginalDecorations": 7,
+      "locallyRepairedBasePixels": 22,
       "mismatches": 0,
       "referenceOrigin": [
         1508,
@@ -436,9 +462,10 @@
       "pathway": "Darkness",
       "level": 1.0,
       "label": "full",
-      "checkedLiquidPixels": 834,
-      "checkedScreenshotPixels": 13344,
+      "checkedLiquidPixels": 826,
+      "checkedScreenshotPixels": 13216,
       "pixelsCoveredByOriginalDecorations": 5,
+      "locallyRepairedBasePixels": 8,
       "mismatches": 0,
       "referenceOrigin": [
         1508,
@@ -453,9 +480,10 @@
       "pathway": "Death",
       "level": 1.0,
       "label": "full",
-      "checkedLiquidPixels": 837,
-      "checkedScreenshotPixels": 13392,
+      "checkedLiquidPixels": 815,
+      "checkedScreenshotPixels": 13040,
       "pixelsCoveredByOriginalDecorations": 4,
+      "locallyRepairedBasePixels": 22,
       "mismatches": 0,
       "referenceOrigin": [
         2092,
@@ -473,6 +501,7 @@
       "checkedLiquidPixels": 815,
       "checkedScreenshotPixels": 13040,
       "pixelsCoveredByOriginalDecorations": 20,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         2676,
@@ -490,6 +519,7 @@
       "checkedLiquidPixels": 838,
       "checkedScreenshotPixels": 13408,
       "pixelsCoveredByOriginalDecorations": 4,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         1508,
@@ -507,6 +537,7 @@
       "checkedLiquidPixels": 796,
       "checkedScreenshotPixels": 12736,
       "pixelsCoveredByOriginalDecorations": 46,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         924,
@@ -524,6 +555,7 @@
       "checkedLiquidPixels": 810,
       "checkedScreenshotPixels": 12960,
       "pixelsCoveredByOriginalDecorations": 32,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         340,
@@ -541,6 +573,7 @@
       "checkedLiquidPixels": 816,
       "checkedScreenshotPixels": 13056,
       "pixelsCoveredByOriginalDecorations": 26,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         3260,
@@ -558,6 +591,7 @@
       "checkedLiquidPixels": 830,
       "checkedScreenshotPixels": 13280,
       "pixelsCoveredByOriginalDecorations": 9,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         924,
@@ -575,6 +609,7 @@
       "checkedLiquidPixels": 820,
       "checkedScreenshotPixels": 13120,
       "pixelsCoveredByOriginalDecorations": 22,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         2676,
@@ -592,6 +627,7 @@
       "checkedLiquidPixels": 826,
       "checkedScreenshotPixels": 13216,
       "pixelsCoveredByOriginalDecorations": 14,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         924,
@@ -609,6 +645,7 @@
       "checkedLiquidPixels": 822,
       "checkedScreenshotPixels": 13152,
       "pixelsCoveredByOriginalDecorations": 20,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         340,
@@ -626,6 +663,7 @@
       "checkedLiquidPixels": 818,
       "checkedScreenshotPixels": 13088,
       "pixelsCoveredByOriginalDecorations": 24,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         924,
@@ -643,6 +681,7 @@
       "checkedLiquidPixels": 838,
       "checkedScreenshotPixels": 13408,
       "pixelsCoveredByOriginalDecorations": 4,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         3260,
@@ -660,6 +699,7 @@
       "checkedLiquidPixels": 811,
       "checkedScreenshotPixels": 12976,
       "pixelsCoveredByOriginalDecorations": 30,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         1508,
@@ -677,6 +717,7 @@
       "checkedLiquidPixels": 824,
       "checkedScreenshotPixels": 13184,
       "pixelsCoveredByOriginalDecorations": 17,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         2676,
@@ -694,6 +735,7 @@
       "checkedLiquidPixels": 830,
       "checkedScreenshotPixels": 13280,
       "pixelsCoveredByOriginalDecorations": 7,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         2092,
@@ -708,9 +750,10 @@
       "pathway": "Visionary",
       "level": 1.0,
       "label": "full",
-      "checkedLiquidPixels": 814,
-      "checkedScreenshotPixels": 13024,
+      "checkedLiquidPixels": 806,
+      "checkedScreenshotPixels": 12896,
       "pixelsCoveredByOriginalDecorations": 28,
+      "locallyRepairedBasePixels": 8,
       "mismatches": 0,
       "referenceOrigin": [
         2092,
@@ -725,9 +768,10 @@
       "pathway": "WheelOfFortune",
       "level": 1.0,
       "label": "full",
-      "checkedLiquidPixels": 827,
-      "checkedScreenshotPixels": 13232,
+      "checkedLiquidPixels": 791,
+      "checkedScreenshotPixels": 12656,
       "pixelsCoveredByOriginalDecorations": 5,
+      "locallyRepairedBasePixels": 42,
       "mismatches": 0,
       "referenceOrigin": [
         2092,
@@ -745,6 +789,7 @@
       "checkedLiquidPixels": 809,
       "checkedScreenshotPixels": 12944,
       "pixelsCoveredByOriginalDecorations": 32,
+      "locallyRepairedBasePixels": 0,
       "mismatches": 0,
       "referenceOrigin": [
         340,

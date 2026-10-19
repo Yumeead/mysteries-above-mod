@@ -82,8 +82,6 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
     private var chosen: String? = ClientAbilityState.selected ?: entries.firstOrNull()?.identity
     private var accent = UiTheme.ACCENT
     private var emblem: Identifier = emblemOf(null)
-    private var headerEmblem: Identifier = emblemOf(null, 24)
-    private var headerTitle: FormattedCharSequence = FormattedCharSequence.EMPTY
 
     private var search = ""
     private var filter: AbilityType? = null
@@ -134,6 +132,7 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
 
     private val group: AbilityGroup get() = ClientOptions.group
 
+    private val emblemSize get() = if (ch >= 200 && lw >= 152) 128 else 96
     private val filterColumns get() = if (lw < 180) 2 else FILTERS
     private val listTop get() = cy + if (page == Page.LIBRARY) 26 + FILTERS / filterColumns * 20 else 6
     private val visibleRows get() = ((cy + ch - 6 - listTop - if (page == Page.KEYS) FOOTER else 0) / ROW).coerceAtLeast(1)
@@ -214,17 +213,7 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
         val worn = roster?.worn
         val pathway = worn?.pathwayId ?: roster?.pathwayId
         accent = pathway?.let { GrimoireSkin.readableAccent(PathwayBranding.liquidOf(it).packed) } ?: GrimoireSkin.GOLD
-        emblem = emblemOf(pathway, if (ch >= 200) 64 else 48)
-        headerEmblem = emblemOf(pathway, 24)
-        if (roster != null) {
-            val title = pathwayName(pathway!!).withColor(accent)
-            val seq = if (worn != null) {
-                Component.translatable("book.$MOD_ID.sequence", worn.sequence.level)
-            } else {
-                Component.translatable("book.$MOD_ID.sequence", roster.sequence.level)
-            }
-            headerTitle = fit(title.append("  ").append(seq.withColor(UiTheme.MUTED)), cw - 64)
-        } else headerTitle = fit(HudSettingsScreen.tr("ordinary"), cw - 64)
+        emblem = emblemOf(pathway, emblemSize)
         when (page) {
             Page.STATUS -> rebuildStatus()
             Page.LIBRARY -> { rebuildLibrary(); rebuildDetail() }
@@ -647,10 +636,8 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
             val x = tabX(i)
             val selected = p == page
             sprite(graphics, if (selected) ROW_ON else ROW_OFF, x, by + 31, tabWidth(), TAB_H)
-            if (selected) UiTheme.hairline(graphics, x, by + 31 + TAB_H - 2, tabWidth(), accent, 1f)
-            else if (inside(mouseX, mouseY, x, by + 31, tabWidth(), TAB_H)) graphics.outline(x, by + 31, tabWidth(), TAB_H, UiTheme.argb(UiTheme.ACCENT_DEEP, 1f))
+            if (!selected && inside(mouseX, mouseY, x, by + 31, tabWidth(), TAB_H)) graphics.outline(x, by + 31, tabWidth(), TAB_H, UiTheme.argb(UiTheme.ACCENT_DEEP, 1f))
         }
-        sprite(graphics, headerEmblem, cx + 1, by + 3, 24, 24, GrimoireSkin.GOLD)
         when (page) {
             Page.STATUS, Page.LIBRARY, Page.GROUPS -> {
                 sprite(graphics, LEAF, cx, cy, lw, ch)
@@ -666,7 +653,6 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
     override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, partialTick: Float) {
         super.extractRenderState(graphics, mouseX, mouseY, partialTick)
 
-        graphics.text(font, headerTitle, cx + 31, by + 11, -1)
         Page.entries.forEachIndexed { i, p ->
             val label = tr("page.${p.name.lowercase()}")
             val rgb = if (p == page) UiTheme.TEXT else UiTheme.MUTED
@@ -691,17 +677,21 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
             return
         }
         val mid = cx + lw / 2
-        val big = if (ch >= 200) 64 else 48
-        val sealY = cy + (ch - big - 54) / 2
+        val big = emblemSize
+        val sealY = cy + maxOf(8, (ch - big - 60) / 2)
         GrimoireSkin.corners(graphics, mid - big / 2 - 6, sealY - 6, big + 12, big + 12, GrimoireSkin.EDGE)
         sprite(graphics, emblem, mid - big / 2, sealY, big, big, GrimoireSkin.GOLD)
-        var y = sealY + big + 16
         val worn = roster.worn
         val pathway = pathwayName(worn?.pathwayId ?: roster.pathwayId)
-        graphics.centeredText(font, pathway, mid, y, UiTheme.argb(accent, 1f))
-        y += 17
         val level = worn?.sequence?.level ?: roster.sequence.level
-        graphics.centeredText(font, tr("sequence_full", level), mid, y, UiTheme.argb(UiTheme.TEXT, 1f))
+        val sequence = tr("sequence_full", level)
+        val scale = minOf(if (big == 128) 2f else 1.5f, (lw - 20f) / maxOf(font.width(pathway), font.width(sequence), 1))
+        graphics.pose().pushMatrix()
+        graphics.pose().translate(mid.toFloat(), (sealY + big + 12).toFloat())
+        graphics.pose().scale(scale, scale)
+        graphics.centeredText(font, pathway, 0, 0, UiTheme.argb(accent, 1f))
+        graphics.centeredText(font, sequence, 0, 14, UiTheme.argb(UiTheme.TEXT, 1f))
+        graphics.pose().popMatrix()
 
         graphics.enableScissor(rx + 1, cy + 1, rx + rw - 1, cy + ch - 1)
         var sy = cy + 8 - statusScroll

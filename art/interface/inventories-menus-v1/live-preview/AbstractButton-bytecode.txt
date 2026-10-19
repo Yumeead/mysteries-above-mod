@@ -1,0 +1,129 @@
+Compiled from "AbstractButton.java"
+public abstract class net.minecraft.client.gui.components.AbstractButton extends net.minecraft.client.gui.components.AbstractWidget$WithInactiveMessage {
+  protected static final int TEXT_MARGIN;
+
+  private static final net.minecraft.client.gui.components.WidgetSprites SPRITES;
+
+  private java.util.function.Supplier<java.lang.Boolean> overrideRenderHighlightedSprite;
+
+  public net.minecraft.client.gui.components.AbstractButton(int, int, int, int, net.minecraft.network.chat.Component);
+    Code:
+         0: aload_0
+         1: iload_1
+         2: iload_2
+         3: iload_3
+         4: iload         4
+         6: aload         5
+         8: invokespecial #1                  // Method net/minecraft/client/gui/components/AbstractWidget$WithInactiveMessage."<init>":(IIIILnet/minecraft/network/chat/Component;)V
+        11: return
+
+  public abstract void onPress(net.minecraft.client.input.InputWithModifiers);
+
+  protected final void extractWidgetRenderState(net.minecraft.client.gui.GuiGraphicsExtractor, int, int, float);
+    Code:
+         0: aload_0
+         1: aload_1
+         2: iload_2
+         3: iload_3
+         4: fload         4
+         6: invokevirtual #7                  // Method extractContents:(Lnet/minecraft/client/gui/GuiGraphicsExtractor;IIF)V
+         9: aload_0
+        10: aload_1
+        11: invokevirtual #13                 // Method handleCursor:(Lnet/minecraft/client/gui/GuiGraphicsExtractor;)V
+        14: return
+
+  protected abstract void extractContents(net.minecraft.client.gui.GuiGraphicsExtractor, int, int, float);
+
+  protected void extractDefaultLabel(net.minecraft.client.gui.ActiveTextCollector);
+    Code:
+         0: aload_0
+         1: aload_1
+         2: aload_0
+         3: invokevirtual #17                 // Method getMessage:()Lnet/minecraft/network/chat/Component;
+         6: iconst_2
+         7: invokevirtual #21                 // Method extractScrollingStringOverContents:(Lnet/minecraft/client/gui/ActiveTextCollector;Lnet/minecraft/network/chat/Component;I)V
+        10: return
+
+  protected final void extractDefaultSprite(net.minecraft.client.gui.GuiGraphicsExtractor);
+    Code:
+         0: aload_1
+         1: getstatic     #25                 // Field net/minecraft/client/renderer/RenderPipelines.GUI_TEXTURED:Lcom/mojang/blaze3d/pipeline/RenderPipeline;
+         4: getstatic     #31                 // Field SPRITES:Lnet/minecraft/client/gui/components/WidgetSprites;
+         7: aload_0
+         8: getfield      #35                 // Field active:Z
+        11: aload_0
+        12: getfield      #39                 // Field overrideRenderHighlightedSprite:Ljava/util/function/Supplier;
+        15: ifnull        36
+        18: aload_0
+        19: getfield      #39                 // Field overrideRenderHighlightedSprite:Ljava/util/function/Supplier;
+        22: invokeinterface #43,  1           // InterfaceMethod java/util/function/Supplier.get:()Ljava/lang/Object;
+        27: checkcast     #49                 // class java/lang/Boolean
+        30: invokevirtual #51                 // Method java/lang/Boolean.booleanValue:()Z
+        33: goto          40
+        36: aload_0
+        37: invokevirtual #55                 // Method isHoveredOrFocused:()Z
+        40: invokevirtual #58                 // Method net/minecraft/client/gui/components/WidgetSprites.get:(ZZ)Lnet/minecraft/resources/Identifier;
+        43: aload_0
+        44: invokevirtual #63                 // Method getX:()I
+        47: aload_0
+        48: invokevirtual #67                 // Method getY:()I
+        51: aload_0
+        52: invokevirtual #70                 // Method getWidth:()I
+        55: aload_0
+        56: invokevirtual #73                 // Method getHeight:()I
+        59: aload_0
+        60: getfield      #76                 // Field alpha:F
+        63: invokestatic  #80                 // Method net/minecraft/util/ARGB.white:(F)I
+        66: invokevirtual #86                 // Method net/minecraft/client/gui/GuiGraphicsExtractor.blitSprite:(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIIII)V
+        69: return
+
+  public void onClick(net.minecraft.client.input.MouseButtonEvent, boolean);
+    Code:
+         0: aload_0
+         1: aload_1
+         2: invokevirtual #92                 // Method onPress:(Lnet/minecraft/client/input/InputWithModifiers;)V
+         5: return
+
+  public boolean keyPressed(net.minecraft.client.input.KeyEvent);
+    Code:
+         0: aload_0
+         1: invokevirtual #96                 // Method isActive:()Z
+         4: ifne          9
+         7: iconst_0
+         8: ireturn
+         9: aload_1
+        10: invokevirtual #99                 // Method net/minecraft/client/input/KeyEvent.isSelection:()Z
+        13: ifeq          33
+        16: aload_0
+        17: invokestatic  #104                // Method net/minecraft/client/Minecraft.getInstance:()Lnet/minecraft/client/Minecraft;
+        20: invokevirtual #110                // Method net/minecraft/client/Minecraft.getSoundManager:()Lnet/minecraft/client/sounds/SoundManager;
+        23: invokevirtual #114                // Method playDownSound:(Lnet/minecraft/client/sounds/SoundManager;)V
+        26: aload_0
+        27: aload_1
+        28: invokevirtual #92                 // Method onPress:(Lnet/minecraft/client/input/InputWithModifiers;)V
+        31: iconst_1
+        32: ireturn
+        33: iconst_0
+        34: ireturn
+
+  public void setOverrideRenderHighlightedSprite(java.util.function.Supplier<java.lang.Boolean>);
+    Code:
+         0: aload_0
+         1: aload_1
+         2: putfield      #39                 // Field overrideRenderHighlightedSprite:Ljava/util/function/Supplier;
+         5: return
+
+  static {};
+    Code:
+         0: new           #59                 // class net/minecraft/client/gui/components/WidgetSprites
+         3: dup
+         4: ldc           #118                // String widget/button
+         6: invokestatic  #120                // Method net/minecraft/resources/Identifier.withDefaultNamespace:(Ljava/lang/String;)Lnet/minecraft/resources/Identifier;
+         9: ldc           #126                // String widget/button_disabled
+        11: invokestatic  #120                // Method net/minecraft/resources/Identifier.withDefaultNamespace:(Ljava/lang/String;)Lnet/minecraft/resources/Identifier;
+        14: ldc           #128                // String widget/button_highlighted
+        16: invokestatic  #120                // Method net/minecraft/resources/Identifier.withDefaultNamespace:(Ljava/lang/String;)Lnet/minecraft/resources/Identifier;
+        19: invokespecial #130                // Method net/minecraft/client/gui/components/WidgetSprites."<init>":(Lnet/minecraft/resources/Identifier;Lnet/minecraft/resources/Identifier;Lnet/minecraft/resources/Identifier;)V
+        22: putstatic     #31                 // Field SPRITES:Lnet/minecraft/client/gui/components/WidgetSprites;
+        25: return
+}

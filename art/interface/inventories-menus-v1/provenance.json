@@ -1,0 +1,28 @@
+{
+  "version": {
+    "id": "26.2",
+    "name": "26.2",
+    "world_version": 4903,
+    "series_id": "main",
+    "protocol_version": 776,
+    "pack_version": {
+      "resource_major": 88,
+      "resource_minor": 0,
+      "data_major": 107,
+      "data_minor": 1
+    },
+    "build_time": "2026-06-16T12:01:27+00:00",
+    "java_component": "java-runtime-epsilon",
+    "java_version": 25,
+    "stable": true,
+    "use_editor": false
+  },
+  "jar": "C:\\Users\\yuryp\\.gradle\\caches\\fabric-loom\\26.2\\minecraft-client.jar",
+  "sha256": "40896ee9f1e2bec3c934daac7e93d41e9e3d9c2f8ae0ca366d52ffbfd1afa290",
+  "screens": 153,
+  "guiPng": 555,
+  "scopePng": 223,
+  "effectIcons": 40,
+  "nineSlice": 44,
+  "scopeNineSlice": 29
+}

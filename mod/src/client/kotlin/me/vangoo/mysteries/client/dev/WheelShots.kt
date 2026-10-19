@@ -660,6 +660,7 @@ object WheelShots {
     private fun planBottomPanel(originalScale: Int) {
         val saved = ClientOptions.hudSettings
         val savedHud = ClientOptions.hud
+        val savedMotion = ClientOptions.reducedMotion
         val savedHand = Minecraft.getInstance().options.mainHand().get()
         val settings = me.vangoo.domain.hud.HudSettings()
         then(100) { mc ->
@@ -669,6 +670,7 @@ object WheelShots {
         then(90) { mc ->
             ClientOptions.hudSettings = settings
             ClientOptions.hud = HudMode.ALWAYS
+            ClientOptions.reducedMotion = false
             mc.options.pauseOnLostFocus = false
             mc.options.attackIndicator().set(AttackIndicatorStatus.HOTBAR)
             command(mc,"mysteries become Fool 5 @a")
@@ -698,17 +700,69 @@ object WheelShots {
         then(30) { mc ->
             spirituality(mc,1f)
             server(mc) { check(mc.singleplayerServer!!.overworld().getBlockState(BlockPos(0,199,0)).block == Blocks.GRASS_BLOCK) }
-            page().firstOrNull()?.let { ModChannels.ABILITY_ACTION.sendToServer(AbilityActionPayload(AbilityActionPayload.Action.SELECT,it.identity,null)) }
+            val entry=checkNotNull(ClientAbilityState.entries.filter { it.type==me.vangoo.domain.abilities.AbilityType.ACTIVE }
+                .maxByOrNull { it.name.string.length })
+            server(mc) {
+                AbilityServices.selection.select(mc.player!!.uuid,AbilityIdentity(entry.identity))
+                AbilityServices.statePump.pushNow(mc.player!!.uuid)
+            }
         }
         for (scale in listOf(2,3,4)) {
             then(25) { mc -> mc.options.guiScale().set(scale);mc.resizeGui() }
             then(2) { mc -> shot(mc,"hud04_gs${scale}_empty_offhand") }
+        }
+        repeat(20) { frame ->
+            then(5) { mc -> shot(mc,"hud04_liquid_live_${frame.toString().padStart(2,'0')}") }
+        }
+        then(5) { ClientOptions.reducedMotion=true }
+        then(10) { mc -> shot(mc,"hud04_liquid_still_0") }
+        then(5) { mc -> shot(mc,"hud04_liquid_still_1") }
+        then(5) { ClientOptions.reducedMotion=false }
+        for ((sanity, mastery) in listOf(37 to 42.37,0 to 100.0,0 to 0.0)) {
+            then(25) { mc ->
+                command(mc,"mysteries sanity $sanity @a")
+                command(mc,"mysteries mastery $mastery @a")
+            }
+            then(2) { mc ->
+                val values=ClientAbilityState.auxiliary
+                check(values.sanityLoss==sanity*100 && values.potionDigestion==Math.round(mastery*100).toInt()) {
+                    "HUD indicators differ from the server: $values"
+                }
+                shot(mc,"hud04_aux_${sanity}_${mastery.toInt()}")
+            }
+        }
+        then(30) { mc -> server(mc) {
+            val beyonder=AbilityServices.beyonders.of(mc.player!!.uuid)!!
+            beyonder.increaseSanityLoss(21)
+            beyonder.setMastery(me.vangoo.domain.valueobjects.Mastery.of(63.5))
+            beyonder.setSpirituality(Spirituality.of(beyonder.maxSpirituality,beyonder.maxSpirituality))
+        } }
+        then(2) { mc ->
+            check(ClientAbilityState.auxiliary==me.vangoo.domain.hud.AuxiliaryValues(2100,6350)) {
+                "Passive changes did not reach the HUD at full spirituality"
+            }
+            shot(mc,"hud04_aux_passive")
+        }
+        then(25) { mc ->
+            command(mc,"mysteries become Fool 0 @a")
+            ClientOptions.hudSettings=settings.copy(numbers=SpiritualityNumbers.ALWAYS)
+        }
+        then(25) { mc -> spirituality(mc,1f) }
+        then(2) { mc -> shot(mc,"hud04_caption_14000") }
+        then(25) { mc ->
+            command(mc,"mysteries become Fool 5 @a")
+            ClientOptions.hudSettings=settings
         }
         for (pathway in listOf("Mother","Justiciar","WheelOfFortune","WhiteTower")) {
             then(25) { mc -> command(mc,"mysteries become $pathway 5 @a") }
             then(25) { mc -> spirituality(mc,1f) }
             then(2) { mc -> shot(mc,"hud04_full_${pathway.lowercase()}") }
         }
+        for ((label,level) in listOf("full" to 1f,"third" to .33f,"low" to .1f,"minimum" to .005f,"empty" to 0f)) {
+            then(3) { mc -> mc.gui.setScreen(FlaskReviewScreen(level,false,false,true,orb=true)) }
+            then(2) { mc -> shot(mc,"hud04_all_orbs_$label") }
+        }
+        then(2) { mc -> mc.gui.setScreen(null) }
         then(25) { mc -> command(mc,"mysteries become Fool 5 @a") }
         then(30) { mc ->
             mc.options.guiScale().set(3);mc.resizeGui()
@@ -749,12 +803,12 @@ object WheelShots {
             command(mc,"fill -2 200 -2 2 204 2 minecraft:air")
             mc.options.mainHand().set(HumanoidArm.LEFT);mc.options.broadcastOptions()
             mc.player!!.swing(net.minecraft.world.InteractionHand.MAIN_HAND)
-            page().firstOrNull { it.cooldownSeconds > 0 }?.let { entry ->
+            ClientAbilityState.entries.firstOrNull { it.cooldownSeconds > 0 }?.let { entry ->
                 server(mc) {
+                    AbilityServices.selection.select(mc.player!!.uuid,AbilityIdentity(entry.identity))
                     AbilityServices.cooldowns.set(mc.player!!.uuid,AbilityIdentity(entry.identity),160)
                     AbilityServices.statePump.pushNow(mc.player!!.uuid)
                 }
-                ModChannels.ABILITY_ACTION.sendToServer(AbilityActionPayload(AbilityActionPayload.Action.SELECT,entry.identity,null))
             }
         }
         then(2) { mc -> shot(mc,"hud04_left_hand") }
@@ -865,6 +919,7 @@ object WheelShots {
             check(ClientOptions.hudSettings==expected) { "Panel settings failed to round-trip" }
             ClientOptions.hudSettings=saved;ClientOptions.hud=savedHud
             mc.options.mainHand().set(savedHand);mc.options.broadcastOptions()
+            ClientOptions.reducedMotion=savedMotion
             mc.options.guiScale().set(originalScale)
             log.info("Bottom panel check passed: native sprites, empty offhand, both hands, resources, settings and persistence")
             mc.stop()

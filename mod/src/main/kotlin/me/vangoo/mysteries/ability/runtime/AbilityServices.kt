@@ -108,6 +108,7 @@ object AbilityServices {
     val statePump = AbilityStatePump(
         send = { id -> players(id)?.let(BeyonderStatus::pushState) },
         now = { (server?.tickCount ?: 0).toLong() },
+        readAuxiliary = { id -> beyonders.of(id)?.let { it.sanityLoss to it.mastery } },
     )
 
     fun bootstrap() {
@@ -199,9 +200,9 @@ object AbilityServices {
         beyonders.online.forEach { beyonder ->
             val before = beyonder.spirituality.current
             beyonder.regenerateSpirituality()
-            // Mark dirty only when the number actually grew: a player at the spirituality
-            // ceiling must generate no packet at all.
+            // At full spirituality, passive sanity or digestion changes still need synchronising.
             if (beyonder.spirituality.current != before) statePump.markDirty(beyonder.playerId)
+            statePump.observeAuxiliary(beyonder.playerId)
         }
     }
 

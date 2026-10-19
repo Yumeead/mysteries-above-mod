@@ -1,0 +1,314 @@
+
+> Configure project :mod
+Fabric Loom: 1.17.21
+
+> Task :mod:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :mod:processResources UP-TO-DATE
+> Task :core:compileKotlin UP-TO-DATE
+> Task :core:compileJava NO-SOURCE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :mod:processClientResources UP-TO-DATE
+> Task :mod:compileKotlin UP-TO-DATE
+> Task :mod:compileJava UP-TO-DATE
+> Task :mod:classes UP-TO-DATE
+> Task :mod:compileClientKotlin UP-TO-DATE
+> Task :mod:compileClientJava UP-TO-DATE
+> Task :mod:clientClasses UP-TO-DATE
+> Task :mod:deleteGameTestRunDir
+> Task :mod:acceptGameTestEula
+> Task :mod:generateLog4jConfig UP-TO-DATE
+> Task :mod:generateDLIConfig UP-TO-DATE
+> Task :mod:configureLaunch
+> Task :mod:downloadAssets
+> Task :mod:configureClientLaunch
+
+> Task :mod:runClient
+[34m[22:07:34][m [32m[main/INFO][m [36m(FabricLoader/GameProvider)[m [0mLoading Minecraft 26.2 with Fabric Loader 0.19.3
+[m[34m[22:07:34][m [32m[main/INFO][m [36m(FabricLoader/Mappings)[m [0mMappings not present!
+[m[34m[22:07:34][m [32m[main/INFO][m [36m(FabricLoader)[m [0mLoading 65 mods:
+	- fabric-api 0.158.0+26.2
+	- fabric-api-base 2.0.4+ece063239e
+	- fabric-api-lookup-api-v1 2.0.17+11e1c9a39e
+	- fabric-biome-api-v1 18.0.6+c7bd5b8e9e
+	- fabric-block-api-v1 3.0.3+ec56b6019e
+	- fabric-block-getter-api-v2 2.0.7+ec56b6019e
+	- fabric-client-gametest-api-v1 6.0.0+515ac5339e
+	- fabric-command-api-v2 3.1.0+00cb03469e
+	- fabric-content-registries-v0 11.3.1+37b1aa249e
+	- fabric-convention-tags-v2 4.7.0+1f023a9e9e
+	- fabric-crash-report-info-v1 1.0.5+086d547a9e
+	- fabric-creative-tab-api-v1 5.0.14+d871b99e9e
+	- fabric-data-attachment-api-v1 2.2.18+515ac5339e
+	- fabric-data-generation-api-v1 25.5.0+aed122aa9e
+	- fabric-debug-api-v1 1.0.2+c792624d9e
+	- fabric-dimensions-v1 5.1.11+515ac5339e
+	- fabric-entity-events-v1 5.0.5+06488ac19e
+	- fabric-events-interaction-v0 5.2.7+515ac5339e
+	- fabric-game-rule-api-v1 4.0.8+46a6d00c9e
+	- fabric-gametest-api-v1 4.0.21+4a7fa0819e
+	- fabric-item-api-v1 14.5.0+c68f6cbe9e
+	- fabric-key-mapping-api-v1 2.0.5+e2bdee789e
+	- fabric-language-kotlin 1.13.13+kotlin.2.4.10
+	   |-- org_jetbrains_kotlin_kotlin-reflect 2.4.10
+	   |-- org_jetbrains_kotlin_kotlin-stdlib 2.4.10
+	   |-- org_jetbrains_kotlin_kotlin-stdlib-jdk7 2.4.10
+	   |-- org_jetbrains_kotlin_kotlin-stdlib-jdk8 2.4.10
+	   |-- org_jetbrains_kotlinx_atomicfu-jvm 0.33.0
+	   |-- org_jetbrains_kotlinx_kotlinx-coroutines-core-jvm 1.11.0
+	   |-- org_jetbrains_kotlinx_kotlinx-coroutines-jdk8 1.11.0
+	   |-- org_jetbrains_kotlinx_kotlinx-datetime-jvm 0.8.0
+	   |-- org_jetbrains_kotlinx_kotlinx-io-bytestring-jvm 0.9.1
+	   |-- org_jetbrains_kotlinx_kotlinx-io-core-jvm 0.9.1
+	   |-- org_jetbrains_kotlinx_kotlinx-serialization-cbor-jvm 1.11.0
+	   |-- org_jetbrains_kotlinx_kotlinx-serialization-core-jvm 1.11.0
+	   \-- org_jetbrains_kotlinx_kotlinx-serialization-json-jvm 1.11.0
+	- fabric-lifecycle-events-v1 4.1.3+4575b05f9e
+	- fabric-loot-api-v3 3.0.17+06488ac19e
+	- fabric-menu-api-v1 2.0.16+086d547a9e
+	- fabric-message-api-v1 7.0.8+bb2ed3f79e
+	- fabric-model-loading-api-v1 8.0.16+c80601bb9e
+	- fabric-networking-api-v1 6.3.3+72073ef09e
+	- fabric-object-builder-api-v1 24.1.0+6fcd5f039e
+	- fabric-particles-v1 5.0.18+d1756aa99e
+	- fabric-permission-api-v1 1.0.5+e442d8d09e
+	- fabric-recipe-api-v1 9.0.20+11e1c9a39e
+	- fabric-registry-sync-v0 7.1.0+c7bd5b8e9e
+	- fabric-renderer-api-v1 14.1.3+2b0d8a229e
+	- fabric-renderer-indigo 9.1.3+2b0d8a229e
+	- fabric-rendering-fluids-v1 6.0.4+06488ac19e
+	- fabric-rendering-v1 25.3.2+515ac5339e
+	- fabric-resource-conditions-api-v1 6.1.0+10e9a28b9e
+	- fabric-resource-loader-v0 3.3.20+4fc5413f9e
+	- fabric-resource-loader-v1 2.0.13+9edec1269e
+	- fabric-screen-api-v1 5.2.0+58e078ad9e
+	- fabric-serialization-api-v1 2.0.4+11a26f319e
+	- fabric-sound-api-v1 2.0.5+11a26f319e
+	- fabric-tag-api-v1 2.1.4+515ac5339e
+	- fabric-transfer-api-v1 8.0.12+11dbb7d79e
+	- fabric-transitive-access-wideners-v1 8.1.4+67c847259e
+	- fabricloader 0.19.3
+	- java 25
+	- minecraft 26.2
+	- mixinextras 0.5.4
+	- mysteries_above 0.1.0
+[m[34m[22:07:35][m [32m[main/INFO][m [36m(FabricLoader/Mixin)[m [0mSpongePowered MIXIN Subsystem Version=0.8.7 Source=file:/C:/Users/yuryp/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.17.3+mixin.0.8.7/41c4a3984a80f4679e759fb9f495587acc5cdac7/sponge-mixin-0.17.3+mixin.0.8.7.jar Service=Knot/Fabric Env=CLIENT
+[m[34m[22:07:35][m [32m[main/INFO][m [36m(FabricLoader/Mixin)[m [0mCompatibility level set to JAVA_25
+[m[34m[22:07:36][m [32m[main/INFO][m [36m(FabricLoader/MixinExtras|Service)[m [0mInitializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.4).
+[m[34m[22:07:37][m [32m[Datafixer Bootstrap #0/INFO][m [36m(Minecraft)[m [0m295 Datafixer optimizations took 401 milliseconds
+[m[34m[22:07:45][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mEnvironment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, profilesHost=https://api.mojang.com, name=PROD]
+[m[34m[22:07:45][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mSetting user: Tester1
+[m[34m[22:07:46][m [32m[Render thread/INFO][m [36m(mysteries_above)[m [0mMysteries Above: спільна частина піднялась — каналів 8, шляхів 22
+[m[34m[22:07:46][m [32m[Render thread/INFO][m [36m(Indigo)[m [0m[Indigo] Registering Indigo renderer!
+[m[34m[22:07:46][m [32m[Render thread/INFO][m [36m(mysteries_above/client)[m [0mMysteries Above: client side is up
+[m[34m[22:07:47][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mBackend library: LWJGL version 3.4.1-snapshot
+[m[34m[22:07:47][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mUsing graphics backend OpenGL, using drivers: 3.3.0 Core Profile Context 26.8.1.260810
+[m[34m[22:07:47][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mUsing graphics device: AMD Radeon RX 9060 XT (ATI Technologies Inc.)
+[m[34m[22:07:47][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mUsing graphics device extensions: GL_ARB_multi_draw_indirect, GL_ARB_buffer_storage, GL_ARB_shader_draw_parameters, GL_ARB_base_instance, GL_KHR_debug, GL_ARB_draw_indirect, GL_ARB_clip_control, GL_ARB_vertex_attrib_binding, GL_ARB_direct_state_access, GL_EXT_texture_filter_anisotropic
+[m[34m[22:07:48][m [32m[Download-2/INFO][m [36m(Minecraft)[m [0mCould not authorize you against Realms server: java.lang.RuntimeException: Failed to parse into SignedJWT: FabricMC
+[m[34m[22:07:48][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mReloading ResourceManager: vanilla, fabric-api, fabric-api-base, fabric-api-lookup-api-v1, fabric-biome-api-v1, fabric-block-api-v1, fabric-block-getter-api-v2, fabric-client-gametest-api-v1, fabric-command-api-v2, fabric-content-registries-v0, fabric-convention-tags-v2, fabric-crash-report-info-v1, fabric-creative-tab-api-v1, fabric-data-attachment-api-v1, fabric-data-generation-api-v1, fabric-debug-api-v1, fabric-dimensions-v1, fabric-entity-events-v1, fabric-events-interaction-v0, fabric-game-rule-api-v1, fabric-gametest-api-v1, fabric-item-api-v1, fabric-key-mapping-api-v1, fabric-language-kotlin, fabric-lifecycle-events-v1, fabric-loot-api-v3, fabric-menu-api-v1, fabric-message-api-v1, fabric-model-loading-api-v1, fabric-networking-api-v1, fabric-object-builder-api-v1, fabric-particles-v1, fabric-permission-api-v1, fabric-recipe-api-v1, fabric-registry-sync-v0, fabric-renderer-api-v1, fabric-renderer-indigo, fabric-rendering-fluids-v1, fabric-rendering-v1, fabric-resource-conditions-api-v1, fabric-resource-loader-v0, fabric-resource-loader-v1, fabric-screen-api-v1, fabric-serialization-api-v1, fabric-sound-api-v1, fabric-tag-api-v1, fabric-transfer-api-v1, fabric-transitive-access-wideners-v1, fabricloader, mysteries_above
+[m[34m[22:07:48][m [32m[Worker-Main-7/INFO][m [36m(Minecraft)[m [0mFound unifont_all_no_pua-17.0.01.hex, loading
+[m[34m[22:07:48][m [32m[Worker-Main-2/INFO][m [36m(Minecraft)[m [0mFound unifont_pua-17.0.01.hex, loading
+[m[34m[22:07:49][m [32m[Worker-Main-2/INFO][m [36m(Minecraft)[m [0mFound unifont_jp_patch-17.0.01.hex, loading
+[m[34m[22:07:50][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mOpenAL initialized on device OpenAL Soft on SteelSeries Sonar - Gaming (SteelSeries Sonar Virtual Audio Device)
+[m[34m[22:07:50][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mSound engine started
+[m[34m[22:07:50][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mCreated: 512x256x0 minecraft:textures/atlas/particles.png-atlas
+[m[34m[22:07:50][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mCreated: 128x128x0 minecraft:textures/atlas/decorated_pot.png-atlas
+[m[34m[22:07:50][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mCreated: 2048x1024x0 minecraft:textures/atlas/armor_trims.png-atlas
+[m[34m[22:07:50][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mCreated: 512x256x0 minecraft:textures/atlas/paintings.png-atlas
+[m[34m[22:07:50][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mCreated: 1024x512x0 minecraft:textures/atlas/shield_patterns.png-atlas
+[m[34m[22:07:50][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mCreated: 2048x2048x4 minecraft:textures/atlas/blocks.png-atlas
+[m[34m[22:07:50][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mCreated: 512x512x0 minecraft:textures/atlas/chest.png-atlas
+[m[34m[22:07:50][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mCreated: 256x128x0 minecraft:textures/atlas/celestials.png-atlas
+[m[34m[22:07:50][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mCreated: 1024x512x0 minecraft:textures/atlas/banner_patterns.png-atlas
+[m[34m[22:07:50][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mCreated: 1024x512x0 minecraft:textures/atlas/items.png-atlas
+[m[34m[22:07:50][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mCreated: 2048x2048x0 minecraft:textures/atlas/gui.png-atlas
+[m[34m[22:07:50][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mCreated: 128x64x0 minecraft:textures/atlas/map_decorations.png-atlas
+[m[34m[22:07:50][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mCreated: 512x512x0 minecraft:textures/atlas/shulker_boxes.png-atlas
+[m[34m[22:07:50][m [32m[Download-2/INFO][m [36m(Minecraft)[m [0mCould not authorize you against Realms server: java.lang.RuntimeException: Failed to parse into SignedJWT: FabricMC
+[m[34m[22:07:51][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mLoaded 1585 recipes
+[m[34m[22:07:52][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mLoaded 1688 advancements
+[m[34m[22:07:52][m [32m[Render thread/INFO][m [36m(BiomeModificationImpl)[m [0mApplied 0 biome modifications to 0 of 68 new biomes in 1.169 ms
+[m[34m[22:07:52][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mStarting integrated minecraft server version 26.2
+[m[34m[22:07:52][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mGenerating keypair
+[m[34m[22:07:52][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mLoading 0 persistent chunks...
+[m[34m[22:07:52][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mПідготовка области відродження: 16%
+[m[34m[22:07:52][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mSaving chunks for level 'ServerLevel[New World]'/minecraft:overworld
+[m[34m[22:07:52][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mSaving chunks for level 'ServerLevel[New World]'/minecraft:the_end
+[m[34m[22:07:52][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mSaving chunks for level 'ServerLevel[New World]'/mysteries_above:spirit_world
+[m[34m[22:07:52][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mSaving chunks for level 'ServerLevel[New World]'/mysteries_above:underworld
+[m[34m[22:07:52][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mSaving chunks for level 'ServerLevel[New World]'/minecraft:the_nether
+[m[34m[22:07:52][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mThreadedAnvilChunkStorage (world): All chunks are saved
+[m[34m[22:07:52][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[m[34m[22:07:52][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mThreadedAnvilChunkStorage (spirit_world): All chunks are saved
+[m[34m[22:07:52][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mThreadedAnvilChunkStorage (underworld): All chunks are saved
+[m[34m[22:07:52][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[m[34m[22:07:52][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mThreadedAnvilChunkStorage: All dimensions are saved
+[m[34m[22:07:52][m [33m[Server thread/WARN][m [36m(TranslationConventionLogWarnings)[m [0m
+	Dev warning - Untranslated Item Tags detected. Please translate your item tags so other mods such as recipe viewers can properly display your tag's name.
+	The format desired is tag.item.<namespace>.<path> for the translation key with slashes in path turned into periods.
+	To disable this message, set this system property in your runs: `-Dfabric-tag-conventions-v2.missingTagTranslationWarning=SILENCED`.
+	To see individual untranslated item tags found, set the system property to `-Dfabric-tag-conventions-v2.missingTagTranslationWarning=VERBOSE`.
+	Default is `SHORT`.
+
+[m[34m[22:07:53][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mLoading 49 chunks for player spawn...
+[m[34m[22:07:53][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mПідготовка области відродження: 16%
+[m[34m[22:07:53][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mПідготовка области відродження: 100%
+[m[34m[22:07:53][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mTime elapsed: 1022 ms
+[m[34m[22:07:53][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mTester1[local:E:74ed6226] logged in with entity id 56 at (-184.07000363296874, -60.0, 384.48691201466863)
+[m[34m[22:07:53][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mTester1 приєднався до гри
+[m[34m[22:07:53][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mChanging view distance to 6, from 10
+[m[34m[22:07:53][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mChanging simulation distance to 5, from 0
+[m[34m[22:07:53][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mResizing Dynamic Transforms UBO, capacity limit of 2 reached during a single frame. New capacity will be 4.
+[m[34m[22:07:53][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mLoaded 29 advancements
+[m[34m[22:07:54][m [31m[Download-2/ERROR][m [36m(Minecraft)[m [31mFailed to retrieve profile key pair
+[m
+MinecraftClientHttpException[type=HTTP_ERROR, status=401, response=ErrorResponse[path=/player/certificates, error=null, errorMessage=null, details=null]]
+	at knot//com.mojang.authlib.minecraft.client.MinecraftClient.buildHttpException(MinecraftClient.java:170)
+	at knot//com.mojang.authlib.minecraft.client.MinecraftClient.readServiceResponse(MinecraftClient.java:147)
+	at knot//com.mojang.authlib.minecraft.client.MinecraftClient.post(MinecraftClient.java:89)
+	at knot//com.mojang.authlib.yggdrasil.YggdrasilUserApiService.getKeyPair(YggdrasilUserApiService.java:62)
+	at knot//net.minecraft.client.multiplayer.AccountProfileKeyPairManager.fetchProfileKeyPair(AccountProfileKeyPairManager.java:128)
+	at knot//net.minecraft.client.multiplayer.AccountProfileKeyPairManager.lambda$readOrFetchProfileKeyPair$0(AccountProfileKeyPairManager.java:77)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1789)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1090)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:614)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+[34m[22:07:54][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mResizing Dynamic Transforms UBO, capacity limit of 4 reached during a single frame. New capacity will be 8.
+[m[34m[22:07:54][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mResizing Chunk Sections UBO, capacity limit of 2 reached during a single frame. New capacity will be 4.
+[m[34m[22:07:54][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mResizing Chunk Sections UBO, capacity limit of 4 reached during a single frame. New capacity will be 8.
+[m[34m[22:07:54][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mУстановлено режим гри для Tester1 на Режим творчости
+[m[34m[22:07:54][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0m[System] [CHAT] Ваш ігровий режим змінено на Режим творчости
+[m[34m[22:07:54][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0m[System] [CHAT] [Server: Установлено режим гри для Tester1 на Режим творчости]
+[m[34m[22:07:54][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mВідмічено 9 чанків у minecraft:overworld з [-1, -1] по [1, 1] як примусово завантажувані
+[m[34m[22:07:54][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mResizing Chunk Sections UBO, capacity limit of 8 reached during a single frame. New capacity will be 16.
+[m[34m[22:07:54][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0m[System] [CHAT] [Server: Відмічено 9 чанків у minecraft:overworld з [-1, -1] по [1, 1] як примусово завантажувані]
+[m[34m[22:07:54][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mResizing Dynamic Transforms UBO, capacity limit of 8 reached during a single frame. New capacity will be 16.
+[m[34m[22:07:54][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mResizing Chunk Sections UBO, capacity limit of 16 reached during a single frame. New capacity will be 32.
+[m[34m[22:07:55][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mResizing Chunk Sections UBO, capacity limit of 32 reached during a single frame. New capacity will be 64.
+[m[34m[22:07:55][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mResizing Chunk Sections UBO, capacity limit of 64 reached during a single frame. New capacity will be 128.
+[m[34m[22:07:59][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mTester1: Fool · Посл. 5 (Marionettist)
+[m[34m[22:07:59][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mУстановлено режим гри для Tester1 на Режим виживання
+[m[34m[22:07:59][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mУстановлено сонячну погоду
+[m[34m[22:07:59][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mУстановлено minecraft:overworld на позначку часу minecraft:noon
+[m[34m[22:07:59][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0m[System] [CHAT] Ваш ігровий режим змінено на Режим виживання
+[m[34m[22:07:59][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0m[System] [CHAT] [Server: Установлено режим гри для Tester1 на Режим виживання]
+[m[34m[22:07:59][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0m[System] [CHAT] [Server: Установлено сонячну погоду]
+[m[34m[22:07:59][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0m[System] [CHAT] [Server: Установлено minecraft:overworld на позначку часу minecraft:noon]
+[m[34m[22:08:00][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mУспішно заповнено 289 блоків
+[m[34m[22:08:00][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0m[System] [CHAT] [Server: Успішно заповнено 289 блоків]
+[m[34m[22:08:00][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mТелепортовано Tester1 на 0.500000, 200.000000, 0.500000
+[m[34m[22:08:00][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mУстановлено 27 рівнів для гравця Tester1
+[m[34m[22:08:00][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0m[System] [CHAT] [Server: Телепортовано Tester1 на 0.500000, 200.000000, 0.500000]
+[m[34m[22:08:00][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0m[System] [CHAT] [Server: Установлено 27 рівнів для гравця Tester1]
+[m[34m[22:08:00][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mLoaded 32 advancements
+[m[34m[22:08:07][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_gs2_empty_offhand
+[m[34m[22:08:08][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_gs3_empty_offhand
+[m[34m[22:08:10][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_gs4_empty_offhand
+[m[34m[22:08:10][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_liquid_live_00
+[m[34m[22:08:10][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_liquid_live_01
+[m[34m[22:08:11][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_liquid_live_02
+[m[34m[22:08:11][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_liquid_live_03
+[m[34m[22:08:11][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_liquid_live_04
+[m[34m[22:08:12][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_liquid_live_05
+[m[34m[22:08:12][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_liquid_live_06
+[m[34m[22:08:12][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_liquid_live_07
+[m[34m[22:08:12][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_liquid_live_08
+[m[34m[22:08:13][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_liquid_live_09
+[m[34m[22:08:13][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_liquid_live_10
+[m[34m[22:08:13][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_liquid_live_11
+[m[34m[22:08:14][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_liquid_live_12
+[m[34m[22:08:14][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_liquid_live_13
+[m[34m[22:08:14][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_liquid_live_14
+[m[34m[22:08:15][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_liquid_live_15
+[m[34m[22:08:15][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_liquid_live_16
+[m[34m[22:08:15][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_liquid_live_17
+[m[34m[22:08:15][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_liquid_live_18
+[m[34m[22:08:16][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_liquid_live_19
+[m[34m[22:08:16][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_liquid_still_0
+[m[34m[22:08:17][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_liquid_still_1
+[m[34m[22:08:17][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mTester1: втрата глузду 37/100
+[m[34m[22:08:17][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mTester1: засвоєння 42,37%
+[m[34m[22:08:19][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_aux_37_42
+[m[34m[22:08:19][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mTester1: втрата глузду 0/100
+[m[34m[22:08:19][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mTester1: засвоєння 100,00%
+[m[34m[22:08:20][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_aux_0_100
+[m[34m[22:08:20][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mTester1: втрата глузду 0/100
+[m[34m[22:08:20][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mTester1: засвоєння 0,00%
+[m[34m[22:08:22][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_aux_0_0
+[m[34m[22:08:23][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_aux_passive
+[m[34m[22:08:23][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mTester1: Fool · Посл. 0 (Fool)
+[m[34m[22:08:26][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_caption_14000
+[m[34m[22:08:26][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mTester1: Fool · Посл. 5 (Marionettist)
+[m[34m[22:08:27][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mTester1: Mother · Посл. 5 (Druid)
+[m[34m[22:08:30][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_full_mother
+[m[34m[22:08:30][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mTester1: Justiciar · Посл. 5 (Paladin)
+[m[34m[22:08:33][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_full_justiciar
+[m[34m[22:08:33][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mTester1: WheelOfFortune · Посл. 5 (Victor)
+[m[34m[22:08:36][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_full_wheeloffortune
+[m[34m[22:08:36][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mTester1: WhiteTower · Посл. 5 (Mysticism Magister)
+[m[34m[22:08:38][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_full_whitetower
+[m[34m[22:08:39][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_all_orbs_full
+[m[34m[22:08:39][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_all_orbs_third
+[m[34m[22:08:39][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_all_orbs_low
+[m[34m[22:08:40][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_all_orbs_minimum
+[m[34m[22:08:40][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_all_orbs_empty
+[m[34m[22:08:40][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mTester1: Fool · Посл. 5 (Marionettist)
+[m[34m[22:08:42][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mЗамінено слот Tester1 на [Золоте яблуко]
+[m[34m[22:08:42][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mЗамінено слот Tester1 на [Залізний нагрудник]
+[m[34m[22:08:42][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0m[System] [CHAT] [Server: Замінено слот Tester1 на [Золоте яблуко]]
+[m[34m[22:08:42][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0m[System] [CHAT] [Server: Замінено слот Tester1 на [Залізний нагрудник]]
+[m[34m[22:08:42][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mLoaded 33 advancements
+[m[34m[22:08:43][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_low_spirit_armor
+[m[34m[22:08:45][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_low_health_hunger
+[m[34m[22:08:46][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_health40
+[m[34m[22:08:48][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_bars
+[m[34m[22:08:48][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mУспішно заповнено 125 блоків
+[m[34m[22:08:48][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0m[System] [CHAT] [Server: Успішно заповнено 125 блоків]
+[m[34m[22:08:48][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mLoaded 43 advancements
+[m[34m[22:08:50][m [32m[IO-Worker-5/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_underwater
+[m[34m[22:08:50][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mУспішно заповнено 125 блоків
+[m[34m[22:08:50][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0m[System] [CHAT] [Server: Успішно заповнено 125 блоків]
+[m[34m[22:08:51][m [32m[IO-Worker-5/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_left_hand
+[m[34m[22:08:53][m [32m[IO-Worker-5/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_narrow_requested4
+[m[34m[22:08:53][m [32m[IO-Worker-5/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_settings_narrow
+[m[34m[22:08:54][m [32m[IO-Worker-5/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_settings_scrolled
+[m[34m[22:08:55][m [32m[IO-Worker-5/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_editor
+[m[34m[22:08:56][m [32m[IO-Worker-5/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_editor_orb_moved
+[m[34m[22:08:56][m [32m[IO-Worker-5/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_orb_moved
+[m[34m[22:08:56][m [32m[Render thread/INFO][m [36m(mysteries_above/wheel-shots)[m [0mMod orb check passed: dragging, keyboard, reload, reopened editor, screen bounds and reset
+[m[34m[22:08:58][m [32m[IO-Worker-5/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_vanilla_style
+[m[34m[22:08:59][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_spirit_off
+[m[34m[22:08:59][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_legacy_bar
+[m[34m[22:09:00][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mНе вдалося здійснити заповнення блоками
+[m[34m[22:09:01][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_motion_empty
+[m[34m[22:09:02][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_motion_turn_right
+[m[34m[22:09:02][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_motion_turn_left
+[m[34m[22:09:04][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_motion_settled
+[m[34m[22:09:05][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_motion_gaining
+[m[34m[22:09:06][m [32m[IO-Worker-3/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_motion_spending
+[m[34m[22:09:08][m [32m[IO-Worker-5/INFO][m [36m(mysteries_above/wheel-shots)[m [0mshot hud04_motion_low
+[m[34m[22:09:08][m [32m[Render thread/INFO][m [36m(mysteries_above/wheel-shots)[m [0mBottom panel check passed: native sprites, empty offhand, both hands, resources, settings and persistence
+[m[34m[22:09:08][m [32m[Render thread/INFO][m [36m(Minecraft)[m [0mStopping!
+[m[34m[22:09:08][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mStopping server
+[m[34m[22:09:08][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mSaving players
+[m[34m[22:09:08][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mTester1 lost connection: Від’єднано
+[m[34m[22:09:08][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mTester1 покинув гру
+[m[34m[22:09:08][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mStopping singleplayer server as player logged out
+[m[34m[22:09:08][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mSaving worlds
+[m[34m[22:09:08][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mSaving chunks for level 'ServerLevel[New World]'/minecraft:overworld
+[m[34m[22:09:08][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mSaving chunks for level 'ServerLevel[New World]'/minecraft:the_end
+[m[34m[22:09:08][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mSaving chunks for level 'ServerLevel[New World]'/mysteries_above:spirit_world
+[m[34m[22:09:08][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mSaving chunks for level 'ServerLevel[New World]'/mysteries_above:underworld
+[m[34m[22:09:08][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mSaving chunks for level 'ServerLevel[New World]'/minecraft:the_nether
+[m[34m[22:09:08][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mThreadedAnvilChunkStorage (world): All chunks are saved
+[m[34m[22:09:08][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[m[34m[22:09:08][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mThreadedAnvilChunkStorage (spirit_world): All chunks are saved
+[m[34m[22:09:08][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mThreadedAnvilChunkStorage (underworld): All chunks are saved
+[m[34m[22:09:08][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[m[34m[22:09:08][m [32m[Server thread/INFO][m [36m(Minecraft)[m [0mThreadedAnvilChunkStorage: All dimensions are saved
+[m
+BUILD SUCCESSFUL in 1m 37s
+14 actionable tasks: 4 executed, 10 up-to-date

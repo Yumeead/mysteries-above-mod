@@ -2,7 +2,7 @@
 
 Source: [Official Pathway Symbols](https://lordofthemysteries.fandom.com/wiki/Category:Official_Pathway_Symbols), the wiki's Colorless Symbols series. The original artwork belongs to its respective rights holders; it was not created by this mod.
 
-Unmodified downloaded sources are in `official/`. `prepare_symbols.py` crops the central silhouette, preserves its internal details, converts the ink to a tintable white mask and produces centered 24, 48 and 64 pixel sprites. The resulting alpha is binary; the game does not resample these sizes. No AI redraws are used.
+Unmodified downloaded sources are in `official/`. `prepare_symbols.py` crops the central silhouette, preserves its internal details, converts the ink to a tintable white mask and produces centered 24, 48, 64, 96 and 128 pixel sprites. The resulting alpha is binary; the game does not resample these sizes. No AI redraws are used.
 
 Run `python art/grimoire/prepare_symbols.py` with Pillow installed to reproduce the sprites.
 

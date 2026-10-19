@@ -1,0 +1,362 @@
+[
+  {
+    "name": "inventory",
+    "guiScale": 2,
+    "file": "gold-inventory-gs2.png",
+    "nativeScreen": "net.minecraft.client.gui.screens.inventory.InventoryScreen 960x540",
+    "physicalSize": [
+      1920,
+      1080
+    ],
+    "source": "C:\\Users\\yuryp\\AppData\\Local\\Temp\\mysteries-gold-menu-review-6a_kcn5l\\screenshots\\gold-inventory-gs2.png",
+    "sha256": "d8d8eccdb6d8abc2f43c6d72b550acbe3f515dca9e695f3e535fa5a6e1425f13",
+    "edited": false,
+    "capturedUtc": "2026-10-19T13:49:49.861003+00:00"
+  },
+  {
+    "name": "chest",
+    "guiScale": 2,
+    "file": "gold-chest-gs2.png",
+    "nativeScreen": "net.minecraft.client.gui.screens.inventory.ContainerScreen 960x540",
+    "physicalSize": [
+      1920,
+      1080
+    ],
+    "source": "C:\\Users\\yuryp\\AppData\\Local\\Temp\\mysteries-gold-menu-review-6a_kcn5l\\screenshots\\gold-chest-gs2.png",
+    "sha256": "aa4d51ad29a1eac8ff6f380db94c2e85e32028079b2687fb3c1fbd88116bd4be",
+    "edited": false,
+    "capturedUtc": "2026-10-19T13:49:53.993116+00:00"
+  },
+  {
+    "name": "tooltip",
+    "guiScale": 2,
+    "file": "gold-tooltip-gs2.png",
+    "nativeScreen": "net.minecraft.client.gui.screens.inventory.InventoryScreen 960x540",
+    "physicalSize": [
+      1920,
+      1080
+    ],
+    "source": "C:\\Users\\yuryp\\AppData\\Local\\Temp\\mysteries-gold-menu-review-6a_kcn5l\\screenshots\\gold-tooltip-gs2.png",
+    "sha256": "64792c74b9ddd4e13328c1f066bbf841abb56bdd9a430714d70c2866ad174b56",
+    "edited": false,
+    "capturedUtc": "2026-10-19T13:50:06.351077+00:00"
+  },
+  {
+    "name": "pause",
+    "guiScale": 2,
+    "file": "gold-pause-gs2.png",
+    "nativeScreen": "net.minecraft.client.gui.screens.PauseScreen 960x540",
+    "physicalSize": [
+      1920,
+      1080
+    ],
+    "source": "C:\\Users\\yuryp\\AppData\\Local\\Temp\\mysteries-gold-menu-review-6a_kcn5l\\screenshots\\gold-pause-gs2.png",
+    "sha256": "d070956f66f24fb96ef7e09eee2de5944cce2a0c71fffe03d5f10ce82ff7912b",
+    "edited": false,
+    "capturedUtc": "2026-10-19T13:50:10.490473+00:00"
+  },
+  {
+    "name": "pause-focus",
+    "guiScale": 2,
+    "file": "gold-pause-focus-gs2.png",
+    "nativeScreen": "net.minecraft.client.gui.screens.PauseScreen 960x540",
+    "physicalSize": [
+      1920,
+      1080
+    ],
+    "source": "C:\\Users\\yuryp\\AppData\\Local\\Temp\\mysteries-gold-menu-review-6a_kcn5l\\screenshots\\gold-pause-focus-gs2.png",
+    "sha256": "067cafcb08c9855d4201621e7b507c1982452baa0a007c31a07fc32fd5437e9d",
+    "edited": false,
+    "capturedUtc": "2026-10-19T13:50:14.607876+00:00"
+  },
+  {
+    "name": "settings",
+    "guiScale": 2,
+    "file": "gold-settings-gs2.png",
+    "nativeScreen": "net.minecraft.client.gui.screens.options.SoundOptionsScreen 960x540",
+    "physicalSize": [
+      1920,
+      1080
+    ],
+    "source": "C:\\Users\\yuryp\\AppData\\Local\\Temp\\mysteries-gold-menu-review-6a_kcn5l\\screenshots\\gold-settings-gs2.png",
+    "sha256": "9794956930e4065ba741e43c5d13b9d815fee83cb317641550ca89b8f64f6715",
+    "edited": false,
+    "capturedUtc": "2026-10-19T13:50:18.728730+00:00"
+  },
+  {
+    "name": "inventory",
+    "guiScale": 3,
+    "file": "gold-inventory-gs3.png",
+    "nativeScreen": "net.minecraft.client.gui.screens.inventory.InventoryScreen 640x360",
+    "physicalSize": [
+      1920,
+      1080
+    ],
+    "source": "C:\\Users\\yuryp\\AppData\\Local\\Temp\\mysteries-gold-menu-review-6a_kcn5l\\screenshots\\gold-inventory-gs3.png",
+    "sha256": "946dc5dc4aca5073d02162cd47a17abbfc4aeac7f7b388c0cddfcc3566b446a3",
+    "edited": false,
+    "capturedUtc": "2026-10-19T13:50:26.977547+00:00"
+  },
+  {
+    "name": "chest",
+    "guiScale": 3,
+    "file": "gold-chest-gs3.png",
+    "nativeScreen": "net.minecraft.client.gui.screens.inventory.ContainerScreen 640x360",
+    "physicalSize": [
+      1920,
+      1080
+    ],
+    "source": "C:\\Users\\yuryp\\AppData\\Local\\Temp\\mysteries-gold-menu-review-6a_kcn5l\\screenshots\\gold-chest-gs3.png",
+    "sha256": "a2a981fb03828a50c344cea77e458aa42f02092eb13e1b9583dae3c464f7ce9f",
+    "edited": false,
+    "capturedUtc": "2026-10-19T13:50:31.094717+00:00"
+  },
+  {
+    "name": "tooltip",
+    "guiScale": 3,
+    "file": "gold-tooltip-gs3.png",
+    "nativeScreen": "net.minecraft.client.gui.screens.inventory.InventoryScreen 640x360",
+    "physicalSize": [
+      1920,
+      1080
+    ],
+    "source": "C:\\Users\\yuryp\\AppData\\Local\\Temp\\mysteries-gold-menu-review-6a_kcn5l\\screenshots\\gold-tooltip-gs3.png",
+    "sha256": "1533d51f336a11ae3d3fda0028c30a8095d19696cfc9bda7cbd89a7f775b409a",
+    "edited": false,
+    "capturedUtc": "2026-10-19T13:50:43.445284+00:00"
+  },
+  {
+    "name": "pause",
+    "guiScale": 3,
+    "file": "gold-pause-gs3.png",
+    "nativeScreen": "net.minecraft.client.gui.screens.PauseScreen 640x360",
+    "physicalSize": [
+      1920,
+      1080
+    ],
+    "source": "C:\\Users\\yuryp\\AppData\\Local\\Temp\\mysteries-gold-menu-review-6a_kcn5l\\screenshots\\gold-pause-gs3.png",
+    "sha256": "7172509a9499e42eae6d6b38ff7b03163326a65c49b261e14421ad5f61510a32",
+    "edited": false,
+    "capturedUtc": "2026-10-19T13:50:47.562596+00:00"
+  },
+  {
+    "name": "pause-focus",
+    "guiScale": 3,
+    "file": "gold-pause-focus-gs3.png",
+    "nativeScreen": "net.minecraft.client.gui.screens.PauseScreen 640x360",
+    "physicalSize": [
+      1920,
+      1080
+    ],
+    "source": "C:\\Users\\yuryp\\AppData\\Local\\Temp\\mysteries-gold-menu-review-6a_kcn5l\\screenshots\\gold-pause-focus-gs3.png",
+    "sha256": "8015f569f8c556a5adaa94ca34f7b95a666dbd59ebf885c34edfd897c4497a62",
+    "edited": false,
+    "capturedUtc": "2026-10-19T13:50:51.680984+00:00"
+  },
+  {
+    "name": "settings",
+    "guiScale": 3,
+    "file": "gold-settings-gs3.png",
+    "nativeScreen": "net.minecraft.client.gui.screens.options.SoundOptionsScreen 640x360",
+    "physicalSize": [
+      1920,
+      1080
+    ],
+    "source": "C:\\Users\\yuryp\\AppData\\Local\\Temp\\mysteries-gold-menu-review-6a_kcn5l\\screenshots\\gold-settings-gs3.png",
+    "sha256": "1208e28a3c47aec6bfe5837f9d46bf008979c3848cf994d7d881193839f7a5f5",
+    "edited": false,
+    "capturedUtc": "2026-10-19T13:50:55.814863+00:00"
+  },
+  {
+    "name": "settings-hover",
+    "guiScale": 2,
+    "file": "gold-settings-hover-gs2.png",
+    "nativeScreen": "net.minecraft.client.gui.screens.options.SoundOptionsScreen 960x540",
+    "physicalSize": [
+      1920,
+      1080
+    ],
+    "source": "C:\\Users\\yuryp\\AppData\\Local\\Temp\\mysteries-gold-menu-review-6a_kcn5l\\screenshots\\gold-settings-hover-gs2.png",
+    "sha256": "362f1ede5592cbb8062b01153ab1fd663e69e3132dc5e8eba82e945640661d6e",
+    "edited": false,
+    "capturedUtc": "2026-10-19T13:51:45.589957+00:00",
+    "nativeInput": "Native click/drag/release: 0.7200000286102295 -> 0.6192052960395813"
+  },
+  {
+    "name": "settings-hover",
+    "guiScale": 3,
+    "file": "gold-settings-hover-gs3.png",
+    "nativeScreen": "net.minecraft.client.gui.screens.options.SoundOptionsScreen 640x360",
+    "physicalSize": [
+      1920,
+      1080
+    ],
+    "source": "C:\\Users\\yuryp\\AppData\\Local\\Temp\\mysteries-gold-menu-review-6a_kcn5l\\screenshots\\gold-settings-hover-gs3.png",
+    "sha256": "c207323a8fd6b1bb255b62030e16a77eafc82ff7d21830a3999c7d9333d0c97f",
+    "edited": false,
+    "capturedUtc": "2026-10-19T13:51:53.926090+00:00",
+    "nativeInput": "Native click/drag/release: 0.7200000286102295 -> 0.6192052960395813"
+  },
+  {
+    "name": "crafting",
+    "guiScale": 2,
+    "file": "gold-crafting-gs2.png",
+    "nativeScreen": "net.minecraft.client.gui.screens.inventory.CraftingScreen 960x540",
+    "physicalSize": [
+      1920,
+      1080
+    ],
+    "source": "C:\\Users\\yuryp\\AppData\\Local\\Temp\\mysteries-gold-menu-review-erg3pbp7\\screenshots\\gold-crafting-gs2.png",
+    "sha256": "cca4f064937b545b15719a915455db11a3e716301b684994215a75c46e460ae2",
+    "edited": false,
+    "capturedUtc": "2026-10-19T13:58:18.356326+00:00",
+    "pagination": {
+      "origin": [
+        320,
+        187
+      ],
+      "label": [
+        381,
+        328,
+        25,
+        9
+      ],
+      "back": [
+        358,
+        324,
+        12,
+        17
+      ],
+      "forward": [
+        413,
+        324,
+        12,
+        17
+      ],
+      "current": 1,
+      "total": 29
+    }
+  },
+  {
+    "name": "crafting-page2",
+    "guiScale": 2,
+    "file": "gold-crafting-page2-gs2.png",
+    "nativeScreen": "net.minecraft.client.gui.screens.inventory.CraftingScreen 960x540",
+    "physicalSize": [
+      1920,
+      1080
+    ],
+    "source": "C:\\Users\\yuryp\\AppData\\Local\\Temp\\mysteries-gold-menu-review-erg3pbp7\\screenshots\\gold-crafting-page2-gs2.png",
+    "sha256": "a2a934e1620a50a9722bad5deb7fa4e58d60bdec14d4abcdb012725bdb3c782a",
+    "edited": false,
+    "capturedUtc": "2026-10-19T13:58:22.492146+00:00",
+    "nativeInput": "Native next-page button: page 2",
+    "pagination": {
+      "origin": [
+        320,
+        187
+      ],
+      "label": [
+        381,
+        328,
+        25,
+        9
+      ],
+      "back": [
+        358,
+        324,
+        12,
+        17
+      ],
+      "forward": [
+        413,
+        324,
+        12,
+        17
+      ],
+      "current": 2,
+      "total": 29
+    }
+  },
+  {
+    "name": "crafting",
+    "guiScale": 3,
+    "file": "gold-crafting-gs3.png",
+    "nativeScreen": "net.minecraft.client.gui.screens.inventory.CraftingScreen 640x360",
+    "physicalSize": [
+      1920,
+      1080
+    ],
+    "source": "C:\\Users\\yuryp\\AppData\\Local\\Temp\\mysteries-gold-menu-review-erg3pbp7\\screenshots\\gold-crafting-gs3.png",
+    "sha256": "fe03b49279310ca562eea2ff386c5df49de731f2c7b5e475dd8bad8687ce13ea",
+    "edited": false,
+    "capturedUtc": "2026-10-19T13:58:26.620266+00:00",
+    "pagination": {
+      "origin": [
+        160,
+        97
+      ],
+      "label": [
+        221,
+        238,
+        25,
+        9
+      ],
+      "back": [
+        198,
+        234,
+        12,
+        17
+      ],
+      "forward": [
+        253,
+        234,
+        12,
+        17
+      ],
+      "current": 1,
+      "total": 29
+    }
+  },
+  {
+    "name": "crafting-page2",
+    "guiScale": 3,
+    "file": "gold-crafting-page2-gs3.png",
+    "nativeScreen": "net.minecraft.client.gui.screens.inventory.CraftingScreen 640x360",
+    "physicalSize": [
+      1920,
+      1080
+    ],
+    "source": "C:\\Users\\yuryp\\AppData\\Local\\Temp\\mysteries-gold-menu-review-erg3pbp7\\screenshots\\gold-crafting-page2-gs3.png",
+    "sha256": "5c2ca36cc9a21dc4c0930847f2d9cef22ffad8067a0ffd6629ef61927ff310ba",
+    "edited": false,
+    "capturedUtc": "2026-10-19T13:58:30.746078+00:00",
+    "nativeInput": "Native next-page button: page 2",
+    "pagination": {
+      "origin": [
+        160,
+        97
+      ],
+      "label": [
+        221,
+        238,
+        25,
+        9
+      ],
+      "back": [
+        198,
+        234,
+        12,
+        17
+      ],
+      "forward": [
+        253,
+        234,
+        12,
+        17
+      ],
+      "current": 2,
+      "total": 29
+    }
+  }
+]

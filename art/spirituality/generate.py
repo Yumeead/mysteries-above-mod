@@ -1,4 +1,4 @@
-"""Extract approved v4 artwork; repair only three damaged dark pendants."""
+"""Extract approved v4 artwork with local pendant and liquid-base pixel repairs."""
 from pathlib import Path
 import argparse
 import colorsys
@@ -24,6 +24,12 @@ FLOWS = {
 STAMPS = {
     "SPIRAL": [[0, 0], [1, 0]], "STEP": [[0, 0], [1, 1]], "RISE": [[0, -1], [0, 0]],
     "DRIFT": [[0, 0]], "ORBIT": [[0, 0], [1, 0]], "FALL": [[0, 0], [0, 1]],
+}
+
+# Glass reflections and outlines at the base must continue the adjacent liquid instead.
+LIQUID_BASE_ROWS = {
+    "WheelOfFortune": 47, "Visionary": 49, "Death": 48,
+    "Darkness": 49, "Chained": 48, "BlackEmperor": 49,
 }
 
 
@@ -182,6 +188,16 @@ def export_liquids():
                     distance = min(abs(h - hue), 1 - abs(h - hue))
                     if mask.getpixel((x, y)) and a and ((saturation > .2 and value > .15 and distance < .2) or min(r, g, b) > 205):
                         liquid.putpixel((x, y), flat.getpixel((x, y)))
+            if design["id"] in LIQUID_BASE_ROWS:
+                first_row = LIQUID_BASE_ROWS[design["id"]]
+                columns = [x for x in range(SIZE[0]) if liquid.getpixel((x, first_row - 1))[3] == 255]
+                assert columns, (slug, name, "Missing adjacent liquid")
+                for y in range(first_row, 50):
+                    for x in range(SIZE[0]):
+                        if mask.getpixel((x, y)):
+                            source_x = min(columns, key=lambda column: abs(column - x))
+                            color = liquid.getpixel((source_x, first_row - 1))
+                            liquid.putpixel((x, y), color)
             assert liquid.getbbox(), (slug, name)
             save(liquid, slug, f"liquid_{name}")
             paintings.append({"level": level, "surface": liquid.getbbox()[1],
@@ -190,7 +206,7 @@ def export_liquids():
         descriptor = json.loads(path.read_text(encoding="utf-8"))
         descriptor["liquids"] = paintings
         path.write_text(json.dumps(descriptor, indent=2) + "\n", encoding="utf-8")
-    print(f"Copied original full-colour liquid artwork for 22 pathways; {compared} reference pixels verified exactly.")
+    print(f"Exported liquid artwork for 22 pathways, repairing the bases of six; {compared} reference pixels verified exactly before local repairs.")
 
 
 def main():

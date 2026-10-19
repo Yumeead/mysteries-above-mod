@@ -29,7 +29,7 @@ class BookArtTest {
 
     @Test
     fun everyPathwayHasTransparentCenteredArtAtEveryActualDisplaySize() {
-        for (pathway in PathwayBranding.names) for (size in listOf(24, 48, 64)) {
+        for (pathway in PathwayBranding.names) for (size in listOf(24, 48, 64, 96, 128)) {
             val name = "${pathway.lowercase()}_$size.png"
             val resource = javaClass.getResource("/assets/mysteries_above/textures/gui/sprites/grimoire/emblem/official/$name")
             assertNotNull(resource, name)

@@ -1,0 +1,60 @@
+{
+  "scope": "isolated visual review only",
+  "guiScalesChecked": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "widthsChecked": [
+    98,
+    150,
+    200,
+    204
+  ],
+  "nativeHandleMetadataUnchanged": true,
+  "trackBorder": 2,
+  "goldPaletteOnly": true,
+  "productionResourcesChanged": false,
+  "gameVerified": true,
+  "textures": [
+    {
+      "texture": "slider.png",
+      "size": [
+        200,
+        20
+      ],
+      "sha256": "6acae530ece83b43102ebab39395c8d927982a11e98dbb50a67b96a43f4932ee"
+    },
+    {
+      "texture": "slider_highlighted.png",
+      "size": [
+        200,
+        20
+      ],
+      "sha256": "f9586bb81d3766ea8670098a073fc4cf5d84456074c5aeca482b3fe3b642df50"
+    },
+    {
+      "texture": "slider_handle.png",
+      "size": [
+        8,
+        20
+      ],
+      "sha256": "1964668e426228e4aea39423cce02b89b46418292e4d76c61f5b7dba0d607bd7"
+    },
+    {
+      "texture": "slider_handle_highlighted.png",
+      "size": [
+        8,
+        20
+      ],
+      "sha256": "d62b6a44123f574ffb337703898004a559948c89391edbd991aec111be9c2e27"
+    }
+  ],
+  "gameGuiScalesChecked": [
+    2,
+    3
+  ],
+  "nativeClickDragReleaseChecked": true,
+  "captures": "in-game/captures.json"
+}

@@ -9,6 +9,24 @@ import org.junit.jupiter.api.Test
 import javax.imageio.ImageIO
 
 class FlaskAssetsTest {
+    @Test fun repairedBasesContinueTheirOwnLiquidInsteadOfTheOldGlassAndOutline() {
+        for ((pathway,firstRow) in mapOf("wheeloffortune" to 47,"visionary" to 49,"death" to 48,
+            "darkness" to 49,"chained" to 48,"blackemperor" to 49)) {
+            val root="/assets/mysteries_above/textures/gui/sprites/spirituality/"
+            val mask=ImageIO.read(javaClass.getResource(root+"common/mask.png"))
+            for (state in listOf("full","third","low","minimum")) {
+                val image=ImageIO.read(javaClass.getResource(root+"$pathway/liquid_$state.png"))
+                val material=(0 until image.width).map { image.getRGB(it,firstRow-1) }.filter { it ushr 24==255 }.toSet()
+                assertFalse(material.isEmpty())
+                for (y in firstRow..49) for (x in 0 until image.width) if (mask.getRGB(x,y) ushr 24>0) {
+                    val color=image.getRGB(x,y)
+                    assertEquals(255,color ushr 24,"$pathway $state has a hole at $x,$y")
+                    assertTrue(color in material,"$pathway $state has a foreign base pixel at $x,$y")
+                }
+            }
+        }
+    }
+
     @Test fun sharedGlassHasAnUnbrokenLightRimInsideTheDarkOutline() {
         val root = "/assets/mysteries_above/textures/gui/sprites/spirituality/common/"
         val frame = ImageIO.read(javaClass.getResource(root + "frame.png"))

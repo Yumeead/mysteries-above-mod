@@ -64,7 +64,7 @@ if __name__ == "__main__":
         bounds = symbol_bounds(alpha)
         cropped = alpha.crop(bounds)
         slug = name.replace(" ", "").lower()
-        for size in (24, 48, 64):
+        for size in (24, 48, 64, 96, 128):
             ratio = (size - 4) / max(cropped.size)
             dimensions = tuple(max(1, round(side * ratio)) for side in cropped.size)
             mask = cropped.resize(dimensions, Image.Resampling.BOX).point(lambda a: 255 if a >= 96 else 0)
@@ -85,7 +85,7 @@ if __name__ == "__main__":
         "Source: [Official Pathway Symbols](https://lordofthemysteries.fandom.com/wiki/Category:Official_Pathway_Symbols), "
         "the wiki's Colorless Symbols series. The original artwork belongs to its respective rights holders; it was not created by this mod.\n\n"
         "Unmodified downloaded sources are in `official/`. `prepare_symbols.py` crops the central silhouette, "
-        "preserves its internal details, converts the ink to a tintable white mask and produces centered 24, 48 and 64 pixel sprites. "
+        "preserves its internal details, converts the ink to a tintable white mask and produces centered 24, 48, 64, 96 and 128 pixel sprites. "
         "The resulting alpha is binary; the game does not resample these sizes. No AI redraws are used.\n\n"
         "Run `python art/grimoire/prepare_symbols.py` with Pillow installed to reproduce the sprites.\n\n"
         "| Pathway | Source page | Download | Crop in original pixels |\n| --- | --- | --- | --- |\n"
