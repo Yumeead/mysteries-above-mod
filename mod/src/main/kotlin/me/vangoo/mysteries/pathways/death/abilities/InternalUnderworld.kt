@@ -7,6 +7,7 @@ import me.vangoo.domain.valueobjects.Sequence
 import me.vangoo.mysteries.ability.AbilityOutcome
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
+import me.vangoo.mysteries.creature.Creatures
 import me.vangoo.mysteries.ability.grantAttribute
 import me.vangoo.mysteries.ability.modifierId
 import me.vangoo.mysteries.ability.revokeAttribute
@@ -72,7 +73,11 @@ import kotlin.math.sin
  * | a phantom | a step into the shadow behind the target |
  * | a zombie villager | passive: once every five minutes, cheats death — it came back once itself |
  *
- * Phase 12 adds the Spirit World's creatures to this table rather than replacing it.
+ * The Spirit World's own beings (phase 12) are read by **who** they are, not by the body the engine
+ * lent them: the Living Shadow steps through shadows though it flies on a vex's wings, the Death
+ * Knight looses a volley, the Envoy reaches with its illusory arms, the Lake Goddess and the Sea
+ * Beasts roll their waves, the Pus of Man cheats death, the Shadow-Swallowing Python drags hiding
+ * things into the light. Released, a being walks out as itself — [INNER_CREATURE] remembers which.
  *
  * ## Nothing here is lost on a restart
  *
@@ -101,7 +106,7 @@ class InternalUnderworld : ActiveAbility(AbilityIdentity.of("death_internal_unde
         val inside = occupantOf(caster)
         if (caster.isShiftKeyDown) return if (inside != null) release(context, caster, inside) else absorb(context, caster)
         inside ?: return AbilityOutcome.failed("Усередині нікого немає — поглиньте слугу (присід + застосування)")
-        val occupant = Occupant.of(inside)
+        val occupant = Occupant.of(inside, caster.getAttached(INNER_CREATURE))
         if (occupant.castCost <= 0) return AbilityOutcome.failed("${occupant.title} діє сам собою — кликати нема чого")
         // A target first: nobody pays to aim at empty air.
         if (occupant.aim > 0 && context.targeting.lookingAt(occupant.aim) == null) return AbilityOutcome.failed("Немає цілі — гляньте на когось")
@@ -118,37 +123,45 @@ class InternalUnderworld : ActiveAbility(AbilityIdentity.of("death_internal_unde
         val takeable = Spirits.isSpirit(target) || Retinue.isOwnedBy(caster.uuid, target)
         if (!takeable || !target.isDeadSoul()) return AbilityOutcome.failed("Ця істота не годиться: лише ваш мертвий слуга або дух")
         val type = target.type
+        val creature = Creatures.keyOf(target)?.identifier()
         if (Retinue.isServant(target)) Retinue.absorb(caster.uuid, target) else target.discard()
 
         caster.setAttached(OCCUPANT, BuiltInRegistries.ENTITY_TYPE.getKey(type))
+        caster.setAttached(INNER_CREATURE, creature)
         erode(caster)
         val level = context.level
         level.sendParticles(ParticleTypes.SQUID_INK, caster.x, caster.y + 1.0, caster.z, 20, 0.4, 0.8, 0.4, 0.02)
         level.sendParticles(ParticleTypes.SCULK_SOUL, target.x, target.y + 0.5, target.z, 14, 0.3, 0.5, 0.3, 0.05)
         level.playSound(null, caster.x, caster.y, caster.z, SoundEvents.SCULK_CATALYST_BLOOM, SoundSource.PLAYERS, 0.8f, 0.7f)
-        val occupant = Occupant.of(type)
+        val occupant = Occupant.of(type, creature)
         return AbilityOutcome.Awaiting(Component.literal("☠ ${occupant.title} оселився у вас: ${occupant.summary}"))
     }
 
     /** Out it walks — the same creature, back in the retinue if there is room for it. */
     private fun release(context: CastContext, caster: ServerPlayer, inside: EntityType<*>): AbilityOutcome {
+        val nature = Occupant.of(inside, caster.getAttached(INNER_CREATURE))
+        val creature = caster.removeAttached(INNER_CREATURE)
         caster.removeAttached(OCCUPANT)
         erode(caster)
         val level = context.level
-        val mob = inside.create(level, EntitySpawnReason.MOB_SUMMONED) as? Mob
+        val at = caster.position().add(context.look.x * 1.5, 0.0, context.look.z * 1.5)
+        // A being of the engine walks out as itself, not as the vanilla body it was lent.
+        val mob = creature?.let { Creatures.spawn(level, Creatures.creatureKey(it), at, EntitySpawnReason.MOB_SUMMONED) }
+            ?: (inside.create(level, EntitySpawnReason.MOB_SUMMONED) as? Mob)?.also {
+                it.snapTo(at.x, at.y, at.z, caster.yRot, 0f)
+                level.addFreshEntity(it)
+            }
         if (mob != null) {
-            val at = caster.position().add(context.look.x * 1.5, 0.0, context.look.z * 1.5)
-            mob.snapTo(at.x, at.y, at.z, caster.yRot, 0f)
-            level.addFreshEntity(mob)
-            // A spirit simply disperses; one of the dead comes back to heel, if there is room for it.
-            if (!Spirits.isSpirit(mob) && Retinue.room(caster, context.sequence) > 0) Retinue.enroll(caster, mob) else mob.discard()
+            // A plain spirit simply disperses; one of the dead or a Spirit World being comes back to heel, if there is room.
+            val disperses = Spirits.isSpirit(mob) && !Spirits.isSpiritWorldBeing(mob)
+            if (!disperses && Retinue.room(caster, context.sequence) > 0) Retinue.enroll(caster, mob) else mob.discard()
         }
         level.sendParticles(ParticleTypes.SCULK_SOUL, caster.x, caster.y + 1.0, caster.z, 16, 0.4, 0.6, 0.4, 0.03)
         level.playSound(null, caster.x, caster.y, caster.z, SoundEvents.ALLAY_DEATH, SoundSource.PLAYERS, 0.6f, 1.3f)
-        return AbilityOutcome.Awaiting(Component.literal("☠ ${Occupant.of(inside).title} покинув ваше тіло"))
+        return AbilityOutcome.Awaiting(Component.literal("☠ ${nature.title} покинув ваше тіло"))
     }
 
-    private fun LivingEntity.isDeadSoul(): Boolean = isUndead() || Spirits.isSpirit(this)
+    private fun LivingEntity.isDeadSoul(): Boolean = isUndead() || Spirits.isSpirit(this) || Spirits.isSpiritWorldBeing(this)
 
     // ── The occupants ───────────────────────────────────────────────────────────
 
@@ -173,6 +186,17 @@ class InternalUnderworld : ActiveAbility(AbilityIdentity.of("death_internal_unde
         }
 
         companion object {
+            /** A Spirit World being by its own name; anything else by its vanilla body. */
+            fun of(type: EntityType<*>, creature: Identifier?): Occupant = when (creature?.path) {
+                "living_shadow" -> PHANTOM
+                "death_knight" -> ARCHER
+                "death_envoy" -> WITHER_SKELETON
+                "lake_goddess", "sea_beasts" -> DROWNED
+                "pus_of_man" -> ZOMBIE_VILLAGER
+                "shadow_swallowing_python" -> SPIRIT
+                else -> of(type)
+            }
+
             fun of(type: EntityType<*>): Occupant = when {
                 type == EntityTypes.VEX -> SPIRIT
                 type == EntityTypes.DROWNED -> DROWNED
@@ -191,6 +215,11 @@ class InternalUnderworld : ActiveAbility(AbilityIdentity.of("death_internal_unde
             AttachmentRegistry.create(modId("inner_occupant")) { it.persistent(Identifier.CODEC) }
         }
 
+        /** The creature of the engine inside, if it was one — so that it walks back out as itself. */
+        private val INNER_CREATURE: AttachmentType<Identifier> by lazy {
+            AttachmentRegistry.create(modId("inner_creature")) { it.persistent(Identifier.CODEC) }
+        }
+
         private val EROSION: Identifier = modifierId("death_internal_underworld", "erosion")
 
         /** When a zombie villager inside may cheat death again — the mod's tick. */
@@ -207,7 +236,7 @@ class InternalUnderworld : ActiveAbility(AbilityIdentity.of("death_internal_unde
             if (inside == null) {
                 player.revokeAttribute(Attributes.MAX_HEALTH, EROSION)
             } else {
-                player.grantAttribute(Attributes.MAX_HEALTH, EROSION, -Occupant.of(inside).erosionHp)
+                player.grantAttribute(Attributes.MAX_HEALTH, EROSION, -Occupant.of(inside, player.getAttached(INNER_CREATURE)).erosionHp)
             }
             if (player.health > player.maxHealth) player.health = player.maxHealth
         }
@@ -220,6 +249,7 @@ class InternalUnderworld : ActiveAbility(AbilityIdentity.of("death_internal_unde
         fun install() {
             // Attachment types register lazily — at mod init, here, never in a unit test that has no Fabric mixins.
             OCCUPANT
+            INNER_CREATURE
             ServerPlayConnectionEvents.JOIN.register { handler, _, _ -> erode(handler.player) }
             // The occupant does not survive the body's death: the attachment stays with the corpse.
             ServerPlayerEvents.AFTER_RESPAWN.register { _, newPlayer, _ -> erode(newPlayer) }
@@ -228,7 +258,8 @@ class InternalUnderworld : ActiveAbility(AbilityIdentity.of("death_internal_unde
                 !(entity is ServerPlayer && occupantOf(entity) != null && source.`is`(DamageTypes.WITHER))
             }
             ServerLivingEntityEvents.ALLOW_DEATH.register { entity, _, _ ->
-                if (entity !is ServerPlayer || occupantOf(entity)?.let(Occupant::of) != Occupant.ZOMBIE_VILLAGER) return@register true
+                val inside = (entity as? ServerPlayer)?.let(::occupantOf) ?: return@register true
+                if (Occupant.of(inside, entity.getAttached(INNER_CREATURE)) != Occupant.ZOMBIE_VILLAGER) return@register true
                 val now = AbilityServices.scheduler.tick
                 if (now < (wardReadyAt[entity.uuid] ?: 0L)) return@register true
                 wardReadyAt[entity.uuid] = now + GatekeeperLore.PUS_OF_MAN_WARD_COOLDOWN_SECONDS * TICKS_PER_SECOND

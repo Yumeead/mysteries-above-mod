@@ -1,6 +1,11 @@
 package me.vangoo.mysteries.pathways.death
 
+import me.vangoo.mysteries.creature.CreatureRegistries
+import me.vangoo.mysteries.creature.CreatureSpec
+import me.vangoo.mysteries.creature.Creatures
+import me.vangoo.mysteries.modId
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents
+import net.minecraft.tags.TagKey
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EntityTypes
@@ -9,7 +14,18 @@ import net.minecraft.world.entity.monster.Vex
 import net.minecraft.world.phys.Vec3
 
 /**
- * What a spirit is in this mod, until phase 12 gives creatures a data-driven engine.
+ * What a spirit is in this mod.
+ *
+ * ## Two kinds of spirit
+ *
+ * | | what | how it is told |
+ * |---|---|---|
+ * | a spirit | any vex | [isSpirit] |
+ * | a being of the Spirit World | a creature of the engine in the datapack tag `#mysteries_above:spirit_world` — the Living Shadow, the Death Knight, the Lake Goddess… | [isSpiritWorldBeing] |
+ *
+ * The plugin told the second kind by a scoreboard tag the MythicMobs pack put on each creature,
+ * which had to match a literal in the code. Here it is a registry tag: a datapack adds a being of
+ * the Spirit World by naming it in the tag, and nothing in the code changes.
  *
  * ## A vex, because vanilla already has spirits
  *
@@ -35,6 +51,15 @@ object Spirits {
     const val EPHEMERAL: String = "mysteries_above.ephemeral"
 
     fun isSpirit(entity: Entity): Boolean = entity is Vex
+
+    val SPIRIT_WORLD: TagKey<CreatureSpec> = TagKey.create(CreatureRegistries.CREATURE, modId("spirit_world"))
+
+    fun isSpiritWorldBeing(entity: Entity): Boolean {
+        val key = Creatures.keyOf(entity) ?: return false
+        return entity.level().registryAccess().lookupOrThrow(CreatureRegistries.CREATURE).get(key)
+            .map { it.`is`(SPIRIT_WORLD) }
+            .orElse(false)
+    }
 
     /** A spirit called out of the Spirit World at [at], already bound. */
     fun summon(level: ServerLevel, at: Vec3): Vex {
