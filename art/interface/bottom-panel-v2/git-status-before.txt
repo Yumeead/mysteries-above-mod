@@ -1,0 +1,31 @@
+ M mod/src/client/kotlin/me/vangoo/mysteries/client/ClientOptions.kt
+ M mod/src/client/kotlin/me/vangoo/mysteries/client/dev/WheelShots.kt
+ M mod/src/client/kotlin/me/vangoo/mysteries/client/hud/AbilityHud.kt
+ M mod/src/client/kotlin/me/vangoo/mysteries/client/hud/MarionetteHud.kt
+ M mod/src/client/kotlin/me/vangoo/mysteries/client/hud/SpiritualityHud.kt
+ M mod/src/client/kotlin/me/vangoo/mysteries/client/input/ModKeys.kt
+ M mod/src/client/kotlin/me/vangoo/mysteries/client/screen/AbilityBookScreen.kt
+ M mod/src/client/resources/assets/mysteries_above/lang/en_us.json
+ M mod/src/client/resources/assets/mysteries_above/lang/uk_ua.json
+?? CODEX.MD
+?? art/
+?? core/src/main/kotlin/me/vangoo/domain/hud/
+?? core/src/test/kotlin/me/vangoo/domain/hud/
+?? mod/run-flask-review-20261018/
+?? mod/src/client/kotlin/me/vangoo/mysteries/client/dev/FlaskReviewScreen.kt
+?? mod/src/client/kotlin/me/vangoo/mysteries/client/hud/HudPlacement.kt
+?? mod/src/client/kotlin/me/vangoo/mysteries/client/render/BookAbilityIcons.kt
+?? mod/src/client/kotlin/me/vangoo/mysteries/client/render/BookGlyphs.kt
+?? mod/src/client/kotlin/me/vangoo/mysteries/client/render/FlaskStyles.kt
+?? mod/src/client/kotlin/me/vangoo/mysteries/client/render/GrimoireSkin.kt
+?? mod/src/client/kotlin/me/vangoo/mysteries/client/render/SpiritualityFlask.kt
+?? mod/src/client/kotlin/me/vangoo/mysteries/client/screen/GrimoireButton.kt
+?? mod/src/client/kotlin/me/vangoo/mysteries/client/screen/HudEditorScreen.kt
+?? mod/src/client/kotlin/me/vangoo/mysteries/client/screen/HudSettingsScreen.kt
+?? mod/src/client/resources/assets/mysteries_above/hud/
+?? mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/grimoire/emblem/official/
+?? mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/spirituality/
+?? mod/src/test/kotlin/me/vangoo/mysteries/client/hud/
+?? mod/src/test/kotlin/me/vangoo/mysteries/client/render/BookArtTest.kt
+?? mod/src/test/kotlin/me/vangoo/mysteries/client/render/BookGlyphsTest.kt
+?? mod/src/test/kotlin/me/vangoo/mysteries/client/render/FlaskAssetsTest.kt

@@ -1,0 +1,85 @@
+{
+  "status": "passed",
+  "scope": "design artifact only; not an in-game test",
+  "protectedSourceAndResourceFilesUnchanged": 883,
+  "sourceImagesUnchanged": true,
+  "pngFiles": {
+    "01-kit-overview-x2.png": [
+      1152,
+      876
+    ],
+    "01-kit-overview-x4.png": [
+      2304,
+      1752
+    ],
+    "02-nine-slice-x4.png": [
+      1200,
+      592
+    ],
+    "03-shared-surfaces-x3.png": [
+      1188,
+      498
+    ],
+    "04-all-pathway-accents-x2.png": [
+      1152,
+      408
+    ],
+    "05-cave-gui2.png": [
+      986,
+      280
+    ],
+    "05-cave-gui3.png": [
+      986,
+      296
+    ],
+    "05-provided-gui2.png": [
+      986,
+      328
+    ],
+    "05-provided-gui3.png": [
+      986,
+      328
+    ],
+    "05-sky-gui2.png": [
+      986,
+      280
+    ],
+    "05-sky-gui3.png": [
+      986,
+      296
+    ],
+    "05-snow-gui2.png": [
+      986,
+      280
+    ],
+    "05-snow-gui3.png": [
+      986,
+      296
+    ],
+    "06-low-spirituality-gui3.png": [
+      986,
+      296
+    ],
+    "draft-panel-16x16.png": [
+      16,
+      16
+    ]
+  },
+  "overviewIntegerNearestScaling": true,
+  "x2ToX4ExactMatch": true,
+  "opaqueItemPixelsUnchanged": true,
+  "panelCenterAlpha": 245,
+  "panelNineSliceBorder": 4,
+  "ukrainianGlyphs": "і ї є ґ І Ї Є Ґ",
+  "missingGlyphs": [],
+  "paths": 22,
+  "fallback": "#B99A61",
+  "textContrastAgainstPanelOnWhite": {
+    "text": 13.1,
+    "muted": 6.94,
+    "disabled": 4.78,
+    "gold": 5.99
+  },
+  "previewLayoutOnly": true,
+  "gameLaunch": false
+}

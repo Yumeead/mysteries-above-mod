@@ -1,0 +1,64 @@
+GENERATION 1
+
+Use case: stylized-concept. Asset type: precisely aligned pixel-art game sprite-sheet for a Minecraft spirituality HUD design review. Use the supplied reference image ONLY for execution quality, glass material, bright edges and rich liquid rendering. DO NOT copy its triangular, square, tubular or other vessel shapes.
+
+Make ONE transparent PNG sprite sheet, ideally 1600 x 1280 pixels, with EXACTLY 5 columns and 4 rows. Each of the 20 cells is 320 x 320. Absolutely no text, numbers, labels, borders, checkerboard or background artwork. All sprites aligned by cell center and baseline. Inside each cell, draw in a strictly coherent logical 64x64 pixel grid enlarged 5 times with crisp nearest-neighbor pixel edges. The actual flask should be 48 logical pixels tall (240 output pixels), with its soft pixel shadow/reflection just below, plenty of transparent margin. No anti-aliasing, no gradients with many colors, no vector circles or painted smooth edges. This is finely crafted pixel art like the reference, not a diagram.
+
+ALL 20 bottles share EXACTLY ONE ROUND SPHERICAL GLASS BULB silhouette, inner cavity and short neck. It is a sphere seen in three-quarter view slightly from above, NOT a narrow/tall potion vial. Round bulb about 34 pixels in diameter; the prominent neck/cork accounts for the rest of the 48-pixel height. Surface ellipse clearly shows the camera slightly above. No golden ring around the bulb. Golden accents restricted to a very small neck rim, string fastener, and optional foot.
+
+Rows:
+1: Fool pathway, variant A: pure sphere, short neck, no pedestal.
+2: Mother pathway, variant A: exact same sphere and neck proportions, no pedestal.
+3: Fool pathway, variant B: same sphere with a small understated old-gold stand immediately below.
+4: Mother pathway, variant B: same sphere and small stand.
+
+Columns in each row, precisely:
+1: EMPTY, 0%, no colored liquid at all.
+2: 10% height, a shallow saturated pool covering only the bottom tenth of the internal sphere height.
+3: 33% height, liquid level exactly one third of internal sphere height from bottom. It is NOT half-full.
+4: 100%, liquid fills whole sphere but NOT the neck; leave glass rim legible.
+5: 0.5%, the tiniest but VISIBLE ONE-LOGICAL-PIXEL pool along the bottom of the internal sphere. Visibly distinct from empty.
+
+Glass: very light translucent cool blue/gray glass with actual alpha transparency above liquid, never an opaque black cavity. Thin tidy dark outer contour (one logical pixel) and an inner bright cool offwhite edge 1–2 pixels wide, clearer on upper left, subtle rear wall curve and thickness at bottom. Long angular white highlight on upper-left rim, tiny white highlight on right, a little translucent pale haze. The bulb reads as hollow transparent glass on both dark and lighter backgrounds. Include three modest level tick marks near one side.
+
+Liquid: Fool is rich violet/lavender; Mother is saturated emerald/teal green. Exactly 4–6 discrete shades each, very dark colored bottom, bright vivid elliptical top surface with a sharp one-pixel bright curved rim. Surface is a shallow ellipse viewed from above, not a straight horizontal stripe or flat solid disk. Organic dark clusters/bubbles inside, one bright small liquid highlight against wall. Use irregular patches and subtle limited dithering, not uniform horizontal color bands. Bubbles must be within liquid only. True visible volume while staying crisp pixel art. No light purple haze outside an empty bottle that could be mistaken for liquid.
+
+Cork and neck: larger, clearly modeled cork with visible oval top and a side highlight. Fool cork is purplish with a light lavender band/wax, subtle beige string, and a tiny hanging purple tag with an abstract eye-like mark. Mother cork is jade green with pale rim/wax, beige string, a tiny green tag, and TWO LITTLE LEAVES tied around the neck. Keep all adornments inside the flask's 48-pixel footprint. Identical three-quarter camera/light from upper left for every row.
+
+Below each sprite: very restrained compact stepped pixel contact shadow and faint broken reflection tinted by the liquid (neutral for empty). Not a blur halo. No real 3D rendering. No decorative gold frame. Prioritize matching the reference's beautiful bright thick glass and richly dimensional liquid, while preserving our identical round bulb across all pathways and all fill states.
+
+========================================
+
+GENERATION 2
+
+Use case: precise-object-edit. Image 1 is the sprite sheet to correct; Image 2 is only the original pixel-art MATERIAL/QUALITY reference.
+Keep the exact 5-column by 4-row grid, all twenty bottle silhouettes, corks, tags, leaves, stands and different liquid levels from image 1. DO NOT change the round bulb design.
+
+CRITICAL CORRECTION: Remove ALL cyan, electric blue, magenta, white noisy blobs, rings, and speckling in the EMPTY glass above the liquid. These are unwanted artefacts, NOT decorations, NOT symbols, and NOT reflections. In every bottle, the cavity above the liquid should contain ONLY clean subtly tinted transparent glass showing a uniform charcoal background, with a delicate cool pale-blue-gray tint at edges, an understated back-wall arc, and the existing simple white upper-left reflection and small right reflection. No bright shapes, holes, symbols, painted circles, or textured nebula in the center. An empty bottle should read as mostly clear glass. The inner glass must NOT be black or opaque gray metal.
+
+For this correction, the WHOLE OUTPUT must be on a perfectly UNIFORM OPAQUE background #242329. NO transparency/alpha removal, NO checkerboard, NO textured background. The outside background and empty glass centers should have nearly the same charcoal value; just light sparse glass tint and edge highlights inside.
+
+Keep the fluid palette to 6 distinct opaque colors for violet and 6 for emerald/teal. Model volume with a bright shallow elliptical surface, deep colored lower region, irregular dark bubble clusters and a slim bright wall reflection. Remove fine noise and smooth painted shading: use deliberate flat clusters and clean square pixels, as in image 2. Bright white glass edge only 1–2 logical pixels, thin dark outside contour, gold only at neck and optional foot. Cork is visibly faceted with top ellipse, subtle rope and pale wax.
+Levels exactly by HEIGHT of round interior, not volume:
+column 1 ZERO liquid, no colored trace;
+column 2 10% height;
+column 3 33% height;
+column 4 100%, up to round bulb top, not neck;
+column 5 0.5% but minimum visible ONE logical pixel at internal bottom.
+Rows 1 Fool without base, row 2 Mother without base, row 3 Fool with small gold base, row 4 Mother with base.
+A short compact stepped contact shadow and faint broken colored reflection beneath each flask, no blur cloud.
+Do not add labels or any text. No new bottle shapes. The end result must be clean, high-quality readable 48-pixel-tall game sprites shown enlarged with NO anti-aliasing, not a digital painting.
+
+========================================
+
+GENERATION 3
+
+Use case: precise-object-edit. Correct this 20-bottle game sprite sheet. Keep EXACT same grid of 5 columns, 4 rows, same sphere, corks, tags, leaves, bright blue-white glass edge, optional small gold base, purple and emerald liquids, proportions, upper-left lighting and plain dark charcoal backdrop. No text.
+Make ONLY these corrections:
+1. Clear glass: eliminate the large dark central oval in EVERY empty/partly empty glass bulb. The whole center above the liquid should look like clear transparent glass, almost the SAME color as the charcoal BACKGROUND behind the bottle. No concentric gray porthole rings. Limit the pale blue-gray glass tint to THIN edge clusters and a faint narrow rear-wall arc. Remove the broad pale-gray patch on the upper-right shoulder; replace with a tiny 1-2 logical-pixel reflection on the right edge. Preserve the long bright white upper-left curved glass highlight, bottom glass thickness, thin dark outer contour and bright pale inner edge.
+2. The second column is too full. Lower the LIQUID SURFACE in all FOUR SECOND-COLUMN sprites by roughly HALF the present pool DEPTH. It must be a very shallow bottom pool, at 10% of bulb internal HEIGHT (roughly 3 logical pixels of liquid in a 30-pixel inner globe). Both back and front arcs of the surface must fit INSIDE those 3 pixels, not a large 6-pixel thick ellipse.
+3. Third column: the liquid should reach ONE THIRD of inner globe HEIGHT. Slightly LOWER the present surface so the level is 10 logical pixels above bottom in a 30-pixel globe. Show a thin ellipse at this height, not half-full.
+4. Column 1 remains absolutely EMPTY. Column 4 stays FULL up to top of SPHERE, not neck. Column 5 must contain a single VISIBLE thin saturated logical-pixel sliver at the very bottom: ONE pixel of colored liquid, not 2-3 pixels or a white-only highlight. Empty and near-empty must be distinguishable at 48px bottle height.
+5. Reflections underneath: make them much fainter and shorter, two or three narrow broken pixel rows maximum; current strong thick mirror puddles are distracting. Use a small restrained contact shadow.
+6. Keep exactly 4–6 discrete flat shades per liquid, rich saturation, irregular dark bubble clusters and bright wall glint. Deliberate crisp square pixel clusters, no smooth gradients, no antialias, no color noise. Treat these as native 48-pixel-high sprites presented enlarged.
+The layout stays: row1 Fool/no foot, row2 Mother/no foot, row3 Fool/small foot, row4 Mother/small foot; columns 0%,10%,33%,100%,0.5%. One shared ROUND glass globe in every single cell.

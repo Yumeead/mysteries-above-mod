@@ -1,0 +1,32 @@
+{
+  "pathway": "Hermit",
+  "frame": "mysteries_above:spirituality/common/frame",
+  "glass": "mysteries_above:spirituality/common/glass",
+  "mask": "mysteries_above:textures/gui/sprites/spirituality/common/mask.png",
+  "tones": "mysteries_above:textures/gui/sprites/spirituality/hermit/tones.png",
+  "neck": "mysteries_above:spirituality/hermit/neck",
+  "tag": "mysteries_above:spirituality/hermit/tag",
+  "engraving": "mysteries_above:spirituality/hermit/engraving",
+  "palette": [
+    "#2B046E",
+    "#3B0697",
+    "#420CA1",
+    "#5C11CE",
+    "#7124DB",
+    "#955EE9"
+  ],
+  "particle": [
+    [
+      0,
+      0
+    ],
+    [
+      1,
+      0
+    ]
+  ],
+  "particleCount": 3,
+  "flow": "ORBIT",
+  "periodTicks": 180,
+  "tagSwing": 0.04
+}

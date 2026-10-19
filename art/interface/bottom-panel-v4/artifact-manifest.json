@@ -1,0 +1,687 @@
+[
+  {
+    "file": "00-bars-x4.png",
+    "bytes": 105761,
+    "sha256": "8c2785f7990fa36a512b607620a2721101d7e177eba9dd32517a9ab60c575b89"
+  },
+  {
+    "file": "00-icons-x4.png",
+    "bytes": 108637,
+    "sha256": "722310edaf75a41e7f6693d3616e606f9fb7f9ee1be0a35a7d5e3235670e73f2"
+  },
+  {
+    "file": "01-gold-kit-x4.png",
+    "bytes": 58769,
+    "sha256": "5148cb34e68120865199b04febb1f1ccb157782f35d9fa3324e884344b99b9b1"
+  },
+  {
+    "file": "02-half-hearts-six-backgrounds.png",
+    "bytes": 240322,
+    "sha256": "17afc9d3506d1ca69c26f47087d287cbe61364378428a229344be33a5f2fa8f8"
+  },
+  {
+    "file": "03-health-rows-and-auto.png",
+    "bytes": 92336,
+    "sha256": "9a2d6f43d15c194e7a5bd87691dd370b4281b44110848cb7230f7293672ba58d"
+  },
+  {
+    "file": "04-auxiliary-visibility.png",
+    "bytes": 276025,
+    "sha256": "84d24033f178ac664c478dcfce383192bd2f5fd0e531f1ab3468b1c2fb294215"
+  },
+  {
+    "file": "05-number-modes.png",
+    "bytes": 223952,
+    "sha256": "05ab6da52da916245c9ba539924071d381fe2b748aed4ca20c40e87dcf957a0d"
+  },
+  {
+    "file": "06-vanilla-armor-air-x4.png",
+    "bytes": 107159,
+    "sha256": "eb9f876933674edd0d2efcd67027b23e3f435887a0ada226467131febd64ff8c"
+  },
+  {
+    "file": "07-empty-offhand-gs2.png",
+    "bytes": 1790999,
+    "sha256": "12517ea3a0e4ae02af004579ea5bc9b29346bf991481fa3f9e67678396294fa5"
+  },
+  {
+    "file": "07-empty-offhand-gs3.png",
+    "bytes": 1767658,
+    "sha256": "d5f6d17010a970ef4b4e744ae8034cf70e44b3ef96b5d10d57dfff08ad3de9b0"
+  },
+  {
+    "file": "07-empty-offhand-x4.png",
+    "bytes": 109235,
+    "sha256": "895e45f7079c9efcaba10f1a1d901abc9b1347f98ac71cae92f91fa9ebb40626"
+  },
+  {
+    "file": "08-empty-offhand-underwater-x4.png",
+    "bytes": 107792,
+    "sha256": "fbb7e191489f040baae7db042e8e4254f9365f82f7eddc9d1c4bf2de97024c64"
+  },
+  {
+    "file": "auxiliary-preview.json",
+    "bytes": 332,
+    "sha256": "2eb0b2a0616f85736e99149c2dde5f384280f5e7ac2d81ca7ca3748c36975068"
+  },
+  {
+    "file": "background-prompts.txt",
+    "bytes": 1433,
+    "sha256": "9b8844267ea9bf42987683dba5f7d7e9ccf04c610cbde4bc66ea7d281ee99913"
+  },
+  {
+    "file": "DECISIONS.md",
+    "bytes": 18698,
+    "sha256": "cac7f85674373ef0dfc9678b4650a6beed37d6fd0d1d87ab189be8fe1ffcfa8b"
+  },
+  {
+    "file": "implementation/build.log",
+    "bytes": 14747,
+    "sha256": "2fbfff3b8ccb6483512e71e43c9f6a115dbc875f96eae6a0c9745e32f259e34b"
+  },
+  {
+    "file": "implementation/client.log",
+    "bytes": 25518,
+    "sha256": "597164b69fb5c8b835a6bdf0492d897bc3eabf0432c41d1f8299921a80b70ce6"
+  },
+  {
+    "file": "implementation/export-assets.py",
+    "bytes": 3962,
+    "sha256": "d61cfb276d4866959f631f0d79da8e7b799c5fe2b6386ffb53350270585e758e"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_bars.png",
+    "bytes": 531357,
+    "sha256": "9267162a778ec70bda61daf1cbab15e3f1930b192dc0e96e04f4637f487e2db7"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_editor.png",
+    "bytes": 319261,
+    "sha256": "c970033805dd13bfe3f781a0b7ecf14141890262886c939928ff418d68839d8c"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_editor_orb_moved.png",
+    "bytes": 302848,
+    "sha256": "49f6097d623d93ad0c272f5d444234ea04e6b6e840c574e1a8d218331985faf2"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_full_justiciar.png",
+    "bytes": 579892,
+    "sha256": "488fe1e80b1f104aec1ef4fa3533f8cea8edcf9c17727cf772a19536cdaf9cc5"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_full_mother.png",
+    "bytes": 543874,
+    "sha256": "913da535281322b4da3da00863c6c3573ad1c049212c9566cff9080e995c1973"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_full_wheeloffortune.png",
+    "bytes": 528761,
+    "sha256": "ba020842e773c2b2c2f4711b3fb92f0a149486744dda4dd7a8433dfd23da44f1"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_full_whitetower.png",
+    "bytes": 586771,
+    "sha256": "d9f4a6c4f8a27011ecb4d26b7530cb6730fb13514cf9890a3fc8beec159ef59c"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_gs2_empty_offhand.png",
+    "bytes": 698822,
+    "sha256": "2032c8b2acc97218f2c4a63a4332d8fb5f5398950a80c14119faca8a20013b72"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_gs3_empty_offhand.png",
+    "bytes": 676529,
+    "sha256": "d85a1dfc1757ee3af55bff037d9097e49c53137cb108e8bc13402957c033e75f"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_gs4_empty_offhand.png",
+    "bytes": 638781,
+    "sha256": "1b0ed09cd04dc5c1adc8fda9b277234d5f513ee0e2adf55b21f689a9e6d5d120"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_health40.png",
+    "bytes": 534610,
+    "sha256": "4e53e869f6c7e09e24c90f6498f32bcac9f4d32af7547743ff581e094b49beb2"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_left_hand.png",
+    "bytes": 709371,
+    "sha256": "73988cf40bc9eba7b8279dc484def178991bdd039d70fb6d35f49e6fc723e95b"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_legacy_bar.png",
+    "bytes": 283861,
+    "sha256": "7303fa870a61dcd1badccebac4b673daf7b9629867d5d0314feb32b80ae0f049"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_low_health_hunger.png",
+    "bytes": 535346,
+    "sha256": "8d550bdd9e93d60dfb6ff81f577558f333bbbfdd861088ea93517fa9132cd928"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_low_spirit_armor.png",
+    "bytes": 533218,
+    "sha256": "deafc02e65a1f7bbc4d40acf707df24fa8c88577769671005cfccbc1245dec52"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_motion_empty.png",
+    "bytes": 289327,
+    "sha256": "9e8d498070c2c01f8746788517fa459a313434d3a8dc473be8cd2f1bce1aacf8"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_motion_gaining.png",
+    "bytes": 280832,
+    "sha256": "233312ec4dcc122899caebdf70cd689b5a76ed792c27909e571b02f1d4b274d1"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_motion_low.png",
+    "bytes": 276115,
+    "sha256": "e355bf15b18f1bd9037acbdf8c3af32e81717108c548218f3e1ab704af289ced"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_motion_settled.png",
+    "bytes": 280921,
+    "sha256": "5dd71471acbae8c0465ebe5a7d1f286978bbd9a8cfccd4e26d93d29bb1af6440"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_motion_spending.png",
+    "bytes": 277643,
+    "sha256": "f21c254adb48a50d5337a24d037c9ad48970281627793d981481708b34b4d937"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_motion_turn_left.png",
+    "bytes": 303908,
+    "sha256": "761bcf076b536f56727e73d70bcdea1edad97579c3a392cf84d41233204b2df6"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_motion_turn_right.png",
+    "bytes": 315659,
+    "sha256": "feba7f62e67866d1a79ad5a0dc82d94b91bef0b5ac382f1c72c27c9a180f78b0"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_narrow_requested4.png",
+    "bytes": 333470,
+    "sha256": "26822466220fe13f9a99cbb16d61e697e682662b7f2c56de1b7a8a4512532439"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_orb_moved.png",
+    "bytes": 306502,
+    "sha256": "dbf8d2542d36c328e739f439fdd5bbffd75f9a95c17576db803f7958a3145152"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_settings_narrow.png",
+    "bytes": 79014,
+    "sha256": "e47ff8debb1e1f4b545da4331f5452e66bb3878d9e02d222869657fb8f20a41e"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_settings_scrolled.png",
+    "bytes": 79692,
+    "sha256": "2b77b2a8d3afba0dd233b504e031ad8cf11830a2f9a961cf5f35b451be64d914"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_spirit_off.png",
+    "bytes": 296762,
+    "sha256": "236ebe96c032956f50fa09508da63470dce7fac2ba07b987f0904c36e6428516"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_underwater.png",
+    "bytes": 693443,
+    "sha256": "637e68e9e12b8d07348d6d7b3905a2594542b13aa194021caacd96f5f2650c24"
+  },
+  {
+    "file": "implementation/game-screenshots/hud04_vanilla_style.png",
+    "bytes": 306158,
+    "sha256": "58958d4746ec894fd00c0ec1f253a3748f21b00d095590579879fe7c3ff29117"
+  },
+  {
+    "file": "implementation/liquid-protected.json",
+    "bytes": 48394,
+    "sha256": "4abe309ff00faa0f3ae5f1863c3558c2e2265d08efd54ca4c71a1c21a719f539"
+  },
+  {
+    "file": "implementation/motion-revision.md",
+    "bytes": 5385,
+    "sha256": "0128ca4581e554a540e6ac5a2db26d5cd89468489875e002bfa26f39793563a7"
+  },
+  {
+    "file": "implementation/README.md",
+    "bytes": 10711,
+    "sha256": "64a5b8e96c3f8c840925db079fd0ef0c39059cfa0346a80d54dc36a8fc73d456"
+  },
+  {
+    "file": "implementation/verification-before-motion.json",
+    "bytes": 5771,
+    "sha256": "1cd00aa4c3408bc487a005ef3f5f6eb5541d38fe629821fdb1611bb35917421d"
+  },
+  {
+    "file": "implementation/verification.json",
+    "bytes": 8942,
+    "sha256": "ab3bfeacee9056c9c8b6a93d8e76eec2153691aaef83d9ab943d03ee406aeb1f"
+  },
+  {
+    "file": "interaction-verification.json",
+    "bytes": 316,
+    "sha256": "a3fb400d490d7b5d9e70f5a2163ad106d8e5aecb3418181e1df7a9d2f0b5b0c7"
+  },
+  {
+    "file": "layout-spec.json",
+    "bytes": 4865,
+    "sha256": "621adc7b7071041e5d9e2d370fe3a30baad2b166c6523a1a74d1c20ac02a7bb7"
+  },
+  {
+    "file": "narrow-left-bar-x3.png",
+    "bytes": 1490010,
+    "sha256": "e1796be4a8804179cf14507e838ea1f9aec8f5cb832b9e075f532617efaaf287"
+  },
+  {
+    "file": "narrow-left-bar-x4.png",
+    "bytes": 1341392,
+    "sha256": "7546d162fd4713a67c6ddd7223ba96c8c1eb6fcacb18f3839aeb89484886f4e5"
+  },
+  {
+    "file": "narrow-left-hearts-x3.png",
+    "bytes": 1502855,
+    "sha256": "b8f9de4ac963484d576cc80a952f25f3544097ca20a5fd0f339a4275ba63c52f"
+  },
+  {
+    "file": "narrow-left-hearts-x4.png",
+    "bytes": 1363521,
+    "sha256": "1a28995082e9f4169d3e3144130a0d3a1b3980c0344609021289c5b1eba18af4"
+  },
+  {
+    "file": "narrow-right-bar-x3.png",
+    "bytes": 1489858,
+    "sha256": "6c9a744ff2c728350b04f6a3b5342bed6a53899072384c54fd0b3c914e308632"
+  },
+  {
+    "file": "narrow-right-bar-x4.png",
+    "bytes": 1341678,
+    "sha256": "41f162ea927665e39220010cc8567970dce123dd037780ab9ebcf9edb1ea5f90"
+  },
+  {
+    "file": "narrow-right-hearts-x3.png",
+    "bytes": 1502714,
+    "sha256": "d2dcc539bd4d8a48de4e6064f8e50c3bd0b04d79f601b6fc98f9e901725ded14"
+  },
+  {
+    "file": "narrow-right-hearts-x4.png",
+    "bytes": 1363892,
+    "sha256": "614e27f0b143e753d059f86a63f85baf46421a443c809684f6ea88504b527e79"
+  },
+  {
+    "file": "panel-cave-full-bar-gs2.png",
+    "bytes": 1510346,
+    "sha256": "cab9a9b78c6d9ecc6ae4a38a8510c46b87a648953c9e6e1d098e5f1770857dd7"
+  },
+  {
+    "file": "panel-cave-full-bar-gs3.png",
+    "bytes": 1480379,
+    "sha256": "9585cacb9df60baf1823ac8d14c755f287224ef97a1b015475f983fcaaa5c1c2"
+  },
+  {
+    "file": "panel-cave-full-hearts-gs2.png",
+    "bytes": 1513617,
+    "sha256": "7e0ba7ba0e40bc2cdd05da7d97df752f0bba23bebdb2ad9ffeaee340331a6177"
+  },
+  {
+    "file": "panel-cave-full-hearts-gs3.png",
+    "bytes": 1486364,
+    "sha256": "7e36c5844b23a239aa518876a07c64afb0e48b0e3a0194ccdd7741863db380a6"
+  },
+  {
+    "file": "panel-desert-full-bar-gs2.png",
+    "bytes": 2900613,
+    "sha256": "2e839a29ebb09ee8e43786587d3a825be9b3a7a516e433654b414acc2e3144f9"
+  },
+  {
+    "file": "panel-desert-full-bar-gs3.png",
+    "bytes": 2856448,
+    "sha256": "7f775e6fec7f0ec68c0c2421e8591fb85f9be0b9e55a53964a2d4fe788d7165e"
+  },
+  {
+    "file": "panel-desert-full-hearts-gs2.png",
+    "bytes": 2905955,
+    "sha256": "ead79558cc69c69c3a1ee40ad7b2a6f8dad7511fb01e164d665e74b49dcdae15"
+  },
+  {
+    "file": "panel-desert-full-hearts-gs3.png",
+    "bytes": 2865913,
+    "sha256": "b94a046df334e0e086e9d26e15dfc27238aa9d49fdc4d0d5634f8c48bd238033"
+  },
+  {
+    "file": "panel-grass-full-bar-gs2.png",
+    "bytes": 1787237,
+    "sha256": "a423f0e519f388828f0994fbb487f9eadba77bd110cd516fd18578169f2d31e6"
+  },
+  {
+    "file": "panel-grass-full-bar-gs3.png",
+    "bytes": 1759866,
+    "sha256": "055ebc3059087bdbae376ca5b86b3520f6124c0b15ae1b976cafa7482643e9d9"
+  },
+  {
+    "file": "panel-grass-full-hearts-gs2.png",
+    "bytes": 1790439,
+    "sha256": "1e277a2b6e385495a309a91ae305f9df0fe08d374e7fdca51a3f9a5945ece76a"
+  },
+  {
+    "file": "panel-grass-full-hearts-gs3.png",
+    "bytes": 1765882,
+    "sha256": "5102c0951aa0fe8aeb4e1233df05a45a352fa0d057b2838415c73ef7ef4c2b31"
+  },
+  {
+    "file": "panel-nether-full-bar-gs2.png",
+    "bytes": 3544259,
+    "sha256": "6c2cbf8ac61a27f159ef2a90419a22cc6f6c96d0ac7917f269f7418aac7aa42e"
+  },
+  {
+    "file": "panel-nether-full-bar-gs3.png",
+    "bytes": 3495608,
+    "sha256": "140f208e7c17c837c24dd3e210ac43df743db658b560bc29aaeb4c93a1e871f2"
+  },
+  {
+    "file": "panel-nether-full-hearts-gs2.png",
+    "bytes": 3549436,
+    "sha256": "601f602ff755d17c2c29a80118a348197706040128cb0a0ae608e8ca8717890f"
+  },
+  {
+    "file": "panel-nether-full-hearts-gs3.png",
+    "bytes": 3505401,
+    "sha256": "38cab98379a2214c082dfe38854c05cd6976f0f1de17083189df1bb8136f18bb"
+  },
+  {
+    "file": "panel-sky-full-bar-gs2.png",
+    "bytes": 209563,
+    "sha256": "64604da8673c784524c22cdc90aef8f06142e9e69541283846ecd46b75982c4c"
+  },
+  {
+    "file": "panel-sky-full-bar-gs3.png",
+    "bytes": 207443,
+    "sha256": "7dd1022dee53f3ac8d5c88b2d41b7706bf4ca0745e0f827f255367e07705ace3"
+  },
+  {
+    "file": "panel-sky-full-hearts-gs2.png",
+    "bytes": 211202,
+    "sha256": "b6c3d312abe9815b99238f1220a48d473eb4a24815a7866eecd5c5589f4e1475"
+  },
+  {
+    "file": "panel-sky-full-hearts-gs3.png",
+    "bytes": 209711,
+    "sha256": "c76a8a96f067dfc988290ad0c732c7f899b0613669bcfc5688d26d0e8f4c0bf2"
+  },
+  {
+    "file": "panel-snow-full-bar-gs2.png",
+    "bytes": 129976,
+    "sha256": "f3186fbf19d880a8b014ce187109361025ef8a7f4a98f352dc59ba3b81be72e8"
+  },
+  {
+    "file": "panel-snow-full-bar-gs3.png",
+    "bytes": 130764,
+    "sha256": "10e6b293599cd7c79f21bfba9d826a9edd62ec584972068072b7fa63f00fd628"
+  },
+  {
+    "file": "panel-snow-full-hearts-gs2.png",
+    "bytes": 131446,
+    "sha256": "47018a22747c24a1cef14548fd831b3855eaa404027f50289b5912726463f0e3"
+  },
+  {
+    "file": "panel-snow-full-hearts-gs3.png",
+    "bytes": 133130,
+    "sha256": "9c2cfba14353b4036f7316ff2fe1b679e9da8350ced345fa29c017e574f44b5d"
+  },
+  {
+    "file": "protected-baseline.json",
+    "bytes": 243305,
+    "sha256": "aedf45b2b7b9e83009c2e3354d92d1f528b6016b0952a4e28c5726326d36b856"
+  },
+  {
+    "file": "provenance.json",
+    "bytes": 6503,
+    "sha256": "373516fe59ecd705beaa17303c4c776d75980752f69cedc1d009b2f458abba8a"
+  },
+  {
+    "file": "README.md",
+    "bytes": 12235,
+    "sha256": "fff5a14ee7a6ed4cfd8ab09cbb9095c433dbf12bd2ceb2ae39441485cc75bb39"
+  },
+  {
+    "file": "review-data.json",
+    "bytes": 11344006,
+    "sha256": "75dd82600089418ff92a874632c07db0132a32f6dcbe20c5382070e0b9932c98"
+  },
+  {
+    "file": "review.html",
+    "bytes": 11385934,
+    "sha256": "f19012cdb9d37cb39f2885049648db37841f3508170b62fbd0278c5ce421d63d"
+  },
+  {
+    "file": "screen-B-look-gs2.png",
+    "bytes": 329430,
+    "sha256": "43f5ac3e13ecd95c2d591987c400d757bf8e0b3e773ca27358ea8ca391ffbff3"
+  },
+  {
+    "file": "screen-B-look-gs3.png",
+    "bytes": 397199,
+    "sha256": "4a433fc847b1137149b784b2164e4c8889b6a1fe231b2b76e66386eb01acb484"
+  },
+  {
+    "file": "screen-B-numbers-gs2.png",
+    "bytes": 329498,
+    "sha256": "305779e57be4bf7818a4adc5efef0e29e24e5be37179ba0c651d121b5e27758d"
+  },
+  {
+    "file": "screen-B-numbers-gs3.png",
+    "bytes": 397360,
+    "sha256": "365c27593b20cb92ae3119e9916d281f223f58dac707707c2002d7e591e77240"
+  },
+  {
+    "file": "screen-B-symbols-gs2.png",
+    "bytes": 330414,
+    "sha256": "fdf85e633c08e1665f7c864106548735d8ef0b3239735b8ffd477b8c332b7590"
+  },
+  {
+    "file": "screen-B-symbols-gs3.png",
+    "bytes": 398363,
+    "sha256": "a3a8d186d6904f407d0d7ad529d5a6960eb67c3e85707db2f52b13aef95e82bf"
+  },
+  {
+    "file": "screen-editor-gs3.png",
+    "bytes": 744143,
+    "sha256": "1196f487c86d3cae6247a9b988e61ca14aba79e0cb0e2cc15e5c32246d234214"
+  },
+  {
+    "file": "sources/bg-desert-imagegen.png",
+    "bytes": 1770096,
+    "sha256": "1d0f6bac30dd4fd0e5a1fa78b9e4f07f841fb65069d62697230fd01bdc4ead2b"
+  },
+  {
+    "file": "sources/bg-nether-imagegen.png",
+    "bytes": 2288754,
+    "sha256": "3bd04979701505017e2198f24a10460a12512d7031a1dc9a19ab5ddecd44782e"
+  },
+  {
+    "file": "states-cave-bar-gs2.png",
+    "bytes": 1087254,
+    "sha256": "99b23c18ca92f6aa9c2148e4b5938b8751f2b3f2887d0f9542a568779710cc30"
+  },
+  {
+    "file": "states-cave-bar-gs3.png",
+    "bytes": 2381981,
+    "sha256": "ba8c935520f017494bb765f4028fd864d3f05cdc967156b51a4d6406e586da31"
+  },
+  {
+    "file": "states-cave-bar-x4.png",
+    "bytes": 4249212,
+    "sha256": "f7fb4e3b00134fcfcf255ea6a9ade1702a0a19ff2e09676e10d74c3838796fa4"
+  },
+  {
+    "file": "states-cave-hearts-gs2.png",
+    "bytes": 1124715,
+    "sha256": "5be63dcc36a04d7e504a8e933be19e09316bcc6141dbdfa2e444eddfa0fc0ed9"
+  },
+  {
+    "file": "states-cave-hearts-gs3.png",
+    "bytes": 2448576,
+    "sha256": "2fe66bd1ae057328e81f2edb886565ad9c896962b030e7d20f2970be9bb47d7c"
+  },
+  {
+    "file": "states-cave-hearts-x4.png",
+    "bytes": 4365061,
+    "sha256": "76bd9defe3dbaa434238e50609ba0124171e1244edb89604d160693f6a58a3e5"
+  },
+  {
+    "file": "states-desert-bar-gs2.png",
+    "bytes": 1494537,
+    "sha256": "2507a6e45b9a34352cab80d9da48bec2f9dd773274ff38eafe5dc8457492afed"
+  },
+  {
+    "file": "states-desert-bar-gs3.png",
+    "bytes": 3433905,
+    "sha256": "8d104faa64c350c5eef35d6c71847aed4d39248f279301dd71b7ab47b9e52fb2"
+  },
+  {
+    "file": "states-desert-bar-x4.png",
+    "bytes": 6299934,
+    "sha256": "69d43dff3132e79b41e5c9dfe95295162d6208aeea73f404e31c6845af98aeec"
+  },
+  {
+    "file": "states-desert-hearts-gs2.png",
+    "bytes": 1548185,
+    "sha256": "9c16912859e5b9566a8bb86354687cf594eb1c4bf01036c59bc852f57241c49b"
+  },
+  {
+    "file": "states-desert-hearts-gs3.png",
+    "bytes": 3540751,
+    "sha256": "07d41b8f86d4dcef58e9a30753f025074eb83cab3923bfc7a9f1f9939583460f"
+  },
+  {
+    "file": "states-desert-hearts-x4.png",
+    "bytes": 6490398,
+    "sha256": "f11cfbaf9d182591c0a537d295bfd81ec278aa2f94ed7fd24bb15eedf9bd6d8f"
+  },
+  {
+    "file": "states-grass-bar-gs2.png",
+    "bytes": 1023726,
+    "sha256": "a7ddb7a4ac3784c45a0815c3cb6b68332f4251ad18641de2bba40e73cd539370"
+  },
+  {
+    "file": "states-grass-bar-gs3.png",
+    "bytes": 2161633,
+    "sha256": "b1c559982d4293e6b72c0941ae3e4b244a8f99645d97552d7867980192560db4"
+  },
+  {
+    "file": "states-grass-bar-x4.png",
+    "bytes": 3751315,
+    "sha256": "a410341d6eb631d5a5ca294e32c4cba53ce522b1700ef3330e4e9aae78305e8b"
+  },
+  {
+    "file": "states-grass-hearts-gs2.png",
+    "bytes": 1058367,
+    "sha256": "3e69ab728dbd9639ad6e2e873f2a62e5a384d4770b0063961c44e41bc41103c5"
+  },
+  {
+    "file": "states-grass-hearts-gs3.png",
+    "bytes": 2228554,
+    "sha256": "40362fb1eb86efbe5244bc83b66493c0564659f0acc8388cdcb91aadccbd2046"
+  },
+  {
+    "file": "states-grass-hearts-x4.png",
+    "bytes": 3870835,
+    "sha256": "f070af96e61b83d5fd003349e6e00751e795cc2b053852342096d7d2fa9cd7c9"
+  },
+  {
+    "file": "states-nether-bar-gs2.png",
+    "bytes": 1540711,
+    "sha256": "1bcbe3390581ef2c97ee03b251e978ced60e0496da89c41c8bd602dc7e7ba08d"
+  },
+  {
+    "file": "states-nether-bar-gs3.png",
+    "bytes": 3574106,
+    "sha256": "ddc822357f7bf741fdf99f9f6a18fc2b3bca566b557307d1ed9c04a9b6a5b98f"
+  },
+  {
+    "file": "states-nether-bar-x4.png",
+    "bytes": 6446864,
+    "sha256": "f5682f72a943520f94f26c23c19330b2cf24ffca13e49f32fdc12ad29a4aafda"
+  },
+  {
+    "file": "states-nether-hearts-gs2.png",
+    "bytes": 1593277,
+    "sha256": "4d9f6111a3c54411e929d0fe38871cc2a3a028baaa2ab5f64d56997722f3600c"
+  },
+  {
+    "file": "states-nether-hearts-gs3.png",
+    "bytes": 3679881,
+    "sha256": "a4ba9b66e15f8d9d4e526146f45d5054fc8f8043d3d4c8cc437c782179864640"
+  },
+  {
+    "file": "states-nether-hearts-x4.png",
+    "bytes": 6629611,
+    "sha256": "29482a8658fb5fa9ce54ee0e78680a600d29b7685620763da6673dafb0cfa7b6"
+  },
+  {
+    "file": "states-sky-bar-gs2.png",
+    "bytes": 273977,
+    "sha256": "3cd2e8f3647372ca4d2ca2ba5296d5da2aab6704df1062b81eb9107f7e2b4914"
+  },
+  {
+    "file": "states-sky-bar-gs3.png",
+    "bytes": 492341,
+    "sha256": "fe182dc332357db4b1abda2be26e040ca924e45c508866d9393bd73bb5045c6d"
+  },
+  {
+    "file": "states-sky-bar-x4.png",
+    "bytes": 787102,
+    "sha256": "f7acbf21c5cd734e2ef973220b0ae46194c6f193e6ec18f47a17795185dc737e"
+  },
+  {
+    "file": "states-sky-hearts-gs2.png",
+    "bytes": 293711,
+    "sha256": "cf009af092237c15d448d03416f69da8d17bf0edf78ceb642ad1838128b6f423"
+  },
+  {
+    "file": "states-sky-hearts-gs3.png",
+    "bytes": 521479,
+    "sha256": "258f28c5efc856aad7796b82517edb87fd974d7ddeb5691c5a955dbd6eb684e7"
+  },
+  {
+    "file": "states-sky-hearts-x4.png",
+    "bytes": 826794,
+    "sha256": "4b2579dbfc2015a303eb0b4cab61efb3a780949225c0742eb1d928f6653a8a30"
+  },
+  {
+    "file": "states-snow-bar-gs2.png",
+    "bytes": 223427,
+    "sha256": "5868d1a302daf2bf267a1e16e07445791ec5155d4e9c7b6678defaa214ab294a"
+  },
+  {
+    "file": "states-snow-bar-gs3.png",
+    "bytes": 361345,
+    "sha256": "44164d106fe9019660fa5565904db6632cb345da35545f103dd6ceb6ca0cbe1c"
+  },
+  {
+    "file": "states-snow-bar-x4.png",
+    "bytes": 532836,
+    "sha256": "75096256813add17e2563bd4370ef070c54d69fc225d407e0c7f290c6399dc43"
+  },
+  {
+    "file": "states-snow-hearts-gs2.png",
+    "bytes": 242965,
+    "sha256": "ee13d49afba0cd9e4b9cac5258c6fd1b4c42b004d5de0a3d559ac16e0380608d"
+  },
+  {
+    "file": "states-snow-hearts-gs3.png",
+    "bytes": 391355,
+    "sha256": "d1835d9b61b5d825b068b6a342751c7afe8e6085f00f0d7eee6a923e030f3607"
+  },
+  {
+    "file": "states-snow-hearts-x4.png",
+    "bytes": 570594,
+    "sha256": "8aeba09a170d9df945cf75eddf1efcaa19e5483960e33cb49b0d1b66ab398393"
+  },
+  {
+    "file": "verification.json",
+    "bytes": 2686,
+    "sha256": "62dc221d2fe62920bb1073e45800cb6bd20eb6d676ba8359f7666ce745cab632"
+  }
+]

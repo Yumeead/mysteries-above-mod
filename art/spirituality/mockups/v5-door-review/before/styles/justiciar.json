@@ -1,0 +1,32 @@
+{
+  "pathway": "Justiciar",
+  "frame": "mysteries_above:spirituality/common/frame",
+  "glass": "mysteries_above:spirituality/common/glass",
+  "mask": "mysteries_above:textures/gui/sprites/spirituality/common/mask.png",
+  "tones": "mysteries_above:textures/gui/sprites/spirituality/justiciar/tones.png",
+  "neck": "mysteries_above:spirituality/justiciar/neck",
+  "tag": "mysteries_above:spirituality/justiciar/tag",
+  "engraving": "mysteries_above:spirituality/justiciar/engraving",
+  "palette": [
+    "#744008",
+    "#935106",
+    "#A86009",
+    "#CE7C0B",
+    "#F3A20E",
+    "#FACE4B"
+  ],
+  "particle": [
+    [
+      0,
+      -1
+    ],
+    [
+      0,
+      0
+    ]
+  ],
+  "particleCount": 3,
+  "flow": "RISE",
+  "periodTicks": 120,
+  "tagSwing": 0.025
+}

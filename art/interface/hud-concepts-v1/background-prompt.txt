@@ -1,0 +1,7 @@
+Mode: imagegen built-in, edit. The only generated image is a background plate; UI is a separate integer-grid Canvas design artifact.
+Input: user-original.png (original source screenshot remains unchanged).
+Output copied into project: sources/user-background-clean-imagegen.png.
+
+Edit target: attached Minecraft screenshot crop. Prepare ONLY a clean background plate for later pixel-exact UI design overlays. Remove ALL user interface in the lower part: both rows of hearts, hunger icons, level 7, XP bar, nine-slot hotbar and selected frame, and the blue flask on the right. Reconstruct only the small Minecraft grass and dirt-path ground areas exposed by their removal, following the existing block pixel texture scale, perspective, lighting and green/brown colors. Preserve the top half of the scene and the diagonal dirt/grass boundary. Preserve original framing and landscape aspect ratio, preferably exactly 986 by 328 pixels. This is a screenshot retouch, not an illustration. Do not add any interface, text, lettering, icons, vial, shadows of removed objects, new objects, watermark, blur, smooth painterly textures, or changed camera view. Maintain crisp blocky nearest-neighbor Minecraft textures.
+
+Actual generator output: 2176×723. Displayed with nearest sampling at 986×328 as an illustrative background; not used to infer Minecraft GUI geometry. Only backgrounds use this conversion; every new HUD component uses a whole GUI multiplier.

@@ -1,0 +1,237 @@
+[
+  {
+    "file": "00-panel-x4.png",
+    "bytes": 31527,
+    "sha256": "19c5d2b8a1f93e7bab2e20bb9c51013b0d51d9138eac68b9710b27fba8a99738"
+  },
+  {
+    "file": "01-kit-stone-x4.png",
+    "bytes": 71767,
+    "sha256": "1a7f6037b16d5429f5cd902d473318d57e0acf817ab0ce8fb86907e5dd2a5cdf"
+  },
+  {
+    "file": "02-hearts-comparison.png",
+    "bytes": 118229,
+    "sha256": "798a1d46511a283606d275a8615f17efb8432c347c8629f30e4e3e0c7f5012a4"
+  },
+  {
+    "file": "02b-hunger-options-x4.png",
+    "bytes": 24133,
+    "sha256": "c848d7071a26a61e3ad3afaff60e5ba27c506e1d513050f76a966cf8a41567e8"
+  },
+  {
+    "file": "03-orbs-pathways-x4.png",
+    "bytes": 115256,
+    "sha256": "9ccd8f7d8cda763fe79100b3427c3dc052971ac24b9fd0ef456f2609dbada30f"
+  },
+  {
+    "file": "04-health-over-20-x4.png",
+    "bytes": 44139,
+    "sha256": "35e743782901d4ce0f9b315dc10a05f4a79ea5f5a50775af298eca83e5567198"
+  },
+  {
+    "file": "05-narrow-1280x720-gs3-forced4.png",
+    "bytes": 163219,
+    "sha256": "79a50661782982d9d94b2be1c6e2869f4a61c00e8ba1942bf59eb472a2be7952"
+  },
+  {
+    "file": "AUDIT.md",
+    "bytes": 27613,
+    "sha256": "25023f1fa24b70246c2e31dda60e764a99f3244123de4aafd191a46266ad20b6"
+  },
+  {
+    "file": "auxiliary-preview.json",
+    "bytes": 437,
+    "sha256": "f8114b79950891cf220018034e37c2a1cf47d6bfe7edb64fc7cf4547c6f036d4"
+  },
+  {
+    "file": "git-status-before.txt",
+    "bytes": 2100,
+    "sha256": "e829176456721e4bbebbc1de8f3d7fe94e57a31e8318dabae6fca366c5decd00"
+  },
+  {
+    "file": "layout-spec.json",
+    "bytes": 2268,
+    "sha256": "b35990fb44acfedad616aecd651b850be8203ede45c0e90bdb6accfe27479d24"
+  },
+  {
+    "file": "narrow-1280x720-left-x3.png",
+    "bytes": 84741,
+    "sha256": "1f4c8e493e400c77d709deef93f87f70cacd89b7809cbc66bbf5ef4f72d8551b"
+  },
+  {
+    "file": "narrow-1280x720-left-x4.png",
+    "bytes": 78020,
+    "sha256": "ec0a9d9e89073692237d69511869e09e0cea25055ff8ec9cae18e66e590305a6"
+  },
+  {
+    "file": "narrow-1280x720-right-x3.png",
+    "bytes": 84765,
+    "sha256": "d404a57a9741c89e2f9726bd3718e54fb65c385ad72cca05bf5d6a94f5694a0a"
+  },
+  {
+    "file": "narrow-1280x720-right-x4.png",
+    "bytes": 78153,
+    "sha256": "b90b232394b20e4aa90cab14e361b1542fb8f97e8e44ed08c622fa4ae692a654"
+  },
+  {
+    "file": "panel-cave-gs2.png",
+    "bytes": 1454219,
+    "sha256": "b1524e466c8d51678837611f047adc6cd2f884cae5e8dcd64d9e8ec4f7133fec"
+  },
+  {
+    "file": "panel-cave-gs3.png",
+    "bytes": 1349296,
+    "sha256": "a0d8109e477f5ed85a57213ed405f9ee9c184d5636a64a480851c815e649d760"
+  },
+  {
+    "file": "panel-no-orb-bar-gs3.png",
+    "bytes": 192499,
+    "sha256": "25e5ba0460fd0b85e037fb08565a7eb854f534306b2bdf8bdf9898b8ce38d93a"
+  },
+  {
+    "file": "panel-no-orb-off-gs3.png",
+    "bytes": 194764,
+    "sha256": "9b1a61111ef3d2430bbdcc058849f925d5c91fb00d0b5a48048c81bb946e0b99"
+  },
+  {
+    "file": "panel-provided-gs2.png",
+    "bytes": 368752,
+    "sha256": "b66eb3791f302e1c0fe93675f0221542bf54316a5396a4e7521979db4c00c46d"
+  },
+  {
+    "file": "panel-provided-gs3.png",
+    "bytes": 269559,
+    "sha256": "2664b4c75620f675d01d05b57be13cd8c9df72e6176b14fc9cbf0d37a86cba1f"
+  },
+  {
+    "file": "panel-sky-gs2.png",
+    "bytes": 206180,
+    "sha256": "6b8cd5e7f537c49354a7060fe08168fcbb1d2f40c981f0b469d024015c090197"
+  },
+  {
+    "file": "panel-sky-gs3.png",
+    "bytes": 196081,
+    "sha256": "1b39115287529a2e144344b9e9ec54414f56cbf31c0b8b7c71e6d3508232ca3d"
+  },
+  {
+    "file": "panel-snow-gs2.png",
+    "bytes": 129795,
+    "sha256": "cf71842aaa1a568f9e3d2db6044e5ae3e694d6cae605de92bde45028dc140779"
+  },
+  {
+    "file": "panel-snow-gs3.png",
+    "bytes": 127958,
+    "sha256": "7ed8d9165ac6d251cef49f1a16b6cdc1be83db7f7e5a24325f41d34cca0704de"
+  },
+  {
+    "file": "protected-baseline.json",
+    "bytes": 221361,
+    "sha256": "d91025737825d161546c06ff99f044c290977d6ca6e6fe0f0a71e33d4eafae88"
+  },
+  {
+    "file": "provenance.json",
+    "bytes": 6199,
+    "sha256": "92a57e639555a1a3684682a855c1bce50f24ba87cbaf9c5712aa4e34927bfac6"
+  },
+  {
+    "file": "README.md",
+    "bytes": 9913,
+    "sha256": "b7d9bbe094da45c3933c798c776d7f72d6bbea44a0e31ceac3b10efc19d66cc1"
+  },
+  {
+    "file": "review-data.json",
+    "bytes": 4172218,
+    "sha256": "fb20a04111e84f7cc58dd61e3204131fda6e9249b381f5a9c70cb04b3652ea2e"
+  },
+  {
+    "file": "review.html",
+    "bytes": 4205523,
+    "sha256": "38f0966957336fd50efa3a5ac0eebc12b09f44b96f1ddb2348f344d849d73a64"
+  },
+  {
+    "file": "screen-B-gs2.png",
+    "bytes": 227627,
+    "sha256": "f3859c6e7248d5580fd6017751bc5e76dc6f2330c3e737dbecec30828a82d40a"
+  },
+  {
+    "file": "screen-B-gs3.png",
+    "bytes": 281885,
+    "sha256": "1e2f6ef81a335926fdaeb2c0f3f830dfac0c2c22270429fa5640bd6b04907cf4"
+  },
+  {
+    "file": "screen-editor-gs2.png",
+    "bytes": 402236,
+    "sha256": "f3ed2afa7805ff44860e53e40df3a8a0454f26cc2a2f19b3231bdcde40dde1ae"
+  },
+  {
+    "file": "screen-editor-gs3.png",
+    "bytes": 481022,
+    "sha256": "0bc90d137dafeeda2c755d321225f9a2178e944a61ac9f5659afa6a8fd86f16d"
+  },
+  {
+    "file": "states-cave-gs2.png",
+    "bytes": 653721,
+    "sha256": "63a23ff16e3f80ac0b469b5623166fef39c2be766f7863eee4163809c952e5b3"
+  },
+  {
+    "file": "states-cave-gs3.png",
+    "bytes": 824523,
+    "sha256": "49edd1ea2f80f8dd72c28ef1c6a83d65df9b99f0e98e58da45f656601d964812"
+  },
+  {
+    "file": "states-cave-x4.png",
+    "bytes": 965751,
+    "sha256": "f1a1860b88c2bc66e26429a05990af7b22814267ca73b5c05cd89fa47540647b"
+  },
+  {
+    "file": "states-provided-gs2.png",
+    "bytes": 677208,
+    "sha256": "9af2a96527eb187534b36c33a2d1595c826e2b851f10d777e5e53cd6f4665047"
+  },
+  {
+    "file": "states-provided-gs3.png",
+    "bytes": 892403,
+    "sha256": "04914704894f6fcc27f343a51c5e4ed11f6c270afcb426feb6895a6e1458fbd7"
+  },
+  {
+    "file": "states-provided-x4.png",
+    "bytes": 1048858,
+    "sha256": "fb014c3b17c067c7b2773026e87ebec85bf115198a6529663d4a6dbc82884498"
+  },
+  {
+    "file": "states-sky-gs2.png",
+    "bytes": 261230,
+    "sha256": "a44833fb264fed8d41ad1a6435b3ecb3b31eeaae52c4e070d9996e31e6287aaa"
+  },
+  {
+    "file": "states-sky-gs3.png",
+    "bytes": 351602,
+    "sha256": "6d12f1ec72264f2148e4ac27eae24546072b4060d9749352be370244387b3b35"
+  },
+  {
+    "file": "states-sky-x4.png",
+    "bytes": 459812,
+    "sha256": "f799ea5d7b7d96ae81284554d99f3115acd3d284c271354848cc36f5ef18fed0"
+  },
+  {
+    "file": "states-snow-gs2.png",
+    "bytes": 352814,
+    "sha256": "c24712dfdc7e2b87e96b7538ae5fa016104b5a14e968cd9aaf188ad6f0c442b5"
+  },
+  {
+    "file": "states-snow-gs3.png",
+    "bytes": 474124,
+    "sha256": "31200147cc87c718a6ea8218e7ac52e765e296bc0dad63a3ca326b3bacfd5bcf"
+  },
+  {
+    "file": "states-snow-x4.png",
+    "bytes": 582648,
+    "sha256": "a839225cb5f29309c45cc0b86225901e24c63517a426b423ffd130f551bb1f42"
+  },
+  {
+    "file": "window-bytecode.txt",
+    "bytes": 64815,
+    "sha256": "fb6134189f47782890e2138edfe2fdc142cd51344ebf9ac24b818899ed333820"
+  }
+]

@@ -1,0 +1,28 @@
+{
+  "pathway": "Mother",
+  "frame": "mysteries_above:spirituality/common/frame",
+  "glass": "mysteries_above:spirituality/common/glass",
+  "mask": "mysteries_above:textures/gui/sprites/spirituality/common/mask.png",
+  "tones": "mysteries_above:textures/gui/sprites/spirituality/mother/tones.png",
+  "neck": "mysteries_above:spirituality/mother/neck",
+  "tag": "mysteries_above:spirituality/mother/tag",
+  "engraving": "mysteries_above:spirituality/mother/engraving",
+  "palette": [
+    "#024D37",
+    "#026443",
+    "#04784C",
+    "#0D9D64",
+    "#01CD72",
+    "#16CA7D"
+  ],
+  "particle": [
+    [
+      0,
+      0
+    ]
+  ],
+  "particleCount": 3,
+  "flow": "DRIFT",
+  "periodTicks": 120,
+  "tagSwing": 0.04
+}

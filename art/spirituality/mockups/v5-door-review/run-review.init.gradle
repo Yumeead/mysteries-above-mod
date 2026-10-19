@@ -1,0 +1,9 @@
+gradle.beforeProject { p ->
+    if (p.path == ':mod') {
+        p.afterEvaluate {
+            p.loom.runs.named('client') {
+                runDir('run/flask-v5-review')
+            }
+        }
+    }
+}

@@ -1,0 +1,30 @@
+{
+  "missingGlyphs": [],
+  "canvasSizes": {
+    "overview": [
+      1152,
+      876
+    ],
+    "context": [
+      986,
+      328
+    ],
+    "geometry": [
+      1200,
+      592
+    ],
+    "surfaces": [
+      1188,
+      498
+    ],
+    "accents": [
+      1152,
+      408
+    ],
+    "large": [
+      2304,
+      1752
+    ]
+  },
+  "ready": true
+}

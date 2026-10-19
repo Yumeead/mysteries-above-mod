@@ -1,0 +1,124 @@
+{
+  "status": "design-only-awaiting-approval",
+  "units": "integer GUI pixels; C=floor(width/2), H=height",
+  "body": {
+    "wingHeight": 85,
+    "centerHeight": 55,
+    "outerOutline": 1,
+    "slopeDegrees": 45,
+    "mirroredShape": true,
+    "mirroredMaterial": true
+  },
+  "full": {
+    "minimumGuiWidth": 432,
+    "width": 416,
+    "extentFromCenter": 208,
+    "shoulderFromCenter": 147,
+    "innerFromCenter": 117,
+    "orbXFromCenter": -175,
+    "orbYFromBottom": -47,
+    "numberXFromCenter": -190,
+    "numberYFromBottom": -73,
+    "auxIconXFromCenter": 148,
+    "auxTubeXFromCenter": 160,
+    "auxTubeWidth": 40,
+    "auxTubeYFromBottom": [
+      -74,
+      -47,
+      -20
+    ]
+  },
+  "compact": {
+    "minimumGuiWidth": 320,
+    "width": 312,
+    "extentFromCenter": 156,
+    "shoulderFromCenter": 96,
+    "innerFromCenter": 66,
+    "orbXFromCenter": -143,
+    "orbYFromBottom": -63,
+    "numberXFromCenter": -148,
+    "numberYFromBottom": -79,
+    "auxIconXFromCenter": 103,
+    "auxTubeXFromCenter": 116,
+    "auxTubeWidth": 34,
+    "auxTubeYFromBottom": [
+      -74,
+      -54,
+      -34
+    ],
+    "tagVisible": true,
+    "liquidScale": 1
+  },
+  "approvedOrb": {
+    "mask": [
+      16,
+      20,
+      30,
+      30
+    ],
+    "bottom": 49,
+    "rims": [
+      40,
+      44
+    ],
+    "onlyEdit": "remove Fool glass engraving within original 7x7 overlay region"
+  },
+  "wells": {
+    "width": 18,
+    "height": 18,
+    "itemWidth": 16,
+    "itemHeight": 16,
+    "itemPadding": 1,
+    "topFromBottom": -20,
+    "bottomFromBottom": -2,
+    "outerStoneNest": [
+      22,
+      21
+    ]
+  },
+  "hotbar": {
+    "itemXFromCenter": -88,
+    "itemYFromBottom": -19,
+    "step": 20,
+    "count": 9
+  },
+  "offhand": {
+    "rightHandedItemXFromCenter": -117,
+    "leftHandedItemXFromCenter": 101,
+    "itemYFromBottom": -19
+  },
+  "ability": {
+    "outerXFromCenter": 122,
+    "outerYFromBottom": -22,
+    "iconXFromCenter": 125,
+    "iconYFromBottom": -19,
+    "cooldownNumberOverIcon": true,
+    "empty": "dim rune"
+  },
+  "health": {
+    "xFromCenter": -91,
+    "yFromBottom": -42,
+    "width": 82,
+    "height": 9,
+    "unitsPerSegment": 2,
+    "normalMaximum": 20,
+    "reviewedExtendedMaximum": 40
+  },
+  "hunger": {
+    "xFromCenter": 9,
+    "yFromBottom": -42,
+    "width": 82,
+    "height": 9,
+    "maximum": 20
+  },
+  "compactIndicators": {
+    "armorVisibleWhen": "armor > 0",
+    "airVisibleWhen": "submerged",
+    "topFromBottom": -53
+  },
+  "thirdAuxiliary": {
+    "value": 0,
+    "dim": true,
+    "labelOnlyInTooltipAndB": true
+  }
+}

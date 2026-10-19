@@ -1,0 +1,28 @@
+{
+  "pathway": "Visionary",
+  "frame": "mysteries_above:spirituality/common/frame",
+  "glass": "mysteries_above:spirituality/common/glass",
+  "mask": "mysteries_above:textures/gui/sprites/spirituality/common/mask.png",
+  "tones": "mysteries_above:textures/gui/sprites/spirituality/visionary/tones.png",
+  "neck": "mysteries_above:spirituality/visionary/neck",
+  "tag": "mysteries_above:spirituality/visionary/tag",
+  "engraving": "mysteries_above:spirituality/visionary/engraving",
+  "palette": [
+    "#2F6AD1",
+    "#3C80ED",
+    "#438AF4",
+    "#50A0FA",
+    "#66B3FB",
+    "#8FCAFC"
+  ],
+  "particle": [
+    [
+      0,
+      0
+    ]
+  ],
+  "particleCount": 3,
+  "flow": "DRIFT",
+  "periodTicks": 160,
+  "tagSwing": 0.04
+}

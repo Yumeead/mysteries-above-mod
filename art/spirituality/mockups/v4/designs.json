@@ -1,0 +1,250 @@
+{
+  "version": 4,
+  "sequenceVariants": false,
+  "variant": "A",
+  "cork": "common-neutral-brown",
+  "pathways": [
+    {
+      "id": "Fool",
+      "name": "Дурень",
+      "hex": "#A26ED7",
+      "tag": "rectangular parchment tarot card with a tiny dark eye/star",
+      "wrap": "crossed burgundy braided cord with one brass bead",
+      "engraving": "fine spiral with three little stars",
+      "contents": "two fine curling lilac mist threads, sparse tiny angular particles; no large bubbles",
+      "motion": "Імла повільно закручується спіраллю; цикл 6 с.",
+      "period": 6
+    },
+    {
+      "id": "Error",
+      "name": "Помилка",
+      "hex": "#6699A1",
+      "tag": "jagged broken CLOCK-FACE shard with one clock hand, NOT a gear",
+      "wrap": "asymmetric tangled copper wire and a thin charcoal cord",
+      "engraving": "two offset broken clock arcs",
+      "contents": "slate teal-blue liquid with tiny displaced square glints and a zigzag seam",
+      "motion": "Квадратні відблиски зрідка зміщуються на піксель і повертаються; цикл 7 с.",
+      "period": 7
+    },
+    {
+      "id": "Door",
+      "name": "Двері",
+      "hex": "#6AE6F7",
+      "tag": "a clearly key-shaped narrow brass KEY pendant",
+      "wrap": "two loops of small turquoise beads and a thin brass chain",
+      "engraving": "small rectangular doorway with a stepped arch",
+      "contents": "bright cyan liquid with sparse tiny rectangular portal-like light flecks",
+      "motion": "Прямокутні частинки проходять крізь дві тонкі світлі площини; цикл 5 с.",
+      "period": 5
+    },
+    {
+      "id": "Visionary",
+      "name": "Провидець",
+      "hex": "#8FB5F1",
+      "tag": "oval pale mother-of-pearl EYE medallion",
+      "wrap": "pleated pale silk ribbon and one neat soft knot",
+      "engraving": "one delicate open eye with three eyelashes",
+      "contents": "pale azure liquid with soft small lens-shaped haze clusters, no big pupils or dark blobs",
+      "motion": "Лінзоподібна імла повільно перетікає до світлого центру; цикл 8 с.",
+      "period": 8
+    },
+    {
+      "id": "Justiciar",
+      "name": "Правосуддя",
+      "hex": "#EBC38E",
+      "tag": "angular SILVER SHIELD pendant with a tiny scales mark",
+      "wrap": "a neat linked silver chain and two orderly horizontal bands",
+      "engraving": "fine balanced scales",
+      "contents": "amber-gold liquid with sparse upright light slivers and tiny diamond sparks",
+      "motion": "Ромби піднімаються рівними стовпчиками; поверхня спокійна; цикл 6 с.",
+      "period": 6
+    },
+    {
+      "id": "BlackEmperor",
+      "name": "Чорний Імператор",
+      "hex": "#1D2341",
+      "tag": "a dark square WAX SEAL with a tiny crown impression",
+      "wrap": "heavy dark squared chain links and a burgundy wax band",
+      "engraving": "thin crown with a slightly skewed surrounding square",
+      "contents": "deep navy liquid, readable steel-violet highlights, thin skewed geometric rings, never a black hole",
+      "motion": "Геометричні кільця повільно зміщуються й відновлюють порядок; цикл 8 с.",
+      "period": 8
+    },
+    {
+      "id": "WhiteTower",
+      "name": "Біла Вежа",
+      "hex": "#7686E1",
+      "tag": "a tiny open IVORY BOOK, two rectangular pages as its silhouette",
+      "wrap": "a folded parchment collar held by a thin straight silver wire",
+      "engraving": "a slender three-tier tower and two short rune strokes",
+      "contents": "periwinkle-blue liquid with tiny angular rune fragments arranged like a small constellation",
+      "motion": "Уламки знаків повільно складаються в короткі ряди й розходяться; цикл 7 с.",
+      "period": 7
+    },
+    {
+      "id": "Paragon",
+      "name": "Взірець",
+      "hex": "#F3914B",
+      "tag": "a small BRASS COGWHEEL pendant with teeth and a dark center hole",
+      "wrap": "brown leather strap with two copper rivets and one metal buckle",
+      "engraving": "small drafting compass and a short ruler line",
+      "contents": "warm copper-orange liquid with tiny mechanical diamond glints and small gear-like flecks, no flames",
+      "motion": "Механічні частинки рухаються короткими точними кроками; цикл 5 с.",
+      "period": 5
+    },
+    {
+      "id": "Sun",
+      "name": "Сонце",
+      "hex": "#FBE86B",
+      "tag": "a small GOLD SUNBURST disc with visible rays",
+      "wrap": "wide ivory ribbon with a short burgundy binding",
+      "engraving": "thin sun with six restrained rays",
+      "contents": "lemon-gold liquid with tiny rising light dust and a very subtle bright central core",
+      "motion": "Світлий пил рівномірно підіймається; тихий пульс раз на 6 с.",
+      "period": 6
+    },
+    {
+      "id": "Tyrant",
+      "name": "Тиран",
+      "hex": "#4673C7",
+      "tag": "a compact three-pronged TRIDENT pendant",
+      "wrap": "thick twisted nautical rope with one bulky sailor knot",
+      "engraving": "thin lightning stroke above one small wave",
+      "contents": "rich ocean-blue liquid with one low wave crest and short tiny electric slivers",
+      "motion": "Поверхнею повільно проходить хвиля, зрідка спалахує тонка іскра; цикл 4 с.",
+      "period": 4
+    },
+    {
+      "id": "TwilightGiant",
+      "name": "Сутінковий Велетень",
+      "hex": "#E87863",
+      "tag": "a narrow pointed BRONZE SWORD charm with a short crossguard",
+      "wrap": "crossed orange-brown leather straps with a bronze clasp",
+      "engraving": "a half sun sinking into a straight horizon",
+      "contents": "copper-coral liquid with sparse tiny ember-like rune strokes and a soft dusk core",
+      "motion": "Рунічні рисочки повільно опускаються, світло переливається як сутінки; цикл 8 с.",
+      "period": 8
+    },
+    {
+      "id": "RedPriest",
+      "name": "Червоний Жрець",
+      "hex": "#FF473A",
+      "tag": "a triangular BURGUNDY CLOTH PENNANT with a pointed tip",
+      "wrap": "stitched red cloth strip and a short black knotted cord",
+      "engraving": "two tiny crossed spears",
+      "contents": "vivid vermilion-red liquid with thin upward ember threads and a few tiny hot sparks, no exterior fire",
+      "motion": "Дрібні жаринки підіймаються ривками, у рідині ворушаться тонкі язички; цикл 4 с.",
+      "period": 4
+    },
+    {
+      "id": "Mother",
+      "name": "Mother",
+      "hex": "#3CB799",
+      "tag": "a pointed serrated LEAF with a single clear central vein",
+      "wrap": "an organic leafy vine collar with two small additional leaves",
+      "engraving": "a slim stem with three leaves",
+      "contents": "emerald-teal liquid with two tiny oval seeds and sparse pollen dots, no large round bubbles",
+      "motion": "Насіння м'яко коливається, пилок повільно підіймається; цикл 6 с.",
+      "period": 6
+    },
+    {
+      "id": "Moon",
+      "name": "Місяць",
+      "hex": "#FF6068",
+      "tag": "a clearly CRESCENT-SHAPED SILVER charm",
+      "wrap": "a string of small ivory pearls and a short pale-violet ribbon",
+      "engraving": "a crescent nested inside a fine incomplete circle",
+      "contents": "rose-crimson liquid with two small luminous pearl motes and a quiet tide-like surface",
+      "motion": "Дві світлі перлини рухаються дугами; поверхня дихає як приплив; цикл 8 с.",
+      "period": 8
+    },
+    {
+      "id": "Darkness",
+      "name": "Темрява",
+      "hex": "#7F95B9",
+      "tag": "a long narrow BLACK FEATHER with visible tapered barbs",
+      "wrap": "a soft black ribbon bow with two short folded tails",
+      "engraving": "three little stars above a shallow sleeping crescent",
+      "contents": "muted steel-blue liquid with very fine horizontal night mist and a few pinprick stars",
+      "motion": "Нічна імла дрейфує вбік, зірки ледь мерехтять; цикл 9 с.",
+      "period": 9
+    },
+    {
+      "id": "Death",
+      "name": "Смерть",
+      "hex": "#728F6C",
+      "tag": "a little pale BONE with two rounded ends, not a skull bottle",
+      "wrap": "frayed linen bandage around neck with a loose gray cord",
+      "engraving": "one tiny faded skull-like mark and a fine vertical bone line",
+      "contents": "dusty olive-green liquid with thin pale descending wisps and tiny ash-like specks",
+      "motion": "Бліді пасма й попелясті цятки повільно опускаються; цикл 8 с.",
+      "period": 8
+    },
+    {
+      "id": "Demoness",
+      "name": "Демонеса",
+      "hex": "#D2409F",
+      "tag": "a black GLASS DIAMOND pendant with a sharp pointed bottom",
+      "wrap": "fine dark lace with three small thorn-shaped loops",
+      "engraving": "a delicate frost-web corner with three radiating threads",
+      "contents": "deep fuchsia liquid with silky pale filaments and tiny sharp frost-like glints",
+      "motion": "Шовкові нитки повільно переплітаються, крижані іскри коротко блимають; цикл 7 с.",
+      "period": 7
+    },
+    {
+      "id": "HangedMan",
+      "name": "Повішений",
+      "hex": "#CC3635",
+      "tag": "a small clearly open KNOTTED ROPE LOOP charm",
+      "wrap": "rough crossed stitched leather strips, a small hanging knot",
+      "engraving": "a tiny inverted cross and a short hanging line",
+      "contents": "deep crimson liquid with sparse fine descending red threads and two tiny droplets",
+      "motion": "Тонкі нитки спускаються й поволі розчиняються внизу; цикл 7 с.",
+      "period": 7
+    },
+    {
+      "id": "Abyss",
+      "name": "Безодня",
+      "hex": "#841F11",
+      "tag": "a jagged dark OBSIDIAN FANG with one broken side",
+      "wrap": "a dark iron collar with two short blunt barbed clasps",
+      "engraving": "three thin descending claw scratches",
+      "contents": "dark rust-scarlet liquid with bright restrained ember cracks and tiny irregular rising flecks",
+      "motion": "Червоні тріщинки нерівномірно спалахують, частинки змінюють напрям; цикл 6 с.",
+      "period": 6
+    },
+    {
+      "id": "Hermit",
+      "name": "Відлюдник",
+      "hex": "#7C62B3",
+      "tag": "a clearly FIVE-POINTED STAR-shaped brass charm",
+      "wrap": "a dark beaded cord with three small pale beads",
+      "engraving": "a sparse angular constellation, no spiral",
+      "contents": "deep violet-blue liquid with small star points and two faint angular orbital traces",
+      "motion": "Зірки рухаються повільними орбітами, сузір'я ледь змінюється; цикл 9 с.",
+      "period": 9
+    },
+    {
+      "id": "Chained",
+      "name": "Скутий",
+      "hex": "#433F6B",
+      "tag": "a clearly U-shaped IRON SHACKLE with an open center",
+      "wrap": "three chunky black iron chain links around the neck",
+      "engraving": "three thin parallel prison bars with a broken little link",
+      "contents": "smoky gray-lavender liquid with thin upright wavering strands and restrained pale pulses",
+      "motion": "Вертикальні пасма коливаються, світло пульсує стримано; цикл 8 с.",
+      "period": 8
+    },
+    {
+      "id": "WheelOfFortune",
+      "name": "Колесо Фортуни",
+      "hex": "#A1CED7",
+      "tag": "a tiny IVORY DICE CUBE with two clearly visible dark pips",
+      "wrap": "a pale braided cord tied into two small symmetrical loops",
+      "engraving": "a fine small eight-spoked wheel",
+      "contents": "milky pale cyan liquid with a few tiny pearl bubbles and a gently orbiting bright fleck",
+      "motion": "Перлини повільно обертаються; зрідка одна іскра міняє напрям; цикл 10 с.",
+      "period": 10
+    }
+  ]
+}

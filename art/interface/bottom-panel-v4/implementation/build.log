@@ -1,0 +1,294 @@
+
+> Configure project :mod
+Fabric Loom: 1.17.21
+
+> Task :mod:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :mod:processResources UP-TO-DATE
+> Task :core:compileKotlin UP-TO-DATE
+> Task :core:compileJava NO-SOURCE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :core:assemble UP-TO-DATE
+> Task :mod:processClientResources UP-TO-DATE
+> Task :core:compileTestKotlin UP-TO-DATE
+> Task :core:compileTestJava NO-SOURCE
+> Task :core:processTestResources NO-SOURCE
+> Task :core:testClasses UP-TO-DATE
+> Task :core:test UP-TO-DATE
+> Task :core:check UP-TO-DATE
+> Task :core:build UP-TO-DATE
+> Task :mod:compileKotlin UP-TO-DATE
+> Task :mod:compileJava UP-TO-DATE
+> Task :mod:classes UP-TO-DATE
+> Task :mod:processIncludeJars UP-TO-DATE
+> Task :mod:processTestResources NO-SOURCE
+> Task :mod:validateAccessWidener UP-TO-DATE
+> Task :mod:compileClientKotlin
+> Task :mod:compileClientJava UP-TO-DATE
+> Task :mod:clientClasses UP-TO-DATE
+> Task :mod:jar
+> Task :mod:assemble
+> Task :mod:compileTestKotlin UP-TO-DATE
+> Task :mod:compileTestJava NO-SOURCE
+> Task :mod:testClasses UP-TO-DATE
+
+> Task :mod:test
+
+AbilityModesTest > Чужий режим не приймається, свій запам'ятовується PASSED
+
+AbilityModesTest > Присід гортає по колу, а режим, якого вже немає, падає на перший PASSED
+
+AbilityModesTest > Без вибору — перший режим; без режимів — нічого PASSED
+
+CooldownTableTest > Глобальне замикання віддає один тік усім здібностям одразу PASSED
+
+CooldownTableTest > Готова здібність віддає нуль в обох одиницях PASSED
+
+CooldownTableTest > Спливлий таймер віддає нуль, а не тік із минулого PASSED
+
+CooldownTableTest > Тік готовності абсолютний, а не залишковий PASSED
+
+CooldownTableTest > З двох таймерів перемагає пізніший PASSED
+
+CooldownTableTest > Забутий гравець лишається без таймерів, включно з глобальним PASSED
+
+CooldownTableTest > Тік готовності й залишок у секундах не розходяться PASSED
+
+PendingChoicesTest > Запізніла відповідь на замінену пропозицію не з'їдає нову PASSED
+
+PendingChoicesTest > Відповідь на чинну пропозицію спрацьовує рівно раз PASSED
+
+PendingChoicesTest > Скасування й індекс поза межами знімають пропозицію без вибору PASSED
+
+SessionHostTest > different abilities of one owner live side by side() PASSED
+
+SessionHostTest > утримання платиться за кожен період, а не раз на такт сесії() PASSED
+
+SessionHostTest > after shutdown the host still opens sessions — the next world needs them() PASSED
+
+SessionHostTest > stopping a session runs its finally — this is what cleanup means now() PASSED
+
+SessionHostTest > a session that throws does not take its neighbour with it() PASSED
+
+SessionHostTest > re-casting replaces the session and unwinds the old one() PASSED
+
+SessionHostTest > a finished session leaves the registry on its own() PASSED
+
+SessionHostTest > a session drains spirituality until it runs out() PASSED
+
+SessionHostTest > waitTicks resumes exactly on the asked tick() PASSED
+
+SessionHostTest > stopAll ends every session of one owner() PASSED
+
+SessionHostTest > sustain gives up when the owner is not in the world() PASSED
+
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.joml.MemUtil$MemUtilUnsafe (file:/C:/Users/yuryp/.gradle/caches/modules-2/files-2.1/org.joml/joml/1.10.8/fc0a71dad90a2cf41d82a76156a0e700af8e4f8d/joml-1.10.8.jar)
+WARNING: Please consider reporting this to the maintainers of class org.joml.MemUtil$MemUtilUnsafe
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+
+> Task :mod:test
+
+AbilityRosterTest > Не Потойбічний — порожній ростер, а не порожній список PASSED
+
+AbilityRosterTest > Заголовок ростера — шлях і канонічна назва Послідовності PASSED
+
+AbilityRosterTest > Фарбування ростера не чіпає іконку самої здібності PASSED
+
+AbilityRosterTest > Опис порахований під Послідовність власника, а не під базову PASSED
+
+AbilityRosterTest > Ціни, типи й перепочинки — ті самі, що в самого Потойбічного PASSED
+
+AbilityRosterTest > Типова іконка — за типом здібності, пофарбована в колір шляху PASSED
+
+AbilityRosterTest > Активна здібність несе свою іконку, а не пасивчину PASSED
+
+AbilityStatePumpTest > Такт не дублює щойно надісланий стан PASSED
+
+AbilityStatePumpTest > Забутий гравець не отримує нічого і не тримає свого таймера PASSED
+
+AbilityStatePumpTest > Чистий гравець пакета не породжує PASSED
+
+AbilityStatePumpTest > Запобіжник рахується окремо для кожного гравця PASSED
+
+AbilityStatePumpTest > Брудний гравець отримує рівно один пакет за такт PASSED
+
+AbilityStatePumpTest > Дія гравця штовхає стан негайно, не чекаючи такту PASSED
+
+BeyonderStoreTest > Не сторінка запису не відновлюється як сторінка PASSED
+
+BeyonderStoreTest > Збережений Потойбічний проходить кодек туди й назад разом зі сторінкою запису PASSED
+
+Реєстр крадіжок > Прометеїв тір резерву не має, тож перший каст нічого не міняє PASSED
+
+Реєстр крадіжок > Невикористане чекає довго, а перший каст перераховує строк PASSED
+
+Реєстр крадіжок > Підмітання забирає силу рівно один раз, а запис живе до кінця вікна жертви PASSED
+
+Реєстр крадіжок > Пригнічена лише вкрадена сила, а не всі PASSED
+
+Реєстр крадіжок > Слот один: нова крадіжка витісняє попередню PASSED
+
+Реєстр крадіжок > Витрачене вкрадене звільняє і слот, і жертву PASSED
+
+Реєстр крадіжок > Жертва не кличе вкрадене, доки не мине її вікно PASSED
+
+Реєстр крадіжок > Збережений реєстр після рестарту тримає ті самі строки, що й до нього PASSED
+
+AbilityGroupTest > removingFromTheGroupDropsItsKey() PASSED
+
+AbilityGroupTest > bindingMovesBothTheKeyAndTheAbility() PASSED
+
+AbilityGroupTest > allGroupHoldsEverythingAndCannotBeEdited() PASSED
+
+AbilityCycleTest > withoutSelectionStartsFromTheNearEnd() PASSED
+
+AbilityCycleTest > stepsAndWrapsBothWays() PASSED
+
+AbilityCycleTest > emptyListHasNothing() PASSED
+
+SpiritualityDisplayTest > spendingFinishesAtTheConfirmedValue() PASSED
+
+SpiritualityDisplayTest > newPacketsContinueFromTheCurrentDisplayedValue() PASSED
+
+SpiritualityDisplayTest > initialStateNewMaximumReconnectAndReducedMotionSnap() PASSED
+
+SpiritualityDisplayTest > recoveryStopsExactlyAtTheCap() PASSED
+
+SpiritualityDisplayTest > gainsCountThroughEveryPointAtTheReceivedRate() PASSED
+
+BookArtTest > abilityPictogramsAreCenteredOnTheSameFifteenPixelGrid() PASSED
+
+BookArtTest > everyPathwayHasTransparentCenteredArtAtEveryActualDisplaySize() PASSED
+
+BookArtTest > everyPathwayLabelKeepsReadableContrastOnPaper() PASSED
+
+BookArtTest > everyExistingPowerHasAnExplicitPictogram() PASSED
+
+BookGlyphsTest > symbolsShareACenteredNinePixelGrid() PASSED
+
+BookGlyphsTest > bookTranslationsCoverEveryPathwayWithoutMiddleDots() PASSED
+
+BottomPanelAssetsTest > everyPathwayFitsItsOwnUnchangedArtworkAndKeepsTheLastDrop() PASSED
+
+BottomPanelAssetsTest > glassHasNoWhiteTopLipAndEveryResourceRemainsAtItsNativeSize() PASSED
+
+FlaskAssetsTest > sharedGlassHasAnUnbrokenLightRimInsideTheDarkOutline() PASSED
+
+FlaskAssetsTest > everyPathwayAndFallbackHaveReplaceableValidSprites() PASSED
+
+WheelLayoutTest > hourMarkStandsOutsideTheCard() PASSED
+
+WheelLayoutTest > cardsSitOnTheRingAndPickBackToThemselves() PASSED
+
+WheelLayoutTest > deadZoneCancels() PASSED
+
+WheelLayoutTest > modePickAndCorridor() PASSED
+
+WheelLayoutTest > oneAbilityTakesTheWholeRing() PASSED
+
+WheelLayoutTest > modeColumnStandsAwayFromTheCentre() PASSED
+
+WheelLayoutTest > sectorBoundariesOnEight() PASSED
+
+WheelLayoutTest > pagesSplitByTwelve() PASSED
+
+EventHubTest > publishing to nobody is free and harmless() PASSED
+
+EventHubTest > clearing drops everything so the next world starts empty() PASSED
+
+EventHubTest > one falling handler neither stops the rest nor stays subscribed() PASSED
+
+EventHubTest > a handler can unsubscribe itself and then hears nothing more() PASSED
+
+EventHubTest > a permanent subscription outlives any plausible tick count() PASSED
+
+EventHubTest > a handler hears its own event type and no other() PASSED
+
+EventHubTest > forgetting a player takes all of their subscriptions and nobody else's() PASSED
+
+EventHubTest > a handler subscribing mid dispatch does not hear the event that spawned it() PASSED
+
+EventHubTest > forgetting one ability leaves the other abilities of the same player alone() PASSED
+
+EventHubTest > a timed subscription stops on the tick it expires() PASSED
+
+PotionBrewTest > Зілля зберігається іменем шляху й номером Послідовності PASSED
+
+PotionBrewTest > Записане читається назад тим самим PASSED
+
+PotionBrewTest > Послідовність поза 0..9 не приймається ні конструктором, ні кодеком PASSED
+
+PotionBrewTest > Шлях, якого ще немає в моді, розпізнається як відсутній, а не падає PASSED
+
+AbilityPayloadCodecTest > Стан без обраної здібності й без живих записів проїжджає порожнім PASSED
+
+AbilityPayloadCodecTest > Ростер без здібностей — це не ростер без шляху PASSED
+
+AbilityPayloadCodecTest > Ростер зі здібностями доїжджає полем у поле, разом з іконками PASSED
+
+AbilityPayloadCodecTest > Ростер у ляльці везе шлях тіла, яке носить Маріонетист PASSED
+
+AbilityPayloadCodecTest > Дія без ідентичності означає «те, що вже обрано» PASSED
+
+AbilityPayloadCodecTest > Порожній ростер проїжджає порожнім PASSED
+
+AbilityPayloadCodecTest > Розхитаність розуму доїжджає на обох межах шкали PASSED
+
+AbilityPayloadCodecTest > Кожна дія проїжджає зі своєю ідентичністю PASSED
+
+AbilityPayloadCodecTest > Стан із перепочинками, тоглями й сесіями доїжджає як є PASSED
+
+IncantationTest > повторення підсилює, але не нескінченно() PASSED
+
+IncantationTest > слова сили читаються у відмінках і серед іншого тексту() PASSED
+
+IncantationTest > текст без форми заклинанням не є() PASSED
+
+ModPathwaysTest > Та сама ідентичність на різних Послідовностях — це тір однієї сили PASSED
+
+ModPathwaysTest > Ціна й перепочинок Цілющої Води — ті самі, що в плагіні PASSED
+
+ModPathwaysTest > Оголошений тип збігається з базовим класом PASSED
+
+ModPathwaysTest > Пошук шляху не зважає на регістр, невідомого — немає PASSED
+
+ModPathwaysTest > Усередині однієї Послідовності ідентичності унікальні PASSED
+
+ModPathwaysTest > Усі 22 шляхи оголошують десять Послідовностей; здібності мають рівно дев'ять PASSED
+
+ModPathwaysTest > Піднесення відкриває здібності верхніх Послідовностей, не забираючи нижніх PASSED
+
+ModPathwaysTest > Двері заповнюють Посл. 9–5 і мовчать вище PASSED
+
+ModPathwaysTest > Індекс імені Послідовності дорівнює її рівню PASSED
+
+ModPathwaysTest > Спільна ідентичність означає спільний клас, а не збіг імен PASSED
+
+OathsTest > Порушена Клятва переживає рестарт разом зі своїми умовами PASSED
+
+OathsTest > Клятва на предмет, якого немає в реєстрі, не читається як умови PASSED
+
+TickSchedulerTest > a cancelled task never fires again() PASSED
+
+TickSchedulerTest > a repeating task keeps its period() PASSED
+
+TickSchedulerTest > one broken task does not stop the rest of the tick() PASSED
+
+TickSchedulerTest > a zero delay runs on the very next tick() PASSED
+
+TickSchedulerTest > work queued from inside a tick runs in that same tick() PASSED
+
+TickSchedulerTest > a delayed task fires on its tick, not before() PASSED
+
+TickSchedulerTest > millis convert to ticks upwards so no delay is instant() PASSED
+
+TickSchedulerTest > cancelAll empties the queue — a world does not outlive itself() PASSED
+
+> Task :mod:check
+> Task :mod:build
+
+BUILD SUCCESSFUL in 10s
+15 actionable tasks: 3 executed, 12 up-to-date

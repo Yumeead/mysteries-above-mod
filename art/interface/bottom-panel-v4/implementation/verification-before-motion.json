@@ -1,0 +1,185 @@
+{
+  "status": "approved-implemented-verified",
+  "verifiedAt": "2026-10-19T00:32:19.876895+03:00",
+  "commands": [
+    "gradlew.bat build",
+    ":mod:runClient (isolated run directory, MYSTERIES_WHEEL_SHOTS=bottom-panel)"
+  ],
+  "tests": {
+    "core": {
+      "tests": 264,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "mod": {
+      "tests": 122,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "protectedSourceFiles": 278,
+  "protectedSourceChanges": [],
+  "protectedResourcesMatchedInsideJar": 273,
+  "generatedSpritesInsideJar": 52,
+  "all22PathwayMasksTested": true,
+  "defaultMask": {
+    "sourceX": 17,
+    "sourceY": 22,
+    "innerDiameter": 28,
+    "outerDiameter": 36,
+    "scale": 1
+  },
+  "nativeTextureExceptions": {
+    "WheelOfFortune": {
+      "sourceX": 20,
+      "sourceY": 30,
+      "innerDiameter": 20,
+      "outerDiameter": 28
+    },
+    "WhiteTower": {
+      "sourceX": 19,
+      "sourceY": 26,
+      "innerDiameter": 24,
+      "outerDiameter": 32
+    }
+  },
+  "client": {
+    "passed": true,
+    "isolatedWorld": true,
+    "screenshots": [
+      {
+        "file": "game-screenshots/hud04_bars.png",
+        "bytes": 532352,
+        "sha256": "be09534aa4ec82d41bb0953c5bf73e12fbaeb4560b8ecf2be02416969b1888e2"
+      },
+      {
+        "file": "game-screenshots/hud04_editor.png",
+        "bytes": 315371,
+        "sha256": "3e0bc541663c543501ba1c091d2ba115f37a99edb057fc13e952d6a551c9e002"
+      },
+      {
+        "file": "game-screenshots/hud04_full_justiciar.png",
+        "bytes": 580854,
+        "sha256": "1b0b7bb5b4f44d423ad29388fabb35f5edfd25172aa94b97ea4b958cefbea5a4"
+      },
+      {
+        "file": "game-screenshots/hud04_full_mother.png",
+        "bytes": 545306,
+        "sha256": "a053ae7af7bb4bba864f1ada82724ec9cf16ea96a8b3b0a5651bda3446ef9289"
+      },
+      {
+        "file": "game-screenshots/hud04_full_wheeloffortune.png",
+        "bytes": 530775,
+        "sha256": "0601b6396509164e0a00b1201d90204d71c924b5c4fddf5c3364b296596ee4eb"
+      },
+      {
+        "file": "game-screenshots/hud04_full_whitetower.png",
+        "bytes": 587777,
+        "sha256": "d4adf4a124a0bd08a0f45472ea606e2937183a1c1d556a322aa7df377989dd1d"
+      },
+      {
+        "file": "game-screenshots/hud04_gs2_empty_offhand.png",
+        "bytes": 698071,
+        "sha256": "5ca6f4223df14a4665b4f96c98706fca78c0c578df5470bbc8a26e29c36a06d4"
+      },
+      {
+        "file": "game-screenshots/hud04_gs3_empty_offhand.png",
+        "bytes": 677234,
+        "sha256": "72464f7054ec94334e0485af7a30af3a2ff40ce7196ae1cd12c92d6908ddd703"
+      },
+      {
+        "file": "game-screenshots/hud04_gs4_empty_offhand.png",
+        "bytes": 640758,
+        "sha256": "f2332106ad0441bd10694474f630445d501c02b7601f698f8c4a6f88c26f43ec"
+      },
+      {
+        "file": "game-screenshots/hud04_health40.png",
+        "bytes": 535172,
+        "sha256": "6e28bf2a91b0a06511a5a649fc894119fbeb483f70787b9a3d486a0f76b4a5ae"
+      },
+      {
+        "file": "game-screenshots/hud04_left_hand.png",
+        "bytes": 736706,
+        "sha256": "327db2fbb33673c83f407b0e16d59983a381a8058e30511fa796d7afd79de595"
+      },
+      {
+        "file": "game-screenshots/hud04_legacy_bar.png",
+        "bytes": 292829,
+        "sha256": "3de99025f8c189231643b3cba720b5b2af4c4275d3a07e96c36663387c395297"
+      },
+      {
+        "file": "game-screenshots/hud04_low_health_hunger.png",
+        "bytes": 536533,
+        "sha256": "427a2e3eab6e05d77290cd3058c5248d88da432d9ce417d93628d6e51f3c13bf"
+      },
+      {
+        "file": "game-screenshots/hud04_low_spirit_armor.png",
+        "bytes": 534132,
+        "sha256": "d661f4dfe26d02c2a1314d30eec250f9ddd99ad347b944c4047c7c55aeb5e924"
+      },
+      {
+        "file": "game-screenshots/hud04_narrow_requested4.png",
+        "bytes": 330203,
+        "sha256": "8d1b43c10a597f0255d52268086fd680c2f888d5b7469c6b1164b05689720ccb"
+      },
+      {
+        "file": "game-screenshots/hud04_settings_narrow.png",
+        "bytes": 79211,
+        "sha256": "4320094aa5621931f3463dc8a8830fd89c66363417587a52d69e0c8fc6cbefae"
+      },
+      {
+        "file": "game-screenshots/hud04_settings_scrolled.png",
+        "bytes": 79729,
+        "sha256": "a4f650ad89b2111c6e508aeabd5d739facc19a57ddea7a5d5d8dfe25a93df848"
+      },
+      {
+        "file": "game-screenshots/hud04_spirit_off.png",
+        "bytes": 300184,
+        "sha256": "87b3110d4bb24df6d48be13fc4d28c95cfd66239cdb78afa0f6fef8c20f3c8cb"
+      },
+      {
+        "file": "game-screenshots/hud04_underwater.png",
+        "bytes": 695870,
+        "sha256": "b26da211fa6394466ba50a8b427419fc248d0d3f02aebc3fce8a9f8b429b217b"
+      },
+      {
+        "file": "game-screenshots/hud04_vanilla_style.png",
+        "bytes": 309435,
+        "sha256": "1a816bf3f550f9f6bb995b3c7a00198fcad98f2059e8f808aa6ea9a22850bf8d"
+      }
+    ],
+    "nativeGuiScales": [
+      2,
+      3,
+      4
+    ],
+    "narrowWindow": [
+      1280,
+      720
+    ],
+    "narrowRequestedScale4ActuallyUses": 3,
+    "forced320x180GeometryUnitTest": true,
+    "knownUnrelatedLogErrors": [
+      "Offline dev Realms authentication / profile-key HTTP 401"
+    ]
+  },
+  "auxiliaryData": {
+    "source": "PreviewAuxiliaryHudSource",
+    "testValues": [
+      5400,
+      7200,
+      0
+    ],
+    "gameplayConnected": false
+  },
+  "artifact": {
+    "file": "mod/build/libs/mod-0.1.0.jar",
+    "bytes": 2894779,
+    "sha256": "c60fcc86fd10641f3bb3a61171d85a344d79a0d43df0510f8d49e9b62c59835e"
+  },
+  "notVerified": [
+    "Third-party shader packs and all combinations of other HUD mods"
+  ]
+}

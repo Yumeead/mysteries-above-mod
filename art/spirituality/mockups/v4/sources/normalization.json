@@ -1,0 +1,772 @@
+[
+  {
+    "id": "Fool",
+    "state": 0,
+    "sourceTop": 22,
+    "sourceBottom": 250,
+    "scale": 0.2096069868995633
+  },
+  {
+    "id": "Fool",
+    "state": 1,
+    "sourceTop": 22,
+    "sourceBottom": 250,
+    "scale": 0.2096069868995633
+  },
+  {
+    "id": "Fool",
+    "state": 2,
+    "sourceTop": 22,
+    "sourceBottom": 250,
+    "scale": 0.2096069868995633
+  },
+  {
+    "id": "Fool",
+    "state": 3,
+    "sourceTop": 22,
+    "sourceBottom": 250,
+    "scale": 0.2096069868995633
+  },
+  {
+    "id": "Fool",
+    "state": 4,
+    "sourceTop": 22,
+    "sourceBottom": 250,
+    "scale": 0.2096069868995633
+  },
+  {
+    "id": "Error",
+    "state": 0,
+    "sourceTop": 25,
+    "sourceBottom": 250,
+    "scale": 0.21238938053097345
+  },
+  {
+    "id": "Error",
+    "state": 1,
+    "sourceTop": 25,
+    "sourceBottom": 250,
+    "scale": 0.21238938053097345
+  },
+  {
+    "id": "Error",
+    "state": 2,
+    "sourceTop": 25,
+    "sourceBottom": 250,
+    "scale": 0.21238938053097345
+  },
+  {
+    "id": "Error",
+    "state": 3,
+    "sourceTop": 25,
+    "sourceBottom": 250,
+    "scale": 0.21238938053097345
+  },
+  {
+    "id": "Error",
+    "state": 4,
+    "sourceTop": 25,
+    "sourceBottom": 249,
+    "scale": 0.21333333333333335
+  },
+  {
+    "id": "Door",
+    "state": 0,
+    "sourceTop": 25,
+    "sourceBottom": 249,
+    "scale": 0.21333333333333335
+  },
+  {
+    "id": "Door",
+    "state": 1,
+    "sourceTop": 25,
+    "sourceBottom": 249,
+    "scale": 0.21333333333333335
+  },
+  {
+    "id": "Door",
+    "state": 2,
+    "sourceTop": 25,
+    "sourceBottom": 249,
+    "scale": 0.21333333333333335
+  },
+  {
+    "id": "Door",
+    "state": 3,
+    "sourceTop": 25,
+    "sourceBottom": 249,
+    "scale": 0.21333333333333335
+  },
+  {
+    "id": "Door",
+    "state": 4,
+    "sourceTop": 25,
+    "sourceBottom": 249,
+    "scale": 0.21333333333333335
+  },
+  {
+    "id": "Visionary",
+    "state": 0,
+    "sourceTop": 20,
+    "sourceBottom": 240,
+    "scale": 0.2171945701357466
+  },
+  {
+    "id": "Visionary",
+    "state": 1,
+    "sourceTop": 20,
+    "sourceBottom": 241,
+    "scale": 0.21621621621621623
+  },
+  {
+    "id": "Visionary",
+    "state": 2,
+    "sourceTop": 20,
+    "sourceBottom": 241,
+    "scale": 0.21621621621621623
+  },
+  {
+    "id": "Visionary",
+    "state": 3,
+    "sourceTop": 20,
+    "sourceBottom": 242,
+    "scale": 0.21524663677130046
+  },
+  {
+    "id": "Visionary",
+    "state": 4,
+    "sourceTop": 20,
+    "sourceBottom": 241,
+    "scale": 0.21621621621621623
+  },
+  {
+    "id": "Justiciar",
+    "state": 0,
+    "sourceTop": 22,
+    "sourceBottom": 246,
+    "scale": 0.21333333333333335
+  },
+  {
+    "id": "Justiciar",
+    "state": 1,
+    "sourceTop": 22,
+    "sourceBottom": 246,
+    "scale": 0.21333333333333335
+  },
+  {
+    "id": "Justiciar",
+    "state": 2,
+    "sourceTop": 22,
+    "sourceBottom": 246,
+    "scale": 0.21333333333333335
+  },
+  {
+    "id": "Justiciar",
+    "state": 3,
+    "sourceTop": 22,
+    "sourceBottom": 246,
+    "scale": 0.21333333333333335
+  },
+  {
+    "id": "Justiciar",
+    "state": 4,
+    "sourceTop": 22,
+    "sourceBottom": 246,
+    "scale": 0.21333333333333335
+  },
+  {
+    "id": "BlackEmperor",
+    "state": 0,
+    "sourceTop": 0,
+    "sourceBottom": 250,
+    "scale": 0.19123505976095617
+  },
+  {
+    "id": "BlackEmperor",
+    "state": 1,
+    "sourceTop": 0,
+    "sourceBottom": 250,
+    "scale": 0.19123505976095617
+  },
+  {
+    "id": "BlackEmperor",
+    "state": 2,
+    "sourceTop": 0,
+    "sourceBottom": 250,
+    "scale": 0.19123505976095617
+  },
+  {
+    "id": "BlackEmperor",
+    "state": 3,
+    "sourceTop": 0,
+    "sourceBottom": 250,
+    "scale": 0.19123505976095617
+  },
+  {
+    "id": "BlackEmperor",
+    "state": 4,
+    "sourceTop": 0,
+    "sourceBottom": 250,
+    "scale": 0.19123505976095617
+  },
+  {
+    "id": "WhiteTower",
+    "state": 0,
+    "sourceTop": 11,
+    "sourceBottom": 240,
+    "scale": 0.20869565217391303
+  },
+  {
+    "id": "WhiteTower",
+    "state": 1,
+    "sourceTop": 11,
+    "sourceBottom": 240,
+    "scale": 0.20869565217391303
+  },
+  {
+    "id": "WhiteTower",
+    "state": 2,
+    "sourceTop": 11,
+    "sourceBottom": 240,
+    "scale": 0.20869565217391303
+  },
+  {
+    "id": "WhiteTower",
+    "state": 3,
+    "sourceTop": 11,
+    "sourceBottom": 240,
+    "scale": 0.20869565217391303
+  },
+  {
+    "id": "WhiteTower",
+    "state": 4,
+    "sourceTop": 11,
+    "sourceBottom": 240,
+    "scale": 0.20869565217391303
+  },
+  {
+    "id": "Paragon",
+    "state": 0,
+    "sourceTop": 0,
+    "sourceBottom": 215,
+    "scale": 0.2222222222222222
+  },
+  {
+    "id": "Paragon",
+    "state": 1,
+    "sourceTop": 0,
+    "sourceBottom": 215,
+    "scale": 0.2222222222222222
+  },
+  {
+    "id": "Paragon",
+    "state": 2,
+    "sourceTop": 0,
+    "sourceBottom": 215,
+    "scale": 0.2222222222222222
+  },
+  {
+    "id": "Paragon",
+    "state": 3,
+    "sourceTop": 0,
+    "sourceBottom": 215,
+    "scale": 0.2222222222222222
+  },
+  {
+    "id": "Paragon",
+    "state": 4,
+    "sourceTop": 0,
+    "sourceBottom": 215,
+    "scale": 0.2222222222222222
+  },
+  {
+    "id": "Sun",
+    "state": 0,
+    "sourceTop": 22,
+    "sourceBottom": 245,
+    "scale": 0.21428571428571427
+  },
+  {
+    "id": "Sun",
+    "state": 1,
+    "sourceTop": 22,
+    "sourceBottom": 245,
+    "scale": 0.21428571428571427
+  },
+  {
+    "id": "Sun",
+    "state": 2,
+    "sourceTop": 22,
+    "sourceBottom": 246,
+    "scale": 0.21333333333333335
+  },
+  {
+    "id": "Sun",
+    "state": 3,
+    "sourceTop": 22,
+    "sourceBottom": 246,
+    "scale": 0.21333333333333335
+  },
+  {
+    "id": "Sun",
+    "state": 4,
+    "sourceTop": 22,
+    "sourceBottom": 244,
+    "scale": 0.21524663677130046
+  },
+  {
+    "id": "Tyrant",
+    "state": 0,
+    "sourceTop": 18,
+    "sourceBottom": 250,
+    "scale": 0.20600858369098712
+  },
+  {
+    "id": "Tyrant",
+    "state": 1,
+    "sourceTop": 0,
+    "sourceBottom": 250,
+    "scale": 0.19123505976095617
+  },
+  {
+    "id": "Tyrant",
+    "state": 2,
+    "sourceTop": 0,
+    "sourceBottom": 250,
+    "scale": 0.19123505976095617
+  },
+  {
+    "id": "Tyrant",
+    "state": 3,
+    "sourceTop": 0,
+    "sourceBottom": 250,
+    "scale": 0.19123505976095617
+  },
+  {
+    "id": "Tyrant",
+    "state": 4,
+    "sourceTop": 1,
+    "sourceBottom": 250,
+    "scale": 0.192
+  },
+  {
+    "id": "TwilightGiant",
+    "state": 0,
+    "sourceTop": 14,
+    "sourceBottom": 243,
+    "scale": 0.20869565217391303
+  },
+  {
+    "id": "TwilightGiant",
+    "state": 1,
+    "sourceTop": 17,
+    "sourceBottom": 232,
+    "scale": 0.2222222222222222
+  },
+  {
+    "id": "TwilightGiant",
+    "state": 2,
+    "sourceTop": 17,
+    "sourceBottom": 232,
+    "scale": 0.2222222222222222
+  },
+  {
+    "id": "TwilightGiant",
+    "state": 3,
+    "sourceTop": 17,
+    "sourceBottom": 232,
+    "scale": 0.2222222222222222
+  },
+  {
+    "id": "TwilightGiant",
+    "state": 4,
+    "sourceTop": 16,
+    "sourceBottom": 231,
+    "scale": 0.2222222222222222
+  },
+  {
+    "id": "RedPriest",
+    "state": 0,
+    "sourceTop": 0,
+    "sourceBottom": 227,
+    "scale": 0.21052631578947367
+  },
+  {
+    "id": "RedPriest",
+    "state": 1,
+    "sourceTop": 1,
+    "sourceBottom": 213,
+    "scale": 0.22535211267605634
+  },
+  {
+    "id": "RedPriest",
+    "state": 2,
+    "sourceTop": 1,
+    "sourceBottom": 214,
+    "scale": 0.22429906542056074
+  },
+  {
+    "id": "RedPriest",
+    "state": 3,
+    "sourceTop": 2,
+    "sourceBottom": 214,
+    "scale": 0.22535211267605634
+  },
+  {
+    "id": "RedPriest",
+    "state": 4,
+    "sourceTop": 1,
+    "sourceBottom": 213,
+    "scale": 0.22535211267605634
+  },
+  {
+    "id": "Mother",
+    "state": 0,
+    "sourceTop": 17,
+    "sourceBottom": 246,
+    "scale": 0.20869565217391303
+  },
+  {
+    "id": "Mother",
+    "state": 1,
+    "sourceTop": 17,
+    "sourceBottom": 247,
+    "scale": 0.2077922077922078
+  },
+  {
+    "id": "Mother",
+    "state": 2,
+    "sourceTop": 17,
+    "sourceBottom": 247,
+    "scale": 0.2077922077922078
+  },
+  {
+    "id": "Mother",
+    "state": 3,
+    "sourceTop": 17,
+    "sourceBottom": 248,
+    "scale": 0.20689655172413793
+  },
+  {
+    "id": "Mother",
+    "state": 4,
+    "sourceTop": 17,
+    "sourceBottom": 247,
+    "scale": 0.2077922077922078
+  },
+  {
+    "id": "Moon",
+    "state": 0,
+    "sourceTop": 25,
+    "sourceBottom": 246,
+    "scale": 0.21621621621621623
+  },
+  {
+    "id": "Moon",
+    "state": 1,
+    "sourceTop": 25,
+    "sourceBottom": 245,
+    "scale": 0.2171945701357466
+  },
+  {
+    "id": "Moon",
+    "state": 2,
+    "sourceTop": 25,
+    "sourceBottom": 246,
+    "scale": 0.21621621621621623
+  },
+  {
+    "id": "Moon",
+    "state": 3,
+    "sourceTop": 25,
+    "sourceBottom": 247,
+    "scale": 0.21524663677130046
+  },
+  {
+    "id": "Moon",
+    "state": 4,
+    "sourceTop": 25,
+    "sourceBottom": 248,
+    "scale": 0.21428571428571427
+  },
+  {
+    "id": "Darkness",
+    "state": 0,
+    "sourceTop": 21,
+    "sourceBottom": 249,
+    "scale": 0.2096069868995633
+  },
+  {
+    "id": "Darkness",
+    "state": 1,
+    "sourceTop": 21,
+    "sourceBottom": 249,
+    "scale": 0.2096069868995633
+  },
+  {
+    "id": "Darkness",
+    "state": 2,
+    "sourceTop": 22,
+    "sourceBottom": 249,
+    "scale": 0.21052631578947367
+  },
+  {
+    "id": "Darkness",
+    "state": 3,
+    "sourceTop": 21,
+    "sourceBottom": 249,
+    "scale": 0.2096069868995633
+  },
+  {
+    "id": "Darkness",
+    "state": 4,
+    "sourceTop": 22,
+    "sourceBottom": 249,
+    "scale": 0.21052631578947367
+  },
+  {
+    "id": "Death",
+    "state": 0,
+    "sourceTop": 12,
+    "sourceBottom": 240,
+    "scale": 0.2096069868995633
+  },
+  {
+    "id": "Death",
+    "state": 1,
+    "sourceTop": 12,
+    "sourceBottom": 239,
+    "scale": 0.21052631578947367
+  },
+  {
+    "id": "Death",
+    "state": 2,
+    "sourceTop": 12,
+    "sourceBottom": 240,
+    "scale": 0.2096069868995633
+  },
+  {
+    "id": "Death",
+    "state": 3,
+    "sourceTop": 12,
+    "sourceBottom": 239,
+    "scale": 0.21052631578947367
+  },
+  {
+    "id": "Death",
+    "state": 4,
+    "sourceTop": 12,
+    "sourceBottom": 239,
+    "scale": 0.21052631578947367
+  },
+  {
+    "id": "Demoness",
+    "state": 0,
+    "sourceTop": 23,
+    "sourceBottom": 301,
+    "scale": 0.17204301075268819
+  },
+  {
+    "id": "Demoness",
+    "state": 1,
+    "sourceTop": 23,
+    "sourceBottom": 286,
+    "scale": 0.18181818181818182
+  },
+  {
+    "id": "Demoness",
+    "state": 2,
+    "sourceTop": 23,
+    "sourceBottom": 286,
+    "scale": 0.18181818181818182
+  },
+  {
+    "id": "Demoness",
+    "state": 3,
+    "sourceTop": 23,
+    "sourceBottom": 286,
+    "scale": 0.18181818181818182
+  },
+  {
+    "id": "Demoness",
+    "state": 4,
+    "sourceTop": 23,
+    "sourceBottom": 285,
+    "scale": 0.18250950570342206
+  },
+  {
+    "id": "HangedMan",
+    "state": 0,
+    "sourceTop": 3,
+    "sourceBottom": 279,
+    "scale": 0.17328519855595667
+  },
+  {
+    "id": "HangedMan",
+    "state": 1,
+    "sourceTop": 3,
+    "sourceBottom": 264,
+    "scale": 0.183206106870229
+  },
+  {
+    "id": "HangedMan",
+    "state": 2,
+    "sourceTop": 3,
+    "sourceBottom": 264,
+    "scale": 0.183206106870229
+  },
+  {
+    "id": "HangedMan",
+    "state": 3,
+    "sourceTop": 3,
+    "sourceBottom": 264,
+    "scale": 0.183206106870229
+  },
+  {
+    "id": "HangedMan",
+    "state": 4,
+    "sourceTop": 3,
+    "sourceBottom": 264,
+    "scale": 0.183206106870229
+  },
+  {
+    "id": "Abyss",
+    "state": 0,
+    "sourceTop": 0,
+    "sourceBottom": 257,
+    "scale": 0.18604651162790697
+  },
+  {
+    "id": "Abyss",
+    "state": 1,
+    "sourceTop": 0,
+    "sourceBottom": 241,
+    "scale": 0.19834710743801653
+  },
+  {
+    "id": "Abyss",
+    "state": 2,
+    "sourceTop": 0,
+    "sourceBottom": 241,
+    "scale": 0.19834710743801653
+  },
+  {
+    "id": "Abyss",
+    "state": 3,
+    "sourceTop": 0,
+    "sourceBottom": 241,
+    "scale": 0.19834710743801653
+  },
+  {
+    "id": "Abyss",
+    "state": 4,
+    "sourceTop": 0,
+    "sourceBottom": 241,
+    "scale": 0.19834710743801653
+  },
+  {
+    "id": "Hermit",
+    "state": 0,
+    "sourceTop": 23,
+    "sourceBottom": 291,
+    "scale": 0.17843866171003717
+  },
+  {
+    "id": "Hermit",
+    "state": 1,
+    "sourceTop": 23,
+    "sourceBottom": 291,
+    "scale": 0.17843866171003717
+  },
+  {
+    "id": "Hermit",
+    "state": 2,
+    "sourceTop": 23,
+    "sourceBottom": 291,
+    "scale": 0.17843866171003717
+  },
+  {
+    "id": "Hermit",
+    "state": 3,
+    "sourceTop": 23,
+    "sourceBottom": 291,
+    "scale": 0.17843866171003717
+  },
+  {
+    "id": "Hermit",
+    "state": 4,
+    "sourceTop": 23,
+    "sourceBottom": 291,
+    "scale": 0.17843866171003717
+  },
+  {
+    "id": "Chained",
+    "state": 0,
+    "sourceTop": 0,
+    "sourceBottom": 267,
+    "scale": 0.1791044776119403
+  },
+  {
+    "id": "Chained",
+    "state": 1,
+    "sourceTop": 0,
+    "sourceBottom": 267,
+    "scale": 0.1791044776119403
+  },
+  {
+    "id": "Chained",
+    "state": 2,
+    "sourceTop": 0,
+    "sourceBottom": 267,
+    "scale": 0.1791044776119403
+  },
+  {
+    "id": "Chained",
+    "state": 3,
+    "sourceTop": 0,
+    "sourceBottom": 267,
+    "scale": 0.1791044776119403
+  },
+  {
+    "id": "Chained",
+    "state": 4,
+    "sourceTop": 0,
+    "sourceBottom": 267,
+    "scale": 0.1791044776119403
+  },
+  {
+    "id": "WheelOfFortune",
+    "state": 0,
+    "sourceTop": 0,
+    "sourceBottom": 239,
+    "scale": 0.2
+  },
+  {
+    "id": "WheelOfFortune",
+    "state": 1,
+    "sourceTop": 0,
+    "sourceBottom": 241,
+    "scale": 0.19834710743801653
+  },
+  {
+    "id": "WheelOfFortune",
+    "state": 2,
+    "sourceTop": 0,
+    "sourceBottom": 241,
+    "scale": 0.19834710743801653
+  },
+  {
+    "id": "WheelOfFortune",
+    "state": 3,
+    "sourceTop": 0,
+    "sourceBottom": 242,
+    "scale": 0.19753086419753085
+  },
+  {
+    "id": "WheelOfFortune",
+    "state": 4,
+    "sourceTop": 0,
+    "sourceBottom": 241,
+    "scale": 0.19834710743801653
+  }
+]

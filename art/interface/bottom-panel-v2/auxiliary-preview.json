@@ -1,0 +1,20 @@
+{
+  "source": "design-preview-stub",
+  "unitsPerFullBar": 10000,
+  "values": {
+    "sanityLoss": 5400,
+    "potionDigestion": 7200,
+    "unassigned": 3800
+  },
+  "labels": [
+    "Втрата",
+    "Засвоєння",
+    "—"
+  ],
+  "colors": [
+    "#B77789",
+    "#93B66B",
+    "#9B8BBA"
+  ],
+  "warning": "Only the design review reads these test values. No client/server gameplay binding has been implemented."
+}

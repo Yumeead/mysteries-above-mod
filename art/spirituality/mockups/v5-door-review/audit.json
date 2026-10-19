@@ -1,0 +1,340 @@
+[
+  {
+    "pathway": "Fool",
+    "name": "Дурень",
+    "motif": "rectangular parchment tarot card with a tiny dark eye/star",
+    "beforeComponents": [
+      103,
+      2
+    ],
+    "afterComponents": [
+      111
+    ]
+  },
+  {
+    "pathway": "Error",
+    "name": "Помилка",
+    "motif": "jagged broken CLOCK-FACE shard with one clock hand, NOT a gear",
+    "beforeComponents": [
+      89,
+      3
+    ],
+    "afterComponents": [
+      93
+    ]
+  },
+  {
+    "pathway": "Door",
+    "name": "Двері",
+    "motif": "a clearly key-shaped narrow brass KEY pendant",
+    "beforeComponents": [
+      61
+    ],
+    "afterComponents": [
+      103
+    ]
+  },
+  {
+    "pathway": "Visionary",
+    "name": "Провидець",
+    "motif": "oval pale mother-of-pearl EYE medallion",
+    "beforeComponents": [
+      84,
+      1,
+      1
+    ],
+    "afterComponents": [
+      107
+    ]
+  },
+  {
+    "pathway": "Justiciar",
+    "name": "Правосуддя",
+    "motif": "angular SILVER SHIELD pendant with a tiny scales mark",
+    "beforeComponents": [
+      75,
+      2,
+      1,
+      1,
+      1
+    ],
+    "afterComponents": [
+      114
+    ]
+  },
+  {
+    "pathway": "BlackEmperor",
+    "name": "Чорний Імператор",
+    "motif": "a dark square WAX SEAL with a tiny crown impression",
+    "beforeComponents": [
+      42,
+      28,
+      5,
+      2,
+      2,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "afterComponents": [
+      117
+    ]
+  },
+  {
+    "pathway": "WhiteTower",
+    "name": "Біла Вежа",
+    "motif": "a tiny open IVORY BOOK, two rectangular pages as its silhouette",
+    "beforeComponents": [
+      120,
+      3,
+      2,
+      1
+    ],
+    "afterComponents": [
+      128
+    ]
+  },
+  {
+    "pathway": "Paragon",
+    "name": "Взірець",
+    "motif": "a small BRASS COGWHEEL pendant with teeth and a dark center hole",
+    "beforeComponents": [
+      96,
+      5,
+      1
+    ],
+    "afterComponents": [
+      109
+    ]
+  },
+  {
+    "pathway": "Sun",
+    "name": "Сонце",
+    "motif": "a small GOLD SUNBURST disc with visible rays",
+    "beforeComponents": [
+      112,
+      2,
+      1
+    ],
+    "afterComponents": [
+      110
+    ]
+  },
+  {
+    "pathway": "Tyrant",
+    "name": "Тиран",
+    "motif": "a compact three-pronged TRIDENT pendant",
+    "beforeComponents": [
+      5,
+      4,
+      3,
+      3,
+      3,
+      3,
+      3,
+      2,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "afterComponents": [
+      111
+    ]
+  },
+  {
+    "pathway": "TwilightGiant",
+    "name": "Сутінковий Велетень",
+    "motif": "a narrow pointed BRONZE SWORD charm with a short crossguard",
+    "beforeComponents": [
+      57,
+      1,
+      1
+    ],
+    "afterComponents": [
+      91
+    ]
+  },
+  {
+    "pathway": "RedPriest",
+    "name": "Червоний Жрець",
+    "motif": "a triangular BURGUNDY CLOTH PENNANT with a pointed tip",
+    "beforeComponents": [
+      106,
+      1,
+      1
+    ],
+    "afterComponents": [
+      97
+    ]
+  },
+  {
+    "pathway": "Mother",
+    "name": "Mother",
+    "motif": "a pointed serrated LEAF with a single clear central vein",
+    "beforeComponents": [
+      119,
+      1
+    ],
+    "afterComponents": [
+      118
+    ]
+  },
+  {
+    "pathway": "Moon",
+    "name": "Місяць",
+    "motif": "a clearly CRESCENT-SHAPED SILVER charm",
+    "beforeComponents": [
+      42,
+      5,
+      3,
+      2,
+      2,
+      2,
+      1
+    ],
+    "afterComponents": [
+      102
+    ]
+  },
+  {
+    "pathway": "Darkness",
+    "name": "Темрява",
+    "motif": "a long narrow BLACK FEATHER with visible tapered barbs",
+    "beforeComponents": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "afterComponents": [
+      106
+    ]
+  },
+  {
+    "pathway": "Death",
+    "name": "Смерть",
+    "motif": "a little pale BONE with two rounded ends, not a skull bottle",
+    "beforeComponents": [
+      57,
+      4,
+      3,
+      2
+    ],
+    "afterComponents": [
+      103
+    ]
+  },
+  {
+    "pathway": "Demoness",
+    "name": "Демонеса",
+    "motif": "a black GLASS DIAMOND pendant with a sharp pointed bottom",
+    "beforeComponents": [
+      11,
+      8,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "afterComponents": [
+      88
+    ]
+  },
+  {
+    "pathway": "HangedMan",
+    "name": "Повішений",
+    "motif": "a small clearly open KNOTTED ROPE LOOP charm",
+    "beforeComponents": [
+      60,
+      1,
+      1
+    ],
+    "afterComponents": [
+      95
+    ]
+  },
+  {
+    "pathway": "Abyss",
+    "name": "Безодня",
+    "motif": "a jagged dark OBSIDIAN FANG with one broken side",
+    "beforeComponents": [
+      19,
+      4,
+      2,
+      2,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "afterComponents": [
+      94
+    ]
+  },
+  {
+    "pathway": "Hermit",
+    "name": "Відлюдник",
+    "motif": "a clearly FIVE-POINTED STAR-shaped brass charm",
+    "beforeComponents": [
+      44,
+      5,
+      1,
+      1
+    ],
+    "afterComponents": [
+      106
+    ]
+  },
+  {
+    "pathway": "Chained",
+    "name": "Скутий",
+    "motif": "a clearly U-shaped IRON SHACKLE with an open center",
+    "beforeComponents": [
+      3,
+      3,
+      2,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "afterComponents": [
+      114
+    ]
+  },
+  {
+    "pathway": "WheelOfFortune",
+    "name": "Колесо Фортуни",
+    "motif": "a tiny IVORY DICE CUBE with two clearly visible dark pips",
+    "beforeComponents": [
+      72,
+      3
+    ],
+    "afterComponents": [
+      107
+    ]
+  }
+]

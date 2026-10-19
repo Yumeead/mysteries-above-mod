@@ -1,0 +1,32 @@
+{
+  "pathway": "Sun",
+  "frame": "mysteries_above:spirituality/common/frame",
+  "glass": "mysteries_above:spirituality/common/glass",
+  "mask": "mysteries_above:textures/gui/sprites/spirituality/common/mask.png",
+  "tones": "mysteries_above:textures/gui/sprites/spirituality/sun/tones.png",
+  "neck": "mysteries_above:spirituality/sun/neck",
+  "tag": "mysteries_above:spirituality/sun/tag",
+  "engraving": "mysteries_above:spirituality/sun/engraving",
+  "palette": [
+    "#946B14",
+    "#BB8A19",
+    "#D09A15",
+    "#E7B41B",
+    "#FAD624",
+    "#FDF43F"
+  ],
+  "particle": [
+    [
+      0,
+      -1
+    ],
+    [
+      0,
+      0
+    ]
+  ],
+  "particleCount": 3,
+  "flow": "RISE",
+  "periodTicks": 120,
+  "tagSwing": 0.025
+}

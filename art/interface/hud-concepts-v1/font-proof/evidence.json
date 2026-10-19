@@ -1,0 +1,24 @@
+{
+  "minecraft": "26.2",
+  "renderer": "actual unchanged Minecraft client; F2 screenshots; no rasterized replacement glyphs",
+  "sample": "і ї є ґ І Ї Є Ґ  |  Їжак, ґанок, Єдність",
+  "guiScales": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "viewport": [
+    1920,
+    1080
+  ],
+  "language": "uk_ua",
+  "forceUnicodeFont": false,
+  "sourceCodeChanges": false,
+  "files": {
+    "font-gui1.png": "1fa079580baf1bb381105def24abf79b738ba7cc2d5749874a5d4b501e1e9550",
+    "font-gui2.png": "584a9a7c50f36f0f368c3eb934fda5ea6a27f182e26a57ffbb4ff554b62618fc",
+    "font-gui3.png": "66cacb55ff0949beee03d412b03ca9a4f07b5ba0e6ab2bc4cdc8fc52cd7ec605",
+    "font-gui4.png": "e1bdba0708f3ae5f019ce4318d975269c1adea1ff9d9eb631599578d5f13b2e2"
+  }
+}

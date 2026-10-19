@@ -1,0 +1,15 @@
+{
+  "values": {
+    "sanityLoss": 5400,
+    "potionDigestion": 7200,
+    "unassigned": 0
+  },
+  "labels": [
+    "Втрата глузду",
+    "Засвоєння зілля",
+    "Третя смуга: не призначена"
+  ],
+  "unitMaximum": 10000,
+  "visibilityHoldMs": 2500,
+  "gameplayBinding": false
+}

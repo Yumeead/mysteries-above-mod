@@ -1,0 +1,28 @@
+{
+  "pathway": "Tyrant",
+  "frame": "mysteries_above:spirituality/common/frame",
+  "glass": "mysteries_above:spirituality/common/glass",
+  "mask": "mysteries_above:textures/gui/sprites/spirituality/common/mask.png",
+  "tones": "mysteries_above:textures/gui/sprites/spirituality/tyrant/tones.png",
+  "neck": "mysteries_above:spirituality/tyrant/neck",
+  "tag": "mysteries_above:spirituality/tyrant/tag",
+  "engraving": "mysteries_above:spirituality/tyrant/engraving",
+  "palette": [
+    "#062E7A",
+    "#0945AB",
+    "#0347B6",
+    "#0A64DB",
+    "#1D94F4",
+    "#56D5FA"
+  ],
+  "particle": [
+    [
+      0,
+      0
+    ]
+  ],
+  "particleCount": 3,
+  "flow": "DRIFT",
+  "periodTicks": 80,
+  "tagSwing": 0.04
+}

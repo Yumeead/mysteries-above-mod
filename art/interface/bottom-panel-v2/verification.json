@@ -1,0 +1,96 @@
+{
+  "mask": {
+    "diameter": 30,
+    "x": 16,
+    "y": 20,
+    "bottom": 49
+  },
+  "liquidSamples": 8592,
+  "liquidChannelMismatches": 0,
+  "fullTransparentMeniscusPixelsPerPath": 22,
+  "layouts": [
+    {
+      "guiWidth": 320,
+      "left": 4,
+      "right": 316,
+      "compact": true
+    },
+    {
+      "guiWidth": 329,
+      "left": 8,
+      "right": 320,
+      "compact": true
+    },
+    {
+      "guiWidth": 427,
+      "left": 57,
+      "right": 369,
+      "compact": true
+    },
+    {
+      "guiWidth": 480,
+      "left": 43,
+      "right": 479,
+      "compact": false
+    },
+    {
+      "guiWidth": 640,
+      "left": 123,
+      "right": 559,
+      "compact": false
+    },
+    {
+      "guiWidth": 960,
+      "left": 283,
+      "right": 719,
+      "compact": false
+    },
+    {
+      "guiWidth": 1920,
+      "left": 763,
+      "right": 1199,
+      "compact": false
+    }
+  ],
+  "hearts": {
+    "width": 9,
+    "height": 9,
+    "step": 8
+  },
+  "hotbar": {
+    "width": 182,
+    "height": 22,
+    "step": 20,
+    "item": [
+      16,
+      16
+    ],
+    "selection": [
+      24,
+      23
+    ]
+  },
+  "notes": [
+    "No new game code or game resources.",
+    "Original images, including meniscus transparency, copied exactly inside the circular mask.",
+    "Glass is a separate layer and may visually overlay original pixels; test checks liquid before glass.",
+    "The full panel and statuses are design proposals; not verified in Minecraft."
+  ],
+  "protectedFiles": {
+    "checked": 1391,
+    "changed": []
+  },
+  "nearest4x": {
+    "file": "00-panel-x4.png",
+    "nonUniformPixelsWithin4x4Blocks": 0
+  },
+  "minimumFillVisiblePixels": {
+    "fool": 8,
+    "mother": 10,
+    "justiciar": 16
+  },
+  "localDocumentLinks": {
+    "missing": []
+  },
+  "pngCount": 37
+}
