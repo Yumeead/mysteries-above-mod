@@ -4,7 +4,17 @@ import me.vangoo.mysteries.client.hud.BottomHud
 import com.google.gson.JsonParser
 import me.vangoo.mysteries.modId
 import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.GuiGraphicsExtractor
+import net.minecraft.client.gui.components.AbstractButton
+import net.minecraft.client.gui.components.AbstractSliderButton
+import net.minecraft.client.gui.components.AbstractWidget
+import net.minecraft.client.gui.components.Button
+import net.minecraft.client.gui.components.EditBox
+import net.minecraft.client.gui.components.StringWidget
 import net.minecraft.client.gui.screens.Screen
+import net.minecraft.client.gui.screens.PauseScreen
+import net.minecraft.client.renderer.RenderPipelines
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents
 import net.minecraft.resources.Identifier
 
 /** Exact vanilla classes only: unknown mod screens and their subclasses keep their resources. */
@@ -18,12 +28,73 @@ object InventorySkin {
         .bufferedReader().use { reader -> JsonParser.parseReader(reader).asJsonObject.entrySet()
             .associate { (key, value) -> Identifier.withDefaultNamespace(key) to modId(value.asString) } }
 
-    fun allows(screen: Screen?): Boolean = screen?.javaClass?.name in screens
+    private val widgets = java.util.ArrayDeque<AbstractWidget>()
+    private const val GOLD = 0xFFDFC28B.toInt()
+
+    fun allows(screen: Screen?): Boolean {
+        val name = screen?.javaClass?.name ?: return false
+        return name in screens || name.startsWith("net.minecraft.client.gui.screens.options.") ||
+            name == "net.minecraft.client.gui.screens.packs.PackSelectionScreen" || screen.javaClass == PauseScreen::class.java
+    }
 
     val enabled: Boolean get() = BottomHud.enabled && allows(Minecraft.getInstance().gui.screen())
 
     @JvmStatic fun texture(original: Identifier): Identifier {
         if (!enabled || original.namespace != "minecraft") return original
+        val name = original.path
+        if (Minecraft.getInstance().gui.screen()?.javaClass?.name !in screens &&
+            !name.startsWith("widget/") && !name.startsWith("tooltip/") && !name.startsWith("pause_menu/") && name != "friends/friends") return original
+        val widget = widgets.peekLast()
+        if (widget != null && !widget.javaClass.name.startsWith("net.minecraft.client.")) return original
+        if (name.startsWith("widget/button") && widget is AbstractButton && widget.active && widget.isHovered &&
+            Minecraft.getInstance().mouseHandler.isLeftPressed) return modId("interface/button_pressed")
         return textures[original] ?: original
     }
+
+    fun register() {
+        ScreenEvents.AFTER_INIT.register { _, screen, _, _ ->
+            if (!allows(screen)) return@register
+            val title = screen.children().filterIsInstance<StringWidget>().firstOrNull { it.message.string == screen.title.string }
+                ?: return@register
+            val originalY = title.y
+            val pauseY = if (screen.javaClass == PauseScreen::class.java)
+                screen.children().filterIsInstance<Button>().minOfOrNull { it.y }?.minus(22) else null
+            ScreenEvents.beforeExtract(screen).register { _, _, _, _, _ ->
+                widgets.clear()
+                title.y = if (enabled && pauseY != null) pauseY else originalY
+            }
+            ScreenEvents.afterBackground(screen).register { _, graphics, _, _, _ ->
+                if (enabled) {
+                    val width = if (pauseY != null) 204 else minOf(Minecraft.getInstance().font.width(title.message) + 16, screen.width - 16)
+                    graphics.blitSprite(RenderPipelines.GUI_TEXTURED, modId("interface/panel_dark"),
+                        (screen.width - width) / 2, title.y - 6, width, 20)
+                }
+            }
+        }
+    }
+
+    @JvmStatic fun beginWidget(widget: AbstractWidget) {
+        if (enabled) widgets.addLast(widget)
+    }
+
+    @JvmStatic fun endWidget(widget: AbstractWidget, graphics: GuiGraphicsExtractor) {
+        if (widgets.peekLast() !== widget) return
+        widgets.removeLast()
+        if (!enabled || !Minecraft.getInstance().lastInputType.isKeyboard ||
+            !widget.active || !widget.isFocused || widget.width < 12 || widget.height < 12 ||
+            !widget.javaClass.name.startsWith("net.minecraft.client.") ||
+            widget !is AbstractButton && widget !is AbstractSliderButton && widget !is EditBox) return
+        val x = widget.x + 3
+        val y = widget.y + 3
+        for ((sx, dx) in listOf(x to 1, widget.x + widget.width - 4 to -1)) {
+            for ((sy, dy) in listOf(y to 1, widget.y + widget.height - 4 to -1)) {
+                for (n in 0..2) {
+                    graphics.fill(sx + dx * n, sy, sx + dx * n + 1, sy + 1, GOLD)
+                    graphics.fill(sx, sy + dy * n, sx + 1, sy + dy * n + 1, GOLD)
+                }
+            }
+        }
+    }
+
+    @JvmStatic fun selectionColor(original: Int): Int = if (enabled) (original and -0x1000000) or 0xDFC28B else original
 }

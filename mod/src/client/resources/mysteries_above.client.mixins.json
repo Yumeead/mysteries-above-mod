@@ -8,6 +8,8 @@
     "AbstractClientPlayerSkinMixin",
     "HudSpriteMixin",
     "InventoryTextureMixin",
+    "InterfaceWidgetMixin",
+    "InterfaceSelectionMixin",
     "ChatLayoutMixin"
   ],
   "injectors": {

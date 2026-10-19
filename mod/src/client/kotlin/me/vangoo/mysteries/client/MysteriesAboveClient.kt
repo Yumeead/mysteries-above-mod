@@ -93,6 +93,7 @@ object MysteriesAboveClient : ClientModInitializer {
         AbilityHud.register()
         MarionetteHud.register()
         BottomHud.register()
+        me.vangoo.mysteries.client.render.InventorySkin.register()
         ModKeys.register()
 
         log.info("Mysteries Above: client side is up")

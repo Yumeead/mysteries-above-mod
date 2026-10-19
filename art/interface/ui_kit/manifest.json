@@ -3,7 +3,8 @@
   "stages": [
     1,
     2,
-    3
+    3,
+    4
   ],
   "jarSha256": "40896ee9f1e2bec3c934daac7e93d41e9e3d9c2f8ae0ca366d52ffbfd1afa290",
   "generated": [
@@ -222,6 +223,302 @@
         18
       ],
       "sha256": "c65eab6298afb83849d9325683852d32a7411ecc82858f594ca0e4d6bef07c6a"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/friends/friends.png",
+      "size": [
+        16,
+        16
+      ],
+      "sha256": "c652aa9fc33c85f730c015856d5f2edab063c3aced359a66550fb545e8833b8f"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/pause_menu/bug.png",
+      "size": [
+        13,
+        13
+      ],
+      "sha256": "5922bd9fffc9ed5262bead8ee9576fc2d9fd73e1176b33c3d6727210bdede41e"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/pause_menu/player_reporting.png",
+      "size": [
+        15,
+        14
+      ],
+      "sha256": "2c77ef62ec660180da505d61faa234114c263b5dacde326d6516753bfb07f9a5"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/pause_menu/social_interactions.png",
+      "size": [
+        20,
+        20
+      ],
+      "sha256": "f1cd6dea7311284b73d8d5c77e27b1cece41336f8b3d71967bebb28577eb9b1d"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/button.png",
+      "size": [
+        200,
+        20
+      ],
+      "sha256": "6acae530ece83b43102ebab39395c8d927982a11e98dbb50a67b96a43f4932ee"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/button_disabled.png",
+      "size": [
+        200,
+        20
+      ],
+      "sha256": "8386caf2bbdf278663ec0dceb7301133a7ae92d6af3caa9a0dd5a28f12a23d2c"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/button_highlighted.png",
+      "size": [
+        200,
+        20
+      ],
+      "sha256": "5b29f3f921738aa33ce8ba6c413632b546d40cf8f49d1bfbb7c5ead5ae1b5777"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/checkbox.png",
+      "size": [
+        20,
+        20
+      ],
+      "sha256": "73159195a3e489fa0fd0d6594beb816017add0ef1548ce93389444986c0f87e1"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/checkbox_highlighted.png",
+      "size": [
+        20,
+        20
+      ],
+      "sha256": "d9fb6ba82d29779ee7c0f9a568ee8fbd4dc761f413867eafd5dda50c47ca6c02"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/checkbox_selected.png",
+      "size": [
+        20,
+        20
+      ],
+      "sha256": "133e18146e114056e4dcd3880e07c0e98e7117b78a38a20a13b63e5cd1bf1ee4"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/checkbox_selected_highlighted.png",
+      "size": [
+        20,
+        20
+      ],
+      "sha256": "a6ea19b3c3e3fef042dd2fa83461c45f9588874410a892ad6f202f455771b3ab"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/cross_button.png",
+      "size": [
+        14,
+        14
+      ],
+      "sha256": "22ac3503da7badd8653e94a89a94a91b8fd938df4ecd76766d99332670c4fe38"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/cross_button_highlighted.png",
+      "size": [
+        14,
+        14
+      ],
+      "sha256": "90d01b6775503df6807b900f64e9e55abc1a5df1d92d452e21e2d847b3c6e2e8"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/locked_button.png",
+      "size": [
+        20,
+        20
+      ],
+      "sha256": "5bb72f0792bcb9429cd92c43a832adc8de8945a2d00dd2375d90da8a181147bf"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/locked_button_disabled.png",
+      "size": [
+        20,
+        20
+      ],
+      "sha256": "48d900103dec4106d3ae148d1b636fcb7e8edbf508a2e84f3169ffe52edd0788"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/locked_button_highlighted.png",
+      "size": [
+        20,
+        20
+      ],
+      "sha256": "894cd989e56eff1b1b989bcfddcb4733e20e64c195e505c4df200f6be266e45e"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/page_backward.png",
+      "size": [
+        23,
+        13
+      ],
+      "sha256": "dda143fbc64c71cc2a74b96dac713f1cc5768995cf85c8fdb0daeb0b8b8080a0"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/page_backward_highlighted.png",
+      "size": [
+        23,
+        13
+      ],
+      "sha256": "24ab7189f28c686dcfe6d7fa23086f5dc6b62496a214710f3b31d9ae7d2a2100"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/page_forward.png",
+      "size": [
+        23,
+        13
+      ],
+      "sha256": "62d801c2113b17480b10d774de740a9993a2be83d4a607adec833469dd8d6df2"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/page_forward_highlighted.png",
+      "size": [
+        23,
+        13
+      ],
+      "sha256": "eed7a4651bb22e75fe123d7db85b7522ea692877e08dbc94bf8dec8c9e070f71"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/preedit.png",
+      "size": [
+        200,
+        20
+      ],
+      "sha256": "6acae530ece83b43102ebab39395c8d927982a11e98dbb50a67b96a43f4932ee"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/scroller.png",
+      "size": [
+        6,
+        32
+      ],
+      "sha256": "d68b68f001dc812a10a5280dadfa6674e921a0aa1ea014217e7f873f20f6abf1"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/scroller_background.png",
+      "size": [
+        6,
+        32
+      ],
+      "sha256": "37717f61821614829caaa8fbd6782edf927f5768d5697ad689b862b507310f65"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/slider.png",
+      "size": [
+        200,
+        20
+      ],
+      "sha256": "6acae530ece83b43102ebab39395c8d927982a11e98dbb50a67b96a43f4932ee"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/slider_handle.png",
+      "size": [
+        8,
+        20
+      ],
+      "sha256": "1964668e426228e4aea39423cce02b89b46418292e4d76c61f5b7dba0d607bd7"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/slider_handle_highlighted.png",
+      "size": [
+        8,
+        20
+      ],
+      "sha256": "d62b6a44123f574ffb337703898004a559948c89391edbd991aec111be9c2e27"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/slider_highlighted.png",
+      "size": [
+        200,
+        20
+      ],
+      "sha256": "f9586bb81d3766ea8670098a073fc4cf5d84456074c5aeca482b3fe3b642df50"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/slot_frame.png",
+      "size": [
+        80,
+        80
+      ],
+      "sha256": "a17806212d2f67608bdb7b480d46d2e7e1f50a16bbc3cb56750c1d38984c7a74"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/tab.png",
+      "size": [
+        130,
+        24
+      ],
+      "sha256": "38cf1a543f3248b313f65920024dc8ecc2b1bd6bd4735b9ecf4c3ebdf69b7f27"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/tab_highlighted.png",
+      "size": [
+        130,
+        24
+      ],
+      "sha256": "9ed86dfc7801e12dd2e9e4111209fb77dc312e45ea9de185c1b12c8d79334167"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/tab_selected.png",
+      "size": [
+        130,
+        24
+      ],
+      "sha256": "6cbe6cef28c2f0b7250683906bedbf4458d861de44b841ea95be33b35e658a43"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/tab_selected_highlighted.png",
+      "size": [
+        130,
+        24
+      ],
+      "sha256": "1c2af53711da623942e287e2b08155076a8aee35b0fdeae96e013ab0c9946b52"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/text_field.png",
+      "size": [
+        200,
+        20
+      ],
+      "sha256": "6acae530ece83b43102ebab39395c8d927982a11e98dbb50a67b96a43f4932ee"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/text_field_highlighted.png",
+      "size": [
+        200,
+        20
+      ],
+      "sha256": "f9586bb81d3766ea8670098a073fc4cf5d84456074c5aeca482b3fe3b642df50"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/unlocked_button.png",
+      "size": [
+        20,
+        20
+      ],
+      "sha256": "0562e5f30eb650b4f43007cb465554d6917e4ded3925d04d9bfb5518b057701a"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/unlocked_button_disabled.png",
+      "size": [
+        20,
+        20
+      ],
+      "sha256": "09b5f03152d2f23a29bbe05b531eff6ee73102973d631f5c290d5258ea600a16"
+    },
+    {
+      "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/sprites/interface/widget/unlocked_button_highlighted.png",
+      "size": [
+        20,
+        20
+      ],
+      "sha256": "d75cf235f039c6edcdb79fb5f304d822acc5531fda239c3b755d9d227b8731cc"
     },
     {
       "path": "mod/src/client/resources/assets/mysteries_above/textures/gui/interface/container/anvil.png",

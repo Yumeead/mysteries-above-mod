@@ -112,6 +112,47 @@ def build(jar):
             sprite(name, target)
             images['sprites/interface/' + name + '.png'] = (target, meta)
         for path in archive.namelist():
+            prefix = 'assets/minecraft/textures/gui/sprites/'
+            if not path.startswith(prefix) or not path.endswith('.png'):
+                continue
+            name = path[len(prefix):-4]
+            if not (name.startswith(('widget/', 'pause_menu/')) or name == 'friends/friends'):
+                continue
+            original = Image.open(io.BytesIO(archive.read(path))).convert('RGBA')
+            meta = json.loads(archive.read(path + '.mcmeta')) if path + '.mcmeta' in archive.namelist() else None
+            target = kit.canvas(*original.size)
+            highlighted = 'highlighted' in name
+            if name.startswith('widget/button'):
+                kit.button(target, 0, 0, target.width, 'disabled' if 'disabled' in name else 'hover' if highlighted else 'normal', target.height)
+                meta['gui']['scaling']['border'] = 3
+            elif name.startswith('widget/slider'):
+                handle = 'handle' in name
+                target = kit.slider_sprite(*original.size, highlighted, handle)
+                if not handle: meta['gui']['scaling']['border'] = 2
+            elif name.startswith(('widget/text_field', 'widget/preedit')):
+                kit.rect(target, 0, 0, *target.size, kit.DARK)
+                kit.metal_frame(target, 0, 0, *target.size, highlighted)
+                meta['gui']['scaling']['border'] = 2
+            elif name.startswith('widget/tab'):
+                kit.button(target, 0, 0, target.width, 'hover' if highlighted else 'normal', target.height, 'selected' in name)
+            elif name.startswith('widget/checkbox'):
+                kit.button(target, 0, 0, target.width, 'hover' if highlighted else 'normal', target.height)
+                if 'selected' in name:
+                    for x, y in [(5, 10), (6, 11), (7, 12), (8, 11), (9, 10), (10, 9), (11, 8), (12, 7), (13, 6)]:
+                        kit.rect(target, x, y, 1, 2, kit.GOLD['light'])
+            elif name.startswith('widget/scroller'):
+                if name.endswith('_background'):
+                    kit.rect(target, 0, 0, *target.size, kit.DARK)
+                    kit.outline(target, 0, 0, *target.size, kit.GOLD['dark'])
+                else: kit.scrollbar(target, 0, 0, target.height, target.height, w=target.width)
+            elif name == 'widget/slot_frame':
+                kit.metal_frame(target, 0, 0, *target.size)
+                meta = {'gui': {'scaling': {'type': 'nine_slice', 'width': target.width, 'height': target.height, 'border': 2}}}
+            else:
+                target = kit.gold_icon(original)
+            assert target.size == original.size, name
+            images['sprites/interface/' + name + '.png'] = (target, meta)
+        for path in archive.namelist():
             root = 'assets/minecraft/textures/gui/'
             if not path.startswith(root + 'container/') or not path.endswith('.png'):
                 continue
@@ -238,7 +279,7 @@ def main():
     registry_raw = json.dumps(registry, ensure_ascii=False, indent=2) + '\n'
     if args.check: assert registry_path.read_text(encoding='utf-8') == registry_raw
     else: registry_path.write_text(registry_raw, encoding='utf-8')
-    report = dict(minecraft='26.2', stages=[1, 2, 3], jarSha256=hashlib.sha256(args.minecraft_jar.read_bytes()).hexdigest(),
+    report = dict(minecraft='26.2', stages=[1, 2, 3, 4], jarSha256=hashlib.sha256(args.minecraft_jar.read_bytes()).hexdigest(),
                   generated=manifest, nativeSlots=slots, globalMinecraftOverrides=False)
     serialized = json.dumps(report, ensure_ascii=False, indent=2) + '\n'
     if args.check: assert (HERE / 'manifest.json').read_text(encoding='utf-8') == serialized
