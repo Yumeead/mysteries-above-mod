@@ -1,0 +1,10 @@
+{
+  "skills": [
+    {
+      "skill": "mysteries_above:whitetower/analysis",
+      "cooldown": 140
+    }
+  ],
+  "gcd": 120,
+  "range": 12
+}

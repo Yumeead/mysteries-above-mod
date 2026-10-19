@@ -1,0 +1,37 @@
+{
+  "beyonders_only": true,
+  "target": [
+    {
+      "type": "effect",
+      "effect": "minecraft:nausea",
+      "duration": 80
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:weakness",
+      "duration": 80
+    },
+    {
+      "type": "chance",
+      "chance": 0.1,
+      "then": [
+        {
+          "type": "drain_sanity",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:smoke"
+        },
+        "count": 8,
+        "spread": 0.4,
+        "rise": 0.5,
+        "y": 1.6
+      }
+    }
+  ]
+}

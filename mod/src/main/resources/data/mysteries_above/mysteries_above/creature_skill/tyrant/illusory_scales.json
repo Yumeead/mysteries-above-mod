@@ -1,0 +1,21 @@
+{
+  "self": [
+    {
+      "type": "effect",
+      "effect": "minecraft:resistance",
+      "duration": 50
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:glow"
+        },
+        "count": 12,
+        "spread": 0.3,
+        "rise": 0.5,
+        "y": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "skills": [
+    {
+      "skill": "mysteries_above:sun/sunshine",
+      "cooldown": 180
+    },
+    {
+      "skill": "mysteries_above:sun/singing",
+      "cooldown": 220
+    }
+  ],
+  "reactions": [
+    {
+      "when": "hurt",
+      "skill": "mysteries_above:sun/blessing",
+      "cooldown": 280,
+      "below": 0.5
+    }
+  ],
+  "gcd": 120,
+  "range": 12
+}

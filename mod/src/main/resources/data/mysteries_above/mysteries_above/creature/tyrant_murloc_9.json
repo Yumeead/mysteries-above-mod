@@ -1,0 +1,37 @@
+{
+  "body": {
+    "entity": "minecraft:drowned",
+    "name": {
+      "text": "Мурлок",
+      "color": "dark_aqua"
+    },
+    "aura": {
+      "particle": {
+        "type": "minecraft:bubble"
+      },
+      "count": 4,
+      "spread": 0.3,
+      "rise": 0.5,
+      "y": 1,
+      "speed": 0.01
+    }
+  },
+  "stats": {
+    "health": 57,
+    "damage": 7,
+    "speed": 0.25
+  },
+  "kit": "mysteries_above:tyrant_9",
+  "pathway": "Tyrant",
+  "sequence": 9,
+  "spawn": {
+    "biomes": [
+      "minecraft:ocean",
+      "minecraft:warm_ocean",
+      "minecraft:lukewarm_ocean",
+      "minecraft:river"
+    ],
+    "chance": 0.005,
+    "structures": 0.005
+  }
+}

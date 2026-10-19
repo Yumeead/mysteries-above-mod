@@ -1,0 +1,45 @@
+{
+  "body": {
+    "entity": "mysteries_above:human",
+    "equipment": {
+      "mainhand": "minecraft:iron_sword",
+      "head": "minecraft:iron_helmet",
+      "chest": "minecraft:chainmail_chestplate"
+    }
+  },
+  "stats": {
+    "health": 30,
+    "damage": 4,
+    "speed": 0.3,
+    "armor": 2
+  },
+  "mind": {
+    "temperament": "neutral",
+    "role": "guard"
+  },
+  "persona": {
+    "names": [
+      "Констебль Гаррісон", "Констебль Мюррей", "Констебль Беккет", "Констебль Девіс",
+      "Констебль Ворд", "Констебль Тернер", "Сержант Колінз", "Сержант Елліот"
+    ]
+  },
+  "speech": {
+    "greet": [
+      "Проходьте, не затримуйтесь.",
+      "Усе спокійно?",
+      "Порядок понад усе."
+    ],
+    "night": [
+      "Тиха ніч. Поки що.",
+      "Комендантська година — додому."
+    ],
+    "fight": [
+      "Стояти! Іменем закону!",
+      "Ви заарештовані!",
+      "До бою!"
+    ],
+    "flee": [
+      "Відступаємо!"
+    ]
+  }
+}

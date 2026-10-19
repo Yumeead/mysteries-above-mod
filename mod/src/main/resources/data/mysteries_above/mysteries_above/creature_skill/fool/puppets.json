@@ -1,0 +1,10 @@
+{
+  "target": [
+    {
+      "type": "summon",
+      "creature": "mysteries_above:fool_puppet",
+      "count": 2,
+      "radius": 1
+    }
+  ]
+}

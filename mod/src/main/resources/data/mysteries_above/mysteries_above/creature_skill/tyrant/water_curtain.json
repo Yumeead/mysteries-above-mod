@@ -1,0 +1,28 @@
+{
+  "self": [
+    {
+      "type": "effect",
+      "effect": "minecraft:resistance",
+      "duration": 60,
+      "amplifier": 1
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:falling_water"
+        },
+        "count": 30,
+        "spread": 0.6,
+        "rise": 0.9,
+        "y": 1
+      }
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:block.water.ambient",
+      "volume": 1,
+      "pitch": 0.8
+    }
+  ]
+}

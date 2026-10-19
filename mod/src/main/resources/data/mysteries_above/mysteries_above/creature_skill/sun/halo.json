@@ -1,0 +1,17 @@
+{
+  "beyonders_only": true,
+  "target": [
+    {
+      "type": "effect",
+      "effect": "minecraft:glowing",
+      "duration": 60
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:weakness",
+      "duration": 50
+    }
+  ],
+  "area": 6,
+  "around_self": true
+}

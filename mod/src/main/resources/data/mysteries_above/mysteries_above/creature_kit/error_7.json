@@ -1,0 +1,31 @@
+{
+  "skills": [
+    {
+      "skill": "mysteries_above:error/decryption",
+      "cooldown": 200
+    },
+    {
+      "skill": "mysteries_above:error/mind_lock",
+      "cooldown": 200
+    },
+    {
+      "skill": "mysteries_above:error/swindler_charm",
+      "cooldown": 160
+    },
+    {
+      "skill": "mysteries_above:error/shadow_theft",
+      "cooldown": 120
+    }
+  ],
+  "reactions": [
+    {
+      "when": "near",
+      "skill": "mysteries_above:error/pickpocket",
+      "cooldown": 50,
+      "distance": 3.0
+    }
+  ],
+  "gcd": 100,
+  "range": 12,
+  "haste": 1
+}

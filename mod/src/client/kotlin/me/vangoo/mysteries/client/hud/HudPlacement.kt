@@ -111,16 +111,20 @@ object HudPlacement {
         }
         if (preview || me.vangoo.mysteries.client.beyonder.ClientAbilityState.isBeyonder) {
             rects[HudPart.ABILITY] = BottomPanel.ability(width, height, client.player?.mainArm == HumanoidArm.LEFT)
-            rects[HudPart.AUXILIARY] = BottomPanel.auxiliary(width, height)
+            rects[HudPart.AUXILIARY] = BottomPanel.auxiliary(width, height, rects.getValue(HudPart.ABILITY))
         }
         MarionetteHud.dimensions(width, height, preview)?.let { (w,h) ->
             val top = rects.values.minOfOrNull { it.y } ?: height - 70
             rects[HudPart.MARIONETTES] = HudRect((width-w)/2, top-h-8, w, h).clamped(width,height)
         }
-        return rects.mapValues { (part, default) ->
+        val boxes = rects.mapValues { (part, default) ->
             val rect = if (part == HudPart.BAR) default
                 else saved[part]?.resolve(default.width,default.height,width,height) ?: default
             HudBox(rect, 1f)
+        }.toMutableMap()
+        if (HudPart.AUXILIARY !in saved) boxes[HudPart.ABILITY]?.let { slot ->
+            boxes[HudPart.AUXILIARY] = HudBox(BottomPanel.auxiliary(width, height, slot.rect), 1f)
         }
+        return boxes
     }
 }

@@ -3,6 +3,7 @@ from pathlib import Path
 import json
 
 from PIL import Image
+from generate import LIQUID_BASE_ROWS
 
 ROOT = Path(__file__).resolve().parents[2]
 ART = ROOT / "art/spirituality"
@@ -32,11 +33,15 @@ def main():
             ref_y = 360 + source_index // 6 * 432
             game_x = (12 + index % 6 * 76) * 4
             game_y = (19 + index // 6 * 60 + 4) * 4
-            checked = covered = 0
+            checked = covered = repaired = 0
             for y in range(56):
                 for x in range(64):
                     pixel = painting.getpixel((x, y))
                     if not pixel[3]:
+                        continue
+                    # These local repairs intentionally differ from the archived v4 screenshots.
+                    if y >= LIQUID_BASE_ROWS.get(name, 56):
+                        repaired += 1
                         continue
                     expected = board.getpixel((ref_x + x * 4, ref_y + y * 4))
                     assert pixel[:3] == expected, (name, label, "export", x, y, pixel, expected)
@@ -52,10 +57,12 @@ def main():
             assert checked > 0, (name, label)
             results.append(dict(pathway=name, level=level, label=label, checkedLiquidPixels=checked,
                 checkedScreenshotPixels=checked * 16, pixelsCoveredByOriginalDecorations=covered,
+                locallyRepairedBasePixels=repaired,
                 mismatches=0, referenceOrigin=[ref_x, ref_y], gameOrigin=[game_x, game_y]))
     report = dict(reference="mockups/v4/01-all-22-pathways-x4.png", guiScale=4,
         pathways=22, states=2, mismatches=0,
         checkedLiquidPixels=sum(result["checkedLiquidPixels"] for result in results),
+        locallyRepairedBasePixels=sum(result["locallyRepairedBasePixels"] for result in results),
         checkedScreenshotPixels=sum(result["checkedScreenshotPixels"] for result in results), results=results)
     (REVIEW / "pixel-check.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(f"PASS: {report['checkedLiquidPixels']} original liquid pixels / {report['checkedScreenshotPixels']} screenshot pixels; zero mismatches in 44 pathway/state pairs.")

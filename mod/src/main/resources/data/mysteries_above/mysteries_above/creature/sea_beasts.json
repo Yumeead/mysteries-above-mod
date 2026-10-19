@@ -1,0 +1,36 @@
+{
+  "body": {
+    "entity": "minecraft:guardian",
+    "name": {
+      "text": "Морська Примара",
+      "color": "blue"
+    },
+    "aura": {
+      "particle": {
+        "type": "minecraft:bubble_column_up"
+      },
+      "count": 6,
+      "spread": 0.4,
+      "rise": 0.3,
+      "y": 1,
+      "speed": 0.02
+    }
+  },
+  "stats": {
+    "health": 90,
+    "damage": 11,
+    "speed": 0.3
+  },
+  "mind": {
+    "temperament": "willless",
+    "fearless": true
+  },
+  "sequence": 5,
+  "spawn": {
+    "biomes": [
+      "minecraft:basalt_deltas",
+      "minecraft:warped_forest"
+    ],
+    "chance": 0.008
+  }
+}

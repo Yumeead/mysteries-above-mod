@@ -1,0 +1,37 @@
+{
+  "body": {
+    "entity": "minecraft:phantom",
+    "name": {
+      "text": "Посланець Смерті",
+      "color": "dark_purple"
+    },
+    "scale": 1.1,
+    "aura": {
+      "particle": {
+        "type": "minecraft:soul"
+      },
+      "count": 4,
+      "spread": 0.4,
+      "rise": 0.3,
+      "y": 1.2,
+      "speed": 0.01
+    }
+  },
+  "stats": {
+    "health": 100,
+    "damage": 12,
+    "speed": 0.3
+  },
+  "mind": {
+    "temperament": "willless",
+    "fearless": true
+  },
+  "sequence": 5,
+  "spawn": {
+    "biomes": [
+      "minecraft:nether_wastes",
+      "minecraft:crimson_forest"
+    ],
+    "chance": 0.01
+  }
+}

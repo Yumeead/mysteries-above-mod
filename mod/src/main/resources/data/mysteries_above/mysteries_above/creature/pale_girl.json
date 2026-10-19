@@ -1,0 +1,38 @@
+{
+  "body": {
+    "entity": "minecraft:stray",
+    "name": {
+      "text": "Бліда Дівчинка",
+      "color": "aqua"
+    },
+    "scale": 0.9,
+    "sun_proof": true,
+    "aura": {
+      "particle": {
+        "type": "minecraft:snowflake"
+      },
+      "count": 5,
+      "spread": 0.3,
+      "rise": 0.4,
+      "y": 1,
+      "speed": 0.01
+    }
+  },
+  "stats": {
+    "health": 70,
+    "damage": 7,
+    "speed": 0.28
+  },
+  "mind": {
+    "temperament": "willless",
+    "fearless": true
+  },
+  "sequence": 5,
+  "spawn": {
+    "biomes": [
+      "minecraft:soul_sand_valley",
+      "minecraft:crimson_forest"
+    ],
+    "chance": 0.01
+  }
+}

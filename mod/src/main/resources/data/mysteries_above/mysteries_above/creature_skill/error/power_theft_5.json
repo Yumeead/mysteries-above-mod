@@ -1,0 +1,38 @@
+{
+  "beyonders_only": true,
+  "target": [
+    {
+      "type": "steal_power",
+      "seconds": 180
+    },
+    {
+      "type": "chance",
+      "chance": 0.3,
+      "then": [
+        {
+          "type": "drain_sanity",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:smoke"
+        },
+        "count": 40,
+        "spread": 0.6,
+        "rise": 0.9,
+        "y": 1.2,
+        "speed": 0.05
+      }
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.enderman.stare",
+      "volume": 1,
+      "pitch": 0.4
+    }
+  ]
+}

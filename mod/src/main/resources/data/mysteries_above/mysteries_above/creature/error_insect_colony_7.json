@@ -1,0 +1,38 @@
+{
+  "body": {
+    "entity": "minecraft:bee",
+    "name": {
+      "text": "Доросла комаха Душезачаровуючої колонії",
+      "color": "dark_gray"
+    },
+    "aura": {
+      "particle": {
+        "type": "minecraft:smoke"
+      },
+      "count": 6,
+      "spread": 0.3,
+      "rise": 0.5,
+      "y": 1,
+      "speed": 0.01
+    }
+  },
+  "stats": {
+    "health": 124,
+    "damage": 12,
+    "speed": 0.3
+  },
+  "mind": {
+    "combat": "own"
+  },
+  "kit": "mysteries_above:error_7",
+  "pathway": "Error",
+  "sequence": 7,
+  "spawn": {
+    "biomes": [
+      "minecraft:swamp",
+      "minecraft:jungle"
+    ],
+    "chance": 0.0025,
+    "structures": 0.0025
+  }
+}

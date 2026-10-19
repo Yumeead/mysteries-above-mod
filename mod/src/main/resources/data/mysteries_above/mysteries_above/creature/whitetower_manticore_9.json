@@ -1,0 +1,35 @@
+{
+  "body": {
+    "entity": "minecraft:phantom",
+    "name": {
+      "text": "Мантикора",
+      "color": "yellow"
+    },
+    "aura": {
+      "particle": {
+        "type": "minecraft:end_rod"
+      },
+      "count": 4,
+      "spread": 0.3,
+      "rise": 0.5,
+      "y": 1,
+      "speed": 0.01
+    }
+  },
+  "stats": {
+    "health": 53,
+    "damage": 7,
+    "speed": 0.25
+  },
+  "kit": "mysteries_above:whitetower_9",
+  "pathway": "WhiteTower",
+  "sequence": 9,
+  "spawn": {
+    "biomes": [
+      "minecraft:savanna",
+      "minecraft:plains"
+    ],
+    "chance": 0.005,
+    "structures": 0.005
+  }
+}

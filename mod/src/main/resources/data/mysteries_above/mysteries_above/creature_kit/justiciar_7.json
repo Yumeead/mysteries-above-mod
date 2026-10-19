@@ -1,0 +1,25 @@
+{
+  "skills": [
+    {
+      "skill": "mysteries_above:justiciar/whip",
+      "cooldown": 140
+    },
+    {
+      "skill": "mysteries_above:justiciar/brand",
+      "cooldown": 200
+    },
+    {
+      "skill": "mysteries_above:justiciar/authority",
+      "cooldown": 240
+    }
+  ],
+  "reactions": [
+    {
+      "when": "pulse",
+      "skill": "mysteries_above:justiciar/jurisdiction",
+      "every": 40
+    }
+  ],
+  "gcd": 120,
+  "range": 12
+}

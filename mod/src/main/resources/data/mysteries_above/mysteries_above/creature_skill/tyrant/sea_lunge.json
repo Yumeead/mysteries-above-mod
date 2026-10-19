@@ -1,0 +1,32 @@
+{
+  "target": [
+    {
+      "type": "damage",
+      "amount": 9
+    },
+    {
+      "type": "knockback",
+      "strength": -0.8,
+      "up": 0.25
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:bubble"
+        },
+        "count": 14,
+        "spread": 0.3,
+        "rise": 0.5,
+        "y": 1,
+        "speed": 0.05
+      }
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.player.splash",
+      "volume": 1,
+      "pitch": 0.8
+    }
+  ]
+}

@@ -2,6 +2,7 @@ package me.vangoo.mysteries.client.hud
 
 import me.vangoo.domain.abilities.AbilityType
 import me.vangoo.domain.hud.HudPart
+import me.vangoo.domain.hud.BottomPanel
 import me.vangoo.domain.hud.SpiritualityDisplay
 import me.vangoo.domain.hud.SpiritualityMode
 import me.vangoo.domain.hud.SpiritualityNumbers
@@ -143,7 +144,7 @@ object SpiritualityHud : HudElement {
             if (mode == SpiritualityMode.FLASK) {
                 if (BottomHud.enabled) {
                     val label = if (exampleState) "800/1600" else currentText + maximumText
-                    val x = 0.coerceIn(1-box.rect.x,graphics.guiWidth()-box.rect.x-font.width(label)-1)
+                    val x = BottomPanel.orbLabelX(font.width(label),box.rect.x,graphics.guiWidth())
                     BottomHud.text(graphics,label,x,if(box.rect.y==0) 1 else 0)
                 }
                 else drawFlaskNumbers(graphics, if (exampleState) "800" else currentText,

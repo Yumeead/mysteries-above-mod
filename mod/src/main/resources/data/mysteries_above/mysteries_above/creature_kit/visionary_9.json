@@ -1,0 +1,10 @@
+{
+  "skills": [
+    {
+      "skill": "mysteries_above:visionary/scan_gaze",
+      "cooldown": 200
+    }
+  ],
+  "gcd": 120,
+  "range": 12
+}

@@ -1,0 +1,59 @@
+{
+  "body": {
+    "entity": "mysteries_above:human",
+    "aura": {
+      "particle": {
+        "type": "minecraft:enchant"
+      },
+      "count": 6,
+      "spread": 0.3,
+      "rise": 0.6,
+      "y": 1,
+      "speed": 0.4
+    }
+  },
+  "stats": {
+    "health": 30,
+    "damage": 4,
+    "speed": 0.3
+  },
+  "mind": {
+    "temperament": "predatory",
+    "role": "beyonder",
+    "flee_below": 0.3
+  },
+  "sequence": 8,
+  "persona": {
+    "names": [
+      "Незнайомець у капюшоні", "Мандрівник у сірому плащі", "Чоловік із тростиною", "Жінка в траурній вуалі",
+      "Блідий юнак", "Сивий моряк", "Мовчазний картяр", "Дама з парасолькою", "Чоловік у циліндрі"
+    ],
+    "pathways": ["Tyrant", "Sun", "WhiteTower", "Door", "Error", "Visionary", "Justiciar", "Fool", "Death"],
+    "weakest": 9,
+    "strongest": 7
+  },
+  "spawn": {
+    "biomes": [
+      "minecraft:plains", "minecraft:forest", "minecraft:birch_forest", "minecraft:taiga", "minecraft:savanna",
+      "minecraft:desert", "minecraft:meadow", "minecraft:dark_forest", "minecraft:swamp", "minecraft:windswept_hills"
+    ],
+    "chance": 0.004,
+    "structures": 0.003
+  },
+  "speech": {
+    "greet": [
+      "Іди своєю дорогою.",
+      "Ми з вами не знайомі. Так і лишімо.",
+      "Цікаве у вас сьогодні товариство…"
+    ],
+    "fight": [
+      "Твоя Характеристика стане моєю.",
+      "Нічого особистого — лише Закон Конвергенції.",
+      "Ти сам до мене прийшов."
+    ],
+    "flee": [
+      "Ні… ти надто сильний.",
+      "Іншим разом."
+    ]
+  }
+}

@@ -2,6 +2,7 @@ package me.vangoo.mysteries
 
 import me.vangoo.mysteries.ability.Disguise
 import me.vangoo.mysteries.ability.runtime.AbilityServices
+import me.vangoo.mysteries.creature.Creatures
 import me.vangoo.mysteries.pathways.error.abilities.ConceptualTheft
 import me.vangoo.mysteries.beyonder.AbilityRequests
 import me.vangoo.mysteries.beyonder.BeyonderStore
@@ -49,6 +50,12 @@ object MysteriesAboveMod : ModInitializer {
         // The ability backbone: the Beyonder registry, cooldowns, messaging, the cast executor.
         // Each further phase adds its own service here.
         AbilityServices.bootstrap()
+
+        // The creature engine (phase 12): three datapack registries and the hooks that wake a mind
+        // in every creature that enters a level. Before Death and the Marionettes on purpose — their
+        // load hooks must strip a servant's or a puppet's will after the mind is rebuilt, not before.
+        Creatures.registerData()
+        Creatures.install()
 
         // Error's stolen dream refuses its owner a bed. A Fabric event cannot be unregistered,
         // so the hook is hung once here and the theft registry decides whether it bites.

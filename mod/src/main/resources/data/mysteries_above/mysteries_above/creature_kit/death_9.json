@@ -1,0 +1,10 @@
+{
+  "skills": [
+    {
+      "skill": "mysteries_above:death/decay",
+      "cooldown": 160
+    }
+  ],
+  "gcd": 120,
+  "range": 12
+}

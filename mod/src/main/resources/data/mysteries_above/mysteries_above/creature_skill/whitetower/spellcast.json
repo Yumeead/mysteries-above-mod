@@ -1,0 +1,48 @@
+{
+  "beyonders_only": true,
+  "self": [
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.evoker.cast_spell",
+      "volume": 1,
+      "pitch": 1.2
+    }
+  ],
+  "target": [
+    {
+      "type": "projectile",
+      "speed": 16,
+      "range": 18,
+      "radius": 1,
+      "hit": [
+        {
+          "type": "damage",
+          "amount": 12
+        },
+        {
+          "type": "particles",
+          "puff": {
+            "particle": {
+              "type": "minecraft:end_rod"
+            },
+            "count": 16,
+            "spread": 0.3,
+            "rise": 0.3,
+            "y": 1,
+            "speed": 0.05
+          }
+        }
+      ],
+      "trail": {
+        "particle": {
+          "type": "minecraft:end_rod"
+        },
+        "count": 2,
+        "spread": 0.05,
+        "rise": 0.05,
+        "y": 0,
+        "speed": 0
+      }
+    }
+  ]
+}

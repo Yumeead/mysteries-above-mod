@@ -1,0 +1,46 @@
+{
+  "self": [
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.snowball.throw",
+      "volume": 1,
+      "pitch": 1.4
+    }
+  ],
+  "target": [
+    {
+      "type": "projectile",
+      "speed": 14,
+      "range": 16,
+      "radius": 1,
+      "hit": [
+        {
+          "type": "damage",
+          "amount": 9
+        },
+        {
+          "type": "particles",
+          "puff": {
+            "particle": {
+              "type": "minecraft:sweep_attack"
+            },
+            "count": 2,
+            "spread": 0.2,
+            "rise": 0.2,
+            "y": 1
+          }
+        }
+      ],
+      "trail": {
+        "particle": {
+          "type": "minecraft:sweep_attack"
+        },
+        "count": 2,
+        "spread": 0.05,
+        "rise": 0.05,
+        "y": 0,
+        "speed": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "skills": [
+    {
+      "skill": "mysteries_above:door/seal",
+      "cooldown": 140
+    }
+  ],
+  "gcd": 120,
+  "range": 12,
+  "stance": {
+    "min": 5,
+    "max": 11
+  }
+}

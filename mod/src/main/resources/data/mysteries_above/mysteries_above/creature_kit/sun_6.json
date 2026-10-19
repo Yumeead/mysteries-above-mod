@@ -1,0 +1,35 @@
+{
+  "skills": [
+    {
+      "skill": "mysteries_above:sun/holy_light",
+      "cooldown": 140
+    },
+    {
+      "skill": "mysteries_above:sun/cleave",
+      "cooldown": 120
+    },
+    {
+      "skill": "mysteries_above:sun/fire_of_light",
+      "cooldown": 180
+    },
+    {
+      "skill": "mysteries_above:sun/sunshine",
+      "cooldown": 200
+    }
+  ],
+  "reactions": [
+    {
+      "when": "pulse",
+      "skill": "mysteries_above:sun/halo",
+      "every": 40
+    },
+    {
+      "when": "hurt",
+      "skill": "mysteries_above:sun/blessing",
+      "cooldown": 280,
+      "below": 0.5
+    }
+  ],
+  "gcd": 120,
+  "range": 12
+}

@@ -1,0 +1,25 @@
+{
+  "body": {
+    "entity": "minecraft:vex",
+    "name": {
+      "text": "Мислеформ",
+      "color": "aqua"
+    },
+    "scale": 1.1
+  },
+  "stats": {
+    "health": 80,
+    "damage": 9,
+    "speed": 0.26
+  },
+  "kit": "mysteries_above:visionary_8",
+  "pathway": "Visionary",
+  "sequence": 8,
+  "spawn": {
+    "biomes": [
+      "minecraft:dark_forest"
+    ],
+    "chance": 0.00375,
+    "structures": 0.00375
+  }
+}

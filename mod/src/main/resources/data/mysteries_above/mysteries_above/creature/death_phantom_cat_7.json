@@ -1,0 +1,36 @@
+{
+  "body": {
+    "entity": "minecraft:cat",
+    "name": {
+      "text": "Кіт-Привид",
+      "color": "gray"
+    },
+    "scale": 1.1,
+    "aura": {
+      "particle": {
+        "type": "minecraft:soul"
+      },
+      "count": 5,
+      "spread": 0.3,
+      "rise": 0.5,
+      "y": 1,
+      "speed": 0.01
+    }
+  },
+  "stats": {
+    "health": 132,
+    "damage": 12,
+    "speed": 0.3
+  },
+  "kit": "mysteries_above:death_7",
+  "pathway": "Death",
+  "sequence": 7,
+  "spawn": {
+    "biomes": [
+      "minecraft:dark_forest",
+      "minecraft:taiga"
+    ],
+    "chance": 0.0025,
+    "structures": 0.0025
+  }
+}

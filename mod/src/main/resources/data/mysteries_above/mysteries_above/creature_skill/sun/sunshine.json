@@ -1,0 +1,32 @@
+{
+  "target": [
+    {
+      "type": "damage",
+      "amount": 9
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:blindness",
+      "duration": 30
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:end_rod"
+        },
+        "count": 20,
+        "spread": 0.4,
+        "rise": 0.6,
+        "y": 1,
+        "speed": 0.02
+      }
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:block.beacon.activate",
+      "volume": 0.7,
+      "pitch": 1.6
+    }
+  ]
+}

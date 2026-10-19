@@ -4,13 +4,15 @@ import me.vangoo.domain.PathwayBranding
 import me.vangoo.mysteries.client.hud.SpiritualityHud
 import me.vangoo.mysteries.client.render.FlaskStyles
 import me.vangoo.mysteries.client.render.SpiritualityFlask
+import me.vangoo.mysteries.client.render.SpiritualityOrb
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
 
 /** Dev-only contact sheet using the production renderer and numbers over the actual world. */
 class FlaskReviewScreen(private val level: Float, private val backing: Boolean,
-                       private val showNumbers: Boolean = true, private val referenceBackground: Boolean = false) : Screen(Component.literal("Flask review")) {
+                       private val showNumbers: Boolean = true, private val referenceBackground: Boolean = false,
+                       private val orb: Boolean = false) : Screen(Component.literal("Flask review")) {
     override fun isPauseScreen() = false
     override fun extractBackground(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, partialTick: Float) = Unit
 
@@ -31,7 +33,9 @@ class FlaskReviewScreen(private val level: Float, private val backing: Boolean,
             graphics.pose().scale(.65f, .65f)
             graphics.text(font, pathway, 0, 0, -1, true)
             graphics.pose().popMatrix()
-            SpiritualityFlask.draw(graphics, style, 0, 4, level, level, 0f,
+            if (orb) SpiritualityOrb.draw(graphics, style, pathway, 16, 15, level, level, 0f,
+                false, false, true, .85f, 0f)
+            else SpiritualityFlask.draw(graphics, style, 0, 4, level, level, 0f,
                 false, false, true, .85f, 0f, backing)
             graphics.pose().translate(0f, 4f)
             if (showNumbers) SpiritualityHud.drawFlaskNumbers(graphics, (14001 * level).toInt().toString(), "/14001")

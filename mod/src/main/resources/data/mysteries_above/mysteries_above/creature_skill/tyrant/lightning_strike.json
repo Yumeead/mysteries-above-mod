@@ -1,0 +1,14 @@
+{
+  "target": [
+    {
+      "type": "lightning",
+      "damage": 9
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.lightning_bolt.thunder",
+      "volume": 0.8,
+      "pitch": 1.2
+    }
+  ]
+}

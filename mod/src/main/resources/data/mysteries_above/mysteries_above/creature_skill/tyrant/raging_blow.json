@@ -1,0 +1,32 @@
+{
+  "target": [
+    {
+      "type": "damage",
+      "amount": 12
+    },
+    {
+      "type": "knockback",
+      "strength": 0.72,
+      "up": 0.2
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:crit"
+        },
+        "count": 14,
+        "spread": 0.3,
+        "rise": 0.4,
+        "y": 1,
+        "speed": 0.2
+      }
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.ravager.attack",
+      "volume": 0.8,
+      "pitch": 0.9
+    }
+  ]
+}

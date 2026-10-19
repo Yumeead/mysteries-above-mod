@@ -1,0 +1,59 @@
+{
+  "body": {
+    "entity": "mysteries_above:human",
+    "equipment": {
+      "head": "minecraft:chainmail_helmet"
+    },
+    "aura": {
+      "particle": {
+        "type": "minecraft:enchant"
+      },
+      "count": 10,
+      "spread": 0.4,
+      "rise": 0.8,
+      "y": 1,
+      "speed": 0.6
+    }
+  },
+  "stats": {
+    "health": 70,
+    "damage": 7,
+    "speed": 0.32,
+    "armor": 4
+  },
+  "mind": {
+    "temperament": "predatory",
+    "role": "beyonder",
+    "flee_below": 0.2
+  },
+  "sequence": 5,
+  "apex": true,
+  "persona": {
+    "names": [
+      "Чоловік у срібній масці", "Жінка з книгою без назви", "Старий у пальті кольору туману", "Безіменний Свідок"
+    ],
+    "pathways": ["Tyrant", "Sun", "WhiteTower", "Door", "Error", "Visionary", "Justiciar", "Fool", "Death"],
+    "weakest": 6,
+    "strongest": 5
+  },
+  "spawn": {
+    "biomes": [
+      "minecraft:dark_forest", "minecraft:old_growth_spruce_taiga", "minecraft:windswept_hills", "minecraft:badlands"
+    ],
+    "chance": 0.0008,
+    "structures": 0.0008
+  },
+  "speech": {
+    "greet": [
+      "Ти ще не знаєш, на що дивишся.",
+      "Звернися назад, поки можеш."
+    ],
+    "fight": [
+      "Ти шукав силу. Ось вона.",
+      "Мені потрібна лише твоя Характеристика."
+    ],
+    "flee": [
+      "Цього разу ти переміг."
+    ]
+  }
+}

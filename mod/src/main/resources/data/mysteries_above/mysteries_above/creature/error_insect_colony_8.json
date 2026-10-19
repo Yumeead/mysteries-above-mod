@@ -1,0 +1,35 @@
+{
+  "body": {
+    "entity": "minecraft:silverfish",
+    "name": {
+      "text": "Личинки Душезачаровуючої колонії",
+      "color": "dark_gray"
+    },
+    "aura": {
+      "particle": {
+        "type": "minecraft:smoke"
+      },
+      "count": 6,
+      "spread": 0.3,
+      "rise": 0.5,
+      "y": 1,
+      "speed": 0.01
+    }
+  },
+  "stats": {
+    "health": 72,
+    "damage": 9,
+    "speed": 0.28
+  },
+  "kit": "mysteries_above:error_8",
+  "pathway": "Error",
+  "sequence": 8,
+  "spawn": {
+    "biomes": [
+      "minecraft:swamp",
+      "minecraft:mangrove_swamp"
+    ],
+    "chance": 0.00375,
+    "structures": 0.00375
+  }
+}

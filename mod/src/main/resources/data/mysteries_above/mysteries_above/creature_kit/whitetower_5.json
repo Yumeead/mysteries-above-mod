@@ -1,0 +1,25 @@
+{
+  "skills": [
+    {
+      "skill": "mysteries_above:whitetower/spellcast",
+      "cooldown": 140
+    },
+    {
+      "skill": "mysteries_above:whitetower/analysis",
+      "cooldown": 180
+    }
+  ],
+  "reactions": [
+    {
+      "when": "hurt",
+      "skill": "mysteries_above:whitetower/mirror_curse",
+      "cooldown": 60
+    }
+  ],
+  "gcd": 80,
+  "range": 14,
+  "stance": {
+    "min": 5,
+    "max": 11
+  }
+}

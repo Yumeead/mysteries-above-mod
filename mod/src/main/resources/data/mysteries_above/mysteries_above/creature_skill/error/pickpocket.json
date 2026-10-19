@@ -1,0 +1,27 @@
+{
+  "target": [
+    {
+      "type": "steal_item",
+      "count": 1
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:smoke"
+        },
+        "count": 14,
+        "spread": 0.4,
+        "rise": 0.3,
+        "y": 0.8,
+        "speed": 0.02
+      }
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.item.pickup",
+      "volume": 1,
+      "pitch": 0.6
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "beyonders_only": true,
+  "target": [
+    {
+      "type": "effect",
+      "effect": "minecraft:slowness",
+      "duration": 30,
+      "amplifier": 3
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:weakness",
+      "duration": 60
+    },
+    {
+      "type": "chance",
+      "chance": 0.15,
+      "then": [
+        {
+          "type": "drain_sanity",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:witch"
+        },
+        "count": 12,
+        "spread": 0.3,
+        "rise": 0.5,
+        "y": 1.6
+      }
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:block.amethyst_block.chime",
+      "volume": 1,
+      "pitch": 0.6
+    }
+  ]
+}

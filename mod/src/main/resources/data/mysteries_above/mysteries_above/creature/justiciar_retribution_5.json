@@ -1,0 +1,35 @@
+{
+  "body": {
+    "entity": "minecraft:iron_golem",
+    "name": {
+      "text": "Караюча Влада",
+      "color": "dark_red"
+    },
+    "scale": 1.55,
+    "aura": {
+      "particle": {
+        "type": "minecraft:wax_off"
+      },
+      "count": 3,
+      "spread": 0.4,
+      "rise": 0.4,
+      "y": 1
+    }
+  },
+  "stats": {
+    "health": 304,
+    "damage": 21,
+    "speed": 0.3
+  },
+  "kit": "mysteries_above:justiciar_5",
+  "pathway": "Justiciar",
+  "sequence": 5,
+  "apex": true,
+  "spawn": {
+    "biomes": [
+      "minecraft:plains"
+    ],
+    "chance": 0.00075,
+    "structures": 0.00075
+  }
+}

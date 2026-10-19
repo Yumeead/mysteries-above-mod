@@ -1,0 +1,47 @@
+{
+  "self": [
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.arrow.shoot",
+      "volume": 1,
+      "pitch": 0.8
+    }
+  ],
+  "target": [
+    {
+      "type": "projectile",
+      "speed": 22,
+      "range": 20,
+      "radius": 1,
+      "hit": [
+        {
+          "type": "damage",
+          "amount": 14
+        },
+        {
+          "type": "particles",
+          "puff": {
+            "particle": {
+              "type": "minecraft:crit"
+            },
+            "count": 10,
+            "spread": 0.2,
+            "rise": 0.2,
+            "y": 1,
+            "speed": 0.1
+          }
+        }
+      ],
+      "trail": {
+        "particle": {
+          "type": "minecraft:crit"
+        },
+        "count": 2,
+        "spread": 0.05,
+        "rise": 0.05,
+        "y": 0,
+        "speed": 0
+      }
+    }
+  ]
+}

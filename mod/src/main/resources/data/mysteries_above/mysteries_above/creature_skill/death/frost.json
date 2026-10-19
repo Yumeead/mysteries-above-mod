@@ -1,0 +1,44 @@
+{
+  "beyonders_only": true,
+  "target": [
+    {
+      "type": "damage",
+      "amount": 11
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:slowness",
+      "duration": 60,
+      "amplifier": 2
+    },
+    {
+      "type": "chance",
+      "chance": 0.2,
+      "then": [
+        {
+          "type": "drain_sanity",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:snowflake"
+        },
+        "count": 18,
+        "spread": 0.3,
+        "rise": 0.5,
+        "y": 1,
+        "speed": 0.05
+      }
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:block.glass.break",
+      "volume": 0.8,
+      "pitch": 1.4
+    }
+  ]
+}

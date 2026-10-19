@@ -16,7 +16,10 @@ export = r'''
 const assets={},put=(name,c)=>assets[name]=c.toDataURL('image/png');
 let c,g;
 put('blank',cv(64,56));
-for(let size=28;size>=8;size-=2){const outer=size+8,margin=(28-size)/2,inside=1+margin;c=cv(outer,outer);g=c.getContext('2d');for(let yy=0;yy<outer;yy++)for(let xx=0;xx<outer;xx++){const d=(2*xx-outer+1)**2+(2*yy-outer+1)**2;if(d>size*size&&d<=outer*outer)r(g,xx,yy,1,1,d>(outer-2)**2?C.ink:d>(outer-4)**2?G.dark:xx+yy<outer-13?G.light:G.mid)}put('orb_frame_'+size,c);
+for(let size=28;size>=8;size-=2){const outer=size+8,margin=(28-size)/2,inside=1+margin;c=cv(outer,outer);g=c.getContext('2d');for(let yy=0;yy<outer;yy++)for(let xx=0;xx<outer;xx++){const d=(2*xx-outer+1)**2+(2*yy-outer+1)**2;if(d>size*size&&d<=outer*outer)r(g,xx,yy,1,1,d>(outer-2)**2?C.ink:d>(outer-4)**2?G.dark:xx+yy<outer-13?G.light:G.mid)}
+ for(const [xx,yy]of [[outer/2-1,1],[1,outer/2-1],[outer-3,outer/2-1],[outer/2-1,outer-3]]){r(g,xx,yy,2,2,G.dark);r(g,xx,yy,1,1,'#E5CD91')}put('orb_frame_'+size,c);
+ const halo=size+20;c=cv(halo,halo);g=c.getContext('2d');
+ for(let yy=0;yy<halo;yy++)for(let xx=0;xx<halo;xx++){const distance=Math.hypot(xx-(halo-1)/2,yy-(halo-1)/2);const fade=(distance-outer/2+1)/6;if(fade>=0&&fade<1){g.globalAlpha=.85*(1-fade)**2;r(g,xx,yy,1,1,'#FFFFFF')}}put('orb_glow_'+size,c);
  c=cv(size,size);disk(c.getContext('2d'),size/2,size/2,size,'#0C171D');put('orb_backing_'+size,c);
  c=cv(size,size);g=c.getContext('2d');for(const [u,v,alpha]of [[.23,.18,.2],[.2,.21,.36],[.18,.25,.48],[.18,.29,.38],[.16,.32,.25],[.86,.39,.35]]){const xx=Math.round(size*u),yy=Math.round(size*v);if((2*xx-size+1)**2+(2*yy-size+1)**2<=size*size){g.globalAlpha=alpha;r(g,xx,yy,1,1,'#9EB5BB')}}put('orb_glass_'+size,c)}
 for(const id of ['Mother','Justiciar']){c=cv(28,28);g=c.getContext('2d');g.globalAlpha=.32;mark(g,17,17,id,C.glass);put('engraving_'+id.toLowerCase(),c)}

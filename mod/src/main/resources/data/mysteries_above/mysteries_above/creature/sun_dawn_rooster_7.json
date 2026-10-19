@@ -1,0 +1,37 @@
+{
+  "body": {
+    "entity": "minecraft:chicken",
+    "name": {
+      "text": "Світанковий Півень",
+      "color": "gold"
+    },
+    "scale": 1.3,
+    "aura": {
+      "particle": {
+        "type": "minecraft:end_rod"
+      },
+      "count": 5,
+      "spread": 0.3,
+      "rise": 0.5,
+      "y": 1,
+      "speed": 0.01
+    }
+  },
+  "stats": {
+    "health": 120,
+    "damage": 11,
+    "speed": 0.3
+  },
+  "kit": "mysteries_above:sun_7",
+  "pathway": "Sun",
+  "sequence": 7,
+  "spawn": {
+    "biomes": [
+      "minecraft:plains",
+      "minecraft:sunflower_plains",
+      "minecraft:savanna"
+    ],
+    "chance": 0.0025,
+    "structures": 0.0025
+  }
+}

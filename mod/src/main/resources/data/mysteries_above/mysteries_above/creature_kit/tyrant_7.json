@@ -1,0 +1,41 @@
+{
+  "skills": [
+    {
+      "skill": "mysteries_above:tyrant/azure_wave",
+      "cooldown": 180
+    },
+    {
+      "skill": "mysteries_above:tyrant/precise_throw",
+      "cooldown": 160
+    },
+    {
+      "skill": "mysteries_above:tyrant/raging_blow",
+      "cooldown": 200
+    },
+    {
+      "skill": "mysteries_above:tyrant/sea_lunge",
+      "cooldown": 220
+    }
+  ],
+  "reactions": [
+    {
+      "when": "hurt",
+      "skill": "mysteries_above:tyrant/restorative_water",
+      "cooldown": 320,
+      "below": 0.5
+    },
+    {
+      "when": "hurt",
+      "skill": "mysteries_above:tyrant/wrath",
+      "cooldown": 500,
+      "below": 0.45
+    },
+    {
+      "when": "hurt",
+      "skill": "mysteries_above:tyrant/illusory_scales",
+      "cooldown": 240
+    }
+  ],
+  "gcd": 120,
+  "range": 14
+}

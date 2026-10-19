@@ -1,0 +1,31 @@
+{
+  "target": [
+    {
+      "type": "damage",
+      "amount": 14
+    },
+    {
+      "type": "knockback",
+      "strength": 0.72,
+      "up": 0.2
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:sweep_attack"
+        },
+        "count": 3,
+        "spread": 0.3,
+        "rise": 0.3,
+        "y": 1
+      }
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.player.attack.sweep",
+      "volume": 1,
+      "pitch": 0.9
+    }
+  ]
+}

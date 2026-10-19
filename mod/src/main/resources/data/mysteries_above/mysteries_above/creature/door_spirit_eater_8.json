@@ -1,0 +1,26 @@
+{
+  "body": {
+    "entity": "minecraft:drowned",
+    "name": {
+      "text": "Пожирач Духів",
+      "color": "dark_aqua"
+    },
+    "scale": 1.1
+  },
+  "stats": {
+    "health": 80,
+    "damage": 9,
+    "speed": 0.26
+  },
+  "kit": "mysteries_above:door_8",
+  "pathway": "Door",
+  "sequence": 8,
+  "spawn": {
+    "biomes": [
+      "minecraft:ocean",
+      "minecraft:river"
+    ],
+    "chance": 0.00375,
+    "structures": 0.00375
+  }
+}

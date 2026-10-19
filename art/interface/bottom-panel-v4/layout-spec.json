@@ -27,7 +27,6 @@
   },
   "orb": {
     "outerDiameter": 36,
-    "alternateOuterDiameter": 34,
     "innerMask": [
       17,
       22,
@@ -64,27 +63,13 @@
     "glassArc": false,
     "fullLiquidCoverage": {
       "insideMaskPixels": 616,
-      "opaquePixelsPerPath": 616
-    },
-    "riseWhenArmorVisible": 8,
-    "nativeTextureExceptions": {
-      "WheelOfFortune": {
-        "inner": 20,
-        "outer": 28,
-        "source": [
-          20,
-          30
-        ]
-      },
-      "WhiteTower": {
-        "inner": 24,
-        "outer": 32,
-        "source": [
-          19,
-          26
-        ]
+      "minimumOpaquePixelsPerPath": 615,
+      "maximumOpaquePixelsPerPath": 616,
+      "originalTransparentEdgePixels": {
+        "WhiteTower": 1
       }
     },
+    "riseWhenArmorVisible": 8,
     "draggableInModStyle": true,
     "positionStorage": "hudPanelPositions.FLASK",
     "movesTogether": [

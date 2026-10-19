@@ -1,0 +1,14 @@
+{
+  "reactions": [
+    {
+      "when": "pulse",
+      "skill": "mysteries_above:spirit_world/lake_goddess_1",
+      "every": 100
+    },
+    {
+      "when": "pulse",
+      "skill": "mysteries_above:spirit_world/lake_goddess_2",
+      "every": 100
+    }
+  ]
+}

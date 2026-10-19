@@ -1,6 +1,8 @@
 package me.vangoo.mysteries.beyonder
 
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
+import me.vangoo.domain.valueobjects.Mastery
+import me.vangoo.domain.valueobjects.SanityLoss
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -14,6 +16,31 @@ import java.util.UUID
  * rather than by hand on `runClient`.
  */
 class AbilityStatePumpTest {
+    @Test fun passiveIndicatorChangesSyncWithoutSpiritualityChangesOrIdlePackets() {
+        var auxiliary = SanityLoss.none() to Mastery.zero()
+        val player = UUID.randomUUID()
+        var sent = 0
+        var clock = 0L
+        val pump = AbilityStatePump(send = { sent++ }, now = { clock }, readAuxiliary = { auxiliary })
+        pump.pushNow(player)
+        clock = TICKS_PER_SECOND.toLong()
+        pump.observeAuxiliary(player); pump.flush()
+        assertEquals(1,sent)
+        auxiliary = SanityLoss.of(30) to Mastery.of(42.37)
+        pump.observeAuxiliary(player); pump.flush()
+        assertEquals(2,sent)
+        clock += TICKS_PER_SECOND
+        pump.observeAuxiliary(player); pump.flush()
+        assertEquals(2,sent)
+        auxiliary = SanityLoss.none() to Mastery.max()
+        pump.observeAuxiliary(player); pump.flush()
+        assertEquals(3,sent)
+        pump.forget(player)
+        clock += TICKS_PER_SECOND
+        pump.observeAuxiliary(player); pump.flush()
+        assertEquals(4,sent,"Reconnecting must not retain the previous indicator snapshot")
+    }
+
 
     private val sent = mutableListOf<UUID>()
     private var tick = 0L

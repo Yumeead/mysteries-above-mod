@@ -1,0 +1,52 @@
+{
+  "self": [
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.player.splash.high_speed",
+      "volume": 1,
+      "pitch": 1.2
+    }
+  ],
+  "target": [
+    {
+      "type": "projectile",
+      "speed": 16,
+      "range": 18,
+      "radius": 1.4,
+      "hit": [
+        {
+          "type": "damage",
+          "amount": 11
+        },
+        {
+          "type": "knockback",
+          "strength": 0.6,
+          "up": 0.2
+        },
+        {
+          "type": "particles",
+          "puff": {
+            "particle": {
+              "type": "minecraft:splash"
+            },
+            "count": 24,
+            "spread": 0.5,
+            "rise": 0.5,
+            "y": 1,
+            "speed": 0.05
+          }
+        }
+      ],
+      "trail": {
+        "particle": {
+          "type": "minecraft:splash"
+        },
+        "count": 2,
+        "spread": 0.05,
+        "rise": 0.05,
+        "y": 0,
+        "speed": 0
+      }
+    }
+  ]
+}

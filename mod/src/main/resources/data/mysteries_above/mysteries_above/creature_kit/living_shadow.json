@@ -1,0 +1,10 @@
+{
+  "reactions": [
+    {
+      "when": "near",
+      "skill": "mysteries_above:spirit_world/living_shadow_1",
+      "cooldown": 40,
+      "distance": 2.5
+    }
+  ]
+}

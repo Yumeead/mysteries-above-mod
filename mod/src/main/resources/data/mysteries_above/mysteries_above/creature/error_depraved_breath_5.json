@@ -1,0 +1,35 @@
+{
+  "body": {
+    "entity": "minecraft:phantom",
+    "name": {
+      "text": "Дух Розбещеного Подиху",
+      "color": "dark_gray"
+    },
+    "aura": {
+      "particle": {
+        "type": "minecraft:smoke"
+      },
+      "count": 8,
+      "spread": 0.3,
+      "rise": 0.5,
+      "y": 1,
+      "speed": 0.01
+    }
+  },
+  "stats": {
+    "health": 208,
+    "damage": 19,
+    "speed": 0.32
+  },
+  "kit": "mysteries_above:error_5",
+  "pathway": "Error",
+  "sequence": 5,
+  "apex": true,
+  "spawn": {
+    "biomes": [
+      "minecraft:swamp"
+    ],
+    "chance": 0.00075,
+    "structures": 0.00075
+  }
+}

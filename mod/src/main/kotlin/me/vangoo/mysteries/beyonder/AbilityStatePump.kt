@@ -1,6 +1,8 @@
 package me.vangoo.mysteries.beyonder
 
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
+import me.vangoo.domain.valueobjects.Mastery
+import me.vangoo.domain.valueobjects.SanityLoss
 import java.util.UUID
 
 /**
@@ -26,12 +28,25 @@ class AbilityStatePump(
     private val send: (UUID) -> Unit,
     private val now: () -> Long,
     private val periodTicks: Int = TICKS_PER_SECOND,
+    private val readAuxiliary: (UUID) -> Pair<SanityLoss, Mastery>? = { null },
 ) {
 
     /** A `LinkedHashSet`, so that the send order matches the order things were marked dirty. */
     private val dirty = LinkedHashSet<UUID>()
 
     private val sentAt = HashMap<UUID, Long>()
+    private val sentAuxiliary = HashMap<UUID, Pair<SanityLoss, Mastery>>()
+
+    /** Passive sanity changes must reach a player whose spirituality is already full. */
+    fun observeAuxiliary(playerId: UUID) {
+        val current = readAuxiliary(playerId) ?: return
+        if (current != sentAuxiliary[playerId]) markDirty(playerId)
+    }
+
+    private fun sendState(playerId: UUID) {
+        send(playerId)
+        readAuxiliary(playerId)?.let { sentAuxiliary[playerId] = it }
+    }
 
     fun markDirty(playerId: UUID) {
         dirty += playerId
@@ -41,7 +56,7 @@ class AbilityStatePump(
     fun pushNow(playerId: UUID) {
         dirty -= playerId
         sentAt[playerId] = now()
-        send(playerId)
+        sendState(playerId)
     }
 
     /**
@@ -60,7 +75,7 @@ class AbilityStatePump(
             if (last != null && tick - last < periodTicks) continue
             iterator.remove()
             sentAt[playerId] = tick
-            send(playerId)
+            sendState(playerId)
         }
     }
 
@@ -68,5 +83,6 @@ class AbilityStatePump(
     fun forget(playerId: UUID) {
         dirty -= playerId
         sentAt.remove(playerId)
+        sentAuxiliary.remove(playerId)
     }
 }

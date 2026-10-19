@@ -1,0 +1,37 @@
+{
+  "body": {
+    "entity": "minecraft:goat",
+    "name": {
+      "text": "Сірий Гірський Козел Хорнацис",
+      "color": "red"
+    },
+    "scale": 1.1,
+    "aura": {
+      "particle": {
+        "type": "minecraft:witch"
+      },
+      "count": 4,
+      "spread": 0.3,
+      "rise": 0.5,
+      "y": 1
+    }
+  },
+  "stats": {
+    "health": 80,
+    "damage": 9,
+    "speed": 0.26
+  },
+  "kit": "mysteries_above:fool_8",
+  "pathway": "Fool",
+  "sequence": 8,
+  "spawn": {
+    "biomes": [
+      "minecraft:snowy_slopes",
+      "minecraft:jagged_peaks",
+      "minecraft:frozen_peaks",
+      "minecraft:grove"
+    ],
+    "chance": 0.006,
+    "structures": 0.006
+  }
+}

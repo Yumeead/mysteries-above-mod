@@ -1,0 +1,33 @@
+{
+  "beyonders_only": true,
+  "target": [
+    {
+      "type": "effect",
+      "effect": "minecraft:nausea",
+      "duration": 60
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:slowness",
+      "duration": 40
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:note"
+        },
+        "count": 10,
+        "spread": 0.4,
+        "rise": 0.5,
+        "y": 1.6
+      }
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:block.note_block.chime",
+      "volume": 1,
+      "pitch": 1.4
+    }
+  ]
+}

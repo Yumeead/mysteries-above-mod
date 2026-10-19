@@ -5,6 +5,7 @@ import me.vangoo.mysteries.client.beyonder.ClientAbilityState
 import me.vangoo.mysteries.client.dev.WheelShots
 import me.vangoo.mysteries.client.beyonder.ClientMarionettes
 import me.vangoo.mysteries.client.beyonder.SanityAmbience
+import me.vangoo.mysteries.client.render.HumanRenderer
 import me.vangoo.mysteries.client.render.MarionetteRenderer
 import me.vangoo.mysteries.client.screen.ChoiceScreen
 import me.vangoo.mysteries.client.render.SpiritGlyphParticle
@@ -81,6 +82,8 @@ object MysteriesAboveClient : ClientModInitializer {
         // and it exists because `AvatarRenderer`'s own bound is a client-only interface the shared
         // entity class cannot implement. See `MarionetteRenderer`.
         EntityRendererRegistry.register(ModEntities.MARIONETTE, ::MarionetteRenderer)
+        // The creature engine's people: the player model, a default skin chosen by the entity's id.
+        EntityRendererRegistry.register(ModEntities.HUMAN, ::HumanRenderer)
 
         ClientPlayConnectionEvents.DISCONNECT.register { _, _ ->
             ClientAbilityState.clear()

@@ -1,0 +1,21 @@
+{
+  "target": [
+    {
+      "type": "damage",
+      "amount": 4,
+      "pierce": true
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:enchant"
+        },
+        "count": 10,
+        "spread": 0.3,
+        "rise": 0.5,
+        "y": 1
+      }
+    }
+  ]
+}

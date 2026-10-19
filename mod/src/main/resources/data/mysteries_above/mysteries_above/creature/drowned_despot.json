@@ -1,0 +1,66 @@
+{
+  "body": {
+    "entity": "mysteries_above:human",
+    "name": {
+      "text": "Ліндон Ворт, Деспот Моря, що втратив контроль",
+      "color": "dark_aqua"
+    },
+    "scale": 1.35,
+    "equipment": {
+      "mainhand": "minecraft:trident",
+      "chest": "minecraft:chainmail_chestplate"
+    },
+    "aura": {
+      "particle": {
+        "type": "minecraft:bubble"
+      },
+      "count": 8,
+      "spread": 0.5,
+      "rise": 0.8,
+      "y": 1,
+      "speed": 0.02
+    }
+  },
+  "stats": {
+    "health": 420,
+    "damage": 12,
+    "speed": 0.3,
+    "armor": 8,
+    "follow_range": 40,
+    "knockback_resistance": 0.6
+  },
+  "mind": {
+    "temperament": "hostile",
+    "fearless": true
+  },
+  "kit": "mysteries_above:tyrant_5",
+  "pathway": "Tyrant",
+  "sequence": 5,
+  "apex": true,
+  "boss": {
+    "bar": "blue",
+    "leash": 40,
+    "enrage_after": 3600,
+    "phases": [
+      {
+        "below": 0.6,
+        "kit": "mysteries_above:boss/despot_storm",
+        "enter": ["mysteries_above:boss/thunder_roar", "mysteries_above:boss/call_the_deep"],
+        "pause": 50
+      },
+      {
+        "below": 0.25,
+        "kit": "mysteries_above:boss/despot_abyss",
+        "enter": ["mysteries_above:boss/thunder_roar", "mysteries_above:tyrant/water_curtain"],
+        "pause": 60
+      }
+    ]
+  },
+  "speech": {
+    "fight": [
+      "Море не пробачає!",
+      "Відчуйте гнів шторму!",
+      "Безодня кличе — і я відповім!"
+    ]
+  }
+}

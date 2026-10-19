@@ -58,7 +58,14 @@ object SpiritualityFlask {
                     previous = color
                 }
             }
-            // Painted highlights and motifs already belong to the reference; do not tint or cover them.
+            if (!reducedMotion) {
+                graphics.nextStratum()
+                for (highlight in FlaskLiquid.highlights(style.rows, painting, style.bottom, clock,
+                    style.periodTicks, style.particleCount + if (gaining) 4 else 2, style.flow)) {
+                    graphics.fill(x + highlight.x, y + highlight.y, x + highlight.x + 1, y + highlight.y + 1,
+                        UiTheme.argb(0xE8F7FF, alpha * highlight.opacity))
+                }
+            }
             graphics.nextStratum()
             sprite(style.neck)
             tag()

@@ -1,0 +1,49 @@
+{
+  "beyonders_only": true,
+  "target": [
+    {
+      "type": "damage",
+      "amount": 16
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:darkness",
+      "duration": 60
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:slowness",
+      "duration": 60,
+      "amplifier": 2
+    },
+    {
+      "type": "chance",
+      "chance": 0.3,
+      "then": [
+        {
+          "type": "drain_sanity",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:soul"
+        },
+        "count": 40,
+        "spread": 0.5,
+        "rise": 0.9,
+        "y": 1.2,
+        "speed": 0.05
+      }
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.enderman.scream",
+      "volume": 0.9,
+      "pitch": 0.5
+    }
+  ]
+}

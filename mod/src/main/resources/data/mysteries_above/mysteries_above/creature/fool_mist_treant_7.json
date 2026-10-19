@@ -1,0 +1,34 @@
+{
+  "body": {
+    "entity": "minecraft:guardian",
+    "name": {
+      "text": "Туманний Трент",
+      "color": "dark_green"
+    },
+    "scale": 1.2,
+    "aura": {
+      "particle": {
+        "type": "minecraft:witch"
+      },
+      "count": 4,
+      "spread": 0.3,
+      "rise": 0.5,
+      "y": 1
+    }
+  },
+  "stats": {
+    "health": 140,
+    "damage": 12,
+    "speed": 0.27
+  },
+  "kit": "mysteries_above:fool_7",
+  "pathway": "Fool",
+  "sequence": 7,
+  "spawn": {
+    "biomes": [
+      "minecraft:ocean",
+      "minecraft:deep_ocean"
+    ],
+    "chance": 0.0025
+  }
+}

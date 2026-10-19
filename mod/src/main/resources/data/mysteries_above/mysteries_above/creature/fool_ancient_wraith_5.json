@@ -1,0 +1,35 @@
+{
+  "body": {
+    "entity": "minecraft:evoker",
+    "name": {
+      "text": "Стародавня Примара",
+      "color": "light_purple"
+    },
+    "scale": 1.55,
+    "aura": {
+      "particle": {
+        "type": "minecraft:witch"
+      },
+      "count": 4,
+      "spread": 0.3,
+      "rise": 0.5,
+      "y": 1
+    }
+  },
+  "stats": {
+    "health": 304,
+    "damage": 21,
+    "speed": 0.3
+  },
+  "kit": "mysteries_above:fool_5",
+  "pathway": "Fool",
+  "sequence": 5,
+  "apex": true,
+  "spawn": {
+    "biomes": [
+      "minecraft:dark_forest"
+    ],
+    "chance": 0.00075,
+    "structures": 0.00075
+  }
+}

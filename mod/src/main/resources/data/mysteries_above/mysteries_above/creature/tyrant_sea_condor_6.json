@@ -1,0 +1,38 @@
+{
+  "body": {
+    "entity": "minecraft:phantom",
+    "name": {
+      "text": "Морський Кондор з Драконячим Оком",
+      "color": "aqua"
+    },
+    "scale": 1.4,
+    "aura": {
+      "particle": {
+        "type": "minecraft:bubble"
+      },
+      "count": 6,
+      "spread": 0.4,
+      "rise": 0.6,
+      "y": 1,
+      "speed": 0.01
+    }
+  },
+  "stats": {
+    "health": 171,
+    "damage": 14,
+    "speed": 0.32
+  },
+  "kit": "mysteries_above:tyrant_6",
+  "pathway": "Tyrant",
+  "sequence": 6,
+  "spawn": {
+    "biomes": [
+      "minecraft:beach",
+      "minecraft:stony_shore",
+      "minecraft:ocean",
+      "minecraft:warm_ocean"
+    ],
+    "chance": 0.0015,
+    "structures": 0.0015
+  }
+}

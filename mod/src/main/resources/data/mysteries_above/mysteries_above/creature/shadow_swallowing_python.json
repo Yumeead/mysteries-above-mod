@@ -1,0 +1,38 @@
+{
+  "body": {
+    "entity": "minecraft:cave_spider",
+    "name": {
+      "text": "Пітон, що ковтає тіні",
+      "color": "dark_green"
+    },
+    "scale": 1.4,
+    "aura": {
+      "particle": {
+        "type": "minecraft:sculk_soul"
+      },
+      "count": 6,
+      "spread": 0.5,
+      "rise": 0.2,
+      "y": 0.4,
+      "speed": 0.01
+    }
+  },
+  "stats": {
+    "health": 80,
+    "damage": 9,
+    "speed": 0.32
+  },
+  "mind": {
+    "temperament": "willless",
+    "fearless": true
+  },
+  "kit": "mysteries_above:shadow_swallowing_python",
+  "sequence": 6,
+  "spawn": {
+    "biomes": [
+      "minecraft:warped_forest",
+      "minecraft:soul_sand_valley"
+    ],
+    "chance": 0.012
+  }
+}

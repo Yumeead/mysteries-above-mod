@@ -1,0 +1,33 @@
+{
+  "self": [
+    {
+      "type": "effect",
+      "effect": "minecraft:strength",
+      "duration": 120,
+      "amplifier": 1
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:speed",
+      "duration": 120
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:angry_villager"
+        },
+        "count": 10,
+        "spread": 0.4,
+        "rise": 0.6,
+        "y": 1.6
+      }
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.ravager.roar",
+      "volume": 1,
+      "pitch": 0.8
+    }
+  ]
+}

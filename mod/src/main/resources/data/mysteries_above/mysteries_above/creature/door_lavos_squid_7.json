@@ -1,0 +1,25 @@
+{
+  "body": {
+    "entity": "minecraft:guardian",
+    "name": {
+      "text": "Лавос-Кальмар",
+      "color": "dark_red"
+    },
+    "scale": 1.2
+  },
+  "stats": {
+    "health": 140,
+    "damage": 12,
+    "speed": 0.27
+  },
+  "kit": "mysteries_above:door_7",
+  "pathway": "Door",
+  "sequence": 7,
+  "spawn": {
+    "biomes": [
+      "minecraft:warm_ocean",
+      "minecraft:deep_ocean"
+    ],
+    "chance": 0.0025
+  }
+}

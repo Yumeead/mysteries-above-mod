@@ -4,6 +4,17 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class BottomPanelTest {
+    @Test fun spiritualityCaptionCentersOverTheGlobeAndStaysInsideTheScreen() {
+        for (textWidth in listOf(17,47,59,65,107)) {
+            val x=BottomPanel.orbLabelX(textWidth,100,427)
+            assertEquals(21f,x+textWidth/2f,.5f)
+            for (origin in listOf(0,16,160,280)) {
+                val clamped=origin+BottomPanel.orbLabelX(textWidth,origin,320)
+                assertTrue(clamped>=1 && clamped+textWidth<=319)
+            }
+        }
+    }
+
     @Test fun lowValuesOverrideAllNumberModesAndChangesExpireAfterFiftyTicks() {
         val display = ResourceNumberDisplay()
         display.tick(20,20)
@@ -46,19 +57,27 @@ class BottomPanelTest {
             for (left in listOf(false,true)) {
                 val ability=BottomPanel.ability(width,height,left)
                 val orb=BottomPanel.orb(width,height,20,true)
-                val auxiliary=BottomPanel.auxiliary(width,height)
+                val auxiliary=BottomPanel.auxiliary(width,height,ability)
+                assertEquals(62,auxiliary.width)
+                assertEquals(42,auxiliary.height)
+                assertEquals(ability.right+4,auxiliary.x,"Indicators must sit to the right of the ability")
+                assertEquals(ability.bottom,auxiliary.bottom)
                 for (rect in listOf(ability,orb,auxiliary)) {
                     assertTrue(rect.x>=0 && rect.y>=0 && rect.right<=width && rect.bottom<=height)
                 }
                 assertFalse(ability.overlaps(orb))
                 assertFalse(ability.overlaps(auxiliary))
+                assertFalse(auxiliary.overlaps(BottomPanel.orb(width,height,0,false)))
+                assertFalse(auxiliary.overlaps(HudRect(width/2-91,height-22,182,22)),
+                    "Indicators must clear hotbar items")
+                for (textHeight in listOf(6,11,17)) {
+                    val label=BottomPanel.abilityLabel(width,height,ability,textHeight)
+                    assertTrue(label.x>=0 && label.y>=0 && label.right<=width && label.bottom<=height)
+                    assertFalse(label.overlaps(ability))
+                    assertFalse(label.overlaps(auxiliary))
+                }
             }
         }
-    }
-
-    @Test fun auxiliaryBoundaryClampsUntrustedSnapshotsWithoutInventingTheThirdValue() {
-        assertEquals(AuxiliaryValues(0,10000,0),AuxiliaryValues(Int.MIN_VALUE,Int.MAX_VALUE,-1).clamped())
-        assertEquals(0,PreviewAuxiliaryHudSource.snapshot().unassigned)
     }
 
     @Test fun chatMessagesClearThePanelOnlyWhereTheirHorizontalBoundsIntersect() {

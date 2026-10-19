@@ -1,0 +1,38 @@
+{
+  "beyonders_only": true,
+  "target": [
+    {
+      "type": "seal_powers",
+      "seconds": 4
+    },
+    {
+      "type": "chance",
+      "chance": 0.2,
+      "then": [
+        {
+          "type": "drain_sanity",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:squid_ink"
+        },
+        "count": 18,
+        "spread": 0.3,
+        "rise": 0.6,
+        "y": 1.8,
+        "speed": 0.01
+      }
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:block.iron_door.close",
+      "volume": 0.9,
+      "pitch": 0.5
+    }
+  ]
+}

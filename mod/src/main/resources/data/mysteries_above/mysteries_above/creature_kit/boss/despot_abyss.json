@@ -1,0 +1,17 @@
+{
+  "gcd": 50,
+  "range": 18,
+  "skills": [
+    { "skill": "mysteries_above:boss/tidal_crash", "cooldown": 140 },
+    { "skill": "mysteries_above:boss/storm_mark", "cooldown": 90 },
+    { "skill": "mysteries_above:tyrant/wind_binding", "cooldown": 160 },
+    { "skill": "mysteries_above:tyrant/windblades", "cooldown": 100 },
+    { "skill": "mysteries_above:tyrant/precise_throw", "cooldown": 100 }
+  ],
+  "reactions": [
+    { "when": "near", "skill": "mysteries_above:tyrant/raging_blow", "cooldown": 80, "distance": 3 },
+    { "when": "hurt", "skill": "mysteries_above:tyrant/wrath", "cooldown": 400, "below": 0.15 },
+    { "when": "pulse", "skill": "mysteries_above:boss/thunder_roar", "every": 300 }
+  ],
+  "haste": 2
+}

@@ -1,0 +1,53 @@
+{
+  "windup": 40,
+  "telegraph": {
+    "particle": {
+      "type": "minecraft:falling_water"
+    },
+    "count": 30,
+    "spread": 2.2,
+    "rise": 0.1,
+    "y": 2.5,
+    "speed": 0
+  },
+  "range": 16,
+  "area": 5,
+  "self": [
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.player.splash.high_speed",
+      "volume": 1.5,
+      "pitch": 0.6
+    }
+  ],
+  "target": [
+    {
+      "type": "damage",
+      "amount": 16
+    },
+    {
+      "type": "knockback",
+      "strength": 1.0,
+      "up": 0.6
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:slowness",
+      "duration": 60,
+      "amplifier": 2
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:splash"
+        },
+        "count": 40,
+        "spread": 1,
+        "rise": 0.6,
+        "y": 0.5,
+        "speed": 0.1
+      }
+    }
+  ]
+}

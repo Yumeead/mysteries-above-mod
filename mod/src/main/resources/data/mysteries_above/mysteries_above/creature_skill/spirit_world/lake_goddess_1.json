@@ -1,0 +1,11 @@
+{
+  "area": 6,
+  "around_self": true,
+  "target": [
+    {
+      "type": "effect",
+      "effect": "minecraft:nausea",
+      "duration": 100
+    }
+  ]
+}

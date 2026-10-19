@@ -20,6 +20,9 @@ import me.vangoo.mysteries.ability.runtime.AbilityServices
 import me.vangoo.mysteries.beyonder.AbilityRequests
 import me.vangoo.mysteries.beyonder.Ascension
 import me.vangoo.mysteries.beyonder.BeyonderStatus
+import me.vangoo.mysteries.creature.CreatureRegistries
+import me.vangoo.mysteries.creature.Creatures
+import net.minecraft.commands.arguments.IdentifierArgument
 import me.vangoo.mysteries.item.ModItems
 import me.vangoo.mysteries.pathways.ModPathways
 import net.minecraft.commands.CommandSourceStack
@@ -87,8 +90,44 @@ object MysteriesCommand {
                         Commands.argument("scale", IntegerArgumentType.integer(0, 100)).forPlayers(::sanity),
                     ),
                 )
-                .then(Commands.literal("forget").requires(OPERATOR).forPlayers(::forget)),
+                .then(Commands.literal("forget").requires(OPERATOR).forPlayers(::forget))
+                .then(
+                    Commands.literal("creature").requires(OPERATOR).then(
+                        Commands.literal("spawn").then(
+                            creatureArgument()
+                                .executes { spawnCreature(it, 1) }
+                                .then(
+                                    Commands.argument("count", IntegerArgumentType.integer(1, MAX_CREATURES))
+                                        .executes { spawnCreature(it, IntegerArgumentType.getInteger(it, "count")) },
+                                ),
+                        ),
+                    ),
+                ),
         )
+    }
+
+    // ── Creatures ───────────────────────────────────────────────────────────────
+
+    private const val MAX_CREATURES = 32
+
+    /**
+     * The creature's registry id. Suggested by the server (`SharedSuggestionProvider` from a custom
+     * provider): the creature registry is not synced, so a client could not suggest it on its own.
+     */
+    private fun creatureArgument() =
+        Commands.argument("creature", IdentifierArgument.id()).suggests { context, builder ->
+            val keys = context.source.server.registryAccess().lookupOrThrow(CreatureRegistries.CREATURE).listElementIds()
+            SharedSuggestionProvider.suggestResource(keys.map { it.identifier() }, builder)
+        }
+
+    /** Creatures at the speaker's feet — the way to meet one without walking three thousand blocks. */
+    private fun spawnCreature(context: CommandContext<CommandSourceStack>, count: Int): Int {
+        val source = context.source
+        val key = Creatures.creatureKey(IdentifierArgument.getId(context, "creature"))
+        val made = (1..count).count { Creatures.spawn(source.level, key, source.position) != null }
+        if (made == 0) throw SimpleCommandExceptionType(Component.literal("Невідома істота: ${key.identifier()}")).create()
+        source.sendSuccess({ Component.literal("Викликано: ${key.identifier()} ×$made") }, true)
+        return made
     }
 
     // ── Targets ─────────────────────────────────────────────────────────────────

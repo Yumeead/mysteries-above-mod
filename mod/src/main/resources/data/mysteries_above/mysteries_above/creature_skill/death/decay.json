@@ -1,0 +1,32 @@
+{
+  "target": [
+    {
+      "type": "damage",
+      "amount": 7
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:poison",
+      "duration": 60
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:squid_ink"
+        },
+        "count": 10,
+        "spread": 0.3,
+        "rise": 0.4,
+        "y": 1,
+        "speed": 0.02
+      }
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.zombie.infect",
+      "volume": 0.8,
+      "pitch": 0.6
+    }
+  ]
+}

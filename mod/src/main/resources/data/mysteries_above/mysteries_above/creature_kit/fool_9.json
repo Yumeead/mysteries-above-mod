@@ -1,0 +1,9 @@
+{
+  "reactions": [
+    {
+      "when": "hurt",
+      "skill": "mysteries_above:fool/danger_intuition",
+      "cooldown": 200
+    }
+  ]
+}

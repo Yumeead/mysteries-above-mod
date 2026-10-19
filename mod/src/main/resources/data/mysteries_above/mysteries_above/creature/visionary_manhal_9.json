@@ -1,0 +1,24 @@
+{
+  "body": {
+    "entity": "minecraft:guardian",
+    "name": {
+      "text": "Манхал-риба",
+      "color": "dark_aqua"
+    }
+  },
+  "stats": {
+    "health": 53,
+    "damage": 7,
+    "speed": 0.25
+  },
+  "kit": "mysteries_above:visionary_9",
+  "pathway": "Visionary",
+  "sequence": 9,
+  "spawn": {
+    "biomes": [
+      "minecraft:ocean",
+      "minecraft:deep_ocean"
+    ],
+    "chance": 0.005
+  }
+}

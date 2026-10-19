@@ -1,0 +1,21 @@
+{
+  "self": [
+    {
+      "type": "effect",
+      "effect": "minecraft:resistance",
+      "duration": 40
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:squid_ink"
+        },
+        "count": 4,
+        "spread": 0.3,
+        "rise": 0.3,
+        "y": 1
+      }
+    }
+  ]
+}

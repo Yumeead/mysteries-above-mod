@@ -25,10 +25,17 @@ class AbilityCastPlanner internal constructor(
     private var gcdReadyAt: Long = 0
     private val skillReadyAt = HashMap<String, Long>()
 
-    fun pickNext(now: Long): String? {
+    /**
+     * @param usable whether a ready skill makes sense right now (range, a Beyonder target…). A skill
+     * that fails it is skipped **without** spending its cooldown or the GCD — the plugin burnt both
+     * on a cast its condition then refused, which made creatures look idle against ordinary people.
+     */
+    fun pickNext(now: Long, usable: (String) -> Boolean = { true }): String? {
         if (now < gcdReadyAt) return null
 
-        val readyIndexes = kit.indices.filter { now >= (skillReadyAt[kit[it].skillName] ?: Long.MIN_VALUE) }
+        val readyIndexes = kit.indices.filter {
+            now >= (skillReadyAt[kit[it].skillName] ?: Long.MIN_VALUE) && usable(kit[it].skillName)
+        }
         if (readyIndexes.isEmpty()) return null
 
         var roll = random.nextInt(readyIndexes.sumOf { weightOf(it) })

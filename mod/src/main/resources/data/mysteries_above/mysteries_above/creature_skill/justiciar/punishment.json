@@ -1,0 +1,30 @@
+{
+  "target": [
+    {
+      "type": "damage",
+      "amount": 18
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:slowness",
+      "duration": 30,
+      "amplifier": 1
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:explosion"
+        },
+        "count": 2,
+        "y": 1
+      }
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.lightning_bolt.thunder",
+      "volume": 0.7,
+      "pitch": 1.4
+    }
+  ]
+}

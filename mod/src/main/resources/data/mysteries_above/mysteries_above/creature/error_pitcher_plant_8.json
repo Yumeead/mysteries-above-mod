@@ -1,0 +1,36 @@
+{
+  "body": {
+    "entity": "minecraft:husk",
+    "name": {
+      "text": "Глечикова рослина з людським обличчям",
+      "color": "dark_green"
+    },
+    "scale": 1.2,
+    "aura": {
+      "particle": {
+        "type": "minecraft:smoke"
+      },
+      "count": 6,
+      "spread": 0.3,
+      "rise": 0.5,
+      "y": 1,
+      "speed": 0.01
+    }
+  },
+  "stats": {
+    "health": 88,
+    "damage": 9,
+    "speed": 0.18
+  },
+  "kit": "mysteries_above:error_8",
+  "pathway": "Error",
+  "sequence": 8,
+  "spawn": {
+    "biomes": [
+      "minecraft:jungle",
+      "minecraft:sparse_jungle"
+    ],
+    "chance": 0.00375,
+    "structures": 0.00375
+  }
+}

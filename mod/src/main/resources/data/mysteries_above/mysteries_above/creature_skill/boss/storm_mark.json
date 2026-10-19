@@ -1,0 +1,27 @@
+{
+  "windup": 30,
+  "telegraph": {
+    "particle": {
+      "type": "minecraft:electric_spark"
+    },
+    "count": 14,
+    "spread": 1.4,
+    "rise": 0.1,
+    "y": 0.1,
+    "speed": 0.05
+  },
+  "range": 20,
+  "area": 3.5,
+  "target": [
+    {
+      "type": "lightning",
+      "damage": 11
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:slowness",
+      "duration": 40,
+      "amplifier": 1
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "beyonders_only": true,
+  "target": [
+    {
+      "type": "seal_powers",
+      "seconds": 8
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:blindness",
+      "duration": 60
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:slowness",
+      "duration": 80,
+      "amplifier": 3
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:weakness",
+      "duration": 120,
+      "amplifier": 1
+    },
+    {
+      "type": "chance",
+      "chance": 0.4,
+      "then": [
+        {
+          "type": "drain_sanity",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "type": "particles",
+      "puff": {
+        "particle": {
+          "type": "minecraft:squid_ink"
+        },
+        "count": 40,
+        "spread": 0.6,
+        "rise": 1,
+        "y": 1.4,
+        "speed": 0.02
+      }
+    },
+    {
+      "type": "sound",
+      "sound": "minecraft:entity.elder_guardian.curse",
+      "volume": 1,
+      "pitch": 0.8
+    }
+  ]
+}
