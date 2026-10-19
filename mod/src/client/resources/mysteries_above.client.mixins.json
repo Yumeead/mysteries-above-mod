@@ -7,6 +7,7 @@
     "GameRendererInvoker",
     "AbstractClientPlayerSkinMixin",
     "HudSpriteMixin",
+    "InventoryTextureMixin",
     "ChatLayoutMixin"
   ],
   "injectors": {
