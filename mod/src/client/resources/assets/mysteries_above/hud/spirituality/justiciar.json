@@ -1,0 +1,55 @@
+{
+  "pathway": "Justiciar",
+  "frame": "mysteries_above:spirituality/common/frame",
+  "glass": "mysteries_above:spirituality/common/glass",
+  "backing": "mysteries_above:spirituality/common/backing",
+  "mask": "mysteries_above:textures/gui/sprites/spirituality/common/mask.png",
+  "tones": "mysteries_above:textures/gui/sprites/spirituality/justiciar/tones.png",
+  "neck": "mysteries_above:spirituality/justiciar/neck",
+  "tag": "mysteries_above:spirituality/justiciar/tag",
+  "engraving": "mysteries_above:spirituality/justiciar/engraving",
+  "palette": [
+    "#744008",
+    "#935106",
+    "#A86009",
+    "#CE7C0B",
+    "#F3A20E",
+    "#FACE4B"
+  ],
+  "particle": [
+    [
+      0,
+      -1
+    ],
+    [
+      0,
+      0
+    ]
+  ],
+  "particleCount": 3,
+  "flow": "RISE",
+  "periodTicks": 120,
+  "tagSwing": 0.025,
+  "liquids": [
+    {
+      "level": 0.005,
+      "surface": 48,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/justiciar/liquid_minimum.png"
+    },
+    {
+      "level": 0.1,
+      "surface": 43,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/justiciar/liquid_low.png"
+    },
+    {
+      "level": 0.33,
+      "surface": 36,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/justiciar/liquid_third.png"
+    },
+    {
+      "level": 1.0,
+      "surface": 20,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/justiciar/liquid_full.png"
+    }
+  ]
+}

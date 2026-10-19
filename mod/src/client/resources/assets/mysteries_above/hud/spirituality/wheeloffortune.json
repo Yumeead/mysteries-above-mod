@@ -1,0 +1,55 @@
+{
+  "pathway": "WheelOfFortune",
+  "frame": "mysteries_above:spirituality/common/frame",
+  "glass": "mysteries_above:spirituality/common/glass",
+  "backing": "mysteries_above:spirituality/common/backing",
+  "mask": "mysteries_above:textures/gui/sprites/spirituality/common/mask.png",
+  "tones": "mysteries_above:textures/gui/sprites/spirituality/wheeloffortune/tones.png",
+  "neck": "mysteries_above:spirituality/wheeloffortune/neck",
+  "tag": "mysteries_above:spirituality/wheeloffortune/tag",
+  "engraving": "mysteries_above:spirituality/wheeloffortune/engraving",
+  "palette": [
+    "#3B8BA6",
+    "#45A7C6",
+    "#52B1D0",
+    "#6AC8E3",
+    "#75DAEE",
+    "#94E9F6"
+  ],
+  "particle": [
+    [
+      0,
+      0
+    ],
+    [
+      1,
+      0
+    ]
+  ],
+  "particleCount": 3,
+  "flow": "ORBIT",
+  "periodTicks": 200,
+  "tagSwing": 0.04,
+  "liquids": [
+    {
+      "level": 0.005,
+      "surface": 41,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/wheeloffortune/liquid_minimum.png"
+    },
+    {
+      "level": 0.1,
+      "surface": 38,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/wheeloffortune/liquid_low.png"
+    },
+    {
+      "level": 0.33,
+      "surface": 28,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/wheeloffortune/liquid_third.png"
+    },
+    {
+      "level": 1.0,
+      "surface": 20,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/wheeloffortune/liquid_full.png"
+    }
+  ]
+}

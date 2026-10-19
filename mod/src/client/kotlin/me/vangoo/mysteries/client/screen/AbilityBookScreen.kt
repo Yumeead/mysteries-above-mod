@@ -5,6 +5,7 @@ import me.vangoo.domain.PathwayBranding
 import me.vangoo.domain.abilities.AbilityType
 import me.vangoo.domain.valueobjects.SanityLoss
 import me.vangoo.mysteries.MOD_ID
+import me.vangoo.mysteries.modId
 import me.vangoo.mysteries.client.AbilityGroup
 import me.vangoo.mysteries.client.ClientOptions
 import me.vangoo.mysteries.client.beyonder.ClientAbilityState
@@ -18,6 +19,7 @@ import me.vangoo.mysteries.net.payload.AbilityActionPayload.Action
 import me.vangoo.mysteries.net.payload.AbilityRosterPayload
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.EditBox
+import net.minecraft.client.gui.components.Tooltip
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.input.KeyEvent
 import net.minecraft.client.input.MouseButtonEvent
@@ -143,6 +145,11 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
         rx = cx + lw + GAP
         rw = cx + cw - rx
 
+        addRenderableWidget(GrimoireButton(bx + bw - 31, by + 5, 22, 22,
+            HudSettingsScreen.tr("settings"), icon = modId("spirituality/settings")) {
+            minecraft.gui.setScreen(HudSettingsScreen(this))
+        }.apply { setTooltip(Tooltip.create(HudSettingsScreen.tr("settings"))) })
+
         when (page) {
             Page.LIBRARY -> {
                 val box = EditBox(font, cx + 18, cy + 7, lw - 18 - FILTERS * 15 - 8, 10, Component.translatable("book.$MOD_ID.search"))
@@ -170,7 +177,7 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
     }
 
     override fun tick() {
-        if (!ClientAbilityState.isBeyonder) {
+        if (minecraft.player == null) {
             onClose()
             return
         }

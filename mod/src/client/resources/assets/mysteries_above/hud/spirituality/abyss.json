@@ -1,0 +1,55 @@
+{
+  "pathway": "Abyss",
+  "frame": "mysteries_above:spirituality/common/frame",
+  "glass": "mysteries_above:spirituality/common/glass",
+  "backing": "mysteries_above:spirituality/common/backing",
+  "mask": "mysteries_above:textures/gui/sprites/spirituality/common/mask.png",
+  "tones": "mysteries_above:textures/gui/sprites/spirituality/abyss/tones.png",
+  "neck": "mysteries_above:spirituality/abyss/neck",
+  "tag": "mysteries_above:spirituality/abyss/tag",
+  "engraving": "mysteries_above:spirituality/abyss/engraving",
+  "palette": [
+    "#3B0804",
+    "#490902",
+    "#5B0902",
+    "#5C0C02",
+    "#7C1002",
+    "#BB3A13"
+  ],
+  "particle": [
+    [
+      0,
+      0
+    ],
+    [
+      1,
+      1
+    ]
+  ],
+  "particleCount": 3,
+  "flow": "STEP",
+  "periodTicks": 120,
+  "tagSwing": 0.025,
+  "liquids": [
+    {
+      "level": 0.005,
+      "surface": 49,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/abyss/liquid_minimum.png"
+    },
+    {
+      "level": 0.1,
+      "surface": 44,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/abyss/liquid_low.png"
+    },
+    {
+      "level": 0.33,
+      "surface": 33,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/abyss/liquid_third.png"
+    },
+    {
+      "level": 1.0,
+      "surface": 20,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/abyss/liquid_full.png"
+    }
+  ]
+}

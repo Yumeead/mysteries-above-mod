@@ -1,7 +1,14 @@
 package me.vangoo.mysteries.client.dev
 
 import me.vangoo.domain.valueobjects.AbilityIdentity
+import me.vangoo.domain.PathwayBranding
 import me.vangoo.domain.valueobjects.Spirituality
+import me.vangoo.domain.hud.HudPart
+import me.vangoo.domain.hud.HudEdge
+import me.vangoo.domain.hud.HudRect
+import me.vangoo.domain.hud.HudPosition
+import me.vangoo.domain.hud.SpiritualityMode
+import me.vangoo.domain.hud.SpiritualityNumbers
 import me.vangoo.mysteries.ability.runtime.AbilityServices
 import me.vangoo.mysteries.client.AbilityGroup
 import me.vangoo.mysteries.client.ClientOptions
@@ -13,15 +20,29 @@ import me.vangoo.mysteries.client.render.WheelLayout
 import me.vangoo.mysteries.client.render.WheelSkin
 import me.vangoo.mysteries.client.screen.AbilityBookScreen
 import me.vangoo.mysteries.client.screen.AbilityWheelScreen
+import me.vangoo.mysteries.client.screen.HudSettingsScreen
+import me.vangoo.mysteries.client.screen.HudEditorScreen
 import me.vangoo.mysteries.net.ModChannels
 import me.vangoo.mysteries.net.payload.AbilityActionPayload
 import me.vangoo.mysteries.net.payload.AbilityRosterPayload
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.Minecraft
+import net.minecraft.client.AttackIndicatorStatus
 import net.minecraft.client.Screenshot
+import net.minecraft.client.gui.components.EditBox
+import net.minecraft.client.gui.components.AbstractWidget
+import net.minecraft.client.gui.screens.ChatScreen
+import net.minecraft.client.gui.screens.inventory.InventoryScreen
 import net.minecraft.client.gui.screens.TitleScreen
 import net.minecraft.client.input.MouseButtonEvent
 import net.minecraft.client.input.MouseButtonInfo
+import net.minecraft.client.input.KeyEvent
+import net.minecraft.world.entity.HumanoidArm
+import net.minecraft.core.BlockPos
+import net.minecraft.world.level.block.Blocks
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+import org.lwjgl.glfw.GLFW
 import org.slf4j.LoggerFactory
 
 /**
@@ -30,7 +51,8 @@ import org.slf4j.LoggerFactory
  *
  *     MYSTERIES_WHEEL_SHOTS=1 ./gradlew :mod:runClient
  *
- * Needs the single-player world `New World` in `mod/run/saves`; shots land in `mod/run/screenshots`.
+ * Uses `New World` in `mod/run/saves`, or the copy named by `MYSTERIES_SHOTS_WORLD`.
+ * Shots land in `mod/run/screenshots`.
  * The states are set on the integrated server directly — this is a camera, not a test of the casts.
  */
 object WheelShots {
@@ -49,12 +71,20 @@ object WheelShots {
             if (mc.gui.screen() is TitleScreen) {
                 started = true
                 mc.window.setWindowed(1920, 1080)
-                mc.createWorldOpenFlows().openWorld("New World") { log.error("Could not open 'New World'") }
+                val world = System.getenv("MYSTERIES_SHOTS_WORLD") ?: "New World"
+                mc.createWorldOpenFlows().openWorld(world) { log.error("Could not open '{}'", world) }
                 plan()
             }
             return
         }
         if (mc.player == null) return
+        if (System.getenv("MYSTERIES_WHEEL_SHOTS") == "bottom-panel" &&
+            mc.gui.screen() is net.minecraft.client.gui.screens.LevelLoadingScreen) return
+        if (System.getenv("MYSTERIES_WHEEL_SHOTS") == "bottom-panel" &&
+            mc.gui.screen() is net.minecraft.client.gui.screens.PauseScreen) {
+            mc.gui.setScreen(null)
+            return
+        }
         if (wait > 0) { wait--; return }
         val (delay, action) = steps.removeFirstOrNull() ?: return
         action(mc)
@@ -104,6 +134,9 @@ object WheelShots {
     /** Survival with levels and armour, so every vanilla row the bar lifts is on screen. */
     private fun planHud(originalSkin: WheelSkin, originalScale: Int) {
         val originalHud = ClientOptions.hud
+        val originalGroup = ClientOptions.activeGroup
+        val originalSpirit = ClientOptions.showSpirituality
+        val originalMotion = ClientOptions.reducedMotion
         then(100) { mc ->
             command(mc, "mysteries become Sun 5 @a")
             command(mc, "weather clear")
@@ -114,6 +147,8 @@ object WheelShots {
             ClientOptions.activeGroup = 0
             ClientOptions.wheelSkin = WheelSkin.ATMOSPHERIC
             ClientOptions.hud = HudMode.ALWAYS
+            ClientOptions.showSpirituality = true
+            ClientOptions.reducedMotion = false
         }
         then(40) { mc ->
             spirituality(mc, 1f)
@@ -128,7 +163,7 @@ object WheelShots {
                     mc.player!!.setXRot(if (night) -35f else 30f)
                 }
                 for ((label, share) in listOf("full" to 1f, "spent" to 0.6f, "critical" to 0.05f)) {
-                    then(12) { mc -> spirituality(mc, share) }
+                    then(24) { mc -> spirituality(mc, share) }
                     then(2) { mc -> shot(mc, "bar_gs${scale}_${bg}_$label") }
                 }
                 run {
@@ -148,9 +183,32 @@ object WheelShots {
                 }
             }
         }
+        then(30) { mc ->
+            mc.options.guiScale().set(3)
+            mc.resizeGui()
+            ClientOptions.hud = HudMode.AUTO
+            command(mc, "time set noon")
+            command(mc, "experience set @a 0 levels")
+            spirituality(mc, .6f)
+        }
+        then(120) { mc -> shot(mc, "bar_auto_xp_zero") }
+        then(20) { mc -> command(mc, "gamemode creative @a") }
+        then(4) { mc -> shot(mc, "bar_auto_creative") }
+        then(30) { mc ->
+            command(mc, "gamemode survival @a")
+            spirituality(mc, .3f)
+        }
+        repeat(10) { frame ->
+            then(3) { mc -> shot(mc, "bar_recovery_$frame") }
+        }
+        then(20) { mc -> command(mc, "gamemode spectator @a") }
+        then(4) { mc -> shot(mc, "bar_spectator_hidden") }
         then(10) { mc ->
             ClientOptions.wheelSkin = originalSkin
             ClientOptions.hud = originalHud
+            ClientOptions.activeGroup = originalGroup
+            ClientOptions.showSpirituality = originalSpirit
+            ClientOptions.reducedMotion = originalMotion
             mc.options.guiScale().set(originalScale)
             command(mc, "gamemode creative @a")
             log.info("wheel shots done")
@@ -249,9 +307,264 @@ object WheelShots {
 
     private enum class State { NORMAL, HOVER, COOLDOWN, NO_SPIRITUALITY }
 
+    private fun planHudResize(originalScale: Int) {
+        val saved = ClientOptions.hudSettings
+        fun drag(screen: HudEditorScreen, x: Double, y: Double, dx: Double, dy: Double) {
+            val start = MouseButtonEvent(x, y, MouseButtonInfo(0, 0))
+            val end = MouseButtonEvent(x + dx, y + dy, MouseButtonInfo(0, 0))
+            check(screen.mouseClicked(start, false))
+            check(screen.mouseDragged(end, dx, dy))
+            check(screen.mouseReleased(end))
+        }
+        then(10) { mc ->
+            mc.options.guiScale().set(3)
+            mc.resizeGui()
+            mc.options.pauseOnLostFocus = false
+            mc.gui.setScreen(HudEditorScreen(AbilityBookScreen()))
+        }
+        for (mode in listOf(SpiritualityMode.FLASK, SpiritualityMode.BAR)) {
+            then(3) { mc ->
+                val screen = mc.gui.screen() as HudEditorScreen
+                ClientOptions.hudSettings = saved.copy(spirituality = mode, positions = emptyMap(), scales = emptyMap())
+                val parts = screen.boxes().keys.toList()
+                for (part in parts) {
+                    for (edge in HudEdge.entries) {
+                        ClientOptions.hudSettings = ClientOptions.hudSettings.copy(positions = emptyMap(), scales = emptyMap())
+                        val initial = screen.boxes().getValue(part).rect
+                        val centered = HudRect((screen.width - initial.width) / 2, (screen.height - initial.height) / 2,
+                            initial.width, initial.height)
+                        ClientOptions.hudSettings = ClientOptions.hudSettings.copy(positions = mapOf(
+                            part to HudPosition.of(centered, screen.width, screen.height)))
+                        val before = screen.boxes().getValue(part)
+                        val x = before.rect.x + (edge.horizontal + 1) * before.rect.width / 2.0
+                        val y = before.rect.y + (edge.vertical + 1) * before.rect.height / 2.0
+                        drag(screen, x, y, edge.horizontal * before.rect.width * .2, edge.vertical * before.rect.height * .2)
+                        val larger = screen.boxes().getValue(part)
+                        check(larger.scale > before.scale) { "Did not enlarge $part from $edge" }
+                        check(ClientOptions.hudSettings.scales.keys == setOf(part)) { "Resized another HUD part" }
+                        val written = ClientOptions.hudSettings
+                        ClientOptions.load()
+                        check(ClientOptions.hudSettings == written) { "HUD size did not survive JSON reload" }
+                        val rx = larger.rect.x + (edge.horizontal + 1) * larger.rect.width / 2.0
+                        val ry = larger.rect.y + (edge.vertical + 1) * larger.rect.height / 2.0
+                        drag(screen, rx, ry, -edge.horizontal * before.rect.width * .3, -edge.vertical * before.rect.height * .3)
+                        check(screen.boxes().getValue(part).scale < before.scale) { "Did not shrink $part from $edge" }
+                    }
+                }
+                log.info("HUD resize: all edges, corners and JSON reload passed for {}", mode)
+            }
+        }
+        then(3) { mc ->
+            val screen = mc.gui.screen() as HudEditorScreen
+            click(mc, "Скинути цей елемент")
+            check(ClientOptions.hudSettings.scales.isEmpty())
+            val box = screen.boxes().getValue(HudPart.ABILITY).rect
+            drag(screen, box.x + box.width / 2.0, box.y + box.height / 2.0, 30.0, -20.0)
+            check(ClientOptions.hudSettings.scales.isEmpty()) { "Moving changed the size" }
+            ClientOptions.hudSettings = ClientOptions.hudSettings.copy(scales = mapOf(HudPart.ABILITY to 1.5f))
+        }
+        then(3) { mc -> shot(mc, "hud_resize_editor") }
+        then(3) { mc -> mc.window.setWindowed(960, 720); mc.options.guiScale().set(3); mc.resizeGui() }
+        then(3) { mc ->
+            val screen = mc.gui.screen() as HudEditorScreen
+            check(screen.boxes().values.all { it.rect.x >= 0 && it.rect.y >= 0 && it.rect.right <= screen.width && it.rect.bottom <= screen.height })
+            shot(mc, "hud_resize_narrow")
+            click(mc, "Скинути все")
+            check(ClientOptions.hudSettings.positions.isEmpty() && ClientOptions.hudSettings.scales.isEmpty())
+            screen.onClose()
+            mc.gui.setScreen(HudEditorScreen(AbilityBookScreen()))
+            check(ClientOptions.hudSettings.scales.isEmpty())
+        }
+        then(5) { mc ->
+            mc.gui.setScreen(null)
+            ClientOptions.hudSettings = saved
+            mc.options.guiScale().set(originalScale)
+            log.info("HUD resize checks passed")
+            mc.stop()
+        }
+    }
+
+    private fun click(mc: Minecraft, caption: String) {
+        val screen = mc.gui.screen()!!
+        val button = screen.children().filterIsInstance<AbstractWidget>().first { it.message.string == caption }
+        val event = MouseButtonEvent(button.x + button.width / 2.0, button.y + button.height / 2.0, MouseButtonInfo(0, 0))
+        screen.mouseClicked(event, false)
+        screen.mouseReleased(event)
+    }
+
+    /** End-to-end HUD checks; run against a copied world in an isolated game directory. */
+    private fun planSpirituality(originalScale: Int) {
+        val savedSettings = ClientOptions.hudSettings
+        val savedHud = ClientOptions.hud
+        val client = Minecraft.getInstance()
+        val savedHand = client.options.mainHand().get()
+        then(100) { mc ->
+            ClientOptions.hud = HudMode.ALWAYS
+            ClientOptions.hudSettings = savedSettings.copy(spirituality = SpiritualityMode.FLASK,
+                numbers = SpiritualityNumbers.ALWAYS, positions = emptyMap())
+            mc.options.pauseOnLostFocus = false
+            mc.options.attackIndicator().set(AttackIndicatorStatus.HOTBAR)
+            mc.player!!.setXRot(12f)
+            command(mc, "gamemode survival @a")
+            command(mc, "time set noon")
+            command(mc, "weather clear")
+        }
+        for (scale in listOf(2, 3, 4)) {
+            then(10) { mc -> mc.options.guiScale().set(scale); mc.resizeGui() }
+            for (pathway in listOf("Fool", "Mother", "Justiciar")) {
+                then(30) { mc -> command(mc, "mysteries become $pathway 5 @a") }
+                for ((label, share) in listOf("full" to 1f, "third" to .33f, "low" to .1f, "minimum" to .005f, "empty" to 0f)) {
+                    then(24) { mc -> spirituality(mc, share) }
+                    then(2) { mc -> shot(mc, "flask_${pathway.lowercase()}_gs${scale}_$label") }
+                }
+            }
+        }
+        then(15) { mc ->
+            mc.options.mainHand().set(HumanoidArm.LEFT)
+            mc.options.broadcastOptions()
+            mc.player!!.swing(net.minecraft.world.InteractionHand.MAIN_HAND)
+        }
+        then(2) { mc -> shot(mc, "flask_left_handed") }
+        then(15) { mc ->
+            mc.options.mainHand().set(savedHand)
+            mc.options.broadcastOptions()
+            mc.window.setWindowed(960, 720)
+            mc.options.guiScale().set(3)
+            mc.resizeGui()
+        }
+        then(2) { mc -> shot(mc, "flask_narrow") }
+        then(75) { mc ->
+            mc.window.setWindowed(1920, 1080)
+            mc.options.guiScale().set(3)
+            mc.resizeGui()
+            ClientOptions.hudSettings = ClientOptions.hudSettings.copy(numbers = SpiritualityNumbers.ON_CHANGE)
+            spirituality(mc, 1f)
+        }
+        then(2) { mc -> shot(mc, "flask_on_change_expired") }
+        then(8) { mc -> mc.gui.setScreen(ChatScreen("", false)) }
+        then(2) { mc -> shot(mc, "flask_chat_number") }
+        then(8) { mc -> mc.gui.setScreen(InventoryScreen(mc.player!!)) }
+        then(2) { mc -> shot(mc, "flask_inventory_number") }
+        then(8) { mc -> mc.gui.setScreen(AbilityBookScreen(AbilityBookScreen.Page.STATUS)) }
+        then(2) { mc -> shot(mc, "flask_book_gear") }
+        then(8) { mc -> click(mc, "Налаштування"); check(mc.gui.screen() is HudSettingsScreen) }
+        then(2) { mc -> shot(mc, "flask_settings") }
+        then(8) { mc ->
+            click(mc, "Смуга")
+            click(mc, "Завжди")
+            check(ClientOptions.hudSettings.spirituality == SpiritualityMode.BAR)
+        }
+        then(2) { mc -> shot(mc, "flask_settings_bar") }
+        then(8) { mc -> mc.gui.setScreen(null) }
+        then(2) { mc -> shot(mc, "flask_fixed_bar") }
+        then(8) { mc ->
+            mc.gui.setScreen(AbilityBookScreen())
+            click(mc, "Налаштування")
+            click(mc, "Ніколи")
+            check(ClientOptions.hudSettings.numbers == SpiritualityNumbers.NEVER)
+            click(mc, "Флакон")
+        }
+        then(2) { mc -> shot(mc, "flask_settings_never") }
+        then(8) { mc -> click(mc, "Перемістити елементи"); check(mc.gui.screen() is HudEditorScreen) }
+        then(2) { mc -> shot(mc, "flask_editor") }
+        then(8) { mc ->
+            val screen = mc.gui.screen() as HudEditorScreen
+            val box = screen.boxes().getValue(HudPart.FLASK).rect
+            val event = MouseButtonEvent(box.x + box.width / 2.0, box.y + box.height / 2.0, MouseButtonInfo(0, 0))
+            screen.mouseClicked(event, false)
+            val moved = MouseButtonEvent(event.x() - 90, event.y() - 65, MouseButtonInfo(0, 0))
+            screen.mouseDragged(moved, -90.0, -65.0)
+            screen.mouseReleased(moved)
+            check(HudPart.FLASK in ClientOptions.hudSettings.positions)
+            val written = ClientOptions.hudSettings
+            ClientOptions.load()
+            check(ClientOptions.hudSettings == written) { "HUD positions did not survive JSON reload" }
+            Files.copy(mc.gameDirectory.toPath().resolve("config/mysteries_above_client.json"),
+                mc.gameDirectory.toPath().resolve("hud-dragged-config.json"), StandardCopyOption.REPLACE_EXISTING)
+            val beforeKey = screen.boxes().getValue(HudPart.FLASK).rect.x
+            screen.keyPressed(KeyEvent(GLFW.GLFW_KEY_LEFT, 0, 0))
+            check(screen.boxes().getValue(HudPart.FLASK).rect.x == beforeKey - 1)
+            log.info("HUD check: drag and config round trip passed")
+        }
+        then(2) { mc -> shot(mc, "flask_editor_moved") }
+        then(12) { mc -> mc.window.setWindowed(960, 720); mc.options.guiScale().set(3); mc.resizeGui() }
+        then(2) { mc ->
+            val screen = mc.gui.screen() as HudEditorScreen
+            check(screen.boxes().values.all { it.rect.x >= 0 && it.rect.y >= 0 && it.rect.right <= screen.width && it.rect.bottom <= screen.height })
+            shot(mc, "flask_editor_narrow")
+        }
+        then(12) { mc -> mc.window.setWindowed(1920, 1080); mc.options.guiScale().set(3); mc.resizeGui() }
+        then(8) { mc ->
+            val screen = mc.gui.screen() as HudEditorScreen
+            val flask = screen.boxes().getValue(HudPart.FLASK).rect
+            val ability = screen.boxes().getValue(HudPart.ABILITY).rect
+            ClientOptions.hudSettings = ClientOptions.hudSettings.copy(positions = ClientOptions.hudSettings.positions +
+                (HudPart.ABILITY to HudPosition.of(ability, screen.width, screen.height)))
+            val start = MouseButtonEvent(flask.x + flask.width / 2.0, flask.y + flask.height / 2.0, MouseButtonInfo(0, 0))
+            screen.mouseClicked(start, false)
+            val target = MouseButtonEvent(ability.x + flask.width / 2.0, ability.y + flask.height / 2.0, MouseButtonInfo(0, 0))
+            screen.mouseDragged(target, target.x() - start.x(), target.y() - start.y())
+            screen.mouseReleased(target)
+            check(screen.boxes().getValue(HudPart.FLASK).rect.overlaps(screen.boxes().getValue(HudPart.ABILITY).rect))
+        }
+        then(2) { mc -> shot(mc, "flask_editor_overlap") }
+        then(8) { mc -> click(mc, "Скинути цей елемент"); check(HudPart.FLASK !in ClientOptions.hudSettings.positions) }
+        then(8) { mc -> click(mc, "Скинути все"); check(ClientOptions.hudSettings.positions.isEmpty()) }
+        then(8) { mc -> click(mc, "Готово"); click(mc, "Вимкнено"); click(mc, "Перемістити елементи") }
+        then(2) { mc ->
+            check((mc.gui.screen() as HudEditorScreen).boxes().keys == setOf(HudPart.FLASK, HudPart.ABILITY, HudPart.MARIONETTES))
+            shot(mc, "flask_editor_off")
+            command(mc, "mysteries forget @a")
+        }
+        then(20) { mc -> mc.gui.setScreen(AbilityBookScreen(AbilityBookScreen.Page.STATUS)) }
+        then(2) { mc -> check(mc.gui.screen() is AbilityBookScreen); shot(mc, "flask_book_no_pathway") }
+        then(8) { mc -> click(mc, "Налаштування"); click(mc, "Флакон"); click(mc, "Перемістити елементи") }
+        then(2) { mc ->
+            check((mc.gui.screen() as HudEditorScreen).boxes().size == 3)
+            shot(mc, "flask_editor_no_pathway")
+        }
+        then(10) { mc ->
+            mc.gui.setScreen(null)
+            ClientOptions.hudSettings = savedSettings
+            ClientOptions.hud = savedHud
+            mc.options.guiScale().set(originalScale)
+            log.info("spirituality HUD checks passed")
+            mc.stop()
+        }
+    }
+
     private fun plan() {
         val originalSkin = ClientOptions.wheelSkin
         val originalScale = Minecraft.getInstance().options.guiScale().get()
+        if (System.getenv("MYSTERIES_WHEEL_SHOTS") == "bottom-panel") return planBottomPanel(originalScale)
+        if (System.getenv("MYSTERIES_WHEEL_SHOTS") == "flask-review") return planFlaskReview(originalScale)
+        if (System.getenv("MYSTERIES_WHEEL_SHOTS") == "hud-resize") return planHudResize(originalScale)
+        if (System.getenv("MYSTERIES_WHEEL_SHOTS") == "spirituality-reload") {
+            then(20) { mc ->
+                val settings = ClientOptions.hudSettings
+                check(settings.spirituality == SpiritualityMode.FLASK && settings.numbers == SpiritualityNumbers.NEVER &&
+                    HudPart.FLASK in settings.positions) { "HUD settings did not survive a client restart" }
+                mc.gui.setScreen(HudEditorScreen(AbilityBookScreen()))
+            }
+            then(2) { mc -> shot(mc, "flask_persisted_after_restart") }
+            then(8) { mc ->
+                val screen = mc.gui.screen() as HudEditorScreen
+                val ability = screen.boxes().getValue(HudPart.ABILITY).rect
+                val flask = screen.boxes().getValue(HudPart.FLASK).rect
+                ClientOptions.hudSettings = ClientOptions.hudSettings.copy(positions = ClientOptions.hudSettings.positions +
+                    (HudPart.ABILITY to HudPosition.of(ability, screen.width, screen.height)))
+                val start = MouseButtonEvent(flask.x + flask.width / 2.0, flask.y + flask.height / 2.0, MouseButtonInfo(0, 0))
+                screen.mouseClicked(start, false)
+                val target = MouseButtonEvent(ability.x + flask.width / 2.0, ability.y + flask.height / 2.0, MouseButtonInfo(0, 0))
+                screen.mouseDragged(target, target.x() - start.x(), target.y() - start.y())
+                screen.mouseReleased(target)
+                check(screen.boxes().getValue(HudPart.FLASK).rect.overlaps(screen.boxes().getValue(HudPart.ABILITY).rect))
+            }
+            then(2) { mc -> shot(mc, "flask_editor_overlap") }
+            then(5) { mc -> log.info("HUD check: settings survived a client restart"); mc.stop() }
+            return
+        }
+        if (System.getenv("MYSTERIES_WHEEL_SHOTS") == "spirituality") return planSpirituality(originalScale)
         // `MYSTERIES_WHEEL_SHOTS=hud` shoots the HUD instead; anything else compares the wheel skins.
         if (System.getenv("MYSTERIES_WHEEL_SHOTS") == "hud") return planHud(originalSkin, originalScale)
         if (System.getenv("MYSTERIES_WHEEL_SHOTS") == "book") return planBook(originalScale)
@@ -304,6 +617,326 @@ object WheelShots {
             ClientOptions.wheelSkin = originalSkin
             mc.options.guiScale().set(originalScale)
             log.info("wheel shots done")
+            mc.stop()
+        }
+    }
+
+    /** Exercises the approved panel only in the isolated copy selected by the test launcher. */
+    private fun planBottomPanel(originalScale: Int) {
+        val saved = ClientOptions.hudSettings
+        val savedHud = ClientOptions.hud
+        val savedHand = Minecraft.getInstance().options.mainHand().get()
+        val settings = me.vangoo.domain.hud.HudSettings()
+        then(100) { mc ->
+            command(mc,"gamemode creative @a")
+            command(mc,"forceload add -16 -16 16 16")
+        }
+        then(90) { mc ->
+            ClientOptions.hudSettings = settings
+            ClientOptions.hud = HudMode.ALWAYS
+            mc.options.pauseOnLostFocus = false
+            mc.options.attackIndicator().set(AttackIndicatorStatus.HOTBAR)
+            command(mc,"mysteries become Fool 5 @a")
+            command(mc,"gamemode survival @a")
+            command(mc,"weather clear")
+            command(mc,"time set noon")
+            command(mc,"fill -8 199 -8 8 199 8 minecraft:grass_block")
+            command(mc,"tp @a 0 200 0 0 -15")
+            command(mc,"experience set @a 27 levels")
+            server(mc) {
+                val player=mc.singleplayerServer!!.playerList.getPlayer(mc.player!!.uuid)!!
+                val items=listOf(net.minecraft.world.item.Items.GOLDEN_SWORD,net.minecraft.world.item.Items.GOLDEN_PICKAXE,
+                    net.minecraft.world.item.Items.GOLDEN_AXE,net.minecraft.world.item.Items.GOLDEN_SHOVEL,
+                    net.minecraft.world.item.Items.GOLDEN_HOE,net.minecraft.world.item.Items.GOLDEN_APPLE,
+                    net.minecraft.world.item.Items.GOLDEN_CARROT,net.minecraft.world.item.Items.GOLD_INGOT,
+                    net.minecraft.world.item.Items.RAW_GOLD)
+                items.forEachIndexed { index,item -> player.inventory.setItem(index,net.minecraft.world.item.ItemStack(item)) }
+                for (slot in listOf(net.minecraft.world.entity.EquipmentSlot.HEAD,net.minecraft.world.entity.EquipmentSlot.CHEST,
+                    net.minecraft.world.entity.EquipmentSlot.LEGS,net.minecraft.world.entity.EquipmentSlot.FEET,
+                    net.minecraft.world.entity.EquipmentSlot.OFFHAND)) player.setItemSlot(slot,net.minecraft.world.item.ItemStack.EMPTY)
+                player.health=player.maxHealth
+                player.foodData.foodLevel=20
+                player.abilities.invulnerable=true
+                player.onUpdateAbilities()
+            }
+        }
+        then(30) { mc ->
+            spirituality(mc,1f)
+            server(mc) { check(mc.singleplayerServer!!.overworld().getBlockState(BlockPos(0,199,0)).block == Blocks.GRASS_BLOCK) }
+            page().firstOrNull()?.let { ModChannels.ABILITY_ACTION.sendToServer(AbilityActionPayload(AbilityActionPayload.Action.SELECT,it.identity,null)) }
+        }
+        for (scale in listOf(2,3,4)) {
+            then(25) { mc -> mc.options.guiScale().set(scale);mc.resizeGui() }
+            then(2) { mc -> shot(mc,"hud04_gs${scale}_empty_offhand") }
+        }
+        for (pathway in listOf("Mother","Justiciar","WheelOfFortune","WhiteTower")) {
+            then(25) { mc -> command(mc,"mysteries become $pathway 5 @a") }
+            then(25) { mc -> spirituality(mc,1f) }
+            then(2) { mc -> shot(mc,"hud04_full_${pathway.lowercase()}") }
+        }
+        then(25) { mc -> command(mc,"mysteries become Fool 5 @a") }
+        then(30) { mc ->
+            mc.options.guiScale().set(3);mc.resizeGui()
+            command(mc,"item replace entity @a weapon.offhand with minecraft:golden_apple")
+            command(mc,"item replace entity @a armor.chest with minecraft:iron_chestplate")
+            spirituality(mc,.1f)
+        }
+        then(2) { mc -> shot(mc,"hud04_low_spirit_armor") }
+        then(25) { mc -> server(mc) {
+            val player=mc.singleplayerServer!!.playerList.getPlayer(mc.player!!.uuid)!!
+            player.health=3f;player.foodData.foodLevel=3
+        } }
+        then(2) { mc -> shot(mc,"hud04_low_health_hunger") }
+        then(25) { mc ->
+            server(mc) {
+                val player=mc.singleplayerServer!!.playerList.getPlayer(mc.player!!.uuid)!!
+                player.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH)!!.baseValue=40.0
+                player.health=31f;player.foodData.foodLevel=20
+            }
+            spirituality(mc,1f)
+        }
+        then(2) { mc -> shot(mc,"hud04_health40") }
+        then(25) { mc ->
+            ClientOptions.hudSettings=ClientOptions.hudSettings.copy(health=me.vangoo.domain.hud.HealthStyle.BAR,
+                hunger=me.vangoo.domain.hud.HungerStyle.BAR)
+        }
+        then(2) { mc -> shot(mc,"hud04_bars") }
+        then(35) { mc ->
+            ClientOptions.hudSettings=settings
+            command(mc,"fill -2 200 -2 2 204 2 minecraft:water")
+            server(mc) { mc.singleplayerServer!!.playerList.getPlayer(mc.player!!.uuid)!!.airSupply=120 }
+        }
+        then(2) { mc ->
+            check(mc.player!!.isUnderWater) { "Underwater scene did not load" }
+            shot(mc,"hud04_underwater")
+        }
+        then(30) { mc ->
+            command(mc,"fill -2 200 -2 2 204 2 minecraft:air")
+            mc.options.mainHand().set(HumanoidArm.LEFT);mc.options.broadcastOptions()
+            mc.player!!.swing(net.minecraft.world.InteractionHand.MAIN_HAND)
+            page().firstOrNull { it.cooldownSeconds > 0 }?.let { entry ->
+                server(mc) {
+                    AbilityServices.cooldowns.set(mc.player!!.uuid,AbilityIdentity(entry.identity),160)
+                    AbilityServices.statePump.pushNow(mc.player!!.uuid)
+                }
+                ModChannels.ABILITY_ACTION.sendToServer(AbilityActionPayload(AbilityActionPayload.Action.SELECT,entry.identity,null))
+            }
+        }
+        then(2) { mc -> shot(mc,"hud04_left_hand") }
+        then(25) { mc -> mc.window.setWindowed(1280,720);mc.options.guiScale().set(4);mc.resizeGui() }
+        then(2) { mc -> shot(mc,"hud04_narrow_requested4") }
+        then(12) { mc -> mc.gui.setScreen(HudSettingsScreen(AbilityBookScreen())) }
+        then(2) { mc -> shot(mc,"hud04_settings_narrow") }
+        then(10) { mc ->
+            val screen=mc.gui.screen() as HudSettingsScreen
+            check(screen.mouseScrolled(screen.width/2.0,screen.height/2.0,0.0,-8.0))
+        }
+        then(2) { mc -> shot(mc,"hud04_settings_scrolled") }
+        then(10) { mc -> mc.gui.setScreen(HudEditorScreen(HudSettingsScreen(AbilityBookScreen()))) }
+        then(2) { mc ->
+            val editor=mc.gui.screen() as HudEditorScreen
+            check(HudPart.FLASK in editor.boxes())
+            check(HudPart.AUXILIARY in editor.boxes())
+            shot(mc,"hud04_editor")
+        }
+        then(10) { mc ->
+            val editor=mc.gui.screen() as HudEditorScreen
+            val box=editor.boxes().getValue(HudPart.FLASK).rect
+            val legacy=ClientOptions.hudSettings.positions
+            val scales=ClientOptions.hudSettings.scales
+            val start=MouseButtonEvent(box.x+box.width/2.0,box.y+box.height/2.0,MouseButtonInfo(0,0))
+            val moved=MouseButtonEvent(16+box.width/2.0,54+box.height/2.0,MouseButtonInfo(0,0))
+            check(editor.mouseClicked(start,false))
+            check(editor.mouseDragged(moved,moved.x()-start.x(),moved.y()-start.y()))
+            check(editor.mouseReleased(moved))
+            check(editor.boxes().getValue(HudPart.FLASK).rect!=box)
+            val beforeKey=editor.boxes().getValue(HudPart.FLASK).rect
+            check(editor.keyPressed(KeyEvent(GLFW.GLFW_KEY_LEFT,0,0)))
+            val placed=editor.boxes().getValue(HudPart.FLASK)
+            check(placed.rect.x==beforeKey.x-1 && placed.rect.y==beforeKey.y && placed.scale==1f)
+            val written=ClientOptions.hudSettings
+            check(HudPart.FLASK in written.panelPositions && written.positions==legacy && written.scales==scales)
+            ClientOptions.load()
+            check(ClientOptions.hudSettings==written) { "Mod orb position did not survive JSON reload" }
+            mc.gui.setScreen(HudEditorScreen(HudSettingsScreen(AbilityBookScreen())))
+            check((mc.gui.screen() as HudEditorScreen).boxes().getValue(HudPart.FLASK)==placed)
+        }
+        then(2) { mc -> shot(mc,"hud04_editor_orb_moved") }
+        then(5) { mc -> mc.gui.setScreen(null) }
+        then(2) { mc ->
+            val width=mc.window.guiScaledWidth;val height=mc.window.guiScaledHeight
+            val expected=ClientOptions.hudSettings.panelPositions.getValue(HudPart.FLASK).resolve(48,44,width,height)
+            check(me.vangoo.mysteries.client.hud.HudPlacement.boxes(width,height).getValue(HudPart.FLASK).rect==expected)
+            shot(mc,"hud04_orb_moved")
+        }
+        then(10) { mc ->
+            mc.gui.setScreen(HudEditorScreen(HudSettingsScreen(AbilityBookScreen())))
+            val editor=mc.gui.screen() as HudEditorScreen
+            val moved=ClientOptions.hudSettings
+            ClientOptions.hudSettings=moved.copy(panelPositions=moved.panelPositions+
+                (HudPart.FLASK to HudPosition(me.vangoo.domain.hud.HorizontalAnchor.RIGHT,
+                    me.vangoo.domain.hud.VerticalAnchor.TOP,10000,-10000)))
+            val edge=editor.boxes().getValue(HudPart.FLASK).rect
+            check(edge.x==editor.width-48 && edge.y==0)
+            check(me.vangoo.mysteries.client.hud.BottomHud.chatRise(editor.height)<=editor.height-80)
+            ClientOptions.hudSettings=moved
+            val box=editor.boxes().getValue(HudPart.FLASK).rect
+            val select=MouseButtonEvent(box.x+box.width/2.0,box.y+box.height/2.0,MouseButtonInfo(0,0))
+            editor.mouseClicked(select,false);editor.mouseReleased(select)
+            click(mc,"Скинути цей елемент")
+            check(HudPart.FLASK !in ClientOptions.hudSettings.panelPositions)
+            check(editor.boxes().getValue(HudPart.FLASK).rect!=box)
+            log.info("Mod orb check passed: dragging, keyboard, reload, reopened editor, screen bounds and reset")
+        }
+        then(15) { mc ->
+            mc.gui.setScreen(null)
+            ClientOptions.hudSettings=ClientOptions.hudSettings.copy(interfaceStyle=me.vangoo.domain.hud.InterfaceStyle.VANILLA)
+        }
+        then(2) { mc -> shot(mc,"hud04_vanilla_style") }
+        then(15) { mc ->
+            ClientOptions.hudSettings=settings.copy(spirituality=SpiritualityMode.OFF)
+        }
+        then(2) { mc -> shot(mc,"hud04_spirit_off") }
+        then(15) { mc -> ClientOptions.hudSettings=settings.copy(spirituality=SpiritualityMode.BAR) }
+        then(2) { mc -> shot(mc,"hud04_legacy_bar") }
+        then(25) { mc ->
+            ClientOptions.hudSettings=settings.copy(numbers=SpiritualityNumbers.ALWAYS)
+            mc.options.guiScale().set(3);mc.resizeGui()
+            command(mc,"fill -8 200 -8 8 204 8 minecraft:air")
+            mc.player!!.yRot=0f
+            spirituality(mc,0f)
+        }
+        then(2) { mc -> shot(mc,"hud04_motion_empty") }
+        for (direction in listOf(1,-1)) {
+            repeat(8) { then(0) { mc -> mc.player!!.yRot+=20f*direction } }
+            then(1) { mc -> shot(mc,if(direction>0) "hud04_motion_turn_right" else "hud04_motion_turn_left") }
+        }
+        then(45) { }
+        then(2) { mc -> shot(mc,"hud04_motion_settled") }
+        then(2) { mc -> spirituality(mc,.5f) }
+        then(5) { mc -> shot(mc,"hud04_motion_gaining") }
+        then(25) { }
+        then(2) { mc -> spirituality(mc,.1f) }
+        then(4) { mc -> shot(mc,"hud04_motion_spending") }
+        then(25) { }
+        then(2) { mc -> shot(mc,"hud04_motion_low") }
+        then(10) { mc ->
+            val position=HudPosition.of(HudRect(270,90,20,20),mc.window.guiScaledWidth,mc.window.guiScaledHeight)
+            val orbPosition=HudPosition.of(HudRect(16,54,48,44),mc.window.guiScaledWidth,mc.window.guiScaledHeight)
+            val expected=settings.copy(panelPositions=mapOf(HudPart.ABILITY to position,HudPart.FLASK to orbPosition),
+                halfHeart=me.vangoo.domain.hud.HalfHeartStyle.LEFT,
+                healthNumbers=SpiritualityNumbers.NEVER,hungerNumbers=SpiritualityNumbers.ALWAYS)
+            ClientOptions.hudSettings=expected;ClientOptions.load()
+            check(ClientOptions.hudSettings==expected) { "Panel settings failed to round-trip" }
+            ClientOptions.hudSettings=saved;ClientOptions.hud=savedHud
+            mc.options.mainHand().set(savedHand);mc.options.broadcastOptions()
+            mc.options.guiScale().set(originalScale)
+            log.info("Bottom panel check passed: native sprites, empty offhand, both hands, resources, settings and persistence")
+            mc.stop()
+        }
+    }
+
+    private fun planFlaskReview(originalScale: Int) {
+        val saved = ClientOptions.hudSettings
+        val savedHud = ClientOptions.hud
+        then(80) { mc ->
+            ClientOptions.hud = HudMode.ALWAYS
+            ClientOptions.hudSettings = saved.copy(spirituality = SpiritualityMode.FLASK,
+                numbers = SpiritualityNumbers.ALWAYS, flaskBacking = false, positions = emptyMap(), scales = emptyMap())
+            mc.options.pauseOnLostFocus = false
+            command(mc, "gamemode creative @a")
+            command(mc, "weather clear")
+            command(mc, "time set noon")
+            command(mc, "mysteries become Door 5 @a")
+            command(mc, "forceload add -48 -32 96 48")
+            command(mc, "tp @a 0 200 0 0 -80")
+        }
+        then(80) { mc ->
+            command(mc, "fill -16 199 -16 16 199 16 minecraft:stone")
+            command(mc, "fill -40 180 24 40 220 24 minecraft:snow_block")
+            command(mc, "fill -10 199 16 10 199 23 minecraft:snow_block")
+            command(mc, "fill 52 188 -12 76 212 12 minecraft:deepslate hollow")
+            command(mc, "fill 58 198 -6 70 198 8 minecraft:deepslate")
+            command(mc, "setblock 64 199 8 minecraft:deepslate")
+            command(mc, "setblock 64 200 8 minecraft:redstone_torch")
+        }
+        then(3) { mc -> server(mc) {
+            val world = mc.singleplayerServer!!.overworld()
+            check(world.getBlockState(BlockPos(0, 205, 24)).block == Blocks.SNOW_BLOCK) { "Snow review wall was not built" }
+            check(world.getBlockState(BlockPos(64, 205, 12)).block == Blocks.DEEPSLATE) { "Cave review room was not built" }
+        } }
+        then(8) { mc ->
+            mc.options.guiScale().set(4); mc.resizeGui()
+            if (!mc.gui.hud.isHidden()) mc.gui.hud.toggle()
+        }
+        for ((label, share) in listOf("third" to .33f, "full" to 1f)) {
+            then(5) { mc -> mc.gui.setScreen(FlaskReviewScreen(share, false, showNumbers = false, referenceBackground = true)) }
+            then(3) { mc -> shot(mc, "fluid_art_gs4_$label") }
+        }
+        then(4) { mc ->
+            if (mc.gui.hud.isHidden()) mc.gui.hud.toggle()
+            mc.gui.setScreen(null)
+        }
+        for (background in listOf("sky", "snow", "cave")) {
+            then(45) { mc ->
+                mc.gui.setScreen(null)
+                mc.options.guiScale().set(3)
+                mc.resizeGui()
+                val position = when (background) {
+                    "cave" -> "64 200 0"
+                    "snow" -> "0 200 21"
+                    else -> "0 200 -24"
+                }
+                command(mc, "tp @a $position 0 ${if (background == "sky") -80 else 0}")
+                spirituality(mc, 1f)
+                ClientOptions.hudSettings = ClientOptions.hudSettings.copy(flaskBacking = true)
+            }
+            then(8) { mc -> shot(mc, "review_door_${background}_shadow") }
+            then(4) { ClientOptions.hudSettings = ClientOptions.hudSettings.copy(flaskBacking = false) }
+            then(8) { mc -> shot(mc, "review_door_${background}_none") }
+            then(4) { ClientOptions.hudSettings = ClientOptions.hudSettings.copy(flaskBacking = false) }
+            for (scale in listOf(2, 3, 4)) {
+                then(8) { mc ->
+                    mc.options.guiScale().set(scale); mc.resizeGui()
+                    if (!mc.gui.hud.isHidden()) mc.gui.hud.toggle()
+                }
+                for ((label, share) in listOf("full" to 1f, "third" to .33f, "low" to .1f, "minimum" to .005f, "empty" to 0f)) {
+                    then(5) { mc -> mc.gui.setScreen(FlaskReviewScreen(share, false)) }
+                    then(3) { mc -> shot(mc, "review_all_${background}_gs${scale}_$label") }
+                }
+                then(5) { mc -> mc.gui.setScreen(FlaskReviewScreen(1f, true)) }
+                then(3) { mc -> shot(mc, "review_all_${background}_gs${scale}_shadow") }
+            }
+            then(4) { mc ->
+                if (mc.gui.hud.isHidden()) mc.gui.hud.toggle()
+                mc.gui.setScreen(null)
+            }
+        }
+        then(10) { mc ->
+            mc.options.guiScale().set(3); mc.resizeGui()
+            mc.gui.setScreen(HudSettingsScreen(AbilityBookScreen()))
+        }
+        then(3) { mc -> shot(mc, "review_settings_none") }
+        then(4) { mc ->
+            click(mc, "М’яка тінь")
+            check(ClientOptions.hudSettings.flaskBacking)
+            ClientOptions.load()
+            check(ClientOptions.hudSettings.flaskBacking) { "Flask backing did not survive reload" }
+        }
+        then(3) { mc -> shot(mc, "review_settings_shadow") }
+        then(4) { mc ->
+            click(mc, "Немає")
+            check(!ClientOptions.hudSettings.flaskBacking)
+            ClientOptions.load()
+            check(!ClientOptions.hudSettings.flaskBacking) { "Disabled flask backing did not survive reload" }
+        }
+        then(5) { mc ->
+            mc.gui.setScreen(null)
+            ClientOptions.hudSettings = saved
+            ClientOptions.hud = savedHud
+            if (mc.gui.hud.isHidden()) mc.gui.hud.toggle()
+            mc.options.guiScale().set(originalScale)
+            log.info("Flask review passed: 22 pathways, 5 levels, 3 backgrounds, GUI 2/3/4, backing persistence")
             mc.stop()
         }
     }

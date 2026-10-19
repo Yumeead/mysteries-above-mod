@@ -1,0 +1,55 @@
+{
+  "pathway": "Death",
+  "frame": "mysteries_above:spirituality/common/frame",
+  "glass": "mysteries_above:spirituality/common/glass",
+  "backing": "mysteries_above:spirituality/common/backing",
+  "mask": "mysteries_above:textures/gui/sprites/spirituality/common/mask.png",
+  "tones": "mysteries_above:textures/gui/sprites/spirituality/death/tones.png",
+  "neck": "mysteries_above:spirituality/death/neck",
+  "tag": "mysteries_above:spirituality/death/tag",
+  "engraving": "mysteries_above:spirituality/death/engraving",
+  "palette": [
+    "#374025",
+    "#485332",
+    "#4F5C36",
+    "#54613A",
+    "#647246",
+    "#81915F"
+  ],
+  "particle": [
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      1
+    ]
+  ],
+  "particleCount": 3,
+  "flow": "FALL",
+  "periodTicks": 160,
+  "tagSwing": 0.04,
+  "liquids": [
+    {
+      "level": 0.005,
+      "surface": 47,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/death/liquid_minimum.png"
+    },
+    {
+      "level": 0.1,
+      "surface": 42,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/death/liquid_low.png"
+    },
+    {
+      "level": 0.33,
+      "surface": 35,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/death/liquid_third.png"
+    },
+    {
+      "level": 1.0,
+      "surface": 20,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/death/liquid_full.png"
+    }
+  ]
+}

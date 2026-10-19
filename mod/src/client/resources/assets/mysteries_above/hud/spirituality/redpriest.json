@@ -1,0 +1,55 @@
+{
+  "pathway": "RedPriest",
+  "frame": "mysteries_above:spirituality/common/frame",
+  "glass": "mysteries_above:spirituality/common/glass",
+  "backing": "mysteries_above:spirituality/common/backing",
+  "mask": "mysteries_above:textures/gui/sprites/spirituality/common/mask.png",
+  "tones": "mysteries_above:textures/gui/sprites/spirituality/redpriest/tones.png",
+  "neck": "mysteries_above:spirituality/redpriest/neck",
+  "tag": "mysteries_above:spirituality/redpriest/tag",
+  "engraving": "mysteries_above:spirituality/redpriest/engraving",
+  "palette": [
+    "#6D0C10",
+    "#A00C0F",
+    "#A31213",
+    "#DC1510",
+    "#F02F13",
+    "#F88739"
+  ],
+  "particle": [
+    [
+      0,
+      -1
+    ],
+    [
+      0,
+      0
+    ]
+  ],
+  "particleCount": 3,
+  "flow": "RISE",
+  "periodTicks": 80,
+  "tagSwing": 0.025,
+  "liquids": [
+    {
+      "level": 0.005,
+      "surface": 49,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/redpriest/liquid_minimum.png"
+    },
+    {
+      "level": 0.1,
+      "surface": 39,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/redpriest/liquid_low.png"
+    },
+    {
+      "level": 0.33,
+      "surface": 31,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/redpriest/liquid_third.png"
+    },
+    {
+      "level": 1.0,
+      "surface": 20,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/redpriest/liquid_full.png"
+    }
+  ]
+}

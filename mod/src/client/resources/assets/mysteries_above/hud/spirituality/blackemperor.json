@@ -1,0 +1,55 @@
+{
+  "pathway": "BlackEmperor",
+  "frame": "mysteries_above:spirituality/common/frame",
+  "glass": "mysteries_above:spirituality/common/glass",
+  "backing": "mysteries_above:spirituality/common/backing",
+  "mask": "mysteries_above:textures/gui/sprites/spirituality/common/mask.png",
+  "tones": "mysteries_above:textures/gui/sprites/spirituality/blackemperor/tones.png",
+  "neck": "mysteries_above:spirituality/blackemperor/neck",
+  "tag": "mysteries_above:spirituality/blackemperor/tag",
+  "engraving": "mysteries_above:spirituality/blackemperor/engraving",
+  "palette": [
+    "#060935",
+    "#080D3B",
+    "#0B104C",
+    "#111965",
+    "#1E288E",
+    "#607AD6"
+  ],
+  "particle": [
+    [
+      0,
+      0
+    ],
+    [
+      1,
+      0
+    ]
+  ],
+  "particleCount": 3,
+  "flow": "ORBIT",
+  "periodTicks": 160,
+  "tagSwing": 0.04,
+  "liquids": [
+    {
+      "level": 0.005,
+      "surface": 43,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/blackemperor/liquid_minimum.png"
+    },
+    {
+      "level": 0.1,
+      "surface": 42,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/blackemperor/liquid_low.png"
+    },
+    {
+      "level": 0.33,
+      "surface": 33,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/blackemperor/liquid_third.png"
+    },
+    {
+      "level": 1.0,
+      "surface": 20,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/blackemperor/liquid_full.png"
+    }
+  ]
+}

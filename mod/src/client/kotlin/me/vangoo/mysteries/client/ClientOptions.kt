@@ -2,6 +2,17 @@ package me.vangoo.mysteries.client
 
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParseException
+import me.vangoo.domain.hud.HudPart
+import me.vangoo.domain.hud.HudPosition
+import me.vangoo.domain.hud.HudSettings
+import me.vangoo.domain.hud.HorizontalAnchor
+import me.vangoo.domain.hud.VerticalAnchor
+import me.vangoo.domain.hud.SpiritualityMode
+import me.vangoo.domain.hud.InterfaceStyle
+import me.vangoo.domain.hud.HealthStyle
+import me.vangoo.domain.hud.HungerStyle
+import me.vangoo.domain.hud.HalfHeartStyle
+import me.vangoo.domain.hud.SpiritualityNumbers
 import me.vangoo.mysteries.MOD_ID
 import me.vangoo.mysteries.client.render.WheelSkin
 import net.fabricmc.loader.api.FabricLoader
@@ -9,6 +20,8 @@ import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption
+import java.nio.file.AtomicMoveNotSupportedException
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
@@ -115,7 +128,14 @@ object ClientOptions {
 
     var showCooldownNumbers: Boolean by persisted(true)
 
-    var showSpirituality: Boolean by persisted(true)
+    var hudSettings: HudSettings by persisted(HudSettings())
+
+    var showSpirituality: Boolean
+        get() = hudSettings.spirituality != SpiritualityMode.OFF
+        set(value) {
+            hudSettings = hudSettings.copy(spirituality = if (!value) SpiritualityMode.OFF
+                else hudSettings.spirituality.takeUnless { it == SpiritualityMode.OFF } ?: SpiritualityMode.FLASK)
+        }
 
     var showDescriptions: Boolean by persisted(true)
 
@@ -170,7 +190,23 @@ object ClientOptions {
             dto.wheelHoldMillis?.let { wheelHoldMillis = it }
             dto.wheelDeadZoneRatio?.let { wheelDeadZoneRatio = it }
             dto.showCooldownNumbers?.let { showCooldownNumbers = it }
-            dto.showSpirituality?.let { showSpirituality = it }
+            val migrated = HudSettings.migrate(dto.spiritualityMode, dto.spiritualityNumbers, dto.showSpirituality)
+            val positions = readPositions(dto.hudPositions)
+            val scales = buildMap {
+                dto.hudScales.orEmpty().forEach { (name, scale) ->
+                    val part = enumOrNull<HudPart>(name) ?: return@forEach
+                    if (scale != null) put(part, HudSettings.validScale(scale))
+                }
+            }
+            hudSettings = migrated.copy(positions = positions, scales = scales, flaskBacking = dto.flaskBacking ?: false,
+                interfaceStyle = dto.interfaceStyle?.let { enumOrNull<InterfaceStyle>(it) } ?: InterfaceStyle.MOD,
+                health = dto.healthStyle?.let { enumOrNull<HealthStyle>(it) } ?: HealthStyle.HEARTS,
+                hunger = dto.hungerStyle?.let { enumOrNull<HungerStyle>(it) } ?: HungerStyle.ICONS,
+                halfHeart = dto.halfHeartStyle?.let { enumOrNull<HalfHeartStyle>(it) } ?: HalfHeartStyle.HEIGHT,
+                healthNumbers = dto.healthNumbers?.let { enumOrNull<SpiritualityNumbers>(it) } ?: SpiritualityNumbers.ON_CHANGE,
+                hungerNumbers = dto.hungerNumbers?.let { enumOrNull<SpiritualityNumbers>(it) } ?: SpiritualityNumbers.ON_CHANGE,
+                compactHealthAbove40 = dto.compactHealthAbove40 ?: false,
+                panelPositions = readPositions(dto.hudPanelPositions))
             dto.showDescriptions?.let { showDescriptions = it }
             dto.reducedMotion?.let { reducedMotion = it }
             dto.wheelSkin?.let { name -> wheelSkin = enumOrNull<WheelSkin>(name) ?: wheelSkin }
@@ -206,6 +242,33 @@ object ClientOptions {
             it.wheelDeadZoneRatio = wheelDeadZoneRatio
             it.showCooldownNumbers = showCooldownNumbers
             it.showSpirituality = showSpirituality
+            it.spiritualityMode = hudSettings.spirituality.name
+            it.spiritualityNumbers = hudSettings.numbers.name
+            it.flaskBacking = hudSettings.flaskBacking
+            it.interfaceStyle = hudSettings.interfaceStyle.name
+            it.healthStyle = hudSettings.health.name
+            it.hungerStyle = hudSettings.hunger.name
+            it.halfHeartStyle = hudSettings.halfHeart.name
+            it.healthNumbers = hudSettings.healthNumbers.name
+            it.hungerNumbers = hudSettings.hungerNumbers.name
+            it.compactHealthAbove40 = hudSettings.compactHealthAbove40
+            it.hudScales = hudSettings.scales.mapKeys { (part, _) -> part.name }
+            it.hudPositions = hudSettings.positions.mapKeys { (part, _) -> part.name }.mapValues { (_, position) ->
+                PositionDto().apply {
+                    horizontal = position.horizontal.name
+                    vertical = position.vertical.name
+                    offsetX = position.offsetX
+                    offsetY = position.offsetY
+                }
+            }
+            it.hudPanelPositions = hudSettings.panelPositions.mapKeys { (part, _) -> part.name }.mapValues { (_, position) ->
+                PositionDto().apply {
+                    horizontal = position.horizontal.name
+                    vertical = position.vertical.name
+                    offsetX = position.offsetX
+                    offsetY = position.offsetY
+                }
+            }
             it.showDescriptions = showDescriptions
             it.reducedMotion = reducedMotion
             it.wheelSkin = wheelSkin.name
@@ -214,16 +277,36 @@ object ClientOptions {
         }
 
         val path = file
+        var temporary: Path? = null
         try {
             Files.createDirectories(path.parent)
-            Files.writeString(path, gson.toJson(dto))
+            temporary = Files.createTempFile(path.parent, MOD_ID, ".tmp")
+            Files.writeString(temporary, gson.toJson(dto))
+            try {
+                Files.move(temporary, path, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
+            } catch (_: AtomicMoveNotSupportedException) {
+                Files.move(temporary, path, StandardCopyOption.REPLACE_EXISTING)
+            }
         } catch (failure: IOException) {
             log.warn("Could not write {}: {}", path, failure.message)
+        } finally {
+            temporary?.let { runCatching { Files.deleteIfExists(it) } }
         }
     }
 
     private inline fun <reified E : Enum<E>> enumOrNull(name: String): E? =
         enumValues<E>().firstOrNull { it.name.equals(name, ignoreCase = true) }
+
+    private fun readPositions(values: Map<String, PositionDto?>?): Map<HudPart, HudPosition> = buildMap {
+        values.orEmpty().forEach { (name, savedOrNull) ->
+            val saved = savedOrNull ?: return@forEach
+            val part = enumOrNull<HudPart>(name) ?: return@forEach
+            val horizontal = saved.horizontal?.let { enumOrNull<HorizontalAnchor>(it) } ?: return@forEach
+            val vertical = saved.vertical?.let { enumOrNull<VerticalAnchor>(it) } ?: return@forEach
+            put(part, HudPosition(horizontal, vertical, (saved.offsetX ?: 0).coerceIn(-16384, 16384),
+                (saved.offsetY ?: 0).coerceIn(-16384, 16384)))
+        }
+    }
 
     private fun <T> persisted(initial: T, sanitize: ((T) -> T)? = null): ReadWriteProperty<Any?, T> =
         Persisted(initial, sanitize)
@@ -264,11 +347,31 @@ object ClientOptions {
         var wheelDeadZoneRatio: Float? = null
         var showCooldownNumbers: Boolean? = null
         var showSpirituality: Boolean? = null
+        var spiritualityMode: String? = null
+        var spiritualityNumbers: String? = null
+        var flaskBacking: Boolean? = null
+        var interfaceStyle: String? = null
+        var healthStyle: String? = null
+        var hungerStyle: String? = null
+        var halfHeartStyle: String? = null
+        var healthNumbers: String? = null
+        var hungerNumbers: String? = null
+        var compactHealthAbove40: Boolean? = null
+        var hudPositions: Map<String, PositionDto?>? = null
+        var hudPanelPositions: Map<String, PositionDto?>? = null
+        var hudScales: Map<String, Float?>? = null
         var showDescriptions: Boolean? = null
         var reducedMotion: Boolean? = null
         var wheelSkin: String? = null
         var groups: List<GroupDto>? = null
         var activeGroup: Int? = null
+    }
+
+    private class PositionDto {
+        var horizontal: String? = null
+        var vertical: String? = null
+        var offsetX: Int? = null
+        var offsetY: Int? = null
     }
 
     private class GroupDto(

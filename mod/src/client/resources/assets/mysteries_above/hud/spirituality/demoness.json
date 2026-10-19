@@ -1,0 +1,55 @@
+{
+  "pathway": "Demoness",
+  "frame": "mysteries_above:spirituality/common/frame",
+  "glass": "mysteries_above:spirituality/common/glass",
+  "backing": "mysteries_above:spirituality/common/backing",
+  "mask": "mysteries_above:textures/gui/sprites/spirituality/common/mask.png",
+  "tones": "mysteries_above:textures/gui/sprites/spirituality/demoness/tones.png",
+  "neck": "mysteries_above:spirituality/demoness/neck",
+  "tag": "mysteries_above:spirituality/demoness/tag",
+  "engraving": "mysteries_above:spirituality/demoness/engraving",
+  "palette": [
+    "#520239",
+    "#71034D",
+    "#940462",
+    "#A00966",
+    "#CB127B",
+    "#E141AA"
+  ],
+  "particle": [
+    [
+      0,
+      0
+    ],
+    [
+      1,
+      0
+    ]
+  ],
+  "particleCount": 3,
+  "flow": "SPIRAL",
+  "periodTicks": 140,
+  "tagSwing": 0.04,
+  "liquids": [
+    {
+      "level": 0.005,
+      "surface": 49,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/demoness/liquid_minimum.png"
+    },
+    {
+      "level": 0.1,
+      "surface": 45,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/demoness/liquid_low.png"
+    },
+    {
+      "level": 0.33,
+      "surface": 38,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/demoness/liquid_third.png"
+    },
+    {
+      "level": 1.0,
+      "surface": 20,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/demoness/liquid_full.png"
+    }
+  ]
+}

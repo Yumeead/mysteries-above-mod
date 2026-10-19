@@ -1,0 +1,55 @@
+{
+  "pathway": "HangedMan",
+  "frame": "mysteries_above:spirituality/common/frame",
+  "glass": "mysteries_above:spirituality/common/glass",
+  "backing": "mysteries_above:spirituality/common/backing",
+  "mask": "mysteries_above:textures/gui/sprites/spirituality/common/mask.png",
+  "tones": "mysteries_above:textures/gui/sprites/spirituality/hangedman/tones.png",
+  "neck": "mysteries_above:spirituality/hangedman/neck",
+  "tag": "mysteries_above:spirituality/hangedman/tag",
+  "engraving": "mysteries_above:spirituality/hangedman/engraving",
+  "palette": [
+    "#3E070C",
+    "#55080D",
+    "#73090E",
+    "#790C10",
+    "#A51215",
+    "#BD3B35"
+  ],
+  "particle": [
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      1
+    ]
+  ],
+  "particleCount": 3,
+  "flow": "FALL",
+  "periodTicks": 140,
+  "tagSwing": 0.04,
+  "liquids": [
+    {
+      "level": 0.005,
+      "surface": 49,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/hangedman/liquid_minimum.png"
+    },
+    {
+      "level": 0.1,
+      "surface": 44,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/hangedman/liquid_low.png"
+    },
+    {
+      "level": 0.33,
+      "surface": 38,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/hangedman/liquid_third.png"
+    },
+    {
+      "level": 1.0,
+      "surface": 20,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/hangedman/liquid_full.png"
+    }
+  ]
+}

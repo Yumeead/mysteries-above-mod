@@ -1,0 +1,55 @@
+{
+  "pathway": "TwilightGiant",
+  "frame": "mysteries_above:spirituality/common/frame",
+  "glass": "mysteries_above:spirituality/common/glass",
+  "backing": "mysteries_above:spirituality/common/backing",
+  "mask": "mysteries_above:textures/gui/sprites/spirituality/common/mask.png",
+  "tones": "mysteries_above:textures/gui/sprites/spirituality/twilightgiant/tones.png",
+  "neck": "mysteries_above:spirituality/twilightgiant/neck",
+  "tag": "mysteries_above:spirituality/twilightgiant/tag",
+  "engraving": "mysteries_above:spirituality/twilightgiant/engraving",
+  "palette": [
+    "#711C17",
+    "#A7291E",
+    "#BD3C24",
+    "#E84A2A",
+    "#F15E31",
+    "#FA954B"
+  ],
+  "particle": [
+    [
+      0,
+      0
+    ],
+    [
+      0,
+      1
+    ]
+  ],
+  "particleCount": 3,
+  "flow": "FALL",
+  "periodTicks": 160,
+  "tagSwing": 0.04,
+  "liquids": [
+    {
+      "level": 0.005,
+      "surface": 49,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/twilightgiant/liquid_minimum.png"
+    },
+    {
+      "level": 0.1,
+      "surface": 41,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/twilightgiant/liquid_low.png"
+    },
+    {
+      "level": 0.33,
+      "surface": 34,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/twilightgiant/liquid_third.png"
+    },
+    {
+      "level": 1.0,
+      "surface": 20,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/twilightgiant/liquid_full.png"
+    }
+  ]
+}

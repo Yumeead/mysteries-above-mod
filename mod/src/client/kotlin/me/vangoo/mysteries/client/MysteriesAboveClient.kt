@@ -15,6 +15,7 @@ import me.vangoo.mysteries.entity.ModEntities
 import me.vangoo.mysteries.client.hud.AbilityHud
 import me.vangoo.mysteries.client.hud.MarionetteHud
 import me.vangoo.mysteries.client.hud.SpiritualityHud
+import me.vangoo.mysteries.client.hud.BottomHud
 import me.vangoo.mysteries.client.input.ModKeys
 import me.vangoo.mysteries.client.net.receiveOnClient
 import me.vangoo.mysteries.net.ModChannels
@@ -91,6 +92,7 @@ object MysteriesAboveClient : ClientModInitializer {
         SpiritualityHud.register()
         AbilityHud.register()
         MarionetteHud.register()
+        BottomHud.register()
         ModKeys.register()
 
         log.info("Mysteries Above: client side is up")

@@ -1,10 +1,20 @@
 package me.vangoo.mysteries.client.hud
 
 import me.vangoo.domain.abilities.AbilityType
+import me.vangoo.domain.hud.HudPart
+import me.vangoo.domain.hud.SpiritualityDisplay
+import me.vangoo.domain.hud.SpiritualityMode
+import me.vangoo.domain.hud.SpiritualityNumbers
+import me.vangoo.domain.hud.TagMotion
+import me.vangoo.domain.services.SpiritualityCalculator
 import me.vangoo.mysteries.client.ClientOptions
 import me.vangoo.mysteries.client.HudMode
 import me.vangoo.mysteries.client.beyonder.ClientAbilityState
+import me.vangoo.mysteries.client.render.FlaskStyles
+import me.vangoo.mysteries.client.render.SpiritualityFlask
+import me.vangoo.mysteries.client.render.SpiritualityOrb
 import me.vangoo.mysteries.client.render.UiTheme
+import me.vangoo.mysteries.client.screen.HudEditorScreen
 import me.vangoo.mysteries.modId
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement
@@ -13,216 +23,174 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements
 import net.minecraft.client.DeltaTracker
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphicsExtractor
+import net.minecraft.client.gui.screens.ChatScreen
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.network.chat.Component
-import kotlin.math.abs
+import kotlin.math.sin
 
-/**
- * Spirituality: a vanilla-width bar right above the experience bar, the number beside it.
- *
- * It sits with health and hunger because it is read the same way — constantly, out of the corner
- * of the eye, while fighting. To make room, the vanilla rows above the experience bar (hearts,
- * armour, food, air, mount health, the level number, the held item's name, the action bar) are
- * lifted by [LIFT] while the bar is shown; with no experience bar (creative) the bar takes its
- * slot instead and nothing moves.
- *
- * The look is pixel and flat: a bronze frame, a three-step gold fill, a notch every tenth, a
- * sigil at each end. The one motion is a faint light running along the fill every four seconds
- * ("spirit flows"); `reducedMotion` stops it. The fill turns red when spirituality is critical.
- * The selected ability's price is shown in advance as a darker stretch at the end of the fill.
- *
- * It never fades and does not hide behind an open screen (the wheel draws it again on top, where
- * the cast cost is decided). It disappears on F1, in spectator mode, and when the player is not a
- * Beyonder. The fill catches up with a new number in ~200 ms; the number itself jumps at once.
- */
+/** The flask and the optional legacy track share confirmed state, numbers and placement. */
 object SpiritualityHud : HudElement {
-
+    private val display = SpiritualityDisplay()
+    private val tag = TagMotion()
+    private val calculator = SpiritualityCalculator()
+    private var owner: java.util.UUID? = null
     private var shown: Pair<Int, Int>? = null
     private var caption: Component? = null
-    private var critical = false
-
-    /** The bar's drawn fraction on this tick and the previous one, interpolated by `partialTick`. */
-    private var level = -1f
-    private var previousLevel = -1f
+    private var currentText = "800"
+    private var maximumText = "/1600"
+    private var movement = 0f
+    private val example = Component.literal("800 / 1600")
     private var ticks = 0
 
+    fun part(preview: Boolean = false): HudPart? = when (ClientOptions.hudSettings.spirituality) {
+        SpiritualityMode.FLASK -> HudPart.FLASK
+        SpiritualityMode.BAR -> HudPart.BAR
+        SpiritualityMode.OFF -> if (preview && !BottomHud.enabled) HudPart.FLASK else null
+    }
+
     fun register() {
-        // Before the level number, so the number lies on the bar the way vanilla's lies on its own.
-        HudElementRegistry.attachElementBefore(VanillaHudElements.EXPERIENCE_LEVEL, modId("spirituality_hud"), this)
-        for (id in LIFTED) {
-            HudElementRegistry.replaceElement(id) { original ->
-                HudElement { graphics, delta ->
-                    val lift = lift()
-                    if (lift == 0) {
-                        original.extractRenderState(graphics, delta)
-                    } else {
-                        graphics.pose().pushMatrix()
-                        graphics.pose().translate(0f, -lift.toFloat())
-                        original.extractRenderState(graphics, delta)
-                        graphics.pose().popMatrix()
-                    }
+        FlaskStyles.register()
+        HudElementRegistry.attachElementBefore(VanillaHudElements.CHAT, modId("spirituality_hud"), this)
+        ClientTickEvents.END_CLIENT_TICK.register { client ->
+            if (owner != client.player?.uuid) {
+                owner = client.player?.uuid
+                display.reset(); tag.reset(); shown = null; caption = null
+            }
+            val speed = client.player?.deltaMovement?.horizontalDistance()?.toFloat() ?: 0f
+            if (!client.isPaused) movement += ((speed * 7f).coerceIn(0f, 1f) - movement) * .15f
+            val state = ClientAbilityState.spirituality
+            if (client.player == null || !ClientAbilityState.isBeyonder || state == null || state.maximum <= 0) {
+                shown = null
+                caption = null
+                display.reset()
+                tag.reset()
+            } else {
+                if (!client.isPaused) {
+                    ticks++
+                    val sequence = ClientAbilityState.roster!!.sequence
+                    display.tick(state.current, state.maximum, ClientOptions.reducedMotion, sequence.level,
+                        calculator.calculateRegenerationRate(sequence, ClientAbilityState.mastery))
+                    val style = FlaskStyles.of(ClientAbilityState.roster?.pathwayId)
+                    tag.tick(client.cameraEntity?.yRot ?: client.player!!.yRot,
+                        sin(ticks / 19f) * movement * (style?.tagSwing ?: 0f), ClientOptions.reducedMotion)
                 }
+                updateCaption(display.number(0f), state.maximum)
             }
         }
-        ClientTickEvents.END_CLIENT_TICK.register(::tick)
     }
 
-    private fun tick(client: Minecraft) {
-        ticks++
-        val spirituality = ClientAbilityState.spirituality
-        if (!shouldShow(client) || spirituality == null || spirituality.maximum <= 0) {
-            shown = null
-            caption = null
-            level = -1f
-            return
-        }
-
-        val target = spirituality.current.toFloat() / spirituality.maximum
-        previousLevel = level
-        level = when {
-            // A first sight of the bar, or motion turned off: no catching up from nowhere.
-            level < 0f || ClientOptions.reducedMotion -> target
-            abs(target - level) < SNAP -> target
-            else -> level + (target - level) * CATCH_UP
-        }
-        if (previousLevel < 0f) previousLevel = level
-
-        val fresh = spirituality.current to spirituality.maximum
+    private fun updateCaption(current: Int, maximum: Int) {
+        val fresh = current to maximum
         if (fresh == shown) return
         shown = fresh
-        critical = spirituality.isCritical()
-        caption = Component.literal("${spirituality.current}")
-            .append(Component.literal(" / ${spirituality.maximum}").withColor(UiTheme.MUTED))
+        caption = Component.literal("$current / $maximum")
+        currentText = current.toString()
+        maximumText = "/$maximum"
     }
 
-    private fun shouldShow(client: Minecraft): Boolean =
-        ClientOptions.hud != HudMode.NEVER &&
-            ClientOptions.showSpirituality &&
-            client.player?.isSpectator == false &&
-            !client.gui.hud.isHidden() &&
-            ClientAbilityState.isBeyonder
-
-    /** How far the vanilla rows move up: only while the bar stands above an experience bar. */
-    private fun lift(): Int = if (caption != null && hasExperienceBar()) LIFT else 0
-
-    private fun hasExperienceBar(): Boolean = Minecraft.getInstance().gameMode?.hasExperience() == true
+    fun dimensions(preview: Boolean = false): Pair<Int, Int>? {
+        return when (part(preview)) {
+            HudPart.FLASK -> {
+                if (BottomHud.enabled) return 48 to 44
+                val style = FlaskStyles.of(ClientAbilityState.roster?.pathwayId) ?: return null
+                style.width to style.height
+            }
+            HudPart.BAR -> 182 to 20
+            else -> null
+        }
+    }
 
     override fun extractRenderState(graphics: GuiGraphicsExtractor, delta: DeltaTracker) {
-        val caption = caption ?: return
-        val spirituality = ClientAbilityState.spirituality ?: return
+        val client = Minecraft.getInstance()
+        if (client.gui.screen() is HudEditorScreen || client.player?.isSpectator != false ||
+            client.gui.hud.isHidden() || ClientOptions.hud == HudMode.NEVER || caption == null) return
+        val part = part() ?: return
+        val box = HudPlacement.boxes(graphics.guiWidth(), graphics.guiHeight())[part] ?: return
+        draw(graphics, box, delta.getGameTimeDeltaPartialTick(false))
+    }
+
+    fun draw(graphics: GuiGraphicsExtractor, box: HudBox, partial: Float, preview: Boolean = false) {
+        val mode = if (preview && ClientOptions.hudSettings.spirituality == SpiritualityMode.OFF)
+            SpiritualityMode.FLASK else ClientOptions.hudSettings.spirituality
+        if (mode == SpiritualityMode.OFF) return
+        val size = dimensions(preview) ?: return
+        val exampleState = preview && (caption == null || ClientOptions.hudSettings.spirituality == SpiritualityMode.OFF)
+        if (!exampleState) ClientAbilityState.spirituality?.let { updateCaption(display.number(partial), it.maximum) }
+        val level = if (exampleState) .5f else display.fraction(partial)
+        val trail = if (exampleState) level else display.trailFraction(partial)
+        val time = ticks + partial
+        val alpha = ClientOptions.opacity.coerceAtLeast(.85f)
+        graphics.pose().pushMatrix()
+        graphics.pose().translate(box.rect.x.toFloat(), box.rect.y.toFloat())
+        graphics.pose().scale(box.scale, box.scale)
+        if (mode == SpiritualityMode.FLASK) {
+            val style = FlaskStyles.of(ClientAbilityState.roster?.pathwayId) ?: run { graphics.pose().popMatrix(); return }
+            if (BottomHud.enabled) SpiritualityOrb.draw(graphics, style, ClientAbilityState.roster?.pathwayId,
+                6, 11, level, trail, time, !exampleState && display.low, !exampleState && display.gainTicks > 0,
+                ClientOptions.reducedMotion, alpha, movement, tag.angle(partial))
+            else SpiritualityFlask.draw(graphics, style, (size.first - style.width) / 2, 0, level, trail, time,
+                    !exampleState && display.low, !exampleState && display.gainTicks > 0,
+                    ClientOptions.reducedMotion, alpha, movement, ClientOptions.hudSettings.flaskBacking)
+        } else {
+            drawBar(graphics, level, trail, time, alpha)
+        }
+        val screen = Minecraft.getInstance().gui.screen()
+        val show = display.low || if (preview) ClientOptions.hudSettings.numbers != SpiritualityNumbers.NEVER
+            else display.showNumber(ClientOptions.hudSettings.numbers, screen is AbstractContainerScreen<*> || screen is ChatScreen)
+        if (show) {
+            val font = Minecraft.getInstance().font
+            graphics.nextStratum()
+            if (mode == SpiritualityMode.FLASK) {
+                if (BottomHud.enabled) {
+                    val label = if (exampleState) "800/1600" else currentText + maximumText
+                    val x = 0.coerceIn(1-box.rect.x,graphics.guiWidth()-box.rect.x-font.width(label)-1)
+                    BottomHud.text(graphics,label,x,if(box.rect.y==0) 1 else 0)
+                }
+                else drawFlaskNumbers(graphics, if (exampleState) "800" else currentText,
+                        if (exampleState) "/1600" else maximumText)
+            } else {
+                val text = caption ?: example
+                graphics.text(font, text, (size.first - font.width(text)) / 2, 0, UiTheme.argb(UiTheme.TEXT, 1f), true)
+            }
+        }
+        graphics.pose().popMatrix()
+    }
+
+    internal fun drawFlaskNumbers(graphics: GuiGraphicsExtractor, current: String, maximum: String) {
         val font = Minecraft.getInstance().font
-        val alpha = ClientOptions.opacity.coerceAtLeast(MIN_ALPHA)
-        val partial = delta.getGameTimeDeltaPartialTick(false)
-
-        val x = graphics.guiWidth() / 2 - WIDTH / 2
-        val y = graphics.guiHeight() - EXPERIENCE_BOTTOM - if (hasExperienceBar()) LIFT else 0
-
-        // Frame and track.
-        graphics.fill(x, y, x + WIDTH, y + HEIGHT, UiTheme.argb(FRAME, alpha))
-        graphics.fill(x + 1, y + 1, x + WIDTH - 1, y + HEIGHT - 1, UiTheme.argb(UiTheme.PANEL, alpha))
-
-        val inner = WIDTH - 2
-        val drawn = previousLevel + (level - previousLevel) * partial
-        val filled = (inner * drawn.coerceIn(0f, 1f)).toInt()
-        val tones = if (critical) CRITICAL_TONES else GOLD_TONES
-        fillRows(graphics, x + 1, y + 1, filled, tones, alpha)
-
-        // The stretch the selected ability will cost: what will be left is visible in advance.
-        costOfSelected()?.let { cost ->
-            val after = (inner * ((spirituality.current - cost).toFloat() / spirituality.maximum).coerceIn(0f, 1f)).toInt()
-            if (after < filled) fillRows(graphics, x + 1 + after, y + 1, filled - after, SPENT_TONES, alpha)
+        fun etched(text: String, y: Float, limit: Float) {
+            val scale = minOf(limit, 27f / font.width(text).coerceAtLeast(1))
+            graphics.pose().pushMatrix()
+            graphics.pose().translate(31f - font.width(text) * scale / 2, y)
+            graphics.pose().scale(scale, scale)
+            for (dy in -1..1) for (dx in -1..1) if (dx != 0 || dy != 0)
+                graphics.text(font, text, dx, dy, UiTheme.argb(0x263340, 1f), false)
+            graphics.nextStratum()
+            graphics.text(font, text, 0, 0, UiTheme.argb(0xF1F7FF, 1f), false)
+            graphics.pose().popMatrix()
         }
+        etched(current, 33f, .8f)
+        etched(maximum, 41f, .65f)
+    }
 
-        // Spirit flows: a faint light runs along the fill.
-        if (!ClientOptions.reducedMotion && filled > SHIMMER_WIDTH) {
-            val phase = ((ticks + partial) % SHIMMER_PERIOD) / SHIMMER_PERIOD
-            val head = (phase * (filled + SHIMMER_WIDTH)).toInt() - SHIMMER_WIDTH
-            val from = (x + 1 + head).coerceAtLeast(x + 1)
-            val to = (x + 1 + head + SHIMMER_WIDTH).coerceAtMost(x + 1 + filled)
-            if (to > from) graphics.fill(from, y + 1, to, y + HEIGHT - 1, UiTheme.argb(0xFFFFFF, alpha * SHIMMER_ALPHA))
+    private fun drawBar(graphics: GuiGraphicsExtractor, level: Float, trail: Float, time: Float, opacity: Float) {
+        val alpha = opacity * if (display.low) .7f + (if (ClientOptions.reducedMotion) 0f else sin(time / 13f) * .025f) else 1f
+        graphics.fill(0, 11, 182, 19, UiTheme.argb(0x58432D, alpha))
+        graphics.fill(1, 12, 181, 18, UiTheme.argb(0xB99A61, alpha * .12f))
+        val filled = (180 * level).toInt()
+        val spent = (180 * trail).toInt()
+        if (spent > filled) graphics.fill(1 + filled, 12, 1 + spent, 18, UiTheme.argb(0xE1C993, alpha * .28f))
+        if (filled > 0) {
+            graphics.fill(1, 12, 1 + filled, 18, UiTheme.argb(0xB99A61, alpha))
+            graphics.fill(1, 12, 1 + filled, 13, UiTheme.argb(0xDDC58B, alpha))
+            graphics.fill(1, 17, 1 + filled, 18, UiTheme.argb(0x78603E, alpha))
+            val state = ClientAbilityState.spirituality
+            val selected = ClientAbilityState.selected?.let(ClientAbilityState::entry)
+            if (state != null && state.maximum > 0 && selected?.type == AbilityType.ACTIVE &&
+                selected.cost > 0 && ClientAbilityState.canAfford(selected)) {
+                val after = (180f * (state.current - selected.cost) / state.maximum).toInt().coerceIn(0, filled)
+                if (after < filled) graphics.fill(1 + after, 13, 1 + filled, 17, UiTheme.argb(UiTheme.ACCENT_DEEP, alpha * .55f))
+            }
         }
-
-        // A notch every tenth, so a share reads at a glance.
-        val notch = UiTheme.argb(0x000000, alpha * NOTCH_ALPHA)
-        for (i in 1 until NOTCHES) {
-            val nx = x + 1 + inner * i / NOTCHES
-            graphics.fill(nx, y + 1, nx + 1, y + HEIGHT - 1, notch)
-        }
-
-        sigil(graphics, x - SIGIL - SIGIL_GAP, y, alpha)
-        sigil(graphics, x + WIDTH + SIGIL_GAP, y, alpha)
-
-        val textX = x + WIDTH + SIGIL_GAP + SIGIL + TEXT_GAP
-        graphics.text(font, caption, textX, y - 1, UiTheme.argb(if (critical) UiTheme.CRITICAL else UiTheme.TEXT, alpha))
     }
-
-    /** The three-row stepped fill: light top edge, body, shadowed bottom edge. */
-    private fun fillRows(graphics: GuiGraphicsExtractor, x: Int, y: Int, width: Int, tones: IntArray, alpha: Float) {
-        if (width <= 0) return
-        tones.forEachIndexed { row, rgb -> graphics.fill(x, y + row, x + width, y + row + 1, UiTheme.argb(rgb, alpha)) }
-    }
-
-    /** A five-pixel diamond eye, the height of the bar: gold rim, dark body, bright pupil. */
-    private fun sigil(graphics: GuiGraphicsExtractor, x: Int, y: Int, alpha: Float) {
-        val rim = UiTheme.argb(UiTheme.ACCENT, alpha)
-        graphics.fill(x + 1, y + 1, x + 4, y + 4, UiTheme.argb(UiTheme.PANEL, alpha))
-        graphics.fill(x + 2, y, x + 3, y + 1, rim)
-        graphics.fill(x + 1, y + 1, x + 2, y + 2, rim)
-        graphics.fill(x + 3, y + 1, x + 4, y + 2, rim)
-        graphics.fill(x, y + 2, x + 1, y + 3, rim)
-        graphics.fill(x + 4, y + 2, x + 5, y + 3, rim)
-        graphics.fill(x + 1, y + 3, x + 2, y + 4, rim)
-        graphics.fill(x + 3, y + 3, x + 4, y + 4, rim)
-        graphics.fill(x + 2, y + 4, x + 3, y + 5, rim)
-        graphics.fill(x + 2, y + 2, x + 3, y + 3, UiTheme.argb(PUPIL, alpha))
-    }
-
-    /** The price of what is selected now — or `null` if there is nothing to pay for or nothing to pay with. */
-    private fun costOfSelected(): Int? {
-        val entry = ClientAbilityState.selected?.let(ClientAbilityState::entry) ?: return null
-        if (entry.type != AbilityType.ACTIVE || entry.cost <= 0) return null
-        return entry.cost.takeIf { ClientAbilityState.canAfford(entry) }
-    }
-
-    /** The vanilla rows that stand above the experience bar. */
-    private val LIFTED = listOf(
-        VanillaHudElements.HEALTH_BAR,
-        VanillaHudElements.ARMOR_BAR,
-        VanillaHudElements.FOOD_BAR,
-        VanillaHudElements.AIR_BAR,
-        VanillaHudElements.MOUNT_HEALTH,
-        VanillaHudElements.EXPERIENCE_LEVEL,
-        VanillaHudElements.HELD_ITEM_TOOLTIP,
-        VanillaHudElements.OVERLAY_MESSAGE,
-    )
-
-    /** The vanilla experience bar: 182 wide, its top 29 above the bottom edge. */
-    private const val WIDTH = 182
-    private const val HEIGHT = 5
-    private const val EXPERIENCE_BOTTOM = 29
-
-    /** The bar's height and a one-pixel gap. */
-    private const val LIFT = HEIGHT + 1
-
-    private const val SIGIL = 5
-    private const val SIGIL_GAP = 2
-    private const val TEXT_GAP = 3
-
-    private const val FRAME = 0x3B2F16
-    private const val PUPIL = 0xFFF2C4
-    private val GOLD_TONES = intArrayOf(0xFFE7A0, 0xD9B256, 0x8F6F26)
-    private val CRITICAL_TONES = intArrayOf(0xE59A86, 0xC46A55, 0x7E3A2E)
-    private val SPENT_TONES = intArrayOf(0x8C7232, 0x6E5824, 0x4A3B18)
-
-    private const val NOTCHES = 10
-    private const val NOTCH_ALPHA = 0.35f
-    private const val SHIMMER_PERIOD = 80f
-    private const val SHIMMER_WIDTH = 6
-    private const val SHIMMER_ALPHA = 0.28f
-
-    /** The bar is read constantly: it never goes fainter than this, whatever the panel opacity. */
-    private const val MIN_ALPHA = 0.9f
-
-    /** Half the gap per tick: ~94 % of the way in four ticks, i.e. 200 ms. */
-    private const val CATCH_UP = 0.5f
-    private const val SNAP = 0.002f
 }

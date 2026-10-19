@@ -1,0 +1,33 @@
+{
+  "pathway": "default",
+  "frame": "mysteries_above:spirituality/common/frame",
+  "glass": "mysteries_above:spirituality/common/glass",
+  "backing": "mysteries_above:spirituality/common/backing",
+  "mask": "mysteries_above:textures/gui/sprites/spirituality/common/mask.png",
+  "tones": "mysteries_above:textures/gui/sprites/spirituality/fool/tones.png",
+  "neck": "mysteries_above:spirituality/fool/neck",
+  "tag": "mysteries_above:spirituality/fool/tag",
+  "engraving": "mysteries_above:spirituality/fool/engraving",
+  "palette": [
+    "#263844",
+    "#3C5260",
+    "#597584",
+    "#7E9AA5",
+    "#ABC2C9",
+    "#DBE7E9"
+  ],
+  "particle": [
+    [
+      0,
+      0
+    ],
+    [
+      1,
+      0
+    ]
+  ],
+  "particleCount": 3,
+  "flow": "SPIRAL",
+  "periodTicks": 120,
+  "tagSwing": 0.04
+}

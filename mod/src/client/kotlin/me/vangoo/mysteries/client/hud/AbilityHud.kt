@@ -2,9 +2,9 @@ package me.vangoo.mysteries.client.hud
 
 import me.vangoo.domain.PathwayBranding
 import me.vangoo.domain.abilities.AbilityType
+import me.vangoo.domain.hud.HudPart
 import me.vangoo.mysteries.MOD_ID
 import me.vangoo.mysteries.client.ClientOptions
-import me.vangoo.mysteries.client.HudAnchor
 import me.vangoo.mysteries.client.HudMode
 import me.vangoo.mysteries.client.beyonder.ClientAbilityState
 import me.vangoo.mysteries.client.input.ModKeys
@@ -20,11 +20,12 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.network.chat.Component
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
 
 /**
  * A thin panel for the selected ability: icon, name, cost and cooldown.
  *
- * Spirituality is not drawn here — it lives in [SpiritualityHud] at the top centre, because it
+ * Spirituality is not drawn here — it lives in [SpiritualityHud] above the XP bar, because it
  * is a resource watched constantly while the ability panel is only a momentary reference. A
  * side effect of the split matters: the panel no longer wakes up on spirituality regeneration,
  * so the AUTO mode really does fade after 5 seconds of quiet.
@@ -85,6 +86,18 @@ object AbilityHud : HudElement {
 
     private var signature: Signature? = null
     private var panel: Panel? = null
+
+    private val example by lazy {
+        val name = Component.translatable("hud.mysteries_above.preview_ability")
+        Panel(null, ItemStack(Items.AMETHYST_SHARD), name, Component.literal("50"), false, true,
+            Component.literal("●"), Component.literal("R"), Component.literal("12"), UiTheme.ACCENT,
+            maxOf(110, Minecraft.getInstance().font.width(name) + 28), 32, 27)
+    }
+
+    private fun currentPanel(preview: Boolean): Panel? =
+        if (preview) panel?.takeIf { it.entry != null } ?: example else panel
+
+    fun dimensions(preview: Boolean = false): Pair<Int, Int>? = currentPanel(preview)?.let { it.width to it.height }
 
     /** How many ticks passed with no change at all. The AUTO mode fades once they add up to 5 seconds. */
     private var idleTicks = IDLE_TICKS
@@ -229,33 +242,27 @@ object AbilityHud : HudElement {
     // ── Frame ───────────────────────────────────────────────────────────────────
 
     override fun extractRenderState(graphics: GuiGraphicsExtractor, delta: DeltaTracker) {
-        val panel = panel ?: return
+        if (BottomHud.enabled) return
+        if (!shouldShow(Minecraft.getInstance())) return
 
         val partial = delta.getGameTimeDeltaPartialTick(false)
         val alpha = (previousFade + (fade - previousFade) * partial) * ClientOptions.opacity
         if (alpha <= MIN_VISIBLE_ALPHA) return
 
-        val scale = ClientOptions.hudScale
+        val box = HudPlacement.boxes(graphics.guiWidth(), graphics.guiHeight())[HudPart.ABILITY] ?: return
+        draw(graphics, box, alpha)
+    }
+
+    fun draw(graphics: GuiGraphicsExtractor, box: HudBox, alpha: Float = ClientOptions.opacity, preview: Boolean = false) {
+        val panel = currentPanel(preview) ?: return
         graphics.pose().pushMatrix()
-        graphics.pose().scale(scale, scale)
-
-        val screenWidth = (graphics.guiWidth() / scale).toInt()
-        val screenHeight = (graphics.guiHeight() / scale).toInt()
-        val x = when (ClientOptions.anchor) {
-            HudAnchor.LEFT_CENTER, HudAnchor.LEFT_TOP -> MARGIN
-            HudAnchor.RIGHT_CENTER, HudAnchor.RIGHT_TOP -> screenWidth - MARGIN - panel.width
-        }
-        val y = when (ClientOptions.anchor) {
-            HudAnchor.LEFT_CENTER, HudAnchor.RIGHT_CENTER -> (screenHeight - panel.height) / 2
-            HudAnchor.LEFT_TOP, HudAnchor.RIGHT_TOP -> MARGIN
-        }
-
-        draw(graphics, panel, x, y, alpha)
-
+        graphics.pose().translate(box.rect.x.toFloat(), box.rect.y.toFloat())
+        graphics.pose().scale(box.scale, box.scale)
+        drawPanel(graphics, panel, 0, 0, alpha, preview)
         graphics.pose().popMatrix()
     }
 
-    private fun draw(graphics: GuiGraphicsExtractor, panel: Panel, x: Int, y: Int, alpha: Float) {
+    private fun drawPanel(graphics: GuiGraphicsExtractor, panel: Panel, x: Int, y: Int, alpha: Float, preview: Boolean) {
         val font = Minecraft.getInstance().font
         val left = x + PADDING
 
@@ -268,8 +275,8 @@ object AbilityHud : HudElement {
 
         val textLeft = if (panel.icon != null) left + ICON + GAP else left
 
-        if (panel.entry != null && panel.icon != null) {
-            val remaining = 1f - ClientAbilityState.cooldownProgress(panel.entry)
+        if (panel.icon != null && (panel.entry != null || preview)) {
+            val remaining = panel.entry?.let { 1f - ClientAbilityState.cooldownProgress(it) } ?: .55f
             UiTheme.cooldownVeil(graphics, left, y + PADDING, ICON, remaining, alpha)
             panel.cooldownLabel?.let {
                 graphics.centeredText(font, it, left + ICON / 2, y + PADDING + 4, UiTheme.argb(UiTheme.TEXT, alpha))
@@ -295,7 +302,6 @@ object AbilityHud : HudElement {
     }
 
     private const val PADDING = 4
-    private const val MARGIN = 6
     private const val ICON = 16
     private const val GAP = 4
     private const val MARKER_GAP = 3

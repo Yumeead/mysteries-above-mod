@@ -5,7 +5,9 @@
   "compatibilityLevel": "JAVA_25",
   "client": [
     "GameRendererInvoker",
-    "AbstractClientPlayerSkinMixin"
+    "AbstractClientPlayerSkinMixin",
+    "HudSpriteMixin",
+    "ChatLayoutMixin"
   ],
   "injectors": {
     "defaultRequire": 1

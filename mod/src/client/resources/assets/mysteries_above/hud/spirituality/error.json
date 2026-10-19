@@ -1,0 +1,55 @@
+{
+  "pathway": "Error",
+  "frame": "mysteries_above:spirituality/common/frame",
+  "glass": "mysteries_above:spirituality/common/glass",
+  "backing": "mysteries_above:spirituality/common/backing",
+  "mask": "mysteries_above:textures/gui/sprites/spirituality/common/mask.png",
+  "tones": "mysteries_above:textures/gui/sprites/spirituality/error/tones.png",
+  "neck": "mysteries_above:spirituality/error/neck",
+  "tag": "mysteries_above:spirituality/error/tag",
+  "engraving": "mysteries_above:spirituality/error/engraving",
+  "palette": [
+    "#044D55",
+    "#03676C",
+    "#0A7175",
+    "#0F9697",
+    "#18B8B6",
+    "#4ED4D7"
+  ],
+  "particle": [
+    [
+      0,
+      0
+    ],
+    [
+      1,
+      1
+    ]
+  ],
+  "particleCount": 3,
+  "flow": "STEP",
+  "periodTicks": 140,
+  "tagSwing": 0.025,
+  "liquids": [
+    {
+      "level": 0.005,
+      "surface": 45,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/error/liquid_minimum.png"
+    },
+    {
+      "level": 0.1,
+      "surface": 44,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/error/liquid_low.png"
+    },
+    {
+      "level": 0.33,
+      "surface": 37,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/error/liquid_third.png"
+    },
+    {
+      "level": 1.0,
+      "surface": 20,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/error/liquid_full.png"
+    }
+  ]
+}

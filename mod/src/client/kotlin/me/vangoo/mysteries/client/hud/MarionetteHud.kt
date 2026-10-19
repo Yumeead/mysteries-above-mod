@@ -1,5 +1,7 @@
 package me.vangoo.mysteries.client.hud
 
+import me.vangoo.domain.hud.HudPart
+
 import me.vangoo.mysteries.client.ClientOptions
 import me.vangoo.mysteries.client.HudMode
 import me.vangoo.mysteries.client.beyonder.ClientMarionettes
@@ -48,7 +50,24 @@ object MarionetteHud : HudElement {
 
     private var built: MarionetteStatePayload? = null
     private var cards: List<Card> = emptyList()
-    private var width = 0
+    private val examples = (1..3).map { i -> Card(
+        Component.translatable("hud.mysteries_above.preview_marionette", i),
+        Component.translatable("hud.mysteries_above.preview_order"), UiTheme.MUTED,
+        .75f, i == 1, false, false)
+    }
+
+    private fun shownCards(preview: Boolean) = if (preview && cards.isEmpty()) examples else cards
+
+    private fun columns(screenWidth: Int, preview: Boolean) = minOf(shownCards(preview).size,
+        ((screenWidth - 8) / (ClientOptions.hudScale * (CARD_WIDTH + CARD_GAP))).toInt().coerceAtLeast(1))
+
+    fun dimensions(screenWidth: Int, screenHeight: Int, preview: Boolean = false): Pair<Int, Int>? {
+        val count = shownCards(preview).size
+        if (count == 0) return null
+        val columns = columns(screenWidth, preview)
+        val rows = (count + columns - 1) / columns
+        return columns * (CARD_WIDTH + CARD_GAP) - CARD_GAP to rows * (CARD_HEIGHT + CARD_GAP) - CARD_GAP
+    }
 
     fun register() {
         HudElementRegistry.attachElementBefore(VanillaHudElements.CHAT, modId("marionette_hud"), this)
@@ -60,7 +79,6 @@ object MarionetteHud : HudElement {
         if (state === built) return
         built = state
         cards = state.entries.map { entry -> card(entry, state) }
-        width = if (cards.isEmpty()) 0 else cards.size * CARD_WIDTH + (cards.size - 1) * CARD_GAP
     }
 
     private fun card(entry: MarionetteStatePayload.Entry, state: MarionetteStatePayload): Card {
@@ -84,19 +102,17 @@ object MarionetteHud : HudElement {
 
     override fun extractRenderState(graphics: GuiGraphicsExtractor, delta: DeltaTracker) {
         if (cards.isEmpty() || !visible()) return
+        val box = HudPlacement.boxes(graphics.guiWidth(), graphics.guiHeight())[HudPart.MARIONETTES] ?: return
+        draw(graphics, box)
+    }
 
-        val scale = ClientOptions.hudScale
+    fun draw(graphics: GuiGraphicsExtractor, box: HudBox, preview: Boolean = false) {
         graphics.pose().pushMatrix()
-        graphics.pose().scale(scale, scale)
-
-        val screenWidth = (graphics.guiWidth() / scale).toInt()
-        val screenHeight = (graphics.guiHeight() / scale).toInt()
-        var x = (screenWidth - width) / 2
-        val y = screenHeight - BOTTOM_MARGIN - CARD_HEIGHT
-
-        cards.forEach { card ->
-            draw(graphics, card, x, y)
-            x += CARD_WIDTH + CARD_GAP
+        graphics.pose().translate(box.rect.x.toFloat(), box.rect.y.toFloat())
+        graphics.pose().scale(box.scale, box.scale)
+        val columns = columns(graphics.guiWidth(), preview)
+        shownCards(preview).forEachIndexed { index, card ->
+            draw(graphics, card, (index % columns) * (CARD_WIDTH + CARD_GAP), (index / columns) * (CARD_HEIGHT + CARD_GAP))
         }
 
         graphics.pose().popMatrix()
@@ -129,7 +145,12 @@ object MarionetteHud : HudElement {
         val barColor = if (card.strained) UiTheme.CRITICAL else UiTheme.ACCENT
         UiTheme.bar(graphics, x + PADDING, y + BAR_Y, CARD_WIDTH - PADDING * 2, BAR_HEIGHT, card.health, barColor, alpha)
 
-        graphics.text(font, card.status, x + PADDING, y + STATUS_Y, UiTheme.argb(card.statusColor, alpha))
+        val textScale = minOf(1f, (CARD_WIDTH - PADDING * 2).toFloat() / font.width(card.status).coerceAtLeast(1))
+        graphics.pose().pushMatrix()
+        graphics.pose().translate((x + PADDING).toFloat(), (y + STATUS_Y).toFloat())
+        graphics.pose().scale(textScale, textScale)
+        graphics.text(font, card.status, 0, 0, UiTheme.argb(card.statusColor, alpha))
+        graphics.pose().popMatrix()
     }
 
     private val MARK: Component = Component.literal("▸")
@@ -140,9 +161,6 @@ object MarionetteHud : HudElement {
     private const val CARD_HEIGHT = 34
     private const val CARD_GAP = 3
     private const val PADDING = 4
-
-    /** Above the hotbar and its two vanilla bars, and clear of the experience number. */
-    private const val BOTTOM_MARGIN = 58
 
     private const val BAR_Y = 15
     private const val BAR_HEIGHT = 3

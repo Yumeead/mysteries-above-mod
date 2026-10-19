@@ -1,0 +1,55 @@
+{
+  "pathway": "Door",
+  "frame": "mysteries_above:spirituality/common/frame",
+  "glass": "mysteries_above:spirituality/common/glass",
+  "backing": "mysteries_above:spirituality/common/backing",
+  "mask": "mysteries_above:textures/gui/sprites/spirituality/common/mask.png",
+  "tones": "mysteries_above:textures/gui/sprites/spirituality/door/tones.png",
+  "neck": "mysteries_above:spirituality/door/neck",
+  "tag": "mysteries_above:spirituality/door/tag",
+  "engraving": "mysteries_above:spirituality/door/engraving",
+  "palette": [
+    "#0386BB",
+    "#03ABD5",
+    "#0AAED6",
+    "#0FD5E9",
+    "#2CF1FA",
+    "#82F1F8"
+  ],
+  "particle": [
+    [
+      0,
+      -1
+    ],
+    [
+      0,
+      0
+    ]
+  ],
+  "particleCount": 3,
+  "flow": "RISE",
+  "periodTicks": 100,
+  "tagSwing": 0.025,
+  "liquids": [
+    {
+      "level": 0.005,
+      "surface": 45,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/door/liquid_minimum.png"
+    },
+    {
+      "level": 0.1,
+      "surface": 43,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/door/liquid_low.png"
+    },
+    {
+      "level": 0.33,
+      "surface": 31,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/door/liquid_third.png"
+    },
+    {
+      "level": 1.0,
+      "surface": 20,
+      "texture": "mysteries_above:textures/gui/sprites/spirituality/door/liquid_full.png"
+    }
+  ]
+}
