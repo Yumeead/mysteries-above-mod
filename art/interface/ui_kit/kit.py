@@ -1,5 +1,5 @@
 """Затверджений піксельний кіт: чисті примітиви без Minecraft, шрифтів або макетів."""
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageColor
 
 GOLD = {'light': '#DFC28B', 'mid': '#B99A61', 'dark': '#65533A'}
 
@@ -75,7 +75,7 @@ def panel(im, x, y, w, h, light=True):
         for yy in range(2, h - 2):
             for xx in range(2, w - 2):
                 tone = ((xx * 3 + yy * 5) % 17 == 0) - ((xx * 5 + yy * 3) % 19 == 0)
-                rect(p, xx, yy, 1, 1, (220 + tone, 197 + tone, 141 + tone, 255))
+                rect(p, xx, yy, 1, 1, (*[c + tone for c in ImageColor.getrgb(BODY)], 255))
     paste(im, p, x, y)
 
 
@@ -156,5 +156,16 @@ def scrollbar(im, x, y, height, thumb=24, offset=0, w=6):
     outline(im, x, y, w, height, GOLD['dark'])
     rect(im, x + 1, y + offset + 1, w - 2, thumb - 2, GOLD['mid'])
     rect(im, x + 1, y + offset + 1, w - 2, 1, GOLD['light'])
+
+
+def gold_icon(source):
+    target = canvas(*source.size)
+    for y in range(source.height):
+        for x in range(source.width):
+            r, g, b, a = source.getpixel((x, y))
+            if a:
+                color = INK if max(r, g, b) < 55 else GOLD['dark'] if max(r, g, b) < 115 else GOLD['mid'] if max(r, g, b) < 205 else GOLD['light']
+                target.putpixel((x, y), (*ImageColor.getrgb(color), a))
+    return target
 
 

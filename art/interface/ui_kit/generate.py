@@ -1,4 +1,4 @@
-"""Етапи 1–2: кіт, фон E і фон скрині; жодних глобальних ресурсів minecraft:."""
+"""Генератор затвердженого інтерфейсу; жодних глобальних ресурсів minecraft:."""
 from pathlib import Path
 from PIL import Image, ImageColor
 import argparse
@@ -41,10 +41,16 @@ def native_slots(source, target):
                     continue
                 if any(xx <= x < xx + ss and yy <= y < yy + ss for xx, yy, ss in found):
                     continue
-                if not all(px[xx, yy][:3] == (139, 139, 139) for xx in range(x + 1, x + size - 1)
-                           for yy in range(y + 1, y + size - 1)):
+                if not all(px[xx, y][:3] == (55, 55, 55) for xx in range(x, x + size - 1)):
+                    continue
+                if not all(px[x, yy][:3] == (55, 55, 55) for yy in range(y, y + size - 1)):
                     continue
                 kit.slot(target, x, y, size=size)
+                # Keep native embedded symbols while replacing the recessed gray field.
+                for yy in range(y + 2, y + size - 2):
+                    for xx in range(x + 2, x + size - 2):
+                        if px[xx, yy][:3] != (139, 139, 139):
+                            target.putpixel((xx, yy), recolor(source.crop((xx, yy, xx + 1, yy + 1))).getpixel((0, 0)))
                 found.append((x, y, size))
     return found
 
@@ -105,6 +111,94 @@ def build(jar):
                 kit.metal_frame(target, 0, 0, *target.size)
             sprite(name, target)
             images['sprites/interface/' + name + '.png'] = (target, meta)
+        for path in archive.namelist():
+            root = 'assets/minecraft/textures/gui/'
+            if not path.startswith(root + 'container/') or not path.endswith('.png'):
+                continue
+            name = path[len(root + 'container/'):]
+            if name in ('inventory.png', 'generic_54.png', 'gamemode_switcher.png') or name.startswith('creative_inventory/'):
+                continue
+            original = Image.open(io.BytesIO(archive.read(path))).convert('RGBA')
+            target = recolor(original)
+            slots[name] = native_slots(original, target)
+            _, _, w, h = original.getchannel('A').getbbox()
+            kit.metal_frame(target, 0, 0, w, h)
+            if name == 'crafting_table.png':
+                kit.rect(target, 89, 32, 25, 19, kit.BODY)
+                kit.arrow(target, 89, 33)
+            assert target.size == original.size
+            images['interface/container/' + name] = (target, None)
+        path = 'assets/minecraft/textures/gui/recipe_book.png'
+        original = Image.open(io.BytesIO(archive.read(path))).convert('RGBA')
+        target = recolor(original)
+        kit.panel(target, 1, 1, 147, 166)
+        kit.rect(target, 25, 13, 83, 15, kit.DARK)
+        kit.outline(target, 25, 13, 83, 15, kit.GOLD['dark'])
+        kit.magnifier(target, 9, 13)
+        kit.page_counter(target, 1, 1)
+        images['interface/recipe_book.png'] = (target, None)
+        for path in archive.namelist():
+            prefix = 'assets/minecraft/textures/gui/sprites/'
+            if not path.startswith(prefix) or not path.endswith('.png'):
+                continue
+            name = path[len(prefix):-4]
+            if not name.startswith(('container/', 'recipe_book/', 'tooltip/')) or name.startswith('container/creative_inventory/'):
+                continue
+            original = Image.open(io.BytesIO(archive.read(path))).convert('RGBA')
+            target = recolor(original)
+            meta = json.loads(archive.read(path + '.mcmeta')) if path + '.mcmeta' in archive.namelist() else None
+            if name.startswith('container/inventory/') or name in ('recipe_book/button', 'recipe_book/button_highlighted'):
+                continue
+            if name.startswith('tooltip/'):
+                target = kit.canvas(*original.size)
+                if name.endswith('/background'):
+                    kit.rect(target, 8, 8, 84, 84, (*ImageColor.getrgb(kit.DARK), 238))
+                else:
+                    kit.metal_frame(target, 8, 8, 84, 84)
+                    kit.rect(target, 10, 10, 80, 80, (0, 0, 0, 0))
+            elif 'slot_highlight_' in name:
+                target = kit.canvas(*original.size)
+                if name.endswith('_front'): kit.outline(target, 3, 3, 18, 18, kit.GOLD['light'])
+            elif name == 'container/slot' or name == 'container/crafter/disabled_slot':
+                target = kit.canvas(*original.size)
+                kit.slot(target, 0, 0)
+                if 'disabled' in name:
+                    kit.rect(target, 3, 8, 12, 2, kit.GOLD['dark'])
+            elif name.startswith('container/slot/'):
+                for y in range(target.height):
+                    for x in range(target.width):
+                        r, g, b, a = original.getpixel((x, y))
+                        if a: target.putpixel((x, y), (*ImageColor.getrgb(kit.GOLD['dark']), a))
+            elif name.endswith('/chest_slots'):
+                native_slots(original, target)
+            elif name.startswith('recipe_book/page_'):
+                target = kit.page_arrow('backward' in name, '_highlighted' in name)
+            elif name in ('recipe_book/tab', 'recipe_book/tab_selected'):
+                target = kit.canvas(*original.size)
+                selected = name.endswith('_selected')
+                kit.panel(target, 0 if selected else 3, 0, target.width - (0 if selected else 3), target.height)
+                if selected: kit.rect(target, target.width - 2, 2, 2, target.height - 4, kit.BODY)
+            elif name.startswith('recipe_book/slot_'):
+                target = kit.canvas(*original.size)
+                kit.slot(target, 0, 0, size=original.width)
+            elif name.endswith('/slot_background'):
+                target = kit.canvas(*original.size)
+                kit.slot(target, 3, 3)
+            elif '/scroller' in name:
+                target = kit.canvas(*original.size)
+                kit.scrollbar(target, 0, 0, target.height, target.height, w=target.width)
+                if 'disabled' in name: target = recolor(target)
+            elif name.startswith('container/beacon/button') or '/enchantment_slot' in name:
+                target = kit.canvas(*original.size)
+                state = 'disabled' if 'disabled' in name else 'hover' if 'highlighted' in name else 'normal'
+                kit.button(target, 0, 0, target.width, state, target.height, 'selected' in name)
+            elif '/pattern' in name or name.startswith('container/stonecutter/recipe'):
+                target = Image.new('RGBA', original.size, kit.SLOT_FILL)
+                kit.metal_frame(target, 0, 0, *target.size, highlighted='selected' in name or 'highlighted' in name)
+            elif name.startswith('container/villager/experience_bar'):
+                target = kit.gold_icon(original)
+            assert target.size == original.size, name
+            images['sprites/interface/' + name + '.png'] = (target, meta)
     return images, slots
 
 
@@ -131,7 +225,20 @@ def main():
             if args.check: assert meta_path.read_text(encoding='utf-8') == meta_raw, meta_path
             else: meta_path.write_text(meta_raw, encoding='utf-8')
         manifest.append(dict(path=str(path.relative_to(ROOT)).replace('\\', '/'), size=list(im.size), sha256=hashlib.sha256(raw).hexdigest()))
-    report = dict(minecraft='26.2', stages=[1, 2], jarSha256=hashlib.sha256(args.minecraft_jar.read_bytes()).hexdigest(),
+    registry = {}
+    for relative in images:
+        if relative.startswith('sprites/interface/'):
+            registry[relative[len('sprites/interface/'):-4]] = 'interface/' + relative[len('sprites/interface/'):-4]
+        elif relative.startswith('interface/container/'):
+            registry['textures/gui/container/' + relative[len('interface/container/'):]] = 'textures/gui/' + relative
+        elif relative in ('interface/inventory.png', 'interface/generic_54.png'):
+            registry['textures/gui/container/' + relative.split('/')[-1]] = 'textures/gui/' + relative
+        elif relative == 'interface/recipe_book.png': registry['textures/gui/recipe_book.png'] = 'textures/gui/' + relative
+    registry_path = OUT.parents[1] / 'interface-textures.json'
+    registry_raw = json.dumps(registry, ensure_ascii=False, indent=2) + '\n'
+    if args.check: assert registry_path.read_text(encoding='utf-8') == registry_raw
+    else: registry_path.write_text(registry_raw, encoding='utf-8')
+    report = dict(minecraft='26.2', stages=[1, 2, 3], jarSha256=hashlib.sha256(args.minecraft_jar.read_bytes()).hexdigest(),
                   generated=manifest, nativeSlots=slots, globalMinecraftOverrides=False)
     serialized = json.dumps(report, ensure_ascii=False, indent=2) + '\n'
     if args.check: assert (HERE / 'manifest.json').read_text(encoding='utf-8') == serialized
