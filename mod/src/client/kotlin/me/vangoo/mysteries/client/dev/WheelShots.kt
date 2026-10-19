@@ -226,8 +226,8 @@ object WheelShots {
             // The same geometry the screen computes: cover, spine, header, first row.
             val bw = minOf(screen.width - 12, 560)
             val bh = minOf(screen.height - 10, 330)
-            val x = (screen.width - bw) / 2 + 36 + 40
-            val y = (screen.height - bh) / 2 + 30 + 6 + 18 * captureRow + 9
+            val x = (screen.width - bw) / 2 + 12 + 40
+            val y = (screen.height - bh) / 2 + 60 + 6 + 18 * captureRow + 9
             screen.mouseClicked(MouseButtonEvent(x.toDouble(), y.toDouble(), MouseButtonInfo(0, 0)), false)
         }
     }
@@ -279,16 +279,51 @@ object WheelShots {
                     then(2) { mc -> shot(mc, "book_gs${scale}_${bg}_keys_capture") }
                     then(4) { mc -> ClientOptions.activeGroup = 0; openBook(mc, AbilityBookScreen.Page.GROUPS) }
                     then(2) { mc -> shot(mc, "book_gs${scale}_${bg}_groups_all"); ClientOptions.activeGroup = 1 }
+                    if (scale == 4) {
+                        then(8) { mc ->
+                            openBook(mc, AbilityBookScreen.Page.STATUS)
+                            val screen = mc.gui.screen()!!
+                            repeat(20) { check(screen.mouseScrolled(screen.width.toDouble(), screen.height / 2.0, 0.0, -1.0)) }
+                        }
+                        then(2) { mc -> shot(mc, "book_gs4_status_scrolled") }
+                        then(8) { mc ->
+                            openBook(mc, AbilityBookScreen.Page.LIBRARY)
+                            val screen = mc.gui.screen()!!
+                            val bw = minOf(screen.width - 12, 560)
+                            val bh = minOf(screen.height - 10, 330)
+                            val lw = (bw - 26) * 9 / 20
+                            val filterW = (lw - 13) / 4
+                            val x = (screen.width - bw) / 2 + 12 + 5 + 3 * (filterW + 1) + filterW / 2
+                            val y = (screen.height - bh) / 2 + 60 + 33
+                            screen.mouseClicked(MouseButtonEvent(x.toDouble(), y.toDouble(), MouseButtonInfo(0, 0)), false)
+                        }
+                        then(2) { mc -> shot(mc, "book_gs4_library_passive_filter") }
+                        then(8) { mc ->
+                            val search = mc.gui.screen()!!.children().filterIsInstance<EditBox>().single()
+                            search.value = "фізичні"
+                        }
+                        then(2) { mc -> shot(mc, "book_gs4_library_search") }
+                    }
                 }
             }
             then(2) { mc -> mc.gui.setScreen(null) }
         }
+        then(20) { mc -> mc.window.setWindowed(960, 720); mc.options.guiScale().set(3); mc.resizeGui() }
+        for (page in AbilityBookScreen.Page.entries) {
+            then(8) { mc -> openBook(mc, page) }
+            then(2) { mc -> shot(mc, "book_compact_${page.name.lowercase()}") }
+        }
         // Other pathways at GUI 3: emblems, modes and a bigger roster.
-        then(10) { mc -> mc.options.guiScale().set(3); mc.resizeGui(); command(mc, "time set noon") }
-        for (pathway in listOf("Tyrant", "Death", "Fool", "Door", "Error", "Visionary", "WhiteTower", "Justiciar", "Hermit")) {
+        then(20) { mc -> mc.window.setWindowed(1920, 1080); mc.options.guiScale().set(3); mc.resizeGui(); command(mc, "time set noon") }
+        for (pathway in PathwayBranding.names.sorted().filter { it != "Sun" }) {
             then(40) { mc -> mc.gui.setScreen(null); command(mc, "mysteries become $pathway 5 @a") }
             then(20) { mc -> spirituality(mc, 0.9f); openBook(mc, AbilityBookScreen.Page.STATUS) }
             then(2) { mc -> shot(mc, "book_path_${pathway.lowercase()}_status") }
+            then(8) { _ ->
+                ClientAbilityState.entries.firstOrNull { it.modes.isNotEmpty() }?.let {
+                    ModChannels.ABILITY_ACTION.sendToServer(AbilityActionPayload(AbilityActionPayload.Action.SELECT, it.identity, null))
+                }
+            }
             then(8) { mc -> openBook(mc, AbilityBookScreen.Page.LIBRARY) }
             then(2) { mc -> shot(mc, "book_path_${pathway.lowercase()}_library") }
         }
