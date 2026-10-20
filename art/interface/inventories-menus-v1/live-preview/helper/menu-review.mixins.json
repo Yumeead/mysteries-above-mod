@@ -1,1 +1,0 @@
-{"required": true, "package": "preview.mixin", "compatibilityLevel": "JAVA_25", "client": ["GraphicsSkinMixin"], "injectors": {"defaultRequire": 1}}

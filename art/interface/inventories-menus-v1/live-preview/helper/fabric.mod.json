@@ -1,1 +1,0 @@
-{"schemaVersion": 1, "id": "mysteries_menu_review", "version": "0.0.1", "name": "Isolated menu visual review", "environment": "client", "entrypoints": {"client": ["preview.ReviewClient"]}, "mixins": [], "depends": {"minecraft": "26.2", "fabricloader": ">=0.19.3", "fabric-api": "*"}}

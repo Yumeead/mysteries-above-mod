@@ -26,3 +26,6 @@ Thumbs.db
 
 # Log4j output from Bootstrap.bootStrap() in :mod tests
 mod/logs/
+
+# Local design sandbox (HTML previews, references), not part of the mod
+art/
