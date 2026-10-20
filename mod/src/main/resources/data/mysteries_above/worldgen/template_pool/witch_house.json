@@ -1,0 +1,16 @@
+{
+  "name": "mysteries_above:witch_house",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "projection": "rigid",
+        "location": "mysteries_above:witch_house",
+        "processors": "mysteries_above:witch_house_loot",
+        "override_liquid_settings": "ignore_waterlogging"
+      }
+    }
+  ]
+}

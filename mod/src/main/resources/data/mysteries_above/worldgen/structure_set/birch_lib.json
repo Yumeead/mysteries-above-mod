@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "mysteries_above:birch_lib",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 60,
+    "separation": 20,
+    "salt": 11111111
+  }
+}

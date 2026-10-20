@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "mysteries_above:ruined_tower",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 110,
+    "separation": 60,
+    "salt": 98765432
+  }
+}
