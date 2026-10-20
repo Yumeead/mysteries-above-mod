@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "mysteries_above:cyan_castle",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 90,
+    "separation": 40,
+    "salt": 1651132
+  }
+}

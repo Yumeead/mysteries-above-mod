@@ -1,4 +1,5 @@
 {
+  "animation": "cast_marionette",
   "target": [
     {
       "type": "knockback",

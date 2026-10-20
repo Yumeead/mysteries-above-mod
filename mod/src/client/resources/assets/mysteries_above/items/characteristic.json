@@ -1,11 +1,11 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "minecraft:item/amethyst_shard",
+    "model": "mysteries_above:item/characteristic",
     "tints": [
       {
         "type": "minecraft:dye",
-        "default": -4934476
+        "default": -8355712
       }
     ]
   }

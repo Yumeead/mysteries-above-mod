@@ -11,6 +11,7 @@ import me.vangoo.mysteries.pathways.sun.Oaths
 import me.vangoo.mysteries.effect.ModParticles
 import me.vangoo.mysteries.effect.ModSounds
 import me.vangoo.mysteries.entity.ModEntities
+import me.vangoo.mysteries.item.Ingredients
 import me.vangoo.mysteries.item.ModComponents
 import me.vangoo.mysteries.item.ModItems
 import me.vangoo.mysteries.net.ModChannels
@@ -40,6 +41,7 @@ object MysteriesAboveMod : ModInitializer {
         // The component before the item: the item already requires it.
         ModComponents.register()
         ModItems.register()
+        Ingredients.register()
         ModEntities.register()
 
         // The sensory vocabulary: particles and sounds are registered on both sides — the

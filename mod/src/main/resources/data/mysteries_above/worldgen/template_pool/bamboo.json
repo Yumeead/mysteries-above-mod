@@ -1,0 +1,16 @@
+{
+  "name": "mysteries_above:bamboo",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "projection": "rigid",
+        "location": "mysteries_above:bamboo",
+        "processors": "mysteries_above:bamboo_loot",
+        "override_liquid_settings": "ignore_waterlogging"
+      }
+    }
+  ]
+}

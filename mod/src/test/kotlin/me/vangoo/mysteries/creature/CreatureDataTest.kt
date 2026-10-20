@@ -63,7 +63,13 @@ internal class CreatureDataTest {
             body.addProperty("entity", "minecraft:villager")
         }
 
-        private val MOD_BODIES = setOf("mysteries_above:human")
+        private val MOD_BODIES = setOf(
+            "mysteries_above:human",
+            "mysteries_above:sea_condor",
+            "mysteries_above:siren",
+            "mysteries_above:ancient_wraith",
+            "mysteries_above:thousand_faced_hunter",
+        )
 
         private fun ResourceKey<*>.id(): String = identifier().toString()
 

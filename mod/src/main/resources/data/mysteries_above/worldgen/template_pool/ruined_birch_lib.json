@@ -1,0 +1,16 @@
+{
+  "name": "mysteries_above:ruined_birch_lib",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "projection": "rigid",
+        "location": "mysteries_above:ruined_birch_lib",
+        "processors": "mysteries_above:lib_loot",
+        "override_liquid_settings": "ignore_waterlogging"
+      }
+    }
+  ]
+}

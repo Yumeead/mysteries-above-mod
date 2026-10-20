@@ -8,7 +8,10 @@ import me.vangoo.mysteries.ability.grantAttribute
 import me.vangoo.mysteries.ability.modifierId
 import me.vangoo.mysteries.ability.revokeAttribute
 import me.vangoo.mysteries.pathways.death.Retinue
+import me.vangoo.mysteries.net.ModChannels
+import me.vangoo.mysteries.net.payload.CreatureMovePayload
 import me.vangoo.mysteries.pathways.fool.Marionettes
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.resources.ResourceKey
 import net.minecraft.server.level.ServerBossEvent
@@ -226,6 +229,7 @@ class Mind(
     }
 
     private fun begin(skill: CreatureSkill, target: LivingEntity) {
+        perform(skill)
         if (skill.windup <= 0) {
             release(skill, target, target.position())
             return
@@ -272,7 +276,14 @@ class Mind(
     private fun fire(reaction: Reaction, target: LivingEntity?) {
         val skill = Creatures.skill(level, reaction.skill) ?: return
         readyAt[reaction] = now + reaction.cooldown
+        perform(skill)
         release(skill, target, target?.position() ?: mob.position())
+    }
+
+    /** The technique's own animation, told to whoever sees the caster. Played from its start, windup included. */
+    private fun perform(skill: CreatureSkill) {
+        val move = skill.animation ?: return
+        ModChannels.CREATURE_MOVE.sendTo(PlayerLookup.tracking(mob), CreatureMovePayload(mob.id, move))
     }
 
     /** One blow with the body itself — for bodies vanilla gave no attack, and for humans. */

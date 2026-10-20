@@ -1,6 +1,6 @@
 {
   "body": {
-    "entity": "minecraft:evoker",
+    "entity": "mysteries_above:ancient_wraith",
     "name": {
       "text": "Стародавня Примара",
       "color": "light_purple"

@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "mysteries_above:ruined_spruce_lib",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 70,
+    "separation": 25,
+    "salt": 77777777
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "values": [
+    "minecraft:meadow",
+    {
+      "id": "minecraft:pale_garden",
+      "required": false
+    }
+  ]
+}

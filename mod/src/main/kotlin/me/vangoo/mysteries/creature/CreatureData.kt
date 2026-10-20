@@ -499,6 +499,8 @@ class Reaction(
  * technique is simply not chosen (the plugin spent its cooldown on nothing)
  * @property area `0` — the target alone; otherwise every enemy within this radius
  * @property aroundSelf the area is centred on the caster, not on the target
+ * @property animation what a body with a model plays as the technique begins — the plugin's
+ * `state{s=…}` line; a body without one, or without that animation, simply does not
  */
 class CreatureSkill(
     val windup: Int,
@@ -509,6 +511,7 @@ class CreatureSkill(
     val aroundSelf: Boolean,
     val self: List<Mechanic>,
     val target: List<Mechanic>,
+    val animation: String?,
 ) {
     companion object {
         val CODEC: Codec<CreatureSkill> = RecordCodecBuilder.create { row ->
@@ -521,8 +524,9 @@ class CreatureSkill(
                 Codec.BOOL.optionalFieldOf("around_self", false).forGetter(CreatureSkill::aroundSelf),
                 Mechanic.CODEC.listOf().optionalFieldOf("self", emptyList()).forGetter(CreatureSkill::self),
                 Mechanic.CODEC.listOf().optionalFieldOf("target", emptyList()).forGetter(CreatureSkill::target),
-            ).apply(row) { windup, telegraph, beyonders, range, area, aroundSelf, self, target ->
-                CreatureSkill(windup, telegraph.orElse(null), beyonders, range.orElse(null), area, aroundSelf, self, target)
+                Codec.STRING.optionalFieldOf("animation").forGetter { Optional.ofNullable(it.animation) },
+            ).apply(row) { windup, telegraph, beyonders, range, area, aroundSelf, self, target, animation ->
+                CreatureSkill(windup, telegraph.orElse(null), beyonders, range.orElse(null), area, aroundSelf, self, target, animation.orElse(null))
             }
         }
     }

@@ -5,6 +5,7 @@ import me.vangoo.mysteries.net.payload.AbilityRosterPayload
 import me.vangoo.mysteries.net.payload.AbilityStatePayload
 import me.vangoo.mysteries.net.payload.ChoiceAnswerPayload
 import me.vangoo.mysteries.net.payload.ChoiceOfferPayload
+import me.vangoo.mysteries.net.payload.CreatureMovePayload
 import me.vangoo.mysteries.net.payload.MarionetteOrderPayload
 import me.vangoo.mysteries.net.payload.MarionetteStatePayload
 import me.vangoo.mysteries.net.payload.ThreadSightPayload
@@ -66,6 +67,10 @@ object ModChannels {
     /** The pick, or the screen closed without one. */
     val CHOICE_ANSWER: ServerboundChannel<ChoiceAnswerPayload> =
         serverbound(ChoiceAnswerPayload.TYPE, ChoiceAnswerPayload.CODEC)
+
+    /** A creature's technique, by the name of its animation — for the bodies that have a model. */
+    val CREATURE_MOVE: ClientboundChannel<CreatureMovePayload> =
+        clientbound(CreatureMovePayload.TYPE, CreatureMovePayload.CODEC)
 
     /** Every declared channel — for logs and tests. */
     val all: List<Channel<*>> get() = declared.toList()

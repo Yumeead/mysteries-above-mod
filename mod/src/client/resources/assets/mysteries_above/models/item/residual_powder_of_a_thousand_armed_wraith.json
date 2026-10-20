@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "mysteries_above:item/residual_powder_of_a_thousand_armed_wraith"
+  }
+}

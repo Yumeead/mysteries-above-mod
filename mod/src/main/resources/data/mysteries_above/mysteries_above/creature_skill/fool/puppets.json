@@ -1,4 +1,5 @@
 {
+  "animation": "cast_summon",
   "target": [
     {
       "type": "summon",

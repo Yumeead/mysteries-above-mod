@@ -1,5 +1,8 @@
 package me.vangoo.mysteries.gametest
 
+import me.vangoo.mysteries.entity.ModEntities
+import me.vangoo.mysteries.net.ModChannels
+import me.vangoo.mysteries.net.payload.CreatureMovePayload
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext
@@ -30,7 +33,39 @@ class CreatureClientGameTest : FabricClientGameTest {
             scene(context, server, "creatures-street", listOf("citizen", "guard", "citizen", "wild_beyonder", "citizen", "guard"))
             scene(context, server, "creatures-boss", listOf("drowned_despot"))
             scene(context, server, "creatures-wild", listOf("tyrant_siren_5", "fool_thousand_faced_hunter_6", "death_knight"))
+            models(context, server)
         }
+    }
+
+    /**
+     * The plugin's four BetterModel creatures on the mod's own renderer: from the front, turned
+     * three-quarters (the side and top faces), and mid-cast (an animation named by the server).
+     * Minds off, or the condor circles out of frame.
+     */
+    private fun models(context: ClientGameTestContext, server: TestServerContext) {
+        val ids = listOf("tyrant_sea_condor_6", "tyrant_siren_5", "fool_ancient_wraith_5", "fool_thousand_faced_hunter_6")
+        scene(context, server, "creatures-models", ids)
+        server.runCommand("execute as @e[tag=mysteries_above.creature] run data merge entity @s {NoAI:1b}")
+        // Phase 14's items in the same frames: an ingredient in hand, the characteristic's own core in the other.
+        server.runCommand("item replace entity @a weapon.mainhand with mysteries_above:sphinx_brain")
+        server.runCommand("item replace entity @a weapon.offhand with mysteries_above:characteristic")
+        server.runCommand("execute as @e[tag=mysteries_above.creature] at @s run tp @s ~ ~ ~ 135 0")
+        context.waitTicks(20)
+        context.takeScreenshot("creatures-models-turned")
+        server.runOnServer<Throwable> { srv ->
+            val player = srv.playerList.players.first()
+            srv.overworld().getEntities(player, player.boundingBox.inflate(48.0)) { "mysteries_above.creature" in it.entityTags() }
+                .forEach {
+                    val move = when (it.type) {
+                        ModEntities.SIREN -> "attack"
+                        ModEntities.THOUSAND_FACED_HUNTER -> "cast_bolt"
+                        else -> "cast_marionette" // the condor has no gesture and stays as it is
+                    }
+                    ModChannels.CREATURE_MOVE.sendTo(player, CreatureMovePayload(it.id, move))
+                }
+        }
+        context.waitTicks(12)
+        context.takeScreenshot("creatures-models-cast")
     }
 
     /** A row of [ids] a few steps ahead, turned to the camera, given three seconds to live. */

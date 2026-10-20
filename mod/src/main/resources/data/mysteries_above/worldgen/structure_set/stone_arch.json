@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "mysteries_above:stone_arch",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 90,
+    "separation": 30,
+    "salt": 10101010
+  }
+}

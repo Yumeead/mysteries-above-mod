@@ -1,4 +1,5 @@
 {
+  "animation": "flame_jump",
   "self": [
     {
       "type": "particles",
