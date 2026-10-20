@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 0,
+        "max": 1
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:soul_of_a_pale_lich",
+          "weight": 50
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:fragmented_bones_of_pale_lich",
+          "weight": 35
+        }
+      ]
+    }
+  ]
+}

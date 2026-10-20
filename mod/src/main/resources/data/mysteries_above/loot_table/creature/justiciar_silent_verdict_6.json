@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 0,
+        "max": 1
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:heart_of_the_silent_verdict",
+          "weight": 50
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:fragment_of_a_sealed_domain",
+          "weight": 50
+        }
+      ]
+    }
+  ]
+}

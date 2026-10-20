@@ -20,6 +20,7 @@ import net.minecraft.resources.Identifier
 import net.minecraft.resources.ResourceKey
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.tags.PoiTypeTags
+import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EntitySpawnReason
 import net.minecraft.world.entity.LivingEntity
@@ -31,6 +32,8 @@ import net.minecraft.world.entity.ai.village.poi.PoiManager
 import net.minecraft.world.entity.ai.village.poi.PoiTypes
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.gamerules.GameRules
+import net.minecraft.world.level.storage.loot.LootTable
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams
 import net.minecraft.world.phys.Vec3
 import org.slf4j.LoggerFactory
@@ -137,16 +140,18 @@ object Creatures {
             val mind = mindOf(entity) ?: return@register true
             mind.now >= mind.pausedUntil
         }
-        ServerLivingEntityEvents.AFTER_DEATH.register { entity, _ ->
+        ServerLivingEntityEvents.AFTER_DEATH.register { entity, source ->
             val mind = mindOf(entity) ?: return@register
             mind.dispose()
             leaveCharacteristic(mind)
+            dropOwnLoot(entity, mind.level, source)
         }
         // A creature drops only what the mod gives it — the plugin's `PreventOtherDrops`. A goat
-        // that is a Grey Mountain Goat of Hornacis does not drop mutton.
-        LootTableEvents.MODIFY_DROPS.register { _, context, drops ->
+        // that is a Grey Mountain Goat of Hornacis does not drop mutton, only its own table.
+        LootTableEvents.MODIFY_DROPS.register { table, context, drops ->
             val dead = context.getOptionalParameter(LootContextParams.THIS_ENTITY)
-            if (dead != null && context.hasParameter(LootContextParams.DAMAGE_SOURCE) && isCreature(dead)) drops.clear()
+            if (dead == null || !context.hasParameter(LootContextParams.DAMAGE_SOURCE) || !isCreature(dead)) return@register
+            if (table.unwrapKey().orElse(null) != lootOf(dead)) drops.clear()
         }
         CreatureSpawner.install()
     }
@@ -332,6 +337,20 @@ object Creatures {
      * The Law of Conservation: a Beyonder's characteristic does not die with them. A wild
      * Beyonder leaves theirs where they fell, exactly as a marionette made from a Beyonder does.
      */
+    /**
+     * The creature's own table, `<namespace>:creature/<id>` — the plugin's `creatures.yml` loot. A
+     * convention rather than a field: a creature without a table simply drops nothing, and a datapack
+     * gives one to its creature by placing the file.
+     */
+    private fun lootOf(entity: Entity): ResourceKey<LootTable>? =
+        keyOf(entity)?.identifier()?.let { ResourceKey.create(Registries.LOOT_TABLE, it.withPrefix("creature/")) }
+
+    private fun dropOwnLoot(entity: LivingEntity, level: ServerLevel, source: DamageSource) {
+        if (!level.gameRules.get(GameRules.MOB_DROPS)) return
+        val table = lootOf(entity) ?: return
+        entity.dropFromLootTable(level, source, source.entity is Player, table)
+    }
+
     private fun leaveCharacteristic(mind: Mind) {
         if (mind.role != Role.BEYONDER) return
         val pathway = mind.pathway ?: return

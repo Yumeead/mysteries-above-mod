@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 1,
+        "max": 2
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:ancient_wraith_dust",
+          "weight": 50
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:ancient_wraith_spirituality",
+          "weight": 35
+        }
+      ]
+    }
+  ]
+}

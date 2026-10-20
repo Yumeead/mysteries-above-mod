@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 0,
+        "max": 1
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:black_hunting_lizard_spinal_fluid",
+          "weight": 50
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:split_personality_essence",
+          "weight": 50
+        }
+      ]
+    }
+  ]
+}

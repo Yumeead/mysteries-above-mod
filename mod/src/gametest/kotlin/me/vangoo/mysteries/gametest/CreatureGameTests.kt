@@ -16,6 +16,7 @@ import me.vangoo.mysteries.pathways.death.Spirits
 import net.fabricmc.fabric.api.gametest.v1.GameTest
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
+import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.gametest.framework.GameTestHelper
 import net.minecraft.resources.ResourceKey
 import net.minecraft.server.level.ServerPlayer
@@ -192,14 +193,18 @@ class CreatureGameTests {
     }
 
     @GameTest(maxTicks = 20, skyAccess = true, padding = PADDING)
-    fun aCreatureDropsNothingOfItsVanillaBody(helper: GameTestHelper) {
+    fun aCreatureDropsItsOwnLootAndNothingOfItsVanillaBody(helper: GameTestHelper) {
         helper.floor()
-        val murloc = helper.creature("tyrant_murloc_9", 4, 4)
+        // A witch's body; its table always gives one or two of its own parts.
+        val hunter = helper.creature("fool_thousand_faced_hunter_6", 4, 4)
         val player = helper.player(4, 7)
-        val at = murloc.position()
-        murloc.hurtServer(helper.level, helper.level.damageSources().playerAttack(player), 1000f)
+        val at = hunter.position()
+        hunter.hurtServer(helper.level, helper.level.damageSources().playerAttack(player), 1000f)
         helper.runAfterDelay(2) {
-            helper.expect(helper.items(at).isEmpty(), "з тіла потопельника випало: ${helper.items(at).map { it.item }}")
+            val dropped = helper.items(at).map { BuiltInRegistries.ITEM.getKey(it.item.item).path }
+            val own = setOf("thousand_faced_hunter_pituitary", "thousand_faced_hunter_blood")
+            helper.expect(dropped.isNotEmpty(), "Тисячоликий Мисливець нічого не скинув")
+            helper.expect(dropped.all { it in own }, "з тіла відьми випало чуже: $dropped")
             helper.succeed()
         }
     }

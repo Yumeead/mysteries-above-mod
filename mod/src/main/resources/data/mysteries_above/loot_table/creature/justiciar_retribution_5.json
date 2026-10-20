@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 0,
+        "max": 1
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:core_of_retributive_authority",
+          "weight": 50
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:brand_of_the_unforgiving_oath",
+          "weight": 50
+        }
+      ]
+    }
+  ]
+}
