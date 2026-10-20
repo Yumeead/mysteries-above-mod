@@ -9,7 +9,9 @@ import me.vangoo.domain.creatures.SpawnDistanceGate
 import me.vangoo.domain.creatures.SpawnRule
 import me.vangoo.domain.valueobjects.LootTableData
 import me.vangoo.mysteries.ability.runtime.AbilityServices
+import me.vangoo.mysteries.modId
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
+import net.fabricmc.fabric.api.gamerule.v1.GameRuleBuilder
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents
 import net.minecraft.core.BlockPos
 import net.minecraft.core.registries.BuiltInRegistries
@@ -25,6 +27,8 @@ import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.EntityTypes
 import net.minecraft.world.entity.MobCategory
 import net.minecraft.world.level.ChunkPos
+import net.minecraft.world.level.gamerules.GameRule
+import net.minecraft.world.level.gamerules.GameRuleCategory
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams
 import net.minecraft.world.phys.Vec3
 
@@ -44,15 +48,36 @@ import net.minecraft.world.phys.Vec3
  * The plugin also swapped vanilla mobs for creatures at the moment they spawned; Fabric has no hook
  * for that moment, and the ambient path already brings the same creatures to the same biomes.
  *
- * ponytail: the numbers are constants until the mod has a config (phase 15).
+ * The plugin's `config.yml` numbers are game rules (`/gamerule mysteries_above:…`): they live with the
+ * world and change without a restart. The rest stays constant — geometry, not balance.
  */
 object CreatureSpawner {
+
+    /** The gate of place: nothing otherworldly within this many blocks of the world's spawn. */
+    val MIN_SPAWN_DISTANCE: GameRule<Int> = GameRuleBuilder.forInteger(3000).minValue(0)
+        .category(GameRuleCategory.SPAWNING).buildAndRegister(modId("creature_min_spawn_distance"))
+
+    /** How often each Beyonder rolls for an ambient creature. */
+    val AMBIENT_INTERVAL_SECONDS: GameRule<Int> = GameRuleBuilder.forInteger(60).minValue(1)
+        .category(GameRuleCategory.SPAWNING).buildAndRegister(modId("creature_ambient_interval"))
+
+    /** The chance of that roll — about one creature per 45 minutes. `0` turns ambient creatures off. */
+    val AMBIENT_CHANCE: GameRule<Double> = GameRuleBuilder.forDouble(0.022).range(0.0, 1.0)
+        .category(GameRuleCategory.SPAWNING).buildAndRegister(modId("creature_ambient_chance"))
+
+    /** No ambient creature while this many already roam within 64 blocks. */
+    val MAX_NEARBY: GameRule<Int> = GameRuleBuilder.forInteger(3).minValue(0)
+        .category(GameRuleCategory.SPAWNING).buildAndRegister(modId("creature_max_nearby"))
+
+    /** The chance an opened chest brings a creature. `0` turns structure creatures off. */
+    val STRUCTURE_CHANCE: GameRule<Double> = GameRuleBuilder.forDouble(0.10).range(0.0, 1.0)
+        .category(GameRuleCategory.SPAWNING).buildAndRegister(modId("creature_structure_chance"))
 
     fun install() {
         // The cooldowns count server ticks, and the next world's server starts counting from zero.
         net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register { chunkCooldown.clear() }
         ServerTickEvents.END_SERVER_TICK.register { server ->
-            if (server.tickCount % AMBIENT_EVERY_TICKS == 0) server.playerList.players.forEach(::tryAmbient)
+            if (server.tickCount % (server.overworld().gameRules.get(AMBIENT_INTERVAL_SECONDS) * 20) == 0) server.playerList.players.forEach(::tryAmbient)
         }
         // A chest's loot is rolled with its opener as THIS_ENTITY and no tool: that is "a chest was
         // opened" in any structure — vanilla's, a datapack's, another mod's.
@@ -94,11 +119,11 @@ object CreatureSpawner {
         val beyonder = AbilityServices.beyonders.of(player.uuid) ?: return
         val level = player.level()
         if (level.difficulty == Difficulty.PEACEFUL || !farEnough(level, player.position())) return
-        if (player.random.nextDouble() >= AMBIENT_CHANCE) return
+        if (player.random.nextDouble() >= level.gameRules.get(AMBIENT_CHANCE)) return
         val near = level.getEntitiesOfClass(net.minecraft.world.entity.Mob::class.java, player.boundingBox.inflate(NEARBY_RADIUS)) {
             Creatures.isCreature(it)
         }
-        if (near.size >= MAX_NEARBY) return
+        if (near.size >= level.gameRules.get(MAX_NEARBY)) return
 
         val pool = candidates(level)
         val biome = level.getBiome(player.blockPosition()).unwrapKey().map { it.identifier().toString() }.orElse(null)
@@ -120,7 +145,7 @@ object CreatureSpawner {
         val server = level.server
         val chunk = ChunkPos.containing(player.blockPosition()).pack()
         if (server.tickCount < (chunkCooldown[chunk] ?: Int.MIN_VALUE)) return
-        if (player.random.nextDouble() >= STRUCTURE_CHANCE) return
+        if (player.random.nextDouble() >= level.gameRules.get(STRUCTURE_CHANCE)) return
         chunkCooldown[chunk] = server.tickCount + STRUCTURE_COOLDOWN_TICKS
 
         val beyonder = AbilityServices.beyonders.of(player.uuid)
@@ -147,7 +172,7 @@ object CreatureSpawner {
     private fun farEnough(level: ServerLevel, at: Vec3): Boolean {
         val spawn = level.server.overworld().respawnData.pos()
         val scale = level.dimensionType().coordinateScale()
-        return SpawnDistanceGate.isFarEnough(at.x * scale - spawn.x, at.z * scale - spawn.z, MIN_SPAWN_DISTANCE)
+        return SpawnDistanceGate.isFarEnough(at.x * scale - spawn.x, at.z * scale - spawn.z, level.gameRules.get(MIN_SPAWN_DISTANCE).toDouble())
     }
 
     private fun aquatic(type: EntityType<*>): Boolean =
@@ -171,15 +196,10 @@ object CreatureSpawner {
         return null
     }
 
-    private const val MIN_SPAWN_DISTANCE = 3000.0
-    private const val AMBIENT_EVERY_TICKS = 60 * 20
-    private const val AMBIENT_CHANCE = 0.022
-    private const val MAX_NEARBY = 3
     private const val NEARBY_RADIUS = 64.0
     private const val AMBIENT_MIN = 24.0
     private const val AMBIENT_MAX = 48.0
 
-    private const val STRUCTURE_CHANCE = 0.10
     private const val STRUCTURE_COOLDOWN_TICKS = 5 * 60 * 20
     private const val STRUCTURE_DELAY_TICKS = 80
     private const val STRUCTURE_MIN = 5.0
