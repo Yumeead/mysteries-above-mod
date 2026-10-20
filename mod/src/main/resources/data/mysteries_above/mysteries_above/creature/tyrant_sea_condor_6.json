@@ -1,6 +1,6 @@
 {
   "body": {
-    "entity": "minecraft:phantom",
+    "entity": "mysteries_above:sea_condor",
     "name": {
       "text": "Морський Кондор з Драконячим Оком",
       "color": "aqua"

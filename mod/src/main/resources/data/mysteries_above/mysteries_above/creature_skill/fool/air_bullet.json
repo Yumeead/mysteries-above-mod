@@ -1,4 +1,5 @@
 {
+  "animation": "cast_bolt",
   "self": [
     {
       "type": "sound",

@@ -1,6 +1,6 @@
 {
   "body": {
-    "entity": "minecraft:drowned",
+    "entity": "mysteries_above:siren",
     "name": {
       "text": "Морська Сирена",
       "color": "aqua"

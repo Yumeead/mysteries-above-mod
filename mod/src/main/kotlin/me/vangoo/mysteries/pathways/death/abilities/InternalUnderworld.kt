@@ -191,7 +191,8 @@ class InternalUnderworld : ActiveAbility(AbilityIdentity.of("death_internal_unde
                 "living_shadow" -> PHANTOM
                 "death_knight" -> ARCHER
                 "death_envoy" -> WITHER_SKELETON
-                "lake_goddess", "sea_beasts" -> DROWNED
+                "lake_goddess", "sea_beasts", "tyrant_siren_5" -> DROWNED
+                "tyrant_sea_condor_6" -> PHANTOM
                 "pus_of_man" -> ZOMBIE_VILLAGER
                 "shadow_swallowing_python" -> SPIRIT
                 else -> of(type)

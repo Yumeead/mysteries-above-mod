@@ -5,6 +5,8 @@ import me.vangoo.mysteries.client.beyonder.ClientAbilityState
 import me.vangoo.mysteries.client.dev.WheelShots
 import me.vangoo.mysteries.client.beyonder.ClientMarionettes
 import me.vangoo.mysteries.client.beyonder.SanityAmbience
+import me.vangoo.mysteries.client.render.BbModelRenderer
+import me.vangoo.mysteries.client.render.CreatureMoves
 import me.vangoo.mysteries.client.render.HumanRenderer
 import me.vangoo.mysteries.client.render.MarionetteRenderer
 import me.vangoo.mysteries.client.screen.ChoiceScreen
@@ -84,12 +86,20 @@ object MysteriesAboveClient : ClientModInitializer {
         EntityRendererRegistry.register(ModEntities.MARIONETTE, ::MarionetteRenderer)
         // The creature engine's people: the player model, a default skin chosen by the entity's id.
         EntityRendererRegistry.register(ModEntities.HUMAN, ::HumanRenderer)
+        // The plugin's four BetterModel creatures: vanilla bodies, the model drawn over them by the
+        // renderer itself. The names are the generator's files; the siren was drawn small and shown at 1.6.
+        EntityRendererRegistry.register(ModEntities.SEA_CONDOR) { BbModelRenderer(it, "sea_condor") }
+        EntityRendererRegistry.register(ModEntities.SIREN) { BbModelRenderer(it, "tyrant_siren_5", size = 1.6f) }
+        EntityRendererRegistry.register(ModEntities.ANCIENT_WRAITH) { BbModelRenderer(it, "fool_ancient_wraith_5") }
+        EntityRendererRegistry.register(ModEntities.THOUSAND_FACED_HUNTER) { BbModelRenderer(it, "fool_thousand_faced_hunter_6") }
+        ModChannels.CREATURE_MOVE.receiveOnClient { payload, _ -> CreatureMoves.accept(payload) }
 
         ClientPlayConnectionEvents.DISCONNECT.register { _, _ ->
             ClientAbilityState.clear()
             ClientMarionettes.clear()
             SanityAmbience.clear()
             SpiritThreads.clear()
+            CreatureMoves.clear()
         }
 
         SpiritualityHud.register()

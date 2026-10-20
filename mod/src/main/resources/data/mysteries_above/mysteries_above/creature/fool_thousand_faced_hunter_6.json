@@ -1,6 +1,6 @@
 {
   "body": {
-    "entity": "minecraft:witch",
+    "entity": "mysteries_above:thousand_faced_hunter",
     "name": {
       "text": "Тисячоликий Мисливець",
       "color": "dark_purple"
