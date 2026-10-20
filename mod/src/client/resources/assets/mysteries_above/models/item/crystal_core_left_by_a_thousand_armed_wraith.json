@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "mysteries_above:item/crystal_core_left_by_a_thousand_armed_wraith"
+  }
+}

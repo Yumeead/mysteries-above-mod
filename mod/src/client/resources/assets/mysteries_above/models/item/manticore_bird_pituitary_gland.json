@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "mysteries_above:item/manticore_bird_pituitary_gland"
+  }
+}

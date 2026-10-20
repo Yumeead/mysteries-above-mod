@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "mysteries_above:item/war_cry_bird_beak_segment"
+  }
+}

@@ -58,8 +58,9 @@ object ModItems {
     /**
      * One condensed core of a given pathway and Sequence.
      *
-     * Same line as the potion: no texture of the mod's own — a vanilla amethyst shard tinted with
-     * the pathway's colour. What is inside is said by the component, not by a registered item.
+     * Same line as the potion: one item tinted with the pathway's colour — the plugin's grey,
+     * slowly pulsing core is drawn in shades so the dye decides its hue. What is inside is said by the
+     * component, not by a registered item.
      */
     fun characteristicOf(pathwayName: String, sequence: Int): ItemStack {
         val branding = PathwayBranding.of(pathwayName)

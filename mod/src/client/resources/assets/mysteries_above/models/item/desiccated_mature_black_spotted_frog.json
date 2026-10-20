@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "mysteries_above:item/desiccated_mature_black_spotted_frog"
+  }
+}

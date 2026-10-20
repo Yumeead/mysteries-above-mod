@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "mysteries_above:item/horn_of_a_flash_patterned_black_snake"
+  }
+}
