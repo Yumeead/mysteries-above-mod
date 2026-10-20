@@ -53,7 +53,8 @@ object TheftRegistry {
 
     /**
      * @property expiresAt when the thief loses the power
-     * @property suppressionEndsAt when the victim gets it back — always later
+     * @property suppressionEndsAt when the victim gets it back — later, except on the reserve
+     *   tier: an unused power may outwait the victim's window, and the record stays until both end
      */
     class Theft(
         val thiefId: UUID,
@@ -125,7 +126,8 @@ object TheftRegistry {
      * Records a theft, replacing whatever the thief held before — the slot is one.
      *
      * @param hold how long the thief keeps the power
-     * @param suppression how long the victim goes without it; must outlast [hold]
+     * @param suppression how long the victim goes without it; must outlast [hold] unless there is
+     *   a reserve term ([activeHold] > 0), whose unused wait is longer than the victim's by design
      */
     fun steal(
         thiefId: UUID,
@@ -136,7 +138,7 @@ object TheftRegistry {
         now: Long = System.currentTimeMillis(),
         activeHold: Long = 0,
     ): Theft {
-        require(suppression >= hold) { "Пригнічення жертви не може бути коротшим за володіння: $suppression < $hold" }
+        require(activeHold > 0 || suppression >= hold) { "Пригнічення жертви не може бути коротшим за володіння: $suppression < $hold" }
         val theft = Theft(thiefId, victimId, identity, now, now + hold, now + suppression, activeHold)
         byThief[thiefId] = theft
         return theft
@@ -190,7 +192,9 @@ object TheftRegistry {
                 theft.revoked = true
                 revoke(theft)
             }
-            if (now >= theft.suppressionEndsAt) byThief.remove(theft.thiefId, theft)
+            // Only once the power is gone too: a reserve outlives the victim's window, and dropping
+            // the record then would leave the thief the power with no clock to take it back.
+            if (theft.revoked && now >= theft.suppressionEndsAt) byThief.remove(theft.thiefId, theft)
         }
     }
 
