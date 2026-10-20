@@ -1,0 +1,1257 @@
+{
+  "type": "minecraft:generic",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:manhal_fish_eyeball",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:goat_horned_blackfish_blood",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:autumn_crocus_essence",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:elf_flower_petals",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:crystalline_moon_orchid",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:thought_essence",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:iridescent_pearl_dust",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:tree_of_elders_fruit",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:mirror_dragon_eyes",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:mirror_dragon_blood",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:black_hunting_lizard_spinal_fluid",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:illusory_chime_tree_fruit",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:mind_crystal_powder",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:split_personality_essence",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:dream_catcher_heart",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:mind_illusion_crystal",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:adult_mind_dragon_blood",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "Visionary",
+                  "sequence": 9
+                }
+              }
+            }
+          ],
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "Visionary",
+                  "sequence": 8
+                }
+              }
+            }
+          ],
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "Visionary",
+                  "sequence": 7
+                }
+              }
+            }
+          ],
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:dimensional_wanderer_eye",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:ever_shifting_lotus",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:spirit_eater_pouch",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:deep_sea_marlin_blood",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:string_grass_powder",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:red_chestnut_flower",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:meteorite_crystal",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:lavos_squid_blood",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:starfaced_stone",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:asmann_complete_brain",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:cursed_wraith_artifact",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:imbued_ink_sac",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:void_drifter_heart",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:astral_mist_essence",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:wayfinder_tree_root",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "Door",
+                  "sequence": 9
+                }
+              }
+            }
+          ],
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "Door",
+                  "sequence": 8
+                }
+              }
+            }
+          ],
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "Door",
+                  "sequence": 7
+                }
+              }
+            }
+          ],
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:heart_of_unquestioned_command",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:bone_of_the_unyielding_frame",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:eye_of_judicial_insight",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:pair_of_terror_demon_worms_eyes",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:silver_war_bears_right_palm",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:eye_of_perfect_recognition",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:thread_of_supernatural_intuition",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:horn_of_a_flash_patterned_black_snake",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:dust_of_lake_spirit",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:ashes_of_a_broken_oath_seal",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:heart_of_the_silent_verdict",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:fragment_of_a_sealed_domain",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:ashes_of_a_forbidden_decree",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:chains_of_collective_fear",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:core_of_retributive_authority",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:brand_of_the_unforgiving_oath",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:ashes_of_a_public_execution",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:shackles_of_the_guilty",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "Justiciar",
+                  "sequence": 9
+                }
+              }
+            }
+          ],
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "Justiciar",
+                  "sequence": 8
+                }
+              }
+            }
+          ],
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "Justiciar",
+                  "sequence": 7
+                }
+              }
+            }
+          ],
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:manticore_bird_pituitary_gland",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:light_antelope_blood",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:rock_crystal_powder",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:peppermint_extract",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:crystallized_cave_monkey_brain",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:memory_flower_petals",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:tree_of_wisdom_sap",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:yellow_amber_powder",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:phantom_python_vertical_eye",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:steel_toothed_wolf_heart",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:mica_powder",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:prismatic_chameleon_heart",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:liquid_silver_phantom_residue",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:mimicry_moss_spores",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:devastated_blank_mask",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:void_beholder_petrified_eye",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:condensed_astral_nebula",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:ancient_rune_powder",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:pure_spirituality_tear",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "WhiteTower",
+                  "sequence": 9
+                }
+              }
+            }
+          ],
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "WhiteTower",
+                  "sequence": 8
+                }
+              }
+            }
+          ],
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "WhiteTower",
+                  "sequence": 7
+                }
+              }
+            }
+          ],
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:blood_speckled_black_mosquito",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:candle_devourer_core",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:verbena_powder",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:human_faced_pitcher_plant",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:soul_bewitching_insect_larvae",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:anothers_tears",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:white_chestnut_balm",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:sphinx_brain",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:soul_bewitching_adult_insect",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:sphinx_blood",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:soul_bewitching_colony_mucus",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:crystal_threadworm",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:cloaked_specter_attachment",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:cloaked_specter_residual_powder",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:larch_essential_oil",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:dream_eating_rat_heart",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:spirit_of_depraved_breath",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:dream_eating_rat_blood",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:despiritualized_depraved_breath",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "Error",
+                  "sequence": 9
+                }
+              }
+            }
+          ],
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "Error",
+                  "sequence": 8
+                }
+              }
+            }
+          ],
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "Error",
+                  "sequence": 7
+                }
+              }
+            }
+          ],
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:star_crystal",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:poison_hemlock",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:dragon_blood_grass_powder",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:hornacis_goat_horn",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:human_faced_rose_stalk",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:black_rimmed_sunflower_powder",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:golden_cloak_grass_powder",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:mist_treant_root",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:dark_panther_spinal_fluid",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:fantasy_grass_oil",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:droplet_gem_powder",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:thousand_faced_hunter_pituitary",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:human_skin_shadow_characteristic",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:thousand_faced_hunter_blood",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:deep_sea_naga_hair",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:ancient_wraith_dust",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:six_winged_gargoyle_core",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:ancient_wraith_spirituality",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "Fool",
+                  "sequence": 9
+                }
+              }
+            }
+          ],
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "Fool",
+                  "sequence": 8
+                }
+              }
+            }
+          ],
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "Fool",
+                  "sequence": 7
+                }
+              }
+            }
+          ],
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:crystal_sunflower",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:siren_rock",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:elf_dark_leaf",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:midsummer_grass",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:dazzling_soul_powder",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:heart_of_magma_titan",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:aconite_juice",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:dawn_rooster_comb",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:radiance_pact_tree_fruit",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:solidified_magma",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:fingered_citron_powder",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:tree_of_elders_crystalized_roots",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:spirit_pact_bird_feather",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:radiance_pact_tree_juice",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:aqua_fern_juice",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:king_dawn_rooster_comb",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:pure_white_brilliant_rock",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:rosemary",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:king_dawn_rooster_blood",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "Sun",
+                  "sequence": 9
+                }
+              }
+            }
+          ],
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "Sun",
+                  "sequence": 8
+                }
+              }
+            }
+          ],
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "Sun",
+                  "sequence": 7
+                }
+              }
+            }
+          ],
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:murloc_bladder",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:man_eating_conch",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:murloc_scales",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:deep_diver_alveoli",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:war_cry_bird_breastbone",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:deep_diver_tongue_half",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:war_cry_bird_beak_segment",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:black_scaled_shark_pituitary",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:raging_white_dolphin_heart",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:black_scaled_shark_fin",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:raging_white_dolphin_blood",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:blue_shadow_falcon_feather",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:sea_condor_eyeballs",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:blue_shadow_falcon_bone",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:sea_condor_feathers",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:siren_throat",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:crystal_jellyfish_cluster",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:siren_hair_strands",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:crystal_jellyfish_tentacles",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "Tyrant",
+                  "sequence": 9
+                }
+              }
+            }
+          ],
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "Tyrant",
+                  "sequence": 8
+                }
+              }
+            }
+          ],
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "Tyrant",
+                  "sequence": 7
+                }
+              }
+            }
+          ],
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:desiccated_mature_black_spotted_frog",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:cloth_wrapped_persons_crystal",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:black_lily",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:death_calling_crows_eyeball",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:death_calling_crow_feather",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:cemetery_blood_rose",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:corpse_scented_essential_oil",
+          "weight": 40
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:phantom_cats_forepaw",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:piece_of_spirit_world_crystal",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:phantom_cat_blood",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:leaf_blessed_by_a_natural_spirit",
+          "weight": 25
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:soul_of_a_pale_lich",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:fragmented_bones_of_pale_lich",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:shadow_of_death",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:decomposing_fluid_from_the_dead",
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:skull_of_an_underworld_wanderer",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:crystal_core_left_by_a_thousand_armed_wraith",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:piece_of_rotten_flesh_from_underworld_wanderer",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:residual_powder_of_a_thousand_armed_wraith",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "Death",
+                  "sequence": 9
+                }
+              }
+            }
+          ],
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "Death",
+                  "sequence": 8
+                }
+              }
+            }
+          ],
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "name": "mysteries_above:beyonder_potion",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components": {
+                "mysteries_above:potion_brew": {
+                  "pathway": "Death",
+                  "sequence": 7
+                }
+              }
+            }
+          ],
+          "weight": 3
+        }
+      ]
+    }
+  ]
+}
