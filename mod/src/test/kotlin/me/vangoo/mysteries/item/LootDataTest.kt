@@ -9,9 +9,9 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 /**
- * The plugin's `GlobalLootCoverageTest`, against the mod's loot tables: an ingredient exists in the
- * game exactly when it can be found. A table naming an item that is not there is skipped silently by
- * the game; an ingredient no table names is a potion nobody can brew — found weeks into play.
+ * The creatures' loot tables against what the mod registers. A table naming an item that is not there
+ * is skipped silently by the game. (Chests need no such check: their pool is built from the ingredient
+ * catalogue itself, so every ingredient is in it by construction — the plugin's `GlobalLootCoverageTest`.)
  *
  * The mod's items are not in a unit test's registries, so an item counts as existing when it has an
  * item model definition (`assets/…/items/<id>.json`) — every registered item needs one to be drawn.
@@ -48,7 +48,7 @@ internal class LootDataTest {
 
     @Test
     fun everyLootItemIsARegisteredItem() {
-        val unknown = (named("global") + named("creature")).flatMap { (file, ids) ->
+        val unknown = named("creature").flatMap { (file, ids) ->
             ids.filter { it.startsWith("mysteries_above:") && it.removePrefix("mysteries_above:") !in items }
                 .map { "${file.fileName} → $it" }
         }
@@ -59,12 +59,5 @@ internal class LootDataTest {
     fun everyCreatureTableBelongsToACreature() {
         val orphans = names(tables.resolve("creature")) - creatures
         assertTrue(orphans.isEmpty(), "Таблиця луту без істоти — її ніхто не скине: $orphans")
-    }
-
-    @Test
-    fun everyIngredientCanBeFound() {
-        val looted = (named("global") + named("creature")).values.flatten().map { it.removePrefix("mysteries_above:") }.toSet()
-        val missing = items - setOf("beyonder_potion", "characteristic") - looted
-        assertTrue(missing.isEmpty(), "Інгредієнт не трапляється ні в скринях, ні в істотах — зілля не звариш: ${missing.sorted()}")
     }
 }
