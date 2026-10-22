@@ -3,7 +3,10 @@ package me.vangoo.mysteries.ability
 import me.vangoo.domain.abilities.CastReceipt
 import me.vangoo.domain.abilities.CastRefusal
 import me.vangoo.domain.valueobjects.SequenceBasedSuccessChance
+import me.vangoo.mysteries.ability.context.Fizzle
+import me.vangoo.mysteries.ability.context.Messaging
 import net.minecraft.network.chat.Component
+import net.minecraft.server.level.ServerPlayer
 
 /** How a cast attempt ended. What [AbilityExecutor] hands back to whoever called it. */
 sealed interface CastReport {
@@ -53,5 +56,40 @@ object CastMessages {
 
         // An ability words its own message — there is nobody to paraphrase it.
         is CastReport.Performed -> report.outcome.message
+    }
+
+    /**
+     * How the refusal shows at the hand. `null` — the report is no refusal: the power happened.
+     *
+     * Resistance is [Fizzle.NONE] on purpose: the clash is drawn on the **target**, where both
+     * sides see it, and a fizzle at the caster's hand would say the power never left it.
+     */
+    fun fizzleOf(report: CastReport): Fizzle? = when (report) {
+        is CastReport.NotBeyonder -> Fizzle.NONE
+        is CastReport.OnCooldown -> Fizzle.CLICK
+        is CastReport.Suppressed -> Fizzle.SPARK
+        is CastReport.Resisted -> Fizzle.NONE
+        is CastReport.Refused -> when (report.reason) {
+            is CastRefusal.NotOwned -> Fizzle.NONE
+            is CastRefusal.NotCastable -> Fizzle.SPARK
+            is CastRefusal.InsufficientSpirituality -> Fizzle.EMPTY
+        }
+        is CastReport.Performed -> if (report.outcome is AbilityOutcome.Failed) Fizzle.SPARK else null
+    }
+
+    /**
+     * The one delivery both entry points share: a refusal becomes a fizzle and a hint, never the
+     * action bar.
+     *
+     * A power that **did** happen still words its outcome in the action bar — until its pathway is
+     * reworked to show it in the world instead (the Sun goes first). Some of those lines are the
+     * answer itself (divination, deduction), and silencing them all at once would take the answer away.
+     */
+    fun deliver(messaging: Messaging, player: ServerPlayer, report: CastReport) {
+        val text = of(report) ?: return
+        when (val fizzle = fizzleOf(report)) {
+            null -> messaging.actionBar(player, text)
+            else -> messaging.hint(player, text, fizzle)
+        }
     }
 }

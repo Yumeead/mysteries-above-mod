@@ -164,7 +164,7 @@ class AbilityExecutor(
     }
 
     private fun report(caster: ServerPlayer, report: CastReport): CastReport {
-        CastMessages.of(report)?.let { messaging.actionBar(caster, it) }
+        CastMessages.deliver(messaging, caster, report)
         return report
     }
 }

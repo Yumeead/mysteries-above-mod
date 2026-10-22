@@ -42,6 +42,12 @@ object SpiritualityHud : HudElement {
     private var movement = 0f
     private val example = Component.literal("800 / 1600")
     private var ticks = 0
+    private var starveTicks = 0
+
+    /** The flask shakes for a moment and shows its numbers: a power was called, and there was nothing to draw it from. */
+    fun starve() {
+        starveTicks = STARVE_TICKS
+    }
 
     fun part(preview: Boolean = false): HudPart? = when (ClientOptions.hudSettings.spirituality) {
         SpiritualityMode.FLASK -> HudPart.FLASK
@@ -68,6 +74,7 @@ object SpiritualityHud : HudElement {
             } else {
                 if (!client.isPaused) {
                     ticks++
+                    if (starveTicks > 0) starveTicks--
                     val sequence = ClientAbilityState.roster!!.sequence
                     display.tick(state.current, state.maximum, ClientOptions.reducedMotion, sequence.level,
                         calculator.calculateRegenerationRate(sequence, ClientAbilityState.mastery))
@@ -121,22 +128,28 @@ object SpiritualityHud : HudElement {
         val trail = if (exampleState) level else display.trailFraction(partial)
         val time = ticks + partial
         val alpha = ClientOptions.opacity.coerceAtLeast(.85f)
+        val starving = !exampleState && starveTicks > 0
+        val low = !exampleState && display.low || starving
         graphics.pose().pushMatrix()
         graphics.pose().translate(box.rect.x.toFloat(), box.rect.y.toFloat())
+        // A shake that dies down: "no", said by the flask itself.
+        if (starving && !ClientOptions.reducedMotion) {
+            graphics.pose().translate(sin(time * STARVE_SHAKE_SPEED) * STARVE_SHAKE * starveTicks / STARVE_TICKS, 0f)
+        }
         graphics.pose().scale(box.scale, box.scale)
         if (mode == SpiritualityMode.FLASK) {
             val style = FlaskStyles.of(ClientAbilityState.roster?.pathwayId) ?: run { graphics.pose().popMatrix(); return }
             if (BottomHud.enabled) SpiritualityOrb.draw(graphics, style, ClientAbilityState.roster?.pathwayId,
-                6, 11, level, trail, time, !exampleState && display.low, !exampleState && display.gainTicks > 0,
+                6, 11, level, trail, time, low, !exampleState && display.gainTicks > 0,
                 ClientOptions.reducedMotion, alpha, movement, tag.angle(partial))
             else SpiritualityFlask.draw(graphics, style, (size.first - style.width) / 2, 0, level, trail, time,
-                    !exampleState && display.low, !exampleState && display.gainTicks > 0,
+                    low, !exampleState && display.gainTicks > 0,
                     ClientOptions.reducedMotion, alpha, movement, ClientOptions.hudSettings.flaskBacking)
         } else {
             drawBar(graphics, level, trail, time, alpha)
         }
         val screen = Minecraft.getInstance().gui.screen()
-        val show = display.low || if (preview) ClientOptions.hudSettings.numbers != SpiritualityNumbers.NEVER
+        val show = display.low || starving || if (preview) ClientOptions.hudSettings.numbers != SpiritualityNumbers.NEVER
             else display.showNumber(ClientOptions.hudSettings.numbers, screen is AbstractContainerScreen<*> || screen is ChatScreen)
         if (show) {
             val font = Minecraft.getInstance().font
@@ -179,6 +192,8 @@ object SpiritualityHud : HudElement {
         graphics.fill(0, 11, 182, 19, UiTheme.argb(0x58432D, alpha))
         graphics.fill(1, 12, 181, 18, UiTheme.argb(0xB99A61, alpha * .12f))
         val filled = (180 * level).toInt()
+        // The bar has no liquid to tremble: on an empty well its track flushes red instead.
+        if (starveTicks > 0) graphics.fill(1, 12, 181, 18, UiTheme.argb(UiTheme.CRITICAL, alpha * .45f * starveTicks / STARVE_TICKS))
         val spent = (180 * trail).toInt()
         if (spent > filled) graphics.fill(1 + filled, 12, 1 + spent, 18, UiTheme.argb(0xE1C993, alpha * .28f))
         if (filled > 0) {
@@ -194,4 +209,8 @@ object SpiritualityHud : HudElement {
             }
         }
     }
+
+    private const val STARVE_TICKS = 16
+    private const val STARVE_SHAKE = 2.5f
+    private const val STARVE_SHAKE_SPEED = 2.6f
 }

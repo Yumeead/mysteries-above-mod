@@ -13,6 +13,7 @@ import me.vangoo.mysteries.client.screen.ChoiceScreen
 import me.vangoo.mysteries.client.render.SpiritGlyphParticle
 import me.vangoo.mysteries.client.render.SpiritMoteParticle
 import me.vangoo.mysteries.client.render.SpiritThreads
+import me.vangoo.mysteries.client.hud.HintHud
 import me.vangoo.mysteries.effect.ModParticles
 import me.vangoo.mysteries.entity.ModEntities
 import me.vangoo.mysteries.client.hud.AbilityHud
@@ -57,6 +58,9 @@ object MysteriesAboveClient : ClientModInitializer {
         // An ability waiting on a pick. The screen holds the whole offer; nothing is stored here.
         ModChannels.CHOICE_OFFER.receiveOnClient { payload, context -> context.client().gui.setScreen(ChoiceScreen(payload)) }
 
+        // A power that did not come: drawn here, by this client alone.
+        ModChannels.HINT.receiveOnClient { payload, _ -> HintHud.accept(payload) }
+
         // The cooldown clock. The client tick, not wall time: a paused single-player game stands
         // still — the server and the countdown along with it.
         ClientTickEvents.END_CLIENT_TICK.register {
@@ -65,6 +69,7 @@ object MysteriesAboveClient : ClientModInitializer {
             // come right after it rather than as a separate subscription with an undefined order.
             SanityAmbience.tick()
             SpiritThreads.tick()
+            HintHud.tick()
         }
 
         // A mote's motion and fade are the client's: the server only sends "where and what colour".
@@ -100,9 +105,11 @@ object MysteriesAboveClient : ClientModInitializer {
             SanityAmbience.clear()
             SpiritThreads.clear()
             CreatureMoves.clear()
+            HintHud.clear()
         }
 
         SpiritualityHud.register()
+        HintHud.register()
         AbilityHud.register()
         MarionetteHud.register()
         BottomHud.register()

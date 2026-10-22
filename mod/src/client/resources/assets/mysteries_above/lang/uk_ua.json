@@ -339,6 +339,7 @@
   "hud.mysteries_above.enabled": "Увімкнено",
   "hud.mysteries_above.disabled": "Вимкнено",
   "hud.mysteries_above.reduced_motion": "Зменшення руху",
+  "hud.mysteries_above.hints": "Підказки здібностей",
   "hud.mysteries_above.low_numbers": "При малому запасі число видно завжди.",
   "hud.mysteries_above.aux.0": "Втрата контролю",
   "hud.mysteries_above.aux.1": "Засвоєння",

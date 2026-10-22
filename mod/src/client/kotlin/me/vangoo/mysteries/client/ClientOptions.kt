@@ -142,6 +142,12 @@ object ClientOptions {
     /** Turns the HUD fade into an instant switch; the cooldown veil stays, it shows state. */
     var reducedMotion: Boolean by persisted(false)
 
+    /**
+     * Words under the crosshair when a power does not come. Off by default: the fizzle at the hand
+     * already says it; the words are for learning and for accessibility.
+     */
+    var hints: Boolean by persisted(false)
+
     /** The wheel's look; geometry and input are the same for every skin. */
     var wheelSkin: WheelSkin by persisted(WheelSkin.ATMOSPHERIC)
 
@@ -209,6 +215,7 @@ object ClientOptions {
                 panelPositions = readPositions(dto.hudPanelPositions))
             dto.showDescriptions?.let { showDescriptions = it }
             dto.reducedMotion?.let { reducedMotion = it }
+            dto.hints?.let { hints = it }
             dto.wheelSkin?.let { name -> wheelSkin = enumOrNull<WheelSkin>(name) ?: wheelSkin }
 
             dto.groups?.let { saved ->
@@ -271,6 +278,7 @@ object ClientOptions {
             }
             it.showDescriptions = showDescriptions
             it.reducedMotion = reducedMotion
+            it.hints = hints
             it.wheelSkin = wheelSkin.name
             it.groups = groups.map { group -> GroupDto(group.name, group.abilities, group.hotkeys) }
             it.activeGroup = activeGroup
@@ -362,6 +370,7 @@ object ClientOptions {
         var hudScales: Map<String, Float?>? = null
         var showDescriptions: Boolean? = null
         var reducedMotion: Boolean? = null
+        var hints: Boolean? = null
         var wheelSkin: String? = null
         var groups: List<GroupDto>? = null
         var activeGroup: Int? = null
