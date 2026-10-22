@@ -62,10 +62,33 @@ object ModParticles {
         { type -> ColorParticleOption.streamCodec(type) },
     )
 
+    /**
+     * Spirit light: a hard core with a halo stepped in rings of pixels — and it **adds** to what is
+     * behind it rather than covering it.
+     *
+     * ## Why the mote cannot glow
+     *
+     * The mote is `FULL_BRIGHT`, so it does not darken in the shade, but it is blended as
+     * translucent: two motes on top of each other are exactly as bright as one. Glow is the
+     * opposite — where light is thick it whitens — and that takes additive blending, the same the
+     * vanilla lightning bolt uses. So a beam made of this light has a white-hot core without
+     * anyone drawing one: the core is the overlap.
+     *
+     * ## It flies exactly as it was sent
+     *
+     * The velocity is the packet's deltas as they are (the `count = 0` form), with no random
+     * spread: a beam, a shell or a wave is a shape, and a shape must not fray.
+     */
+    val SPIRIT_LIGHT: ParticleType<ColorParticleOption> = FabricParticleTypes.complex(
+        { type -> ColorParticleOption.codec(type) },
+        { type -> ColorParticleOption.streamCodec(type) },
+    )
+
     /** Forces the class to initialise before the registries close. */
     fun register() {
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, modId("spirit_mote"), SPIRIT_MOTE)
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, modId("spirit_glyph"), SPIRIT_GLYPH)
+        Registry.register(BuiltInRegistries.PARTICLE_TYPE, modId("spirit_light"), SPIRIT_LIGHT)
     }
 
     /**
@@ -80,6 +103,10 @@ object ModParticles {
     /** A steady mote for shapes that must hold their form. The alpha is ours just the same. */
     fun glyph(color: RgbColor): ColorParticleOption =
         ColorParticleOption.create(SPIRIT_GLYPH, OPAQUE or color.packed)
+
+    /** Light that glows: additive, so it whitens where it is thick. The alpha is ours just the same. */
+    fun light(color: RgbColor): ColorParticleOption =
+        ColorParticleOption.create(SPIRIT_LIGHT, OPAQUE or color.packed)
 
     private const val OPAQUE = 0xFF shl 24
 }

@@ -5,7 +5,9 @@ import me.vangoo.domain.abilities.CastReceipt
 import me.vangoo.domain.abilities.CastRefusal
 import me.vangoo.mysteries.beyonder.TheftRegistry
 import me.vangoo.domain.abilities.CastTicket
+import me.vangoo.domain.PathwayBranding
 import me.vangoo.domain.entities.Beyonder
+import me.vangoo.mysteries.effect.ward
 import me.vangoo.domain.valueobjects.SanityPenalty
 import me.vangoo.domain.valueobjects.SequenceBasedSuccessChance
 import me.vangoo.mysteries.MOD_ID
@@ -160,7 +162,10 @@ class AbilityExecutor(
             casterSequence = context.beyonder.sequenceLevel,
             targetSequence = defender.sequenceLevel,
         )
-        return if (chance.rollSuccess()) null else chance
+        if (chance.rollSuccess()) return null
+        // The clash is shown where it happened — on the target, in the colour of the will that held.
+        ward(target, PathwayBranding.liquidOf(defender.pathway.name))
+        return chance
     }
 
     private fun report(caster: ServerPlayer, report: CastReport): CastReport {

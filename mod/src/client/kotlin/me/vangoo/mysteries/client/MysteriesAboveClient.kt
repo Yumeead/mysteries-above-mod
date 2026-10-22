@@ -11,8 +11,10 @@ import me.vangoo.mysteries.client.render.HumanRenderer
 import me.vangoo.mysteries.client.render.MarionetteRenderer
 import me.vangoo.mysteries.client.screen.ChoiceScreen
 import me.vangoo.mysteries.client.render.SpiritGlyphParticle
+import me.vangoo.mysteries.client.render.SpiritLightParticle
 import me.vangoo.mysteries.client.render.SpiritMoteParticle
 import me.vangoo.mysteries.client.render.SpiritThreads
+import me.vangoo.mysteries.client.render.WorldEffects
 import me.vangoo.mysteries.client.hud.HintHud
 import me.vangoo.mysteries.effect.ModParticles
 import me.vangoo.mysteries.entity.ModEntities
@@ -58,8 +60,9 @@ object MysteriesAboveClient : ClientModInitializer {
         // An ability waiting on a pick. The screen holds the whole offer; nothing is stored here.
         ModChannels.CHOICE_OFFER.receiveOnClient { payload, context -> context.client().gui.setScreen(ChoiceScreen(payload)) }
 
-        // A power that did not come: drawn here, by this client alone.
+        // A power that did not come, and the light of one that did: both are drawn here, by this client alone.
         ModChannels.HINT.receiveOnClient { payload, _ -> HintHud.accept(payload) }
+        ModChannels.WORLD_EFFECT.receiveOnClient { payload, _ -> WorldEffects.accept(payload) }
 
         // The cooldown clock. The client tick, not wall time: a paused single-player game stands
         // still — the server and the countdown along with it.
@@ -70,6 +73,7 @@ object MysteriesAboveClient : ClientModInitializer {
             SanityAmbience.tick()
             SpiritThreads.tick()
             HintHud.tick()
+            WorldEffects.tick()
         }
 
         // A mote's motion and fade are the client's: the server only sends "where and what colour".
@@ -82,6 +86,9 @@ object MysteriesAboveClient : ClientModInitializer {
             // The threads are built of the glyph's pixels, spawned by hand rather than by a packet.
             SpiritThreads.sprites = sprites
             SpiritGlyphParticle.Provider(sprites)
+        }
+        ParticleProviderRegistry.getInstance().register(ModParticles.SPIRIT_LIGHT) { sprites ->
+            SpiritLightParticle.Provider(sprites)
         }
 
         // The next world starts with a clean slate: someone else's roster is neither drawable nor wanted.
@@ -106,10 +113,12 @@ object MysteriesAboveClient : ClientModInitializer {
             SpiritThreads.clear()
             CreatureMoves.clear()
             HintHud.clear()
+            WorldEffects.clear()
         }
 
         SpiritualityHud.register()
         HintHud.register()
+        WorldEffects.register()
         AbilityHud.register()
         MarionetteHud.register()
         BottomHud.register()

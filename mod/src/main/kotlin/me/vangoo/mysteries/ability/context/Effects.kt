@@ -1,8 +1,11 @@
 package me.vangoo.mysteries.ability.context
 
 import me.vangoo.domain.valueobjects.RgbColor
+import net.minecraft.core.BlockPos
 import net.minecraft.core.particles.ParticleOptions
+import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.phys.Vec3
 
 /**
  * The vocabulary of shapes: what is seen when an ability fires.
@@ -49,4 +52,31 @@ interface Effects {
         color: RgbColor? = null,
         counterFlow: ParticleOptions? = null,
     )
+
+    /**
+     * A line of light from [from] to [to]: it holds for [durationTicks], then fades on its own.
+     * [width] 0 is a thread, 1 a pillar a block across. It glows — where it is thick it whitens.
+     */
+    fun beam(
+        level: ServerLevel,
+        from: Vec3,
+        to: Vec3,
+        durationTicks: Int = BEAM_TICKS,
+        width: Float = 0f,
+        color: RgbColor? = null,
+    )
+
+    /**
+     * Real light at [at] for [durationTicks] — a light block, so the place is lit for everyone. It
+     * dims before it goes out. Only air is lit: if [at] is taken, the block above is tried.
+     */
+    fun flare(level: ServerLevel, at: BlockPos, durationTicks: Int, brightness: Int = FULL_BRIGHTNESS)
+
+    /** A flash that whitens the screens of those within [radius] who look at [at] — by up to [strength]. */
+    fun flash(level: ServerLevel, at: Vec3, radius: Double, strength: Float = 1f, color: RgbColor? = null)
+
+    companion object {
+        const val BEAM_TICKS = 6
+        const val FULL_BRIGHTNESS = 15
+    }
 }

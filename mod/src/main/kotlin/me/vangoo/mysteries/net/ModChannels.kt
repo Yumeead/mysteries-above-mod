@@ -10,6 +10,7 @@ import me.vangoo.mysteries.net.payload.HintPayload
 import me.vangoo.mysteries.net.payload.MarionetteOrderPayload
 import me.vangoo.mysteries.net.payload.MarionetteStatePayload
 import me.vangoo.mysteries.net.payload.ThreadSightPayload
+import me.vangoo.mysteries.net.payload.WorldEffectPayload
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.StreamCodec
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
@@ -77,6 +78,12 @@ object ModChannels {
     val HINT: ClientboundChannel<HintPayload> =
         clientbound(HintPayload.TYPE, HintPayload.CODEC)
 
+    /**
+     * Light the client builds itself: a beam, a flash. One packet per shape instead of a stream of
+     * particles per tick — the client knows how to draw it, the server only says where and how long.
+     */
+    val WORLD_EFFECT: ClientboundChannel<WorldEffectPayload> =
+        clientbound(WorldEffectPayload.TYPE, WorldEffectPayload.CODEC)
 
     /** Every declared channel — for logs and tests. */
     val all: List<Channel<*>> get() = declared.toList()

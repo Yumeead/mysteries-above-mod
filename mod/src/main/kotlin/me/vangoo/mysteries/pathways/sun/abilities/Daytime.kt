@@ -11,14 +11,14 @@ import me.vangoo.mysteries.ability.session
 import me.vangoo.mysteries.ability.sessionRunning
 import me.vangoo.mysteries.ability.stopSession
 import me.vangoo.mysteries.ability.sustain
+import me.vangoo.mysteries.effect.douse
+import me.vangoo.mysteries.effect.kindle
 import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
-import net.minecraft.world.level.block.Blocks
-import net.minecraft.world.level.block.LightBlock
 
 /**
  * Sun, Seq. 8 (Light Seeker): **Daylight**.
@@ -90,7 +90,7 @@ class Daytime : ActiveAbility(AbilityIdentity.of("sun_daytime")) {
                     val here = priest.blockPosition().above()
                     if (here != lit) {
                         lit?.let { douse(priest.level() as ServerLevel, it) }
-                        lit = kindle(priest.level() as ServerLevel, here)
+                        lit = kindle(priest.level() as ServerLevel, here, LIGHT_LEVEL)
                     }
                 }
                 if (end == SessionEnd.EXHAUSTED) {
@@ -109,27 +109,11 @@ class Daytime : ActiveAbility(AbilityIdentity.of("sun_daytime")) {
         return AbilityOutcome.done("Довкола вас настав день")
     }
 
-    /** Places the light if there is air there. Returns the position, or `null` if the spot is taken. */
-    private fun kindle(level: ServerLevel, pos: BlockPos): BlockPos? {
-        if (!level.getBlockState(pos).isAir) return null
-        val state = Blocks.LIGHT.defaultBlockState().setValue(LightBlock.LEVEL, LIGHT_LEVEL)
-        return if (level.setBlock(pos, state, UPDATE_FLAGS)) pos else null
-    }
-
-    /** Removes **our own** light. Someone else's block in that spot is left alone. */
-    private fun douse(level: ServerLevel, pos: BlockPos) {
-        if (level.getBlockState(pos).block === Blocks.LIGHT) {
-            level.setBlock(pos, Blocks.AIR.defaultBlockState(), UPDATE_FLAGS)
-        }
-    }
-
     private companion object {
         const val BASE_PERIODIC_COST = 10
         const val COOLDOWN_SECONDS = 3
         const val LIGHT_LEVEL = 15
         /** Once every five ticks: on foot the block changes less often, and there are four times fewer chunk updates. */
         const val MOVE_PERIOD_TICKS = 5
-        /** Tell the client, do not wake the neighbours: a light block affects nothing. */
-        const val UPDATE_FLAGS = 2
     }
 }
