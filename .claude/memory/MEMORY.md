@@ -10,5 +10,5 @@
 - [Ability visuals must not clutter](ability-visuals-must-not-clutter.md) — persistent visuals sparse and fading; ThreadSight was rejected as screen-filling
 - [Death: deferred parts](death-pathway-deferred.md) — Spirit World pact/occupants closed in phase 12; recipe branch of Voice of the Dead → brewing
 - [Immersive abilities](immersive-abilities-direction.md) — no chat/action bar: fading world text, fizzle + hints toggle, additive glow then bloom, Sun pilot
-- [Sun pilot — next](immersive-sun-pilot-next.md) — handoff for milestone B: approved per-ability plan, milestone A uncommitted, known issues
+- [Sun pilot — next](immersive-sun-pilot-next.md) — handoff for milestone B: approved per-ability plan, milestone A committed, known issues
 - [Stale dev server drops new packets](stale-dev-server-drops-new-packets.md) — restart runServer after server-side changes before debugging "nothing happens"
