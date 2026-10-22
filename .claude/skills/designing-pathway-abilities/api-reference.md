@@ -50,6 +50,13 @@ The ability implements only `canCast` and `cast`. Ordering is the executor's bus
 | `AbilityOutcome.Awaiting(msg?)` | started, waiting on the player | nobody yet — **you** call `context.cast.complete()` when it lands |
 | `AbilityOutcome.Failed(msg)` | nothing happened | nobody |
 
+**`Failed(msg)` is a hint, not a notice.** The player sees a fizzle at the hand (sparks gather
+and gutter out); `msg` appears under the crosshair only if they turned hints on. So write it
+to explain the refusal, and make the refusal **visible in the world** where the world can show
+it (holy light hits the ceiling, not "the sky is closed"). `Done(msg)` still reaches the action
+bar until the pathway is reworked — new and reworked abilities return `Done()` with no text:
+the effect is the message.
+
 **`Awaiting` replaces the plugin's `deferred` + `AbilityResourceConsumer`.** There is nothing to remember: hold `context.cast` (the `PendingCast`, *not* the whole context — that carries one caster's identity), and call `complete()` when the effect actually fires. Never called → the cast was free. Called twice → `check()` fails inside the ticket. The invariant is a type now, not a `КРИТИЧНО` comment.
 
 ### Resistance by Sequence
@@ -84,9 +91,10 @@ The context carries only what the mod itself owns:
 | `beyonders` | `of(uuid)`, `isBeyonder`, `online` — other players' domain state |
 | `cooldowns` | `remainingSeconds`, `set`, `clear`, `lockAll` |
 | `targeting` | `livingNear(r)`, `playersNear(r)`, `lookingAt(range)`, `playerLookingAt(range)` |
-| `messaging` | `tell` / `actionBar`, by player **or by UUID** (target may be offline or in another dimension) |
+| `messaging` | `hint(player, text, fizzle)` for a power that ended or did not come; `tell` / `actionBar` only where the words **are** the power (an answer, a message). By player **or by UUID** |
 | `scheduling` | `after(ticks)`, `every(ticks)`, sessions — see below |
 | `events` | `on<E> { … }` — react to what happens in the world; see below |
+| `effects` | shapes that last or glow: `bodyAura`, `beam` (additive light along a line), `flare` (a real light block that dims and goes out), `flash` (whitens the screens of those who look) |
 
 **A context service is the only way in, not the convenient way in.** If a service covers
 what you need, call it — never the vanilla call underneath. Every member above already
@@ -110,15 +118,10 @@ What the rule does **not** forbid is vanilla with no service over it: `caster.he
 `target.hurtServer(…)`. Don't wrap those — that is how the plugin grew
 `IDataContext.getFoodLevel(UUID)`.
 
-Not there yet, arriving with its own phase — don't invent a stand-in:
-
-| | phase |
-|---|---|
-| `effects` — particle-shape vocabulary | 07 |
-| `ui` — choice screens and input | 11 |
-| `summons` — data-driven creatures | 12 |
-
-Until phase 07, emit particles yourself via `level.sendParticles(…)`.
+A one-off puff at the moment of a cast is still `level.sendParticles(…)` at the call site; a
+shape gets into `effects` by lasting or by being asked for by a second pathway. For glow, sow
+`ModParticles.light(color)` (additive: it whitens where it is thick) in the `count = 0` form —
+the deltas then arrive as its exact velocity.
 
 ## Registration
 
@@ -158,7 +161,7 @@ context.session {
         val end = sustain(periodTicks = 2, upkeep = periodicCost) { player ->
             trail(player)                       // owner is resolved fresh each beat
         }
-        if (end == SessionEnd.EXHAUSTED) messaging.actionBar(ownerId, /* … */)
+        if (end == SessionEnd.EXHAUSTED) messaging.hint(ownerId, /* … */, Fizzle.EMPTY)
     } finally {
         owner?.removeEffect(MobEffects.SPEED)   // runs on every exit, cancel included
     }
@@ -216,8 +219,13 @@ want to unsubscribe early (a one-shot reaction cancels itself from inside the ha
 ## Effect/juice checklist
 
 - Sound + particle on cast, a distinct one on hit/resolve.
-- Feedback to **both** caster and target — action bar for punchy notices.
-- A clear failure message for every guard, as `AbilityOutcome.Failed`.
+- Feedback to **both** caster and target — **in the world**, not the chat or the action bar
+  (user's decision, 22.10.2026): the light, the sound and the target's reaction are the message.
+- Heavy powers get three beats: gather (3–8 ticks, the power visibly pulls into the hand),
+  release (glow peak, real light via `effects.flare`, sound), aftermath (2–3 s of residue).
+  Reflex powers stay instant.
+- Every guard returns `AbilityOutcome.Failed` with a hint that explains it — the player sees the
+  fizzle, the words are for those who turned hints on.
 - Ukrainian for every player-facing string; `Component.literal(...)`, no `§` codes.
 - Scale at least one dimension by sequence.
 
