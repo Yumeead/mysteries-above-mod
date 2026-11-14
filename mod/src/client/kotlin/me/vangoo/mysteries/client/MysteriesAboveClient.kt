@@ -11,6 +11,7 @@ import me.vangoo.mysteries.client.render.HumanRenderer
 import me.vangoo.mysteries.client.render.MarionetteRenderer
 import me.vangoo.mysteries.client.screen.ChoiceScreen
 import me.vangoo.mysteries.client.render.SpiritGlyphParticle
+import me.vangoo.mysteries.client.render.SunEyesLayer
 import me.vangoo.mysteries.client.render.SpiritLightParticle
 import me.vangoo.mysteries.client.render.SpiritMoteParticle
 import me.vangoo.mysteries.client.render.SpiritThreads
@@ -30,6 +31,11 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry
+import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback
+import net.minecraft.client.model.player.PlayerModel
+import net.minecraft.client.renderer.entity.RenderLayerParent
+import net.minecraft.client.renderer.entity.state.AvatarRenderState
+import net.minecraft.world.entity.EntityTypes
 import org.slf4j.LoggerFactory
 
 /**
@@ -107,6 +113,11 @@ object MysteriesAboveClient : ClientModInitializer {
         EntityRendererRegistry.register(ModEntities.SIREN) { BbModelRenderer(it, "tyrant_siren_5", size = 1.6f) }
         EntityRendererRegistry.register(ModEntities.ANCIENT_WRAITH) { BbModelRenderer(it, "fool_ancient_wraith_5") }
         EntityRendererRegistry.register(ModEntities.THOUSAND_FACED_HUNTER) { BbModelRenderer(it, "fool_thousand_faced_hunter_6") }
+        // The suns of the Sun's Night Vision: one more layer on the vanilla player renderer, wide and slim alike.
+        LivingEntityRenderLayerRegistrationCallback.EVENT.register { type, renderer, helper, _ ->
+            @Suppress("UNCHECKED_CAST")
+            if (type == EntityTypes.PLAYER) helper.register(SunEyesLayer(renderer as RenderLayerParent<AvatarRenderState, PlayerModel>))
+        }
         ModChannels.CREATURE_MOVE.receiveOnClient { payload, _ -> CreatureMoves.accept(payload) }
 
         ClientPlayConnectionEvents.DISCONNECT.register { _, _ ->
