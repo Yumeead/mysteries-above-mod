@@ -94,7 +94,7 @@ The context carries only what the mod itself owns:
 | `messaging` | `hint(player, text, fizzle)` for a power that ended or did not come; `tell` / `actionBar` only where the words **are** the power (an answer, a message). By player **or by UUID** |
 | `scheduling` | `after(ticks)`, `every(ticks)`, sessions — see below |
 | `events` | `on<E> { … }` — react to what happens in the world; see below |
-| `effects` | shapes that last or glow: `bodyAura`, `beam` (additive light along a line), `flare` (a real light block that dims and goes out), `flash` (whitens the screens of those who look) |
+| `effects` | shapes that last or glow: `bodyAura`, `beam` (a solid shaft of light in hazy air — width 0 is a thin ray, 1 a pillar out of the sky; it lands `BEAM_REACH_TICKS` after the call and lights the air near where it lands; a Sun shaft out of the sky comes from the sun — `sunward`, `SUN_REACH`, `lightReaches` in `HolyLight.kt`), `flare` (a real light block that dims and goes out), `flash` (whitens the screens of those who look) |
 
 **A context service is the only way in, not the convenient way in.** If a service covers
 what you need, call it — never the vanilla call underneath. Every member above already
@@ -121,7 +121,19 @@ What the rule does **not** forbid is vanilla with no service over it: `caster.he
 A one-off puff at the moment of a cast is still `level.sendParticles(…)` at the call site; a
 shape gets into `effects` by lasting or by being asked for by a second pathway. For glow, sow
 `ModParticles.light(color)` (additive: it whitens where it is thick) in the `count = 0` form —
-the deltas then arrive as its exact velocity.
+the deltas then arrive as its exact velocity. The light brakes as it flies and carries about seven
+times its speed, so a pulse meant to reach `r` blocks is sent at `r / 7`. Within four blocks of the
+camera a light stops growing on screen, so a pulse from the caster's chest does not fill their view.
+
+Shapes in `mysteries/effect` that are called directly (instant, or not yet asked for twice):
+
+| shape | what |
+|---|---|
+| `burst(level, centre, radius, color, points, speed)` | a shell of light bursting outwards — a pulse, a flare-up on someone, a broken aura |
+| `wave(level, centre, radius, color)` + `waveArrival(distance, radius)` | a ring of light running out and braking; the second says on which tick its front passes a distance, so what it touches can flare as it is touched |
+| `ward(target, color)` | the target held out: a burst in the **defender's** colour plus the shield sound |
+| `worldText(scheduling, level, at, text, ticks)` | words hanging in the world that fade — where a power that **knows** answers |
+| `ModParticles.lightGlyph(color)` | light that **rides a player**: send it with the crown as the position and the offset in the deltas (`count = 0`), redraw every 2 ticks — a halo, a sun over the shoulder, a burning fist |
 
 ## Registration
 
