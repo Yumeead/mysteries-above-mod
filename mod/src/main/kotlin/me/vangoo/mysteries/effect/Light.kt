@@ -15,7 +15,10 @@ import net.minecraft.world.level.block.LightBlock
 import net.minecraft.world.phys.Vec3
 import kotlin.math.PI
 import kotlin.math.acos
+import kotlin.math.ceil
 import kotlin.math.cos
+import kotlin.math.ln
+import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.math.sqrt
 
@@ -95,19 +98,69 @@ fun douse(level: ServerLevel, pos: BlockPos) {
  */
 fun ward(target: LivingEntity, color: RgbColor) {
     val level = target.level() as? ServerLevel ?: return
-    val light = ModParticles.light(color)
     val centre = target.position().add(0.0, target.bbHeight / 2.0, 0.0)
     val radius = maxOf(target.bbWidth.toDouble(), target.bbHeight / 2.0) * WARD_SPREAD
+    burst(level, centre, radius, color, WARD_POINTS, WARD_BURST)
+    level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 0.8f, 1.4f)
+}
+
+/**
+ * A shell of light that bursts out of [centre]: [points] lights on a sphere of [radius], each
+ * flying straight outwards at [speed] blocks a tick. The light brakes as it flies, so it carries
+ * about seven times [speed] before it burns out — a pulse that must reach `r` blocks is sent at `r / 7`.
+ */
+fun burst(level: ServerLevel, centre: Vec3, radius: Double, color: RgbColor, points: Int, speed: Double) {
+    val light = ModParticles.light(color)
     // An even spread over the sphere (a golden-angle spiral): a random scatter clumps and leaves holes.
-    for (i in 0 until WARD_POINTS) {
-        val polar = acos(1 - 2 * (i + 0.5) / WARD_POINTS)
+    for (i in 0 until points) {
+        val polar = acos(1 - 2 * (i + 0.5) / points)
         val azimuth = PI * (3 - sqrt(5.0)) * i
         val out = Vec3(sin(polar) * cos(azimuth), cos(polar), sin(polar) * sin(azimuth))
         val at = centre.add(out.scale(radius))
         // `count = 0`: the deltas arrive as the exact velocity — the shell bursts outwards, not in a spread.
-        level.sendParticles(light, at.x, at.y, at.z, 0, out.x, out.y, out.z, WARD_BURST)
+        level.sendParticles(light, at.x, at.y, at.z, 0, out.x, out.y, out.z, speed)
     }
-    level.playSound(null, centre.x, centre.y, centre.z, SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 0.8f, 1.4f)
+}
+
+/**
+ * A ring of light running out from [centre] to [radius] at [centre]'s height, braking as it goes:
+ * one shot of lights, each flying straight outwards, the way a shock wave spreads — fast, then slow.
+ *
+ * Not a ring redrawn every tick where the front is now: each of those generations stands where it
+ * was put and burns out behind the front, and from inside the wave — where its caster stands — that
+ * wake is a field of dying lights in their own face. One generation has no wake.
+ *
+ * The front is exact: [waveArrival] says on which tick it passes a distance, so a power that acts
+ * on what the wave touches times itself by the same numbers.
+ */
+fun wave(level: ServerLevel, centre: Vec3, radius: Double, color: RgbColor) {
+    val light = ModParticles.light(color)
+    val speed = waveSpeed(radius)
+    // As many lights as keep the spacing at the edge: a ring of fixed count thins out to dots there.
+    val count = (TAU * radius / WAVE_SPACING).toInt().coerceAtLeast(MIN_WAVE_POINTS)
+    repeat(count) { i ->
+        val angle = TAU * i / count
+        val x = cos(angle)
+        val z = sin(angle)
+        // `count = 0`: the deltas arrive as the exact velocity — straight out, level with the centre.
+        level.sendParticles(light, centre.x + x * WAVE_START, centre.y, centre.z + z * WAVE_START, 0, x, 0.0, z, speed)
+    }
+}
+
+/** The tick on which [wave]'s front, sent to [radius], passes [distance] from its centre. */
+fun waveArrival(distance: Double, radius: Double): Int {
+    val run = distance - WAVE_START
+    if (run <= 0) return 0
+    // The light covers v·(1 − fᵗ)/(1 − f) in t ticks; solved for t.
+    val left = 1 - run * (1 - ModParticles.LIGHT_FRICTION) / waveSpeed(radius)
+    if (left <= 0) return ModParticles.LIGHT_MIN_LIFETIME
+    return ceil(ln(left) / ln(ModParticles.LIGHT_FRICTION)).toInt().coerceIn(0, ModParticles.LIGHT_MIN_LIFETIME)
+}
+
+/** Just fast enough that the front reaches [radius] while the shortest-lived light still burns. */
+private fun waveSpeed(radius: Double): Double {
+    val f = ModParticles.LIGHT_FRICTION
+    return (radius - WAVE_START).coerceAtLeast(0.0) * (1 - f) / (1 - f.pow(ModParticles.LIGHT_MIN_LIFETIME))
 }
 
 private fun lightOf(brightness: Int) =
@@ -122,3 +175,10 @@ private const val BEAM_AUDIENCE = 64.0
 private const val WARD_POINTS = 36
 private const val WARD_SPREAD = 0.85
 private const val WARD_BURST = 0.05
+
+private const val TAU = 2 * PI
+/** Blocks between two lights of a wave front at its edge: dense enough to read as a line, not a dotted one. */
+private const val WAVE_SPACING = 0.9
+private const val MIN_WAVE_POINTS = 8
+/** The ring is born a step out from its centre, not inside whoever sent it. */
+private const val WAVE_START = 1.0

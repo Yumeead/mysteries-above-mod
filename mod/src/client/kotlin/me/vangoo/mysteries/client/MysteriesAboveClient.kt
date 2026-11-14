@@ -90,6 +90,9 @@ object MysteriesAboveClient : ClientModInitializer {
         ParticleProviderRegistry.getInstance().register(ModParticles.SPIRIT_LIGHT) { sprites ->
             SpiritLightParticle.Provider(sprites)
         }
+        ParticleProviderRegistry.getInstance().register(ModParticles.SPIRIT_LIGHT_GLYPH) { sprites ->
+            SpiritGlyphParticle.Provider(sprites, SpiritLightParticle.LAYER, SpiritLightParticle.GLYPH_SIZE)
+        }
 
         // The next world starts with a clean slate: someone else's roster is neither drawable nor wanted.
         // The marionette wears a player model and a stolen face; the renderer is the mod's first,

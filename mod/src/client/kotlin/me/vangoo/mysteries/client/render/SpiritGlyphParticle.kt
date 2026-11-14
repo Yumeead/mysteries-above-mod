@@ -78,6 +78,9 @@ class SpiritGlyphParticle private constructor(
     private val offset: Vec3,
     options: ColorParticleOption,
     sprite: TextureAtlasSprite,
+    /** Translucent for a mark, additive for light — the latching is the same either way. */
+    private val layer: SingleQuadParticle.Layer,
+    size: Float,
     // The constructor **without** velocity: that is the one that mixes in no spread.
 ) : SingleQuadParticle(level, x, y, z, sprite) {
 
@@ -104,12 +107,12 @@ class SpiritGlyphParticle private constructor(
         gravity = 0f
         friction = 1f
         hasPhysics = false
-        quadSize = SIZE
+        quadSize = size
         alpha = 1f
         pin(0f)
     }
 
-    override fun getLayer(): SingleQuadParticle.Layer = SingleQuadParticle.Layer.TRANSLUCENT
+    override fun getLayer(): SingleQuadParticle.Layer = layer
 
     /** Glows on its own: the shape of another's power must not darken in the shade. */
     override fun getLightCoords(partialTick: Float): Int = LightCoordsUtil.FULL_BRIGHT
@@ -135,8 +138,15 @@ class SpiritGlyphParticle private constructor(
      */
     override fun extract(state: QuadParticleRenderState, camera: Camera, partialTick: Float) {
         pin(partialTick)
+        // Light riding the camera's own body hangs right at the eye: it stays a point, as all light does.
+        if (layer === SpiritLightParticle.LAYER) near = SpiritLightParticle.nearScale(camera, x, y, z)
         super.extract(state, camera, partialTick)
     }
+
+    /** The share of its size a riding light keeps this frame; a mark always keeps all of it. */
+    private var near = 1f
+
+    override fun getQuadSize(partialTick: Float): Float = super.getQuadSize(partialTick) * near
 
     /** Puts the glyph on the owner's interpolated crown. With no owner — leaves it where it is. */
     private fun pin(partialTick: Float) {
@@ -151,7 +161,11 @@ class SpiritGlyphParticle private constructor(
         zo = z
     }
 
-    class Provider(private val sprites: SpriteSet) : ParticleProvider<ColorParticleOption> {
+    class Provider(
+        private val sprites: SpriteSet,
+        private val layer: SingleQuadParticle.Layer = SingleQuadParticle.Layer.TRANSLUCENT,
+        private val size: Float = SIZE,
+    ) : ParticleProvider<ColorParticleOption> {
         override fun createParticle(
             options: ColorParticleOption,
             level: ClientLevel,
@@ -164,7 +178,7 @@ class SpiritGlyphParticle private constructor(
             random: RandomSource,
             // The deltas in this packet form are not a velocity but the **offset from the crown**:
             // the glyph flies nowhere, so the field is free, and the offset must arrive exact.
-        ): Particle = SpiritGlyphParticle(level, x, y, z, Vec3(xd, yd, zd), options, sprites.get(random))
+        ): Particle = SpiritGlyphParticle(level, x, y, z, Vec3(xd, yd, zd), options, sprites.get(random), layer, size)
     }
 
     private companion object {

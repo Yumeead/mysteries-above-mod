@@ -19,3 +19,8 @@ mutable	field	net/minecraft/network/protocol/game/ClientboundPlayerInfoUpdatePac
 # goals, and loses only the right to choose its enemies. That is one line, `targetSelector`, and
 # vanilla keeps it protected because nothing outside a `Mob` normally rewrites another mob's will.
 accessible	field	net/minecraft/world/entity/Mob	targetSelector	Lnet/minecraft/world/entity/ai/goal/GoalSelector;
+
+# The fading text of the knowledge powers (effect/WorldText) — a vanilla text display, built from a
+# tag like `/summon` builds it, whose opacity is stepped down before it goes. Opacity is synced
+# entity data, but its setter is private: nothing in vanilla fades a display once it is placed.
+accessible	method	net/minecraft/world/entity/Display$TextDisplay	setTextOpacity	(B)V

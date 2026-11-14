@@ -84,11 +84,25 @@ object ModParticles {
         { type -> ColorParticleOption.streamCodec(type) },
     )
 
+    /**
+     * A steady light that rides its owner: [SPIRIT_GLYPH]'s latching, [SPIRIT_LIGHT]'s glow.
+     *
+     * A halo, a small sun over the shoulder, a fist that burns — light that belongs to a body
+     * rather than to a point in the world. The plain glyph rides too, but it is translucent: two
+     * of them on one spot are as bright as one, and a halo of them reads as paint, not as light.
+     * Sent the glyph's way — `count = 0`, the crown as the position, the offset in the deltas.
+     */
+    val SPIRIT_LIGHT_GLYPH: ParticleType<ColorParticleOption> = FabricParticleTypes.complex(
+        { type -> ColorParticleOption.codec(type) },
+        { type -> ColorParticleOption.streamCodec(type) },
+    )
+
     /** Forces the class to initialise before the registries close. */
     fun register() {
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, modId("spirit_mote"), SPIRIT_MOTE)
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, modId("spirit_glyph"), SPIRIT_GLYPH)
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, modId("spirit_light"), SPIRIT_LIGHT)
+        Registry.register(BuiltInRegistries.PARTICLE_TYPE, modId("spirit_light_glyph"), SPIRIT_LIGHT_GLYPH)
     }
 
     /**
@@ -107,6 +121,19 @@ object ModParticles {
     /** Light that glows: additive, so it whitens where it is thick. The alpha is ours just the same. */
     fun light(color: RgbColor): ColorParticleOption =
         ColorParticleOption.create(SPIRIT_LIGHT, OPAQUE or color.packed)
+
+    /** Light that rides its owner. The alpha is ours just the same. */
+    fun lightGlyph(color: RgbColor): ColorParticleOption =
+        ColorParticleOption.create(SPIRIT_LIGHT_GLYPH, OPAQUE or color.packed)
+
+    /**
+     * How [SPIRIT_LIGHT] brakes in flight: its speed is multiplied by this every tick, so it carries
+     * `1 / (1 − f)` ≈ seven times its speed in all. The server times shapes by it, the client flies them.
+     */
+    const val LIGHT_FRICTION = 0.86
+
+    /** The shortest [SPIRIT_LIGHT] lives, in ticks: a shape that must arrive somewhere arrives by then. */
+    const val LIGHT_MIN_LIFETIME = 8
 
     private const val OPAQUE = 0xFF shl 24
 }
