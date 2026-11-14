@@ -7,6 +7,7 @@ import me.vangoo.mysteries.ability.AbilityOutcome
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
 import me.vangoo.mysteries.ability.SessionScope
+import me.vangoo.mysteries.ability.context.Fizzle
 import me.vangoo.mysteries.ability.context.Messaging
 import me.vangoo.mysteries.ability.context.Scheduling
 import me.vangoo.mysteries.ability.runtime.LiveTargeting
@@ -14,6 +15,7 @@ import me.vangoo.mysteries.ability.session
 import me.vangoo.mysteries.ability.sessionRunning
 import me.vangoo.mysteries.ability.stopSession
 import me.vangoo.mysteries.effect.ModParticles
+import me.vangoo.mysteries.net.payload.DoorKind
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
 import me.vangoo.mysteries.schedule.TaskHandle
 import me.vangoo.mysteries.world.SpiritWorld
@@ -132,18 +134,18 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
         val forward = horizontal(context.look)
         doorway(
             context.scheduling, context.level, context.origin.add(forward.scale(STEP_OUT)),
-            forward, LEAP_DOOR_TICKS, context.effects.pathwayColor,
+            forward, LEAP_DOOR_TICKS, context.effects.pathwayColor, DoorKind.FREE, CORRIDOR_DEPTH,
         )
         context.caster.teleportTo(to.x, to.y, to.z)
         doorway(
             context.scheduling, context.level, to.add(forward.scale(STEP_OUT)),
-            forward, LEAP_DOOR_TICKS, context.effects.pathwayColor,
+            forward, LEAP_DOOR_TICKS, context.effects.pathwayColor, DoorKind.FREE, CORRIDOR_DEPTH,
         )
         context.level.playSound(
             null, to.x, to.y, to.z,
             SoundEvents.PORTAL_TRAVEL, SoundSource.PLAYERS, 1.0f, 1.2f,
         )
-        return AbilityOutcome.done("Двері вивели вас до лодестона")
+        return AbilityOutcome.Done()
     }
 
     // ── A door into the spirit world ────────────────────────────────────────────
@@ -163,7 +165,8 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
         // moment of entry.
         val ticket = context.cast
 
-        doorway(scheduling, context.level, footing, forward, DOOR_TICKS, color)
+        // Its corridor ends in the spirit world's white: you see where it leads before you go.
+        doorway(scheduling, context.level, footing, forward, DOOR_TICKS, color, DoorKind.FREE, CORRIDOR_DEPTH, SPIRIT_WHITE)
         context.level.playSound(
             null, footing.x, footing.y, footing.z,
             SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 0.8f, 1.5f,
@@ -174,7 +177,7 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
             val party = LinkedHashSet<UUID>()
             try {
                 if (!awaitEntry(footing, fellowship, messaging)) {
-                    messaging.actionBar(ownerId, Component.literal("Двері зачинились — ніхто не увійшов"))
+                    messaging.hint(ownerId, Component.literal("Двері зачинились — ніхто не увійшов"))
                     return@session
                 }
                 ticket.complete()
@@ -183,7 +186,7 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
                 party.forEach { id ->
                     val traveller = server.playerList.getPlayer(id) ?: return@forEach
                     SpiritWorld.enter(traveller, spirit)
-                    messaging.actionBar(
+                    messaging.hint(
                         traveller,
                         Component.literal("Удар рукою відчиняє двері назад; коліщатко змінює швидкість"),
                     )
@@ -198,9 +201,7 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
             }
         }
 
-        return AbilityOutcome.Awaiting(
-            Component.literal("Двері стоять ${DOOR_TICKS / TICKS_PER_SECOND} с — увійдіть, щоб вирушити"),
-        )
+        return AbilityOutcome.Awaiting()
     }
 
     /** While the door stands: gathering the party by gaze and waiting for the Traveller to cross the threshold. */
@@ -230,7 +231,7 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
         val seen = LiveTargeting(walker).playerLookingAt(MARK_RANGE) ?: return
         if (!walker.isShiftKeyDown) {
             if (seen.uuid !in fellowship) {
-                messaging.actionBar(
+                messaging.hint(
                     walker,
                     Component.literal("Присядьте, щоб узяти ${seen.name.string} із собою"),
                 )
@@ -238,7 +239,7 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
             return
         }
         if (!fellowship.add(seen.uuid)) return
-        messaging.actionBar(walker, Component.literal("${seen.name.string} піде з вами"))
+        messaging.hint(walker, Component.literal("${seen.name.string} піде з вами"))
         messaging.tell(
             seen,
             Component.literal("Мандрівник бере вас у духовний світ — тримайтесь ближче за ${FELLOW_RADIUS.toInt()} бл."),
@@ -318,7 +319,7 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
                     if (walker.swinging) {
                         exit = openExit(scheduling, spirit, back, walker, color)
                         exitCloses = ticksAlive + EXIT_TICKS
-                        messaging.actionBar(
+                        messaging.hint(
                             walker,
                             Component.literal("Двері назад відчинено — за ними ваше місце виходу"),
                         )
@@ -334,13 +335,13 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
                 if (sinceUpkeep >= TICKS_PER_SECOND) {
                     sinceUpkeep -= TICKS_PER_SECOND
                     if (!payUpkeep()) {
-                        messaging.actionBar(ownerId, Component.literal("Духовності не стало — біле виштовхує вас"))
+                        messaging.hint(ownerId, Component.literal("Духовності не стало — біле виштовхує вас"), Fizzle.EMPTY)
                         return
                     }
                 }
                 waitTicks(WATCH_PERIOD_TICKS)
             }
-            messaging.actionBar(ownerId, Component.literal("Час у білому вийшов"))
+            messaging.hint(ownerId, Component.literal("Час у білому вийшов"))
         } finally {
             // The cut-out is real blocks in a real world. Not filling it back in means leaving a
             // hole in the white behind, and that is the only thing in this ability that outlives
@@ -361,7 +362,7 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
     ): Exit {
         val forward = horizontal(walker.getViewVector(1.0f))
         val footing = walker.position().add(forward.scale(STEP_OUT))
-        doorway(scheduling, spirit, footing, forward, EXIT_TICKS, color)
+        doorway(scheduling, spirit, footing, forward, EXIT_TICKS, color, DoorKind.FREE, CORRIDOR_DEPTH, color)
         spirit.playSound(
             null, footing.x, footing.y, footing.z,
             SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 0.8f, 0.9f,
@@ -519,6 +520,10 @@ class TravellersDoor : ActiveAbility(AbilityIdentity.of("door_travellers_door"))
         /** How long a door back stands: the circle appears in ~1.5 s, the rest is for looking around. */
         const val EXIT_TICKS = 15 * TICKS_PER_SECOND
         const val LEAP_DOOR_TICKS = 3 * TICKS_PER_SECOND
+        /** How far a Traveller's door seems to run: a corridor, not a pane. */
+        const val CORRIDOR_DEPTH = 6f
+        /** The glow at the end of a door into the spirit world. */
+        val SPIRIT_WHITE = RgbColor.of(240, 244, 255)
 
         const val WATCH_PERIOD_TICKS = 4
         const val MARK_RANGE = 12.0

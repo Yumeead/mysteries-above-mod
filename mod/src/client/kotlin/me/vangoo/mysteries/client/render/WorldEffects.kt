@@ -19,7 +19,8 @@ import net.minecraft.world.phys.HitResult
 import net.minecraft.world.phys.Vec3
 
 /**
- * The client half of [me.vangoo.mysteries.effect.beam] and [me.vangoo.mysteries.effect.flash].
+ * The client half of [me.vangoo.mysteries.effect.beam] and [me.vangoo.mysteries.effect.flash]; the
+ * Door's doors and passages arrive by the same packet and are handed to [Doors].
  *
  * A beam is a solid shaft of light ([LightShaft]), not a line of particles: one packet says where and
  * how long, and every frame the shaft is drawn where it stands. Nothing about it switches: it runs
@@ -48,6 +49,7 @@ object WorldEffects : HudElement {
         // and read the ground's depth, copied before anything else is drawn over it.
         LevelRenderEvents.AFTER_OPAQUE_TERRAIN.register { if (beams.isNotEmpty() && !ShaderPacks.inUse) LightShaft.captureDepth() }
         LevelRenderEvents.COLLECT_SUBMITS.register(::submit)
+        LevelRenderEvents.COLLECT_SUBMITS.register(Doors::submit)
     }
 
     fun accept(payload: WorldEffectPayload) {
@@ -55,6 +57,8 @@ object WorldEffects : HudElement {
             is WorldEffectPayload.Beam ->
                 beams += Beam(payload.from, payload.to, payload.color and 0xFFFFFF, payload.width, payload.sourceWidth, payload.ticks)
             is WorldEffectPayload.Flash -> weigh(payload)
+            is WorldEffectPayload.Door -> Doors.accept(payload)
+            is WorldEffectPayload.Passage -> Doors.accept(payload)
         }
     }
 
@@ -63,10 +67,12 @@ object WorldEffects : HudElement {
         flash = if (flash < FLASH_GONE) 0f else flash * FLASH_DECAY
         if (Minecraft.getInstance().isPaused) return
         beams.removeAll { beam -> ++beam.age >= beam.ticks + BEAM_FADE_TICKS }
+        Doors.tick()
     }
 
     fun clear() {
         beams.clear()
+        Doors.clear()
         flash = 0f
         previousFlash = 0f
     }
