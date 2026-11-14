@@ -28,6 +28,7 @@ https://claude.ai/code/artifact/79182c35-c186-4232-b3b3-773466c48901
 ./gradlew :mod:runGameTest       # ігрові тести: істоти, лут і кожна здібність кожного шляху (~35 с, входить у build)
 ./gradlew :mod:runClientGameTest # справжній клієнт, скриншоти істот і світла → mod/build/run/clientGameTest/screenshots (наступний build їх стирає)
 ./gradlew :core:test --configure-on-demand   # не конфігурує :mod, ще швидше
+./gradlew :mod:runClientGameTest -Ponly=fool # лише тести, в імені яких є слово (і серверні, і клієнтські)
 ./gradlew :mod:runServer         # сервер розробки
 ./gradlew :mod:runClient         # клієнт розробки
 ```
@@ -37,6 +38,10 @@ https://claude.ai/code/artifact/79182c35-c186-4232-b3b3-773466c48901
 рівно там, куди юніт-тест не дістає. Виміряно — див. пастку 5: `sprites.first()` у
 реєстрації провайдера ламав гру на заставці, і дві фази поспіль (07 і 08) закривались
 «зеленими», не запустившись жодного разу.
+
+**Перевіряєш одну річ — ганяй лише її тест: `-Ponly=<слово>`.** Повний прогін клієнтських тестів проходить
+усі сцени всіх шляхів по черзі; `-Ponly=door` лишає тільки `DoorClientGameTest` (клас без слова в імені
+виходить одразу, `skipped()` у `TestWorld.kt`), а для `runGameTest` вмикає ванільний селектор `*:*door*`.
 
 **Лог дивитись у `mod/run/logs/latest.log`**, а не у виводі gradle: `runClient` тримає
 свій stdout до виходу процесу, тож поки гра працює, з нього не видно нічого.
