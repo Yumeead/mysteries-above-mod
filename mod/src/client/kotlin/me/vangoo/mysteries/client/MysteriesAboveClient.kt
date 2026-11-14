@@ -144,6 +144,7 @@ object MysteriesAboveClient : ClientModInitializer {
         SpiritualityHud.register()
         HintHud.register()
         DangerArrows.register()
+        me.vangoo.mysteries.client.hud.DreamVision.register()
         WorldEffects.register()
         AbilityHud.register()
         MarionetteHud.register()

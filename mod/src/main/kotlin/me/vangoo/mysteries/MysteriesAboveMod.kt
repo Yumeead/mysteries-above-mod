@@ -20,6 +20,7 @@ import me.vangoo.mysteries.net.ModChannels
 import me.vangoo.mysteries.pathways.ModPathways
 import me.vangoo.mysteries.pathways.death.Death
 import me.vangoo.mysteries.pathways.fool.Faces
+import me.vangoo.mysteries.pathways.fool.abilities.Dreams
 import me.vangoo.mysteries.pathways.fool.Marionettes
 import me.vangoo.mysteries.pathways.fool.PaperThrowTrigger
 import me.vangoo.mysteries.server.MysteriesCommand
@@ -81,6 +82,8 @@ object MysteriesAboveMod : ModInitializer {
         Disguise.install()
         // Who has seen whose face: the Faceless's gallery and the spirit pendulum's list of people.
         Faces.install()
+        // A Seer's dream: where to wake lies on the player, so a quit mid-dream wakes them on the next join.
+        Dreams.install()
 
         // The spirit world is data in itself, but a player who left the game inside it would
         // stay there forever: the session that could bring them back goes out together with
