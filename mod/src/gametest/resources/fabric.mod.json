@@ -28,6 +28,10 @@
       {
         "adapter": "kotlin",
         "value": "me.vangoo.mysteries.gametest.LightClientGameTest"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.gametest.SunClientGameTest"
       }
     ]
   },
