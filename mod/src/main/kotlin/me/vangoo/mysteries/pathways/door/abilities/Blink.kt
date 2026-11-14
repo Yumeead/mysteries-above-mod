@@ -6,21 +6,39 @@ import me.vangoo.domain.valueobjects.Sequence
 import me.vangoo.mysteries.ability.AbilityOutcome
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
-import me.vangoo.mysteries.effect.ModParticles
+import me.vangoo.mysteries.ability.session
+import me.vangoo.mysteries.net.payload.DoorKind
+import me.vangoo.mysteries.net.payload.WorldEffectPayload
 import net.minecraft.core.BlockPos
-import net.minecraft.core.particles.ParticleOptions
-import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
+import net.minecraft.server.level.ServerPlayer
+import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
+import net.minecraft.world.entity.PositionMoveRotation
+import net.minecraft.world.entity.Relative
+import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.phys.Vec3
+import kotlin.math.ceil
 
 /**
  * Door, Seq. 5 (Traveller): **Instant Step**.
  *
  * The Traveller's simplest power and their most frequent: fifteen blocks in the direction of
- * the gaze, instantly.
+ * the gaze, in a blink.
+ *
+ * ## A door, a passage, a door
+ *
+ * The first revisions teleported in the tick of the cast, and the power was a jump cut. Now space
+ * opens a pale door just ahead of the Traveller and another at the landing, folds a passage between
+ * them — arch after arch of the door's own outline — and the Traveller **rushes along it**: a few
+ * ticks of real motion, a sharp start easing into the arrival, the body seen flying by everyone and
+ * the camera carried with it. The door behind shuts, the one ahead lets them out and shuts behind them,
+ * and the passage goes out after them.
+ *
+ * The motion is the server pushing the player each tick ([ServerPlayer.hurtMarked] sends it to their
+ * own client, which moves itself); the last tick puts them exactly on the landing.
  *
  * ## A safe spot is searched for, not guaranteed
  *
@@ -41,7 +59,7 @@ class Blink : ActiveAbility(AbilityIdentity.of("door_blink")) {
     override fun cooldownSeconds(sequence: Sequence): Int = COOLDOWN_SECONDS
 
     override fun description(sequence: Sequence): Component = Component.literal(
-        "Миттєве переміщення в бік погляду.\n" +
+        "Ривок крізь простір у бік погляду.\n" +
             "▪ Дальність ${distance(sequence).toInt()} бл.; упреться в стіну — станете перед нею\n" +
             "▪ Відкат ${COOLDOWN_SECONDS} с",
     )
@@ -56,24 +74,57 @@ class Blink : ActiveAbility(AbilityIdentity.of("door_blink")) {
             ?: return AbilityOutcome.failed("Там немає безпечного місця")
 
         val from = context.origin
-        val mote = ModParticles.mote(context.effects.pathwayColor)
+        val ahead = horizontal(look)
+        val pale = context.effects.pathwayColor.shade(PALE)
+        val flight = flightTicks(from.distanceTo(landing))
+        val opened = DoorKind.BLINK.opened
 
-        silhouette(context.level, from, mote)
-        context.level.playSound(
-            null, from.x, from.y, from.z,
-            SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1.5f, 0.8f,
-        )
+        // Both doors open the way the Traveller goes: they push through the first, and the second
+        // shuts behind them. The passage runs between the two.
+        val departure = from.add(ahead.scale(DOOR_GAP))
+        val arrival = landing.subtract(ahead.scale(DOOR_GAP))
+        doorway(context.scheduling, context.level, departure, ahead.reverse(), flight, pale, DoorKind.BLINK)
+        doorway(context.scheduling, context.level, arrival, ahead.reverse(), flight, pale, DoorKind.BLINK)
+        passage(context.level, departure, arrival, pale, opened, flight)
+        sound(context.level, from, SoundEvents.AMETHYST_BLOCK_CHIME, 1.4f)
 
-        context.caster.teleportTo(landing.x, landing.y, landing.z)
+        context.session {
+            // The door opens first, then they go.
+            waitTicks(opened)
+            val start = owner?.position() ?: return@session
+            owner?.let { sound(it.level() as ServerLevel, start, SoundEvents.ILLUSIONER_MIRROR_MOVE, 1.3f) }
+            try {
+                for (tick in 1..flight) {
+                    val traveller = owner ?: return@session
+                    // Open loop: each tick's step along the curve, whatever the server last heard of
+                    // where the client is — a late packet must not turn into a lurch.
+                    val behind = WorldEffectPayload.Passage.travelled((tick - 1).toFloat() / flight)
+                    val next = WorldEffectPayload.Passage.travelled(tick.toFloat() / flight)
+                    traveller.deltaMovement = landing.subtract(start).scale((next - behind).toDouble())
+                    traveller.hurtMarked = true
+                    traveller.resetFallDistance()
+                    waitTicks(1)
+                }
+            } finally {
+                owner?.let { arrive(it, landing) }
+            }
+        }
 
-        silhouette(context.level, landing, mote)
-        trail(context.level, from, landing)
-        context.level.playSound(
-            null, landing.x, landing.y, landing.z,
-            SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1.5f, 1.2f,
-        )
+        return AbilityOutcome.Done()
+    }
 
-        return AbilityOutcome.done("Ви перенеслись на ${from.distanceTo(landing).toInt()} бл.")
+    /** Puts the Traveller exactly on the landing, at rest — unless it was walled up on the way. */
+    private fun arrive(traveller: ServerPlayer, landing: Vec3) {
+        val level = traveller.level() as? ServerLevel ?: return
+        traveller.deltaMovement = Vec3.ZERO
+        traveller.hurtMarked = true
+        traveller.resetFallDistance()
+        // Not `teleportTo(x, y, z)`: that one keeps the client's own velocity (`Relative.DELTA`), and the
+        // Traveller would sail on a few blocks past the landing. Here the velocity is set to nothing.
+        if (fits(level, BlockPos.containing(landing)) != null) {
+            traveller.connection.teleport(PositionMoveRotation(landing, Vec3.ZERO, 0f, 0f), Relative.ROTATION)
+        }
+        sound(level, landing, SoundEvents.AMETHYST_BLOCK_CHIME, 1.6f)
     }
 
     /**
@@ -92,37 +143,19 @@ class Blink : ActiveAbility(AbilityIdentity.of("door_blink")) {
     }
 
     private fun fits(level: ServerLevel, pos: BlockPos): Vec3? {
-        if (!level.getBlockState(pos).isAir || !level.getBlockState(pos.above()).isAir) return null
+        if (!open(level, pos) || !open(level, pos.above())) return null
         return Vec3(pos.x + 0.5, pos.y.toDouble(), pos.z + 0.5)
     }
 
-    /** A figure left behind at the place of disappearance and appearing at the place of arrival. */
-    private fun silhouette(level: ServerLevel, at: Vec3, mote: ParticleOptions) {
-        var y = 0.0
-        while (y <= BODY_HEIGHT) {
-            val width = if (y > SHOULDERS) HEAD_WIDTH else BODY_WIDTH
-            var angle = 0.0
-            while (angle < TAU) {
-                level.sendParticles(
-                    mote,
-                    at.x + width * Math.cos(angle),
-                    at.y + y,
-                    at.z + width * Math.sin(angle),
-                    1, 0.0, 0.0, 0.0, 0.0,
-                )
-                angle += TAU / SILHOUETTE_POINTS
-            }
-            y += BODY_STEP
-        }
-    }
+    /** Air, or a door's light: another Traveller's door may stand lit right there. */
+    private fun open(level: ServerLevel, pos: BlockPos): Boolean =
+        level.getBlockState(pos).let { it.isAir || it.`is`(Blocks.LIGHT) }
 
-    private fun trail(level: ServerLevel, from: Vec3, to: Vec3) {
-        val steps = (from.distanceTo(to) / TRAIL_STEP).toInt().coerceIn(1, MAX_TRAIL_STEPS)
-        for (i in 0..steps) {
-            val point = from.lerp(to, i.toDouble() / steps).add(0.0, 1.0, 0.0)
-            level.sendParticles(ParticleTypes.PORTAL, point.x, point.y, point.z, 3, 0.1, 0.1, 0.1, 0.0)
-        }
-    }
+    private fun sound(level: ServerLevel, at: Vec3, event: SoundEvent, pitch: Float) =
+        level.playSound(null, at.x, at.y + 1.0, at.z, event, SoundSource.PLAYERS, 1.0f, pitch)
+
+    /** About [SPEED] blocks a tick on average — fast enough to be a blink, slow enough to be seen. */
+    private fun flightTicks(distance: Double): Int = ceil(distance / SPEED).toInt().coerceIn(MIN_FLIGHT, MAX_FLIGHT)
 
     private fun distance(sequence: Sequence): Double =
         scale(BASE_DISTANCE, sequence, SequenceScaler.ScalingStrategy.MODERATE).toDouble()
@@ -132,14 +165,16 @@ class Blink : ActiveAbility(AbilityIdentity.of("door_blink")) {
         const val COOLDOWN_SECONDS = 8
         const val CLEARANCE = 0.6
         const val SEARCH = 3
-        const val TRAIL_STEP = 0.5
-        const val MAX_TRAIL_STEPS = 60
-        const val BODY_HEIGHT = 1.8
-        const val BODY_STEP = 0.2
-        const val BODY_WIDTH = 0.35
-        const val HEAD_WIDTH = 0.22
-        const val SHOULDERS = 1.5
-        const val SILHOUETTE_POINTS = 8
-        const val TAU = 2.0 * Math.PI
+        /** How far ahead of the Traveller the first door stands, and behind them the second. */
+        const val DOOR_GAP = 0.6
+        /**
+         * Blocks a tick, on average. The curve starts at twice that, and the server takes a client
+         * moving more than ten blocks a tick for a cheat — so it stays well under.
+         */
+        const val SPEED = 4.0
+        const val MIN_FLIGHT = 3
+        const val MAX_FLIGHT = 8
+        /** The doors and the passage are paler than the pathway: space itself, not the Traveller's light. */
+        const val PALE = 0.35
     }
 }
