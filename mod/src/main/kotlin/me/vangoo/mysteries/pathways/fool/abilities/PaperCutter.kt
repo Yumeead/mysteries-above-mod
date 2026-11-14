@@ -10,6 +10,7 @@ import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
 import me.vangoo.mysteries.item.ModComponents
 import me.vangoo.mysteries.item.PaperWeapon
+import me.vangoo.mysteries.pathways.fool.gather
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
@@ -78,10 +79,12 @@ class PaperCutter : ActiveAbility(IDENTITY), PaperThrower {
         weapon.set(ModComponents.PAPER_WEAPON, PaperWeapon(type.name, type.uses))
         if (!context.caster.addItem(weapon)) context.caster.drop(weapon, false)
 
+        // The paper flies in off the air and wraps the thing in the hand; the woven weapon has its name.
         val at = context.origin
+        gather(context.level, context.eye.add(context.look.scale(0.5)).add(0.0, -0.3, 0.0), WEAVE_SCRAPS)
         context.level.playSound(null, at.x, at.y, at.z, SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0f, 1.4f)
 
-        return AbilityOutcome.done("Створено: ${type.displayName}")
+        return AbilityOutcome.Done()
     }
 
     private fun typeFor(item: Item): PaperWeaponType? = when (item) {
@@ -101,5 +104,6 @@ class PaperCutter : ActiveAbility(IDENTITY), PaperThrower {
         val IDENTITY: AbilityIdentity = AbilityIdentity.of("fool_paper_cutter")
         private const val WEAPON_UNLOCK_SEQUENCE = 7
         private const val CRAFT_COOLDOWN_SECONDS = 3
+        private const val WEAVE_SCRAPS = 12
     }
 }

@@ -5,13 +5,14 @@ import me.vangoo.domain.valueobjects.Sequence
 import me.vangoo.mysteries.ability.AbilityContext
 import me.vangoo.mysteries.ability.Ticking
 import me.vangoo.mysteries.ability.ToggleablePassiveAbility
+import me.vangoo.mysteries.ability.context.Fizzle
+import me.vangoo.mysteries.net.payload.WorldEffectPayload.Face.Kind
+import me.vangoo.mysteries.pathways.fool.face
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
-import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
-import net.minecraft.world.phys.Vec3
 
 /**
  * Fool, Seq. 8 (Clown): **Expression Control**.
@@ -23,7 +24,7 @@ import net.minecraft.world.phys.Vec3
  * established, not a static `isMasked(UUID)` of its own the way the plugin built it.
  */
 class ExpressionControl :
-    ToggleablePassiveAbility(AbilityIdentity.of("fool_expression_control")),
+    ToggleablePassiveAbility(IDENTITY),
     Ticking {
 
     override val tickPeriodTicks: Int = TICKS_PER_SECOND
@@ -35,23 +36,22 @@ class ExpressionControl :
             "▪ Витрата $COST_PER_SECOND духовності/с",
     )
 
+    // A paper mask settles on the face and sinks in: from then on the face is the mask.
     override fun onEnable(context: AbilityContext) {
+        face(context.level, Kind.MASK, context.caster)
         chime(context, SoundEvents.BEACON_ACTIVATE, 1.8f)
-        context.messaging.actionBar(context.caster, Component.literal("🎭 Маска активна"))
     }
 
     override fun onDisable(context: AbilityContext) {
+        face(context.level, Kind.UNMASK, context.caster)
         chime(context, SoundEvents.BEACON_DEACTIVATE, 1.2f)
-        context.messaging.actionBar(context.caster, Component.literal("🎭 Маска знята"))
     }
 
     override fun tick(context: AbilityContext) {
+        // A perfect mask shows nothing — that is the whole of it. Only its slipping is felt.
         if (!context.beyonder.payUpkeep(COST_PER_SECOND)) {
-            context.messaging.actionBar(context.caster, Component.literal("🎭 Духовність вичерпана — маска тримається на волосині"))
-            return
+            context.messaging.hint(context.caster, Component.literal("Духовність вичерпана — маска тримається на волосині"), Fizzle.EMPTY)
         }
-        val at: Vec3 = context.caster.position()
-        context.level.sendParticles(ParticleTypes.SOUL, at.x, at.y + 2.0, at.z, 3, 0.15, 0.1, 0.15, 0.0)
     }
 
     private fun chime(context: AbilityContext, sound: SoundEvent, pitch: Float) {
@@ -59,7 +59,9 @@ class ExpressionControl :
         context.level.playSound(null, at.x, at.y, at.z, sound, SoundSource.PLAYERS, 1.0f, pitch)
     }
 
-    private companion object {
-        const val COST_PER_SECOND = 10
+    companion object {
+        /** The mask a reading power checks for before it reports anything about this Beyonder. */
+        val IDENTITY: AbilityIdentity = AbilityIdentity.of("fool_expression_control")
+        private const val COST_PER_SECOND = 10
     }
 }

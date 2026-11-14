@@ -8,16 +8,18 @@ import me.vangoo.mysteries.ability.PermanentPassiveAbility
 import me.vangoo.mysteries.ability.Ticking
 import me.vangoo.mysteries.ability.context.on
 import me.vangoo.mysteries.event.IncomingDamage
+import me.vangoo.domain.valueobjects.RgbColor
+import me.vangoo.mysteries.effect.ModParticles
+import me.vangoo.mysteries.effect.privateGlow
+import me.vangoo.mysteries.effect.privateSound
+import me.vangoo.mysteries.effect.privateText
 import me.vangoo.mysteries.event.MobTargeting
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
-import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
 import net.minecraft.tags.ItemTags
-import net.minecraft.world.effect.MobEffectInstance
-import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.Mob
 import net.minecraft.world.entity.projectile.Projectile
@@ -51,6 +53,13 @@ import kotlin.random.Random
  *
  * Balance numbers live in [DangerPremonition] (`core`, phase 08 already ported it); this file is
  * effects only.
+ *
+ * ## The warning says where, not in words
+ *
+ * The first port wrote "a zombie took aim at you from the south-west" into the action bar. Now the
+ * threat itself flares: an outline only the Seer sees, and a bell heard by the Seer alone, played
+ * **from where the threat is** — the ear already knows the direction, so nothing has to name it. A
+ * glimpse of what the target will do next hangs over its head as a single word.
  */
 class DangerIntuition :
     PermanentPassiveAbility(AbilityIdentity.of("fool_danger_intuition")),
@@ -64,6 +73,7 @@ class DangerIntuition :
         val dodge = (DangerPremonition.lethalDodgeChance(sequence) * 100).roundToInt()
         return Component.literal(
             "Передчуваєте загрозу: ворожих мобів, озброєних гравців і снаряди в радіусі ${SCAN_RADIUS.toInt()} бл.\n" +
+                "▪ Загроза спалахує обрисом, і дзвін лунає з її боку — бачите й чуєте лише ви\n" +
                 "▪ Бачите крізь двері, на які дивитесь\n" +
                 "▪ Зрідка вгадуєте наступну дію цілі під прицілом\n" +
                 "▪ $dodge% шанс автоматично ухилитись від смертельного удару",
@@ -81,9 +91,7 @@ class DangerIntuition :
 
         context.events.on<MobTargeting> { event ->
             if (event.target !== context.caster) return@on
-            warn(context, event.mob.uuid, event.mob) {
-                "⚠ ${event.mob.type.description.string} узяв вас на приціл ${direction(context, event.mob.position())}"
-            }
+            warn(context, event.mob.uuid, event.mob)
         }
 
         context.events.on<IncomingDamage> { damage -> tryLethalDodge(context, damage) }
@@ -109,9 +117,7 @@ class DangerIntuition :
     private fun scanArmedPlayers(context: AbilityContext) {
         for (player in context.targeting.playersNear(SCAN_RADIUS)) {
             if (!holdsWeapon(player) || !isLookingAt(player, context.caster)) continue
-            warn(context, player.uuid, player) {
-                "⚠ ${player.name.string} озброєний і дивиться на вас ${direction(context, player.position())}"
-            }
+            warn(context, player.uuid, player)
         }
     }
 
@@ -132,7 +138,7 @@ class DangerIntuition :
 
         for (projectile in projectiles) {
             if (!isHeadingTowards(projectile.position(), projectile.deltaMovement, caster.position(), 3.0)) continue
-            warn(context, projectile.uuid, projectile) { "⚡ Передчуття: снаряд летить у вас!" }
+            warn(context, projectile.uuid, projectile)
         }
     }
 
@@ -161,15 +167,10 @@ class DangerIntuition :
             .filter { it.position().distanceTo(center) <= DOOR_REVEAL_RADIUS }
         if (revealed.isEmpty()) return
 
-        revealed.forEach {
-            it.addEffect(MobEffectInstance(MobEffects.GLOWING, DOOR_GLOW_TICKS, 0, true, false, true))
-        }
+        // Seen through the door, for the Seer alone: whoever stands behind it is outlined.
+        privateGlow(caster, revealed, DOOR_GLOW_TICKS)
         lastDoorReveal[owner] = now
-        context.level.playSound(
-            null, caster.x, caster.y, caster.z,
-            SoundEvents.SCULK_SENSOR_HIT, SoundSource.PLAYERS, 0.7f, 1.4f,
-        )
-        context.messaging.actionBar(caster, Component.literal("👁 За дверима хтось є (${revealed.size})"))
+        privateSound(caster, center, SoundEvents.SCULK_SENSOR_HIT, 0.7f, 1.4f)
     }
 
     // ── The occasional hint ──────────────────────────────────────────────────────
@@ -182,13 +183,13 @@ class DangerIntuition :
         val target = context.targeting.lookingAt(PREDICT_RANGE) ?: return
         if (Random.nextDouble() > DangerPremonition.actionPredictionChance(context.sequence)) return
 
-        val hint = when {
-            target is Mob && target.target === context.caster -> "ціль зараз атакує"
-            target.deltaMovement.lengthSqr() > 0.05 -> "ціль рухається"
-            else -> "ціль вичікує"
+        val glimpse = when {
+            target is Mob && target.target === context.caster -> "атакує"
+            target.deltaMovement.lengthSqr() > 0.05 -> "рушить"
+            else -> "вичікує"
         }
         lastPrediction[owner] = now
-        context.messaging.actionBar(context.caster, Component.literal("🔮 Передбачення: $hint"))
+        privateText(context.caster, target.position(), Component.literal(glimpse), GLIMPSE_TICKS, GLIMPSE, anchor = target)
     }
 
     // ── Lethal dodge ─────────────────────────────────────────────────────────────
@@ -207,18 +208,19 @@ class DangerIntuition :
         damage.cancel()
         lastDodge[owner] = now
 
+        // Yanked aside with no wind-up, a beat before the blow: where the body was, a grey trace hangs.
         val look = caster.getViewVector(1.0f)
-        val side = Vec3(-look.z, 0.0, look.x).normalize().scale(if (Random.nextBoolean()) 0.9 else -0.9)
-        caster.setDeltaMovement(side.x, 0.35, side.z)
-        context.level.sendParticles(ParticleTypes.CRIT, caster.x, caster.y + 1.0, caster.z, 20, 0.4, 0.5, 0.4, 0.1)
-        context.level.sendParticles(ParticleTypes.END_ROD, caster.x, caster.y + 1.0, caster.z, 10, 0.3, 0.4, 0.3, 0.05)
+        val side = Vec3(-look.z, 0.0, look.x).normalize().scale(if (Random.nextBoolean()) DODGE_SPEED else -DODGE_SPEED)
+        context.level.sendParticles(ModParticles.mote(TRACE), caster.x, caster.y + 1.0, caster.z, TRACE_MOTES, 0.25, 0.5, 0.25, 0.0)
+        caster.setDeltaMovement(side.x, DODGE_LIFT, side.z)
+        // The server's own push reaches the client only if it is marked: without this the dodge never moved anyone.
+        caster.hurtMarked = true
         context.level.playSound(null, caster.x, caster.y, caster.z, SoundEvents.ENDER_DRAGON_FLAP, SoundSource.PLAYERS, 0.8f, 1.6f)
-        context.messaging.actionBar(caster, Component.literal("✦ Передчуття врятувало вас!"))
     }
 
     // ── Shared warning throttle ──────────────────────────────────────────────────
 
-    private fun warn(context: AbilityContext, sourceId: UUID, source: net.minecraft.world.entity.Entity, message: () -> String) {
+    private fun warn(context: AbilityContext, sourceId: UUID, source: net.minecraft.world.entity.Entity) {
         val owner = context.caster.uuid
         val warnings = lastWarnings.getOrPut(owner) { HashMap() }
         val now = context.scheduling.tick
@@ -228,27 +230,9 @@ class DangerIntuition :
 
         val distance = context.caster.position().distanceTo(source.position())
         val volume = (1.0 - (distance / SCAN_RADIUS)).coerceAtLeast(0.3).toFloat()
-        context.level.playSound(
-            null, context.caster.x, context.caster.y, context.caster.z,
-            SoundEvents.NOTE_BLOCK_BELL, SoundSource.PLAYERS, volume, 0.5f + volume,
-        )
-        context.messaging.actionBar(context.caster, Component.literal(message()))
-    }
-
-    private fun direction(context: AbilityContext, to: Vec3): String {
-        val from = context.caster.position()
-        var angle = Math.toDegrees(Math.atan2(-(to.x - from.x), to.z - from.z))
-        if (angle < 0) angle += 360
-        return when {
-            angle >= 337.5 || angle < 22.5 -> "з півдня"
-            angle < 67.5 -> "з ПдЗх"
-            angle < 112.5 -> "із заходу"
-            angle < 157.5 -> "з ПнЗх"
-            angle < 202.5 -> "з півночі"
-            angle < 247.5 -> "з ПнСх"
-            angle < 292.5 -> "зі сходу"
-            else -> "з ПдСх"
-        }
+        privateGlow(context.caster, listOf(source), WARN_GLOW_TICKS)
+        // Played from the threat itself: the ear tells the direction, so no word has to.
+        privateSound(context.caster, source.position(), SoundEvents.NOTE_BLOCK_BELL.value(), volume.coerceAtLeast(0.6f), 0.5f + volume)
     }
 
     private companion object {
@@ -266,5 +250,13 @@ class DangerIntuition :
         val PREDICT_THROTTLE_TICKS = 4000L / 50
 
         const val MILLIS_PER_TICK = 50L
+
+        val WARN_GLOW_TICKS = 3 * TICKS_PER_SECOND / 2
+        val GLIMPSE_TICKS = 2 * TICKS_PER_SECOND
+        val GLIMPSE: RgbColor = RgbColor.of(214, 196, 240)
+        val TRACE: RgbColor = RgbColor.of(170, 170, 182)
+        const val TRACE_MOTES = 14
+        const val DODGE_SPEED = 1.2
+        const val DODGE_LIFT = 0.3
     }
 }
