@@ -2,6 +2,7 @@ package me.vangoo.mysteries.entity
 
 import com.mojang.serialization.Codec
 import com.mojang.serialization.codecs.RecordCodecBuilder
+import net.minecraft.core.BlockPos
 import net.minecraft.core.UUIDUtil
 import net.minecraft.network.syncher.EntityDataAccessor
 import net.minecraft.network.syncher.EntityDataSerializers
@@ -75,6 +76,15 @@ class MarionetteEntity(type: EntityType<out MarionetteEntity>, level: Level) : A
 
         /** Beating one entity until it or the puppet is down. */
         data class Attack(val victimId: UUID) : Order
+
+        /** Keeping close to the Marionettist and striking whoever goes for them. */
+        data object Guard : Order
+
+        /** Picking up what lies within reach of [anchor] and bringing it to the Marionettist. */
+        data class Gather(val anchor: Vec3) : Order
+
+        /** Walking to [pos] and pressing what is there: a lever, a button, a door. */
+        data class Use(val pos: BlockPos) : Order
     }
 
     /**
@@ -115,6 +125,13 @@ class MarionetteEntity(type: EntityType<out MarionetteEntity>, level: Level) : A
     var ownerId: UUID? = null
 
     var order: Order = Order.Stand
+
+    /**
+     * What a [Order.Guard], [Order.Gather] or [Order.Use] has the body do this moment — one of the
+     * four plain verbs, decided by `Marionettes` a few times a second for puppets and seized mobs
+     * alike. Not saved: it is worked out again from the order.
+     */
+    var step: Order? = null
 
     /**
      * Set when this is not a puppet at all but the **vessel**: the body a possessing Marionettist
@@ -181,6 +198,15 @@ class MarionetteEntity(type: EntityType<out MarionetteEntity>, level: Level) : A
                 output.putString("order", "attack")
                 output.store("order_victim", UUIDUtil.CODEC, current.victimId)
             }
+            is Order.Guard -> output.putString("order", "guard")
+            is Order.Gather -> {
+                output.putString("order", "gather")
+                output.store("order_target", Vec3.CODEC, current.anchor)
+            }
+            is Order.Use -> {
+                output.putString("order", "use")
+                output.store("order_block", BlockPos.CODEC, current.pos)
+            }
         }
     }
 
@@ -193,6 +219,9 @@ class MarionetteEntity(type: EntityType<out MarionetteEntity>, level: Level) : A
             "follow" -> Order.Follow
             "go_to" -> input.read("order_target", Vec3.CODEC).map<Order> { Order.GoTo(it) }.orElse(Order.Stand)
             "attack" -> input.read("order_victim", UUIDUtil.CODEC).map<Order> { Order.Attack(it) }.orElse(Order.Stand)
+            "guard" -> Order.Guard
+            "gather" -> input.read("order_target", Vec3.CODEC).map<Order> { Order.Gather(it) }.orElse(Order.Stand)
+            "use" -> input.read("order_block", BlockPos.CODEC).map<Order> { Order.Use(it) }.orElse(Order.Stand)
             else -> Order.Stand
         }
     }
@@ -236,7 +265,14 @@ class MarionetteEntity(type: EntityType<out MarionetteEntity>, level: Level) : A
             is Order.Stand -> halt()
             is Order.GoTo -> walkTo(current.target) { order = Order.Stand }
             is Order.Follow -> follow()
-            is Order.Attack -> assault(current.victimId)
+            is Order.Attack -> assault(current.victimId) { order = Order.Stand }
+            // The longer errands: `Marionettes` says what they mean right now.
+            is Order.Guard, is Order.Gather, is Order.Use -> when (val now = step) {
+                is Order.GoTo -> walkTo(now.target) { step = Order.Stand }
+                is Order.Follow -> follow()
+                is Order.Attack -> assault(now.victimId) { step = null }
+                else -> halt()
+            }
         }
     }
 
@@ -254,10 +290,10 @@ class MarionetteEntity(type: EntityType<out MarionetteEntity>, level: Level) : A
         if (distanceToSqr(owner) <= FOLLOW_GAP * FOLLOW_GAP) halt() else walkTo(owner.position()) {}
     }
 
-    private fun assault(victimId: UUID) {
+    private fun assault(victimId: UUID, onGone: () -> Unit) {
         val victim = (level() as? ServerLevel)?.getEntityInAnyDimension(victimId) as? LivingEntity
         if (victim == null || !victim.isAlive || victim.level() !== level()) {
-            order = Order.Stand
+            onGone()
             halt()
             return
         }

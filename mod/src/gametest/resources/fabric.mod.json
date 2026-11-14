@@ -52,6 +52,10 @@
       {
         "adapter": "kotlin",
         "value": "me.vangoo.mysteries.gametest.DangerClientGameTest"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.gametest.ThreadsClientGameTest"
       }
     ]
   },
