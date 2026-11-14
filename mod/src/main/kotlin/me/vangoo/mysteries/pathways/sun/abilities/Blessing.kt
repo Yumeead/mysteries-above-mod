@@ -11,9 +11,14 @@ import me.vangoo.mysteries.ability.session
 import me.vangoo.mysteries.ability.sessionRunning
 import me.vangoo.mysteries.ability.stopSession
 import me.vangoo.mysteries.ability.sustain
+import me.vangoo.domain.valueobjects.RgbColor
+import me.vangoo.mysteries.ability.context.Fizzle
 import me.vangoo.mysteries.effect.ModParticles
+import me.vangoo.mysteries.effect.douse
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
+import net.minecraft.core.BlockPos
 import net.minecraft.core.particles.ParticleOptions
+import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
@@ -29,6 +34,10 @@ import net.minecraft.world.phys.AABB
  *
  * Sustained light: while the Seeker pays, everyone nearby is healed and the unclean nearby
  * smoulder. It goes out when the spirituality runs out or when the Seeker casts a second time.
+ *
+ * The light is real: a warm light block walks with the Seeker, so the place they stand in is lit
+ * for everyone, and the unclean in it smoke and shed embers. No circle is drawn on the ground —
+ * where the blessing reaches is read off whom it touches.
  *
  * ## A power that goes out on its own is a session, not a toggle
  *
@@ -70,24 +79,30 @@ class Blessing : ActiveAbility(AbilityIdentity.of("sun_blessing")) {
     override fun cast(context: CastContext): AbilityOutcome {
         if (context.sessionRunning) {
             context.stopSession()
-            return AbilityOutcome.done("Благословення згасло")
+            return AbilityOutcome.Done()
         }
 
         val radius = range(context.sequence)
         val burn = undeadDamage(context.sequence)
-        val mote = ModParticles.mote(context.effects.pathwayColor)
+        val ember = ModParticles.light(EMBER)
         val messaging = context.messaging
         val beyonders = context.beyonders
+        // The light block is state in the world, and the ability instance is shared by every
+        // player — so its place lives in this Seeker's session, as in `Daytime`.
+        var lit: BlockPos? = null
+        var beat = 0
 
         context.session {
             try {
-                val end = sustain(periodTicks = TICKS_PER_SECOND, upkeep = periodicCost) { priest ->
-                    radiate(priest, mote, radius)
+                val end = sustain(periodTicks = LIGHT_PERIOD_TICKS, upkeep = periodicCost) { priest ->
+                    lit = carryLight(priest.level(), lit, priest.blockPosition().above(), WARM_LIGHT)
+                    if (beat++ % BEATS_PER_SECOND != 0) return@sustain
                     reach(priest, radius).forEach { nearby ->
                         // Three categories, not two: damage to the unclean, healing to one's own,
                         // nothing to the rest of the world. A cow under a blessing is not healed.
                         if (nearby.isProfane(beyonders)) {
-                            smite(priest.level() as ServerLevel, priest, beyonders, nearby, burn)
+                            smite(priest.level(), priest, beyonders, nearby, burn)
+                            smoulder(nearby, ember)
                         } else if (nearby.isFaithful(beyonders)) {
                             nearby.addEffect(
                                 MobEffectInstance(MobEffects.REGENERATION, MERCY_TICKS, 0, true, false, true),
@@ -96,10 +111,13 @@ class Blessing : ActiveAbility(AbilityIdentity.of("sun_blessing")) {
                     }
                 }
                 if (end == SessionEnd.EXHAUSTED) {
-                    messaging.actionBar(ownerId, Component.literal("Благословення згасло: духовність скінчилась"))
+                    messaging.hint(ownerId, Component.literal("Благословення згасло: духовність скінчилась"), Fizzle.EMPTY)
                 }
             } finally {
-                owner?.let { extinguish(it) }
+                owner?.let { priest ->
+                    lit?.let { douse(priest.level(), it) }
+                    extinguish(priest)
+                }
             }
         }
 
@@ -107,32 +125,38 @@ class Blessing : ActiveAbility(AbilityIdentity.of("sun_blessing")) {
             null, context.origin.x, context.origin.y, context.origin.z,
             SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8f, 1.2f,
         )
-        return AbilityOutcome.done("Благословення розгорнулось")
+        return AbilityOutcome.Done()
     }
 
-    /** Who is in the circle. Taken anew every tick — the circle moves with the Seeker. */
-    private fun reach(priest: ServerPlayer, radius: Double): List<LivingEntity> {
-        val level = priest.level() as? ServerLevel ?: return emptyList()
-        return level.getEntitiesOfClass(
+    /** Who is in the circle. Taken anew every second — the circle moves with the Seeker. */
+    private fun reach(priest: ServerPlayer, radius: Double): List<LivingEntity> =
+        priest.level().getEntitiesOfClass(
             LivingEntity::class.java,
             AABB.ofSize(priest.position(), radius * 2, radius * 2, radius * 2),
         ).filter { it.position().distanceToSqr(priest.position()) <= radius * radius }
-    }
 
-    private fun radiate(priest: ServerPlayer, mote: ParticleOptions, radius: Double) {
-        val level = priest.level() as? ServerLevel ?: return
-        repeat(HALO_POINTS) { i ->
-            val angle = TAU * i / HALO_POINTS
+    /** The unclean in the light smoulder: smoke, and embers that rise off them and glow. */
+    private fun smoulder(target: LivingEntity, ember: ParticleOptions) {
+        val level = target.level() as? ServerLevel ?: return
+        val random = level.random
+        level.sendParticles(
+            ParticleTypes.SMOKE, target.x, target.y + target.bbHeight * 0.6, target.z,
+            SMOKE, target.bbWidth * 0.4, target.bbHeight * 0.3, target.bbWidth * 0.4, 0.01,
+        )
+        repeat(EMBERS) {
             level.sendParticles(
-                mote,
-                priest.x + radius * Math.cos(angle), priest.y + 0.3, priest.z + radius * Math.sin(angle),
-                1, 0.0, 0.0, 0.0, 0.0,
+                ember,
+                target.x + (random.nextDouble() - 0.5) * target.bbWidth,
+                target.y + random.nextDouble() * target.bbHeight,
+                target.z + (random.nextDouble() - 0.5) * target.bbWidth,
+                // `count = 0`: an exact velocity — the ember rises straight, it is not flung.
+                0, 0.0, EMBER_RISE, 0.0, 1.0,
             )
         }
     }
 
     private fun extinguish(priest: ServerPlayer) {
-        (priest.level() as? ServerLevel)?.playSound(
+        priest.level().playSound(
             null, priest.x, priest.y, priest.z,
             SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.7f, 1.2f,
         )
@@ -151,7 +175,15 @@ class Blessing : ActiveAbility(AbilityIdentity.of("sun_blessing")) {
         const val BASE_UNDEAD_DAMAGE = 3
         /** A little longer than the tick, so it does not blink between ticks. */
         const val MERCY_TICKS = 30
-        const val HALO_POINTS = 20
-        const val TAU = 2.0 * Math.PI
+
+        /** The light keeps up with a walk; the blessing itself acts once a second. */
+        const val LIGHT_PERIOD_TICKS = 5
+        const val BEATS_PER_SECOND = TICKS_PER_SECOND / LIGHT_PERIOD_TICKS
+        /** Warm rather than blinding: a hearth, not the noon of `Daytime`. */
+        const val WARM_LIGHT = 11
+        val EMBER = RgbColor(0xFF9A3C)
+        const val EMBERS = 3
+        const val EMBER_RISE = 0.05
+        const val SMOKE = 4
     }
 }

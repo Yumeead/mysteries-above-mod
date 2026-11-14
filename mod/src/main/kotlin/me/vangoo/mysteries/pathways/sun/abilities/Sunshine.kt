@@ -6,17 +6,19 @@ import me.vangoo.domain.valueobjects.Sequence
 import me.vangoo.mysteries.ability.AbilityOutcome
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
-import me.vangoo.mysteries.effect.ModParticles
+import me.vangoo.mysteries.effect.burst
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
-import net.minecraft.core.particles.ParticleOptions
-import net.minecraft.core.particles.ParticleTypes
+import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
+import net.minecraft.world.entity.HumanoidArm
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.phys.Vec3
+import kotlin.math.cos
+import kotlin.math.sin
 
 /**
  * Sun, Seq. 8 (Light Seeker): **Sunshine**.
@@ -48,34 +50,36 @@ class Sunshine : ActiveAbility(AbilityIdentity.of("sun_sunshine")) {
         val target = context.targeting.lookingAt(MAX_RANGE)
             ?: return AbilityOutcome.failed("Немає цілі")
 
-        val mote = ModParticles.mote(context.effects.pathwayColor)
-        ray(context, target, mote)
+        ray(context, target)
 
-        val dealt = smite(context.level, context.caster, context.beyonders, target, damage(context.sequence))
-        val profane = target.isProfane(context.beyonders)
-        if (profane) {
+        smite(context.level, context.caster, context.beyonders, target, damage(context.sequence))
+        if (target.isProfane(context.beyonders)) {
             target.igniteForSeconds((FIRE_TICKS / TICKS_PER_SECOND).toFloat())
             target.addEffect(MobEffectInstance(MobEffects.BLINDNESS, BLIND_TICKS, 0))
         }
-
-        context.messaging.actionBar(target.uuid, Component.literal("Вас торкнулось святе світло"))
-        return AbilityOutcome.done(
-            "Сяйво вразило ${target.name.string} на ${dealt.toInt()}" +
-                if (profane) " — нечисть горить" else "",
-        )
+        return AbilityOutcome.Done()
     }
 
-    /** A beam from the eye to the target plus a flash at the point of impact. */
-    private fun ray(context: CastContext, target: LivingEntity, mote: ParticleOptions) {
-        val from = context.eye
+    /**
+     * A beam from the hand to the target. Where it lands — a flash for whoever looks, a burst, and
+     * for half a second real light.
+     */
+    private fun ray(context: CastContext, target: LivingEntity) {
+        val level = context.level
+        val caster = context.caster
+        // From the casting hand, not the eye: a beam out of the camera itself is seen end-on — a
+        // dot — and from the side of the view the caster watches it fly.
+        val yaw = Math.toRadians(caster.yRot.toDouble())
+        val side = if (caster.mainArm == HumanoidArm.RIGHT) HAND_ASIDE else -HAND_ASIDE
+        // Facing +z, the right hand is towards −x.
+        val right = Vec3(-cos(yaw), 0.0, -sin(yaw)).scale(side)
+        val from = context.eye.add(caster.lookAngle.scale(HAND_REACH)).add(right).add(0.0, -HAND_DROP, 0.0)
         val to = target.position().add(0.0, target.bbHeight * 0.5, 0.0)
-        val steps = (from.distanceTo(to) / STEP).toInt().coerceIn(1, MAX_STEPS)
-        for (i in 0..steps) {
-            val point: Vec3 = from.lerp(to, i.toDouble() / steps)
-            context.level.sendParticles(mote, point.x, point.y, point.z, 1, 0.03, 0.03, 0.03, 0.0)
-        }
-        context.level.sendParticles(ParticleTypes.END_ROD, to.x, to.y, to.z, 12, 0.2, 0.2, 0.2, 0.03)
-        context.level.playSound(
+        context.effects.beam(level, from, to, BEAM_TICKS, BAND_WIDTH)
+        context.effects.flash(level, to, FLASH_RADIUS, FLASH_STRENGTH)
+        context.effects.flare(level, BlockPos.containing(to), FLARE_TICKS, FLARE_BRIGHTNESS)
+        burst(level, to, IMPACT_RADIUS, context.effects.pathwayColor, IMPACT_POINTS, IMPACT_SPEED)
+        level.playSound(
             null, to.x, to.y, to.z,
             SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0f, 1.8f,
         )
@@ -90,7 +94,17 @@ class Sunshine : ActiveAbility(AbilityIdentity.of("sun_sunshine")) {
         const val COOLDOWN_SECONDS = 5
         const val FIRE_TICKS = 3 * TICKS_PER_SECOND
         const val BLIND_TICKS = 3 * TICKS_PER_SECOND
-        const val STEP = 0.3
-        const val MAX_STEPS = 90
+
+        const val BEAM_TICKS = 4
+        const val BAND_WIDTH = 0.25f
+        const val HAND_REACH = 0.5
+        const val HAND_DROP = 0.35
+        const val FLASH_RADIUS = 8.0
+        const val FLASH_STRENGTH = 0.35f
+        const val FLARE_TICKS = 10
+        const val FLARE_BRIGHTNESS = 12
+        const val IMPACT_RADIUS = 0.2
+        const val IMPACT_POINTS = 16
+        const val IMPACT_SPEED = 0.12
     }
 }

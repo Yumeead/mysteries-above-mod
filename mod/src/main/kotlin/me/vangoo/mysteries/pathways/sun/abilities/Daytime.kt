@@ -11,14 +11,13 @@ import me.vangoo.mysteries.ability.session
 import me.vangoo.mysteries.ability.sessionRunning
 import me.vangoo.mysteries.ability.stopSession
 import me.vangoo.mysteries.ability.sustain
+import me.vangoo.mysteries.ability.context.Fizzle
+import me.vangoo.mysteries.effect.ModParticles
+import me.vangoo.mysteries.effect.douse
 import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.Component
-import net.minecraft.server.level.ServerLevel
-import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
-import net.minecraft.world.level.block.Blocks
-import net.minecraft.world.level.block.LightBlock
 
 /**
  * Sun, Seq. 8 (Light Seeker): **Daylight**.
@@ -37,6 +36,11 @@ import net.minecraft.world.level.block.LightBlock
  * model, and moves with a single `setBlock`. The difference from night vision is mechanical
  * rather than cosmetic — night vision shows **you**, light changes the **world**: other players
  * see it, mob spawning stops, daylight sensors react.
+ *
+ * ## The light has a source
+ *
+ * A light block is invisible, so a lit cave with nothing in it to shine reads as a bug in the
+ * lighting. A small sun rides over the Seeker's shoulder — the place the light comes from.
  *
  * ## One block, and it is cleaned up
  *
@@ -76,29 +80,29 @@ class Daytime : ActiveAbility(AbilityIdentity.of("sun_daytime")) {
     override fun cast(context: CastContext): AbilityOutcome {
         if (context.sessionRunning) {
             context.stopSession()
-            return AbilityOutcome.done("Світло згасло")
+            return AbilityOutcome.Done()
         }
 
         val messaging = context.messaging
+        val sun = ModParticles.lightGlyph(context.effects.pathwayColor)
         // The light block is state in the world, not in the ability: the ability instance is
         // shared by every player, so the position must live in a specific Seeker's session.
         var lit: BlockPos? = null
 
         context.session {
             try {
-                val end = sustain(periodTicks = MOVE_PERIOD_TICKS, upkeep = periodicCost) { priest ->
-                    val here = priest.blockPosition().above()
-                    if (here != lit) {
-                        lit?.let { douse(priest.level() as ServerLevel, it) }
-                        lit = kindle(priest.level() as ServerLevel, here)
-                    }
+                val end = sustain(periodTicks = SUN_PERIOD_TICKS, upkeep = periodicCost) { priest ->
+                    lit = carryLight(priest.level(), lit, priest.blockPosition().above(), LIGHT_LEVEL)
+                    // Where the light comes from: a small sun over the shoulder. Two on one spot —
+                    // the light adds up, so the core burns whiter than its halo.
+                    val shoulder = fromCrown(priest, SUN_ASIDE, SUN_DOWN, SUN_FORWARD)
+                    repeat(SUN_LAYERS) { rideLight(priest, shoulder, sun) }
                 }
                 if (end == SessionEnd.EXHAUSTED) {
-                    messaging.actionBar(ownerId, Component.literal("Світло згасло: духовність скінчилась"))
+                    messaging.hint(ownerId, Component.literal("Світло згасло: духовність скінчилась"), Fizzle.EMPTY)
                 }
             } finally {
-                val level = owner?.level() as? ServerLevel
-                if (level != null) lit?.let { douse(level, it) }
+                owner?.let { priest -> lit?.let { douse(priest.level(), it) } }
             }
         }
 
@@ -106,30 +110,23 @@ class Daytime : ActiveAbility(AbilityIdentity.of("sun_daytime")) {
             null, context.origin.x, context.origin.y, context.origin.z,
             SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.6f, 1.8f,
         )
-        return AbilityOutcome.done("Довкола вас настав день")
-    }
-
-    /** Places the light if there is air there. Returns the position, or `null` if the spot is taken. */
-    private fun kindle(level: ServerLevel, pos: BlockPos): BlockPos? {
-        if (!level.getBlockState(pos).isAir) return null
-        val state = Blocks.LIGHT.defaultBlockState().setValue(LightBlock.LEVEL, LIGHT_LEVEL)
-        return if (level.setBlock(pos, state, UPDATE_FLAGS)) pos else null
-    }
-
-    /** Removes **our own** light. Someone else's block in that spot is left alone. */
-    private fun douse(level: ServerLevel, pos: BlockPos) {
-        if (level.getBlockState(pos).block === Blocks.LIGHT) {
-            level.setBlock(pos, Blocks.AIR.defaultBlockState(), UPDATE_FLAGS)
-        }
+        return AbilityOutcome.Done()
     }
 
     private companion object {
         const val BASE_PERIODIC_COST = 10
         const val COOLDOWN_SECONDS = 3
         const val LIGHT_LEVEL = 15
-        /** Once every five ticks: on foot the block changes less often, and there are four times fewer chunk updates. */
-        const val MOVE_PERIOD_TICKS = 5
-        /** Tell the client, do not wake the neighbours: a light block affects nothing. */
-        const val UPDATE_FLAGS = 2
+
+        /**
+         * Every two ticks — the sun lives four. The light block moves on the same beat, but only
+         * when the Seeker has left the block it burns in, so walking costs no more chunk updates.
+         */
+        const val SUN_PERIOD_TICKS = 2
+        /** Over the right shoulder, a little behind: seen by others, not in the Seeker's own face. */
+        const val SUN_ASIDE = 0.5
+        const val SUN_DOWN = 0.1
+        const val SUN_FORWARD = -0.2
+        const val SUN_LAYERS = 2
     }
 }

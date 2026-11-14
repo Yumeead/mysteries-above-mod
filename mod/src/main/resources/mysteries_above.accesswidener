@@ -19,3 +19,13 @@ mutable	field	net/minecraft/network/protocol/game/ClientboundPlayerInfoUpdatePac
 # goals, and loses only the right to choose its enemies. That is one line, `targetSelector`, and
 # vanilla keeps it protected because nothing outside a `Mob` normally rewrites another mob's will.
 accessible	field	net/minecraft/world/entity/Mob	targetSelector	Lnet/minecraft/world/entity/ai/goal/GoalSelector;
+
+# The fading text of the knowledge powers (effect/WorldText) — a vanilla text display, built from a
+# tag like `/summon` builds it, whose opacity is stepped down before it goes. Opacity is synced
+# entity data, but its setter is private: nothing in vanilla fades a display once it is placed.
+accessible	method	net/minecraft/world/entity/Display$TextDisplay	setTextOpacity	(B)V
+
+# The solid shaft of light (client/render/LightShaft) — a render type of the mod's own, with its own
+# shader and premultiplied blending. Vanilla builds every render type through this one factory and
+# keeps it package-private; there is no public way to a type that is not on its list.
+accessible	method	net/minecraft/client/renderer/rendertype/RenderType	create	(Ljava/lang/String;Lnet/minecraft/client/renderer/rendertype/RenderSetup;)Lnet/minecraft/client/renderer/rendertype/RenderType;

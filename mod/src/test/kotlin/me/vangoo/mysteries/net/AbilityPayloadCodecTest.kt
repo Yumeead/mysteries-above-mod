@@ -10,6 +10,10 @@ import me.vangoo.mysteries.net.payload.AbilityRosterPayload
 import me.vangoo.domain.valueobjects.Mastery
 import me.vangoo.domain.valueobjects.SanityLoss
 import me.vangoo.mysteries.net.payload.AbilityStatePayload
+import me.vangoo.mysteries.ability.context.Fizzle
+import me.vangoo.mysteries.net.payload.HintPayload
+import me.vangoo.mysteries.net.payload.WorldEffectPayload
+import net.minecraft.world.phys.Vec3
 import net.minecraft.core.RegistryAccess
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.chat.Component
@@ -197,6 +201,37 @@ class AbilityPayloadCodecTest {
         cooldownSeconds = cooldownSeconds,
         icon = ItemStack(item),
     )
+
+    @Test
+    @DisplayName("Підказка везе і зрив, і текст")
+    fun hintRoundTrips() {
+        val payload = HintPayload(Fizzle.EMPTY, Component.literal("Недостатньо духовності: потрібно 30, є 12"))
+
+        assertEquals(payload, roundTrip(payload, HintPayload.CODEC))
+    }
+
+    @Test
+    @DisplayName("Обидві форми світла проїжджають кожна своєю")
+    fun worldEffectsRoundTrip() {
+        val beam = WorldEffectPayload.Beam(Vec3(1.5, 96.0, -3.25), Vec3(1.5, 64.0, -3.25), 0xFFD27A, 8, 1f, 12f)
+        val flash = WorldEffectPayload.Flash(Vec3(0.0, 70.0, 0.0), 0xFFFFFF, 24f, 0.8f)
+
+        assertEquals(beam, roundTrip(beam, WorldEffectPayload.CODEC))
+        assertEquals(flash, roundTrip(flash, WorldEffectPayload.CODEC))
+    }
+
+    @Test
+    @DisplayName("Промінь з краю світу клієнт обрізає від джерела — місце, куди він падає, лишається")
+    fun anOverlongBeamIsClamped() {
+        val beam = WorldEffectPayload.Beam(Vec3(0.0, 1e6, 0.0), Vec3.ZERO, 0xFFFFFF, 10_000, 99f)
+
+        val decoded = roundTrip(beam, WorldEffectPayload.CODEC) as WorldEffectPayload.Beam
+
+        assertEquals(Vec3.ZERO, decoded.to)
+        assertEquals(WorldEffectPayload.MAX_LENGTH, decoded.from.y, 1e-6)
+        assertEquals(WorldEffectPayload.MAX_TICKS, decoded.ticks)
+        assertEquals(WorldEffectPayload.MAX_WIDTH, decoded.width)
+    }
 
     private fun <T : Any> roundTrip(payload: T, codec: StreamCodec<RegistryFriendlyByteBuf, T>): T {
         val buf = RegistryFriendlyByteBuf(Unpooled.buffer(), registries)

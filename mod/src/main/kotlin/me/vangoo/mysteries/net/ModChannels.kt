@@ -6,9 +6,11 @@ import me.vangoo.mysteries.net.payload.AbilityStatePayload
 import me.vangoo.mysteries.net.payload.ChoiceAnswerPayload
 import me.vangoo.mysteries.net.payload.ChoiceOfferPayload
 import me.vangoo.mysteries.net.payload.CreatureMovePayload
+import me.vangoo.mysteries.net.payload.HintPayload
 import me.vangoo.mysteries.net.payload.MarionetteOrderPayload
 import me.vangoo.mysteries.net.payload.MarionetteStatePayload
 import me.vangoo.mysteries.net.payload.ThreadSightPayload
+import me.vangoo.mysteries.net.payload.WorldEffectPayload
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.codec.StreamCodec
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
@@ -71,6 +73,17 @@ object ModChannels {
     /** A creature's technique, by the name of its animation — for the bodies that have a model. */
     val CREATURE_MOVE: ClientboundChannel<CreatureMovePayload> =
         clientbound(CreatureMovePayload.TYPE, CreatureMovePayload.CODEC)
+
+    /** A power that did not come: the fizzle at the hand, and the reason for those who want it. */
+    val HINT: ClientboundChannel<HintPayload> =
+        clientbound(HintPayload.TYPE, HintPayload.CODEC)
+
+    /**
+     * Light the client builds itself: a beam, a flash. One packet per shape instead of a stream of
+     * particles per tick — the client knows how to draw it, the server only says where and how long.
+     */
+    val WORLD_EFFECT: ClientboundChannel<WorldEffectPayload> =
+        clientbound(WorldEffectPayload.TYPE, WorldEffectPayload.CODEC)
 
     /** Every declared channel — for logs and tests. */
     val all: List<Channel<*>> get() = declared.toList()

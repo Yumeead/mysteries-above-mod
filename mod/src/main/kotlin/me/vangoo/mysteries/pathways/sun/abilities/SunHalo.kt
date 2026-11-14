@@ -11,7 +11,10 @@ import me.vangoo.mysteries.ability.session
 import me.vangoo.mysteries.ability.sessionRunning
 import me.vangoo.mysteries.ability.stopSession
 import me.vangoo.mysteries.ability.sustain
+import me.vangoo.domain.valueobjects.RgbColor
+import me.vangoo.mysteries.ability.context.Fizzle
 import me.vangoo.mysteries.effect.ModParticles
+import me.vangoo.mysteries.effect.burst
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
 import net.minecraft.core.particles.ParticleOptions
 import net.minecraft.network.chat.Component
@@ -71,19 +74,20 @@ class SunHalo : ActiveAbility(AbilityIdentity.of("sun_halo")) {
     override fun cast(context: CastContext): AbilityOutcome {
         if (context.sessionRunning) {
             context.stopSession()
-            return AbilityOutcome.done("Німб згас")
+            return AbilityOutcome.Done()
         }
 
         // Activation cleanses — that is what the halo is taken for at the moment things are
         // already bad.
-        val cleaned = cleanse(context.caster)
+        cleanse(context.caster)
 
         val radius = range(context.sequence)
         val hit = pulseDamage(context.sequence)
-        val mote = ModParticles.mote(context.effects.pathwayColor)
-        // The halo is a steady shape, so the mote is steady too: a spark shimmers and floats up,
-        // and a ring made of them read as a cloud. See `SpiritGlyphParticle`.
-        val glyph = ModParticles.glyph(context.effects.pathwayColor)
+        val color = context.effects.pathwayColor
+        // The halo is a steady shape that **shines**: the riding glyph, blended as light. A spark
+        // shimmers and floats up, and a ring made of them read as a cloud — see `SpiritGlyphParticle`.
+        val glyph = ModParticles.lightGlyph(color)
+        val pulseSpeed = radius / BURST_CARRY
         val messaging = context.messaging
         val beyonders = context.beyonders
 
@@ -98,7 +102,7 @@ class SunHalo : ActiveAbility(AbilityIdentity.of("sun_halo")) {
                     beat++
                     if (beat % BEATS_PER_PULSE != 0) return@sustain
 
-                    pulse(priest)
+                    pulse(priest, color, pulseSpeed)
                     val level = priest.level()
                     level.getEntitiesOfClass(
                         LivingEntity::class.java,
@@ -109,7 +113,7 @@ class SunHalo : ActiveAbility(AbilityIdentity.of("sun_halo")) {
                         .forEach { smite(level, priest, beyonders, it, hit) }
                 }
                 if (end == SessionEnd.EXHAUSTED) {
-                    messaging.actionBar(ownerId, Component.literal("Німб згас: духовність скінчилась"))
+                    messaging.hint(ownerId, Component.literal("Німб згас: духовність скінчилась"), Fizzle.EMPTY)
                 }
             } finally {
                 owner?.let { priest ->
@@ -121,9 +125,7 @@ class SunHalo : ActiveAbility(AbilityIdentity.of("sun_halo")) {
             }
         }
 
-        return AbilityOutcome.done(
-            if (cleaned > 0) "Німб спалахнув, знято шкідливих ефектів: $cleaned" else "Німб спалахнув",
-        )
+        return AbilityOutcome.Done()
     }
 
     /**
@@ -170,21 +172,22 @@ class SunHalo : ActiveAbility(AbilityIdentity.of("sun_halo")) {
     }
 
     /**
-     * A pulse strike — **the chime only**.
+     * A pulse strike: the chime, and a sphere of light bursting out of the priest to the edge of
+     * the radius — the strike is the size of its reach.
      *
-     * Circles on the ground were the first thing removed from here: `Blessing` already has that
+     * Circles on the ground were the first thing removed from here: `Blessing` already had that
      * same handwriting, and the Sun's two sustained powers looked identical. The second, wider
      * ring above the head that replaced them turned out no better: on the chime a second rim
-     * flashed around the halo, and instead of a strike it read as a glitch.
-     *
-     * The halo stays a single ring **always**. The strike is announced by the sound and its
-     * consequences by the target losing health; there is no need to draw it a second time.
+     * flashed around the halo, and instead of a strike it read as a glitch. A sphere is neither —
+     * it leaves the halo alone and is gone within half a second.
      */
-    private fun pulse(priest: ServerPlayer) {
-        priest.level().playSound(
+    private fun pulse(priest: ServerPlayer, color: RgbColor, speed: Double) {
+        val level = priest.level()
+        level.playSound(
             null, priest.x, priest.y, priest.z,
             SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.9f, 0.9f,
         )
+        burst(level, priest.position().add(0.0, priest.bbHeight * 0.6, 0.0), BURST_START, color, BURST_POINTS, speed)
     }
 
     private fun range(sequence: Sequence): Double =
@@ -218,6 +221,11 @@ class SunHalo : ActiveAbility(AbilityIdentity.of("sun_halo")) {
         const val HALO_POINTS = 10
         /** Slowly: the ring must not smear into an arc within the glyph's two-tick lifetime. */
         const val HALO_SPIN = 0.03
+
+        const val BURST_START = 0.4
+        const val BURST_POINTS = 40
+        /** The light brakes as it flies: it carries about seven times its speed. */
+        const val BURST_CARRY = 7.0
         const val TAU = 2.0 * Math.PI
     }
 }

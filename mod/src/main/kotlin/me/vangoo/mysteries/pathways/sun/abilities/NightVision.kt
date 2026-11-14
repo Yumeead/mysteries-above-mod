@@ -7,12 +7,18 @@ import me.vangoo.mysteries.ability.AbilityOutcome
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
 import me.vangoo.mysteries.ability.SessionEnd
+import me.vangoo.mysteries.ability.context.Fizzle
 import me.vangoo.mysteries.ability.session
 import me.vangoo.mysteries.ability.sessionRunning
 import me.vangoo.mysteries.ability.stopSession
 import me.vangoo.mysteries.ability.sustain
+import me.vangoo.mysteries.modId
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry
+import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType
 import net.minecraft.network.chat.Component
+import net.minecraft.network.codec.ByteBufCodecs
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.effect.MobEffectInstance
@@ -30,6 +36,13 @@ import net.minecraft.world.effect.MobEffects
  * vanilla `DARKNESS` (a Warden's blinding pulses): it is applied on top and blacks out the screen
  * even for someone who can see in the dark. The tick removes it every second, and **that** is
  * what tells the power from the bottle.
+ *
+ * ## The suns are seen from outside
+ *
+ * The potion is a private matter; the power is not. While it holds, the Seeker's eyes burn gold
+ * for everyone who looks at them — drawn the way a spider's eyes are, over the face, glowing in
+ * the dark. The client learns whose eyes burn from [SUN_EYES], an attachment synced to everyone
+ * who sees the player and never saved: the suns go out with the session, or with the server.
  */
 class NightVision : ActiveAbility(AbilityIdentity.of("sun_night_vision")) {
 
@@ -53,13 +66,14 @@ class NightVision : ActiveAbility(AbilityIdentity.of("sun_night_vision")) {
         "Два мініатюрних сонця у ваших очах.\n" +
             "▪ Нічне бачення, поки тримаєте\n" +
             "▪ Темрява вас не засліплює — навіть наслана\n" +
+            "▪ Ваші очі світяться золотом — їх видно в темряві\n" +
             "▪ Витрата: ${periodicCost(sequence)} духовності/с; повторний каст вимикає",
     )
 
     override fun cast(context: CastContext): AbilityOutcome {
         if (context.sessionRunning) {
             context.stopSession()
-            return AbilityOutcome.done("Сонця в очах згасли")
+            return AbilityOutcome.Done()
         }
 
         val messaging = context.messaging
@@ -71,12 +85,15 @@ class NightVision : ActiveAbility(AbilityIdentity.of("sun_night_vision")) {
                         MobEffectInstance(MobEffects.NIGHT_VISION, VISION_TICKS, 0, true, false, true),
                     )
                     priest.removeEffect(MobEffects.DARKNESS)
+                    // Asked every second rather than set once: a respawn or a new world brings a new player object.
+                    if (!priest.hasAttached(SUN_EYES)) priest.setAttached(SUN_EYES, true)
                 }
                 if (end == SessionEnd.EXHAUSTED) {
-                    messaging.actionBar(ownerId, Component.literal("Сонця згасли: духовність скінчилась"))
+                    messaging.hint(ownerId, Component.literal("Сонця згасли: духовність скінчилась"), Fizzle.EMPTY)
                 }
             } finally {
                 owner?.removeEffect(MobEffects.NIGHT_VISION)
+                owner?.removeAttached(SUN_EYES)
             }
         }
 
@@ -84,16 +101,27 @@ class NightVision : ActiveAbility(AbilityIdentity.of("sun_night_vision")) {
             null, context.origin.x, context.origin.y, context.origin.z,
             SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.6f, 2.0f,
         )
-        return AbilityOutcome.done("Темрява для вас скінчилась")
+        return AbilityOutcome.Done()
     }
 
-    private companion object {
-        const val BASE_PERIODIC_COST = 9
-        const val COOLDOWN_SECONDS = 3
+    companion object {
+        /** Whose eyes burn. Synced to every client that sees the player; never written to disk. */
+        val SUN_EYES: AttachmentType<Boolean> by lazy {
+            AttachmentRegistry.create(modId("sun_eyes")) { it.syncWith(ByteBufCodecs.BOOL, AttachmentSyncPredicate.all()) }
+        }
+
+        /** An attachment unknown when a player loads is dropped from them, so it is created during init. */
+        fun install() {
+            SUN_EYES
+        }
+
+        private const val BASE_PERIODIC_COST = 9
+        private const val COOLDOWN_SECONDS = 3
+
         /**
          * Over twenty seconds — so the client does not flicker with darkening: vanilla starts
          * blinking night vision over the last ten seconds of its duration.
          */
-        const val VISION_TICKS = 25 * TICKS_PER_SECOND
+        private const val VISION_TICKS = 25 * TICKS_PER_SECOND
     }
 }

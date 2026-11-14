@@ -1,6 +1,9 @@
 package me.vangoo.mysteries.ability.runtime
 
+import me.vangoo.mysteries.ability.context.Fizzle
 import me.vangoo.mysteries.ability.context.Messaging
+import me.vangoo.mysteries.net.ModChannels
+import me.vangoo.mysteries.net.payload.HintPayload
 import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
@@ -23,6 +26,16 @@ class ServerMessaging(private val server: () -> MinecraftServer?) : Messaging {
 
     override fun actionBar(playerId: UUID, message: Component) {
         find(playerId)?.let { actionBar(it, message) }
+    }
+
+    override fun hint(player: ServerPlayer, message: Component, fizzle: Fizzle) {
+        // A vanilla client draws no fizzle and has no setting to read hints from: the action bar is all it has.
+        if (ModChannels.HINT.reaches(player)) ModChannels.HINT.sendTo(player, HintPayload(fizzle, message))
+        else actionBar(player, message)
+    }
+
+    override fun hint(playerId: UUID, message: Component, fizzle: Fizzle) {
+        find(playerId)?.let { hint(it, message, fizzle) }
     }
 
     private fun find(playerId: UUID): ServerPlayer? = server()?.playerList?.getPlayer(playerId)

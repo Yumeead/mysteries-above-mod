@@ -9,4 +9,7 @@
 - [Ability visuals: pixel and on-theme](ability-visuals-pixel-and-on-theme.md) — no smooth geometry, no default ground circles; the effect must depict the ability
 - [Ability visuals must not clutter](ability-visuals-must-not-clutter.md) — persistent visuals sparse and fading; ThreadSight was rejected as screen-filling
 - [Death: deferred parts](death-pathway-deferred.md) — Spirit World pact/occupants closed in phase 12; recipe branch of Voice of the Dead → brewing
+- [Immersive abilities](immersive-abilities-direction.md) — no chat/action bar: fading world text, fizzle + hints toggle, additive glow then bloom, Sun pilot
+- [Sun pilot — state](immersive-sun-pilot-next.md) — milestone B built (uncommitted): what is left, screenshot lessons for the next pathway
 - [Stale dev server drops new packets](stale-dev-server-drops-new-packets.md) — restart runServer after server-side changes before debugging "nothing happens"
+- [Light-shaft beam](light-shaft-beam.md) — the solid beam in its own shader: sun-angled sky shafts, depth-soft ground, Iris fallback, knobs, open problems, how to verify

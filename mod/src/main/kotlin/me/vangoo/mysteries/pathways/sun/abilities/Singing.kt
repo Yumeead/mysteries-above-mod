@@ -10,17 +10,16 @@ import me.vangoo.mysteries.ability.session
 import me.vangoo.mysteries.ability.sessionRunning
 import me.vangoo.mysteries.effect.ModParticles
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
+import me.vangoo.domain.valueobjects.RgbColor
+import me.vangoo.mysteries.effect.burst
 import net.minecraft.core.particles.ParticleOptions
 import net.minecraft.network.chat.Component
-import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.phys.AABB
-import kotlin.math.cos
-import kotlin.math.sin
 
 /**
  * Sun, Seq. 9 (Bard): **Singing**.
@@ -61,58 +60,65 @@ class Singing : ActiveAbility(AbilityIdentity.of("sun_singing")) {
             "▪ Отримає лише той, хто дослухав до кінця — вас зокрема",
     )
 
-    /** A second song on top of the first is no longer singing. */
-    override fun canCast(context: CastContext): Boolean = !context.sessionRunning
-
     override fun cast(context: CastContext): AbilityOutcome {
+        // A second song on top of the first is no longer singing.
+        if (context.sessionRunning) return AbilityOutcome.failed("Ви вже співаєте")
+
         val pending = context.cast
         val radius = range(context.sequence)
         val boonTicks = boonSeconds(context.sequence) * TICKS_PER_SECOND
-        val mote = ModParticles.mote(context.effects.pathwayColor)
-        // The service goes into the session, not the context: `Messaging` holds nobody's identity.
-        val messaging = context.messaging
+        val color = context.effects.pathwayColor
+        val light = ModParticles.light(color)
 
         context.session {
             repeat(SCALE.size) { note ->
                 val bard = owner ?: return@session
-                sing(bard, mote, radius, note)
+                sing(bard, light, radius, note)
                 waitTicks(SONG_TICKS / SCALE.size)
             }
 
             val bard = owner ?: return@session
             val listeners = audience(bard, radius)
-            listeners.forEach { uplift(it, boonTicks) }
+            listeners.forEach { uplift(it, boonTicks, color) }
             pending.complete()
-
             chord(bard)
-            messaging.actionBar(ownerId, Component.literal("Пісню дослухали: ${listeners.size}"))
         }
 
-        return AbilityOutcome.Awaiting(Component.literal("Ви заспівали"))
+        return AbilityOutcome.Awaiting()
     }
 
-    /** One note: a sound plus a ring of motes marking whom the song reaches. */
-    private fun sing(bard: ServerPlayer, mote: ParticleOptions, radius: Double, note: Int) {
-        val level = bard.level() as? ServerLevel ?: return
+    /**
+     * One note: a sound, and the light of the song creeping out towards everyone who hears it.
+     *
+     * Each note carries the stream one step further — from the bard to [note]/[SCALE] of the way —
+     * so the light reaches a listener on the last note, the same moment the boon does. Whoever
+     * walks off is followed: the line is drawn to where they stand **now**.
+     */
+    private fun sing(bard: ServerPlayer, light: ParticleOptions, radius: Double, note: Int) {
+        val level = bard.level()
         level.playSound(
             null, bard.x, bard.y, bard.z,
             SoundEvents.NOTE_BLOCK_CHIME.value(), SoundSource.PLAYERS,
             1.2f, pitchOf(SCALE[note]),
         )
-        repeat(RING_POINTS) { i ->
-            val angle = TAU * i / RING_POINTS + note * RING_TURN
-            level.sendParticles(
-                mote,
-                bard.x + radius * cos(angle), bard.y + 0.4, bard.z + radius * sin(angle),
-                1, 0.0, 0.0, 0.0, 0.0,
-            )
+        val from = bard.position().add(0.0, bard.bbHeight * CHEST, 0.0)
+        val reach = (note + 1).toDouble() / SCALE.size
+        audience(bard, radius).filter { it !== bard }.forEach { listener ->
+            val to = listener.position().add(0.0, listener.bbHeight * CHEST, 0.0)
+            val way = to.subtract(from)
+            val drift = way.normalize().scale(DRIFT)
+            repeat(MOTES_PER_NOTE) {
+                // Over the stretch this note adds, and a little behind it: the stream is thickest at its head.
+                val along = reach - level.random.nextDouble() * STRETCH / SCALE.size
+                val at = from.add(way.scale(along.coerceIn(0.0, 1.0)))
+                level.sendParticles(light, at.x, at.y, at.z, 0, drift.x, drift.y, drift.z, 1.0)
+            }
         }
     }
 
     /** The final chord — it carries further than the song itself. */
     private fun chord(bard: ServerPlayer) {
-        val level = bard.level() as? ServerLevel ?: return
-        level.playSound(
+        bard.level().playSound(
             null, bard.x, bard.y, bard.z,
             SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1.0f, 1.5f,
         )
@@ -120,22 +126,19 @@ class Singing : ActiveAbility(AbilityIdentity.of("sun_singing")) {
 
     /** The listeners are players within the radius, the bard included. */
     private fun audience(bard: ServerPlayer, radius: Double): List<ServerPlayer> {
-        val level = bard.level() as? ServerLevel ?: return listOf(bard)
-        return level.getEntitiesOfClass(
+        return bard.level().getEntitiesOfClass(
             ServerPlayer::class.java,
             AABB.ofSize(bard.position(), radius * 2, radius * 2, radius * 2),
         ).filter { it.position().distanceToSqr(bard.position()) <= radius * radius }
     }
 
-    private fun uplift(listener: ServerPlayer, ticks: Int) {
+    /** Whoever stood to the last note flares up: the song has reached them. */
+    private fun uplift(listener: ServerPlayer, ticks: Int, color: RgbColor) {
         listener.addEffect(MobEffectInstance(MobEffects.REGENERATION, ticks, 0, false, true, true))
         listener.addEffect(MobEffectInstance(MobEffects.RESISTANCE, ticks, 0, false, true, true))
         listener.addEffect(MobEffectInstance(MobEffects.STRENGTH, ticks, 0, false, true, true))
-        (listener.level() as? ServerLevel)?.sendParticles(
-            net.minecraft.core.particles.ParticleTypes.NOTE,
-            listener.x, listener.y + listener.bbHeight + 0.3, listener.z,
-            6, 0.3, 0.1, 0.3, 1.0,
-        )
+        val centre = listener.position().add(0.0, listener.bbHeight * CHEST, 0.0)
+        burst(listener.level(), centre, BLOOM_RADIUS, color, BLOOM_POINTS, BLOOM_SPEED)
     }
 
     private fun range(sequence: Sequence): Double =
@@ -152,9 +155,16 @@ class Singing : ActiveAbility(AbilityIdentity.of("sun_singing")) {
         const val SONG_TICKS = 4 * TICKS_PER_SECOND
         /** A rising row in semitones from the root — a vanilla note block takes 0..24. */
         val SCALE = intArrayOf(0, 4, 7, 11, 12, 16)
-        const val RING_POINTS = 14
-        const val RING_TURN = 0.11
-        const val TAU = 2.0 * Math.PI
+
+        const val CHEST = 0.6
+        const val MOTES_PER_NOTE = 5
+        /** How far behind its head the stream of one note reaches, in notes. */
+        const val STRETCH = 1.5
+        /** The stream creeps, it does not fly: a light drifts half a block over its life. */
+        const val DRIFT = 0.06
+        const val BLOOM_RADIUS = 0.45
+        const val BLOOM_POINTS = 24
+        const val BLOOM_SPEED = 0.08
     }
 }
 

@@ -11,8 +11,12 @@ import me.vangoo.mysteries.client.render.HumanRenderer
 import me.vangoo.mysteries.client.render.MarionetteRenderer
 import me.vangoo.mysteries.client.screen.ChoiceScreen
 import me.vangoo.mysteries.client.render.SpiritGlyphParticle
+import me.vangoo.mysteries.client.render.SunEyesLayer
+import me.vangoo.mysteries.client.render.SpiritLightParticle
 import me.vangoo.mysteries.client.render.SpiritMoteParticle
 import me.vangoo.mysteries.client.render.SpiritThreads
+import me.vangoo.mysteries.client.render.WorldEffects
+import me.vangoo.mysteries.client.hud.HintHud
 import me.vangoo.mysteries.effect.ModParticles
 import me.vangoo.mysteries.entity.ModEntities
 import me.vangoo.mysteries.client.hud.AbilityHud
@@ -27,6 +31,11 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry
+import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityRenderLayerRegistrationCallback
+import net.minecraft.client.model.player.PlayerModel
+import net.minecraft.client.renderer.entity.RenderLayerParent
+import net.minecraft.client.renderer.entity.state.AvatarRenderState
+import net.minecraft.world.entity.EntityTypes
 import org.slf4j.LoggerFactory
 
 /**
@@ -57,6 +66,10 @@ object MysteriesAboveClient : ClientModInitializer {
         // An ability waiting on a pick. The screen holds the whole offer; nothing is stored here.
         ModChannels.CHOICE_OFFER.receiveOnClient { payload, context -> context.client().gui.setScreen(ChoiceScreen(payload)) }
 
+        // A power that did not come, and the light of one that did: both are drawn here, by this client alone.
+        ModChannels.HINT.receiveOnClient { payload, _ -> HintHud.accept(payload) }
+        ModChannels.WORLD_EFFECT.receiveOnClient { payload, _ -> WorldEffects.accept(payload) }
+
         // The cooldown clock. The client tick, not wall time: a paused single-player game stands
         // still — the server and the countdown along with it.
         ClientTickEvents.END_CLIENT_TICK.register {
@@ -65,6 +78,8 @@ object MysteriesAboveClient : ClientModInitializer {
             // come right after it rather than as a separate subscription with an undefined order.
             SanityAmbience.tick()
             SpiritThreads.tick()
+            HintHud.tick()
+            WorldEffects.tick()
         }
 
         // A mote's motion and fade are the client's: the server only sends "where and what colour".
@@ -77,6 +92,12 @@ object MysteriesAboveClient : ClientModInitializer {
             // The threads are built of the glyph's pixels, spawned by hand rather than by a packet.
             SpiritThreads.sprites = sprites
             SpiritGlyphParticle.Provider(sprites)
+        }
+        ParticleProviderRegistry.getInstance().register(ModParticles.SPIRIT_LIGHT) { sprites ->
+            SpiritLightParticle.Provider(sprites)
+        }
+        ParticleProviderRegistry.getInstance().register(ModParticles.SPIRIT_LIGHT_GLYPH) { sprites ->
+            SpiritGlyphParticle.Provider(sprites, SpiritLightParticle.LAYER, SpiritLightParticle.GLYPH_SIZE)
         }
 
         // The next world starts with a clean slate: someone else's roster is neither drawable nor wanted.
@@ -92,6 +113,11 @@ object MysteriesAboveClient : ClientModInitializer {
         EntityRendererRegistry.register(ModEntities.SIREN) { BbModelRenderer(it, "tyrant_siren_5", size = 1.6f) }
         EntityRendererRegistry.register(ModEntities.ANCIENT_WRAITH) { BbModelRenderer(it, "fool_ancient_wraith_5") }
         EntityRendererRegistry.register(ModEntities.THOUSAND_FACED_HUNTER) { BbModelRenderer(it, "fool_thousand_faced_hunter_6") }
+        // The suns of the Sun's Night Vision: one more layer on the vanilla player renderer, wide and slim alike.
+        LivingEntityRenderLayerRegistrationCallback.EVENT.register { type, renderer, helper, _ ->
+            @Suppress("UNCHECKED_CAST")
+            if (type == EntityTypes.PLAYER) helper.register(SunEyesLayer(renderer as RenderLayerParent<AvatarRenderState, PlayerModel>))
+        }
         ModChannels.CREATURE_MOVE.receiveOnClient { payload, _ -> CreatureMoves.accept(payload) }
 
         ClientPlayConnectionEvents.DISCONNECT.register { _, _ ->
@@ -100,9 +126,13 @@ object MysteriesAboveClient : ClientModInitializer {
             SanityAmbience.clear()
             SpiritThreads.clear()
             CreatureMoves.clear()
+            HintHud.clear()
+            WorldEffects.clear()
         }
 
         SpiritualityHud.register()
+        HintHud.register()
+        WorldEffects.register()
         AbilityHud.register()
         MarionetteHud.register()
         BottomHud.register()

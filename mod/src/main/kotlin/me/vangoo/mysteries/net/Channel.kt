@@ -50,8 +50,11 @@ class ClientboundChannel<T : CustomPacketPayload> internal constructor(
      * normal situation, not an error.
      */
     fun sendTo(players: Iterable<ServerPlayer>, payload: T) {
-        players.forEach { if (ServerPlayNetworking.canSend(it, type)) sendTo(it, payload) }
+        players.forEach { if (reaches(it)) sendTo(it, payload) }
     }
+
+    /** `false` for a vanilla client: it does not know this channel. */
+    fun reaches(player: ServerPlayer): Boolean = ServerPlayNetworking.canSend(player, type)
 }
 
 /** Client → server. */

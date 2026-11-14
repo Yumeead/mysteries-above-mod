@@ -28,7 +28,7 @@ object AbilityRequests {
     fun castSelected(player: ServerPlayer) {
         val selected = AbilityServices.selection.of(player.uuid)
         if (selected == null) {
-            AbilityServices.messaging.actionBar(
+            AbilityServices.messaging.hint(
                 player,
                 Component.literal("Здібність не обрано — утримайте клавішу касту, щоб обрати"),
             )
@@ -109,7 +109,7 @@ object AbilityRequests {
     }
 
     private fun report(player: ServerPlayer, report: CastReport): CastReport {
-        CastMessages.of(report)?.let { AbilityServices.messaging.actionBar(player, it) }
+        CastMessages.deliver(AbilityServices.messaging, player, report)
         return report
     }
 }

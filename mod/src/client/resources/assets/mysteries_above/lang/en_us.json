@@ -339,6 +339,7 @@
   "hud.mysteries_above.enabled": "On",
   "hud.mysteries_above.disabled": "Off",
   "hud.mysteries_above.reduced_motion": "Reduced motion",
+  "hud.mysteries_above.hints": "Ability hints",
   "hud.mysteries_above.low_numbers": "Low resources always show their number.",
   "hud.mysteries_above.aux.0": "Control loss",
   "hud.mysteries_above.aux.1": "Digestion",

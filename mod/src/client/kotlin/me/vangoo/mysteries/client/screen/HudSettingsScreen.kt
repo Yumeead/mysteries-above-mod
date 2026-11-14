@@ -77,6 +77,9 @@ class HudSettingsScreen(private val parent: Screen) : Screen(tr("settings")) {
                 options("reduced_motion", listOf("disabled", "enabled"), { ClientOptions.reducedMotion == (it == 1) }) {
                     ClientOptions.reducedMotion = it == 1
                 }
+                options("hints", listOf("disabled", "enabled"), { ClientOptions.hints == (it == 1) }) {
+                    ClientOptions.hints = it == 1
+                }
             }
             1 -> {
                 val names = SpiritualityNumbers.entries.map { "numbers.${it.name.lowercase()}" }
