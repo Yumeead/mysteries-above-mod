@@ -79,15 +79,25 @@ class LightClientGameTest : FabricClientGameTest {
             server.runCommand("time set noon")
             context.waitTicks(40)
             beams(context, server, "light-beams-day")
+
+            // Fabulous draws the translucent world into targets of its own and merges them by depth.
+            context.runOnClient<Throwable> { it.options.improvedTransparency().set(true) }
+            context.waitTicks(20)
+            beams(context, server, "light-beams-day-fabulous")
+            context.runOnClient<Throwable> { it.options.improvedTransparency().set(false) }
         }
     }
 
-    /** A pillar a block across falling from high above, and a thin thread across the yard. */
+    /** A pillar a block across falling from high above, a thin thread across the yard, and a ray along the view. */
     private fun beams(context: ClientGameTestContext, server: TestServerContext, name: String) {
         server.on { srv, player ->
             val base = player.position()
-            beam(srv.overworld(), base.add(0.0, 24.0, 9.0), base.add(0.0, 0.0, 9.0), SUN, 40, 1f)
-            beam(srv.overworld(), base.add(-5.0, 1.2, 5.0), base.add(5.0, 1.8, 11.0), SUN, 40, 0f)
+            val scheduling = AbilityServices.scheduling
+            beam(scheduling, srv.overworld(), base.add(0.0, 24.0, 9.0), base.add(0.0, 0.0, 9.0), SUN, 40, 1f)
+            beam(scheduling, srv.overworld(), base.add(-5.0, 1.2, 5.0), base.add(5.0, 1.8, 11.0), SUN, 40, 0f)
+            // From beside the eye straight ahead: the view the caster has of their own ray.
+            val eye = player.getEyePosition(1f)
+            beam(scheduling, srv.overworld(), eye.add(-0.36, -0.35, 0.5), eye.add(-1.5, -1.0, 13.0), SUN, 40, 0.25f)
         }
         context.waitTicks(12)
         context.takeScreenshot(name)

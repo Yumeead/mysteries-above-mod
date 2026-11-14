@@ -26,9 +26,17 @@ sealed interface WorldEffectPayload : CustomPacketPayload {
 
     /**
      * A line of light from [from] to [to], sown anew every tick for [ticks]; then it fades.
-     * [width] 0 is a thread, 1 a pillar a block across. [color] is RGB.
+     * [width] 0 is a thread, 1 a pillar a block across; [sourceWidth] is its width at [from] — a shaft
+     * out of the sun is as broad as the sun up there. [color] is RGB.
      */
-    data class Beam(val from: Vec3, val to: Vec3, val color: Int, val ticks: Int, val width: Float) : WorldEffectPayload
+    data class Beam(
+        val from: Vec3,
+        val to: Vec3,
+        val color: Int,
+        val ticks: Int,
+        val width: Float,
+        val sourceWidth: Float = width,
+    ) : WorldEffectPayload
 
     /** A flash at [at]: those within [radius] who look at it see their screen whiten by up to [strength]. */
     data class Flash(val at: Vec3, val color: Int, val radius: Float, val strength: Float) : WorldEffectPayload
@@ -37,6 +45,7 @@ sealed interface WorldEffectPayload : CustomPacketPayload {
 
         const val MAX_TICKS = 200
         const val MAX_WIDTH = 4f
+        const val MAX_SOURCE_WIDTH = 32f
         const val MAX_LENGTH = 256.0
 
         val TYPE: CustomPacketPayload.Type<WorldEffectPayload> = CustomPacketPayload.Type(modId("world_effect"))
@@ -52,6 +61,7 @@ sealed interface WorldEffectPayload : CustomPacketPayload {
                             buf.writeInt(payload.color)
                             buf.writeVarInt(payload.ticks)
                             buf.writeFloat(payload.width)
+                            buf.writeFloat(payload.sourceWidth)
                         }
                         is Flash -> {
                             buf.writeByte(FLASH)
@@ -65,11 +75,12 @@ sealed interface WorldEffectPayload : CustomPacketPayload {
                 StreamDecoder { buf ->
                     when (val tag = buf.readByte().toInt()) {
                         BEAM -> {
-                            val from = Vec3.STREAM_CODEC.decode(buf)
-                            var to = Vec3.STREAM_CODEC.decode(buf)
-                            if (from.distanceTo(to) > MAX_LENGTH) to = from.add(to.subtract(from).normalize().scale(MAX_LENGTH))
+                            var from = Vec3.STREAM_CODEC.decode(buf)
+                            val to = Vec3.STREAM_CODEC.decode(buf)
+                            // Cut from the source: where a beam lands is what it is about.
+                            if (from.distanceTo(to) > MAX_LENGTH) from = to.add(from.subtract(to).normalize().scale(MAX_LENGTH))
                             Beam(from, to, buf.readInt(), buf.readVarInt().coerceIn(1, MAX_TICKS),
-                                buf.readFloat().coerceIn(0f, MAX_WIDTH))
+                                buf.readFloat().coerceIn(0f, MAX_WIDTH), buf.readFloat().coerceIn(0f, MAX_SOURCE_WIDTH))
                         }
                         FLASH -> Flash(Vec3.STREAM_CODEC.decode(buf), buf.readInt(), buf.readFloat().coerceIn(0f, MAX_LENGTH.toFloat()),
                             buf.readFloat().coerceIn(0f, 1f))

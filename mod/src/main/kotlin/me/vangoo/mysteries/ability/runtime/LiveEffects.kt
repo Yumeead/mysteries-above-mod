@@ -35,8 +35,8 @@ internal class LiveEffects(
         counterFlow: ParticleOptions?,
     ) = bodyAura(scheduling, target, durationTicks, color ?: pathwayColor, counterFlow)
 
-    override fun beam(level: ServerLevel, from: Vec3, to: Vec3, durationTicks: Int, width: Float, color: RgbColor?) =
-        beamShape(level, from, to, color ?: pathwayColor, durationTicks, width)
+    override fun beam(level: ServerLevel, from: Vec3, to: Vec3, durationTicks: Int, width: Float, color: RgbColor?, sourceWidth: Float) =
+        beamShape(scheduling, level, from, to, color ?: pathwayColor, durationTicks, width, sourceWidth)
 
     override fun flare(level: ServerLevel, at: BlockPos, durationTicks: Int, brightness: Int) =
         flareShape(scheduling, level, at, durationTicks, brightness)

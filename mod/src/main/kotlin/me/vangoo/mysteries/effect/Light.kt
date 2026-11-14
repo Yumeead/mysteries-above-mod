@@ -26,28 +26,61 @@ import kotlin.math.sqrt
  * Light that a power **gives off**: the shapes that make a cast look like something happened in
  * the world rather than in the chat.
  *
- * Three of them, and they differ by who draws them:
+ * They differ by who draws them:
  *
  * | shape | drawn by | why there |
  * |---|---|---|
- * | [beam] | the client, from one packet | a line redrawn every tick would be a stream of particle packets |
+ * | [beam] | the client, from one packet (its light — the server, as real blocks) | a line redrawn every tick would be a stream of particle packets |
  * | [flash] | each client for itself | only the client knows where its camera looks |
  * | [flare] | the server, as a real block | real light lights the place up for everyone and stops mobs spawning |
+ * | [burst], [wave] | the server, as light particles | one shot each: the light flies on its own, no packet of their own is worth it |
  *
  * The glow itself is the client's: [ModParticles.SPIRIT_LIGHT] is blended additively, so where
- * the light is thick it whitens on its own — the hot core of a beam is nothing but its own overlap.
+ * the light is thick it whitens on its own; a beam is a shaft drawn by a shader of the mod's own
+ * (`client/render/LightShaft`), lit as a volume of hazy air.
  */
 
-/** A line of light from [from] to [to] that holds for [durationTicks] and then fades on its own. */
-fun beam(level: ServerLevel, from: Vec3, to: Vec3, color: RgbColor, durationTicks: Int, width: Float) {
+/**
+ * A line of light from [from] to [to] that holds for [durationTicks] and then fades on its own.
+ * It reaches [to] [BEAM_REACH_TICKS] after it is sent — a power that strikes where it lands waits as long.
+ * It is [width] across where it lands and [sourceWidth] at its source, evenly in between.
+ *
+ * The shaft is real light too, near where it lands: every few blocks of its last stretch the air is
+ * lit for as long as it shines, brighter the wider it is. Further up it lights nothing worth a block.
+ */
+fun beam(
+    scheduling: Scheduling,
+    level: ServerLevel,
+    from: Vec3,
+    to: Vec3,
+    color: RgbColor,
+    durationTicks: Int,
+    width: Float,
+    sourceWidth: Float = width,
+) {
     require(durationTicks > 0) { "Тривалість променя мусить бути додатною: $durationTicks" }
     val middle = from.add(to).scale(0.5)
-    val audience = from.distanceTo(to) / 2 + BEAM_AUDIENCE
+    val length = from.distanceTo(to)
     ModChannels.WORLD_EFFECT.sendTo(
-        PlayerLookup.around(level, middle, audience),
-        WorldEffectPayload.Beam(from, to, color.packed, durationTicks, width),
+        PlayerLookup.around(level, middle, length / 2 + BEAM_AUDIENCE),
+        WorldEffectPayload.Beam(from, to, color.packed, durationTicks, width, sourceWidth),
     )
+
+    if (length < 1e-3) return
+    val back = from.subtract(to).scale(1 / length)
+    val brightness = (BEAM_LIGHT + (LightBlock.MAX_LEVEL - BEAM_LIGHT) * width.coerceIn(0f, 1f)).toInt()
+    var along = BEAM_LIT_STEP / 2
+    while (along <= minOf(length, BEAM_LIT_REACH)) {
+        flare(scheduling, level, BlockPos.containing(to.add(back.scale(along))), durationTicks + BEAM_FADE_TICKS, brightness)
+        along += BEAM_LIT_STEP
+    }
 }
+
+/** How long a beam takes to reach its end: out of the sky it falls, from the hand it flies. */
+const val BEAM_REACH_TICKS = 3
+
+/** How long a beam takes to fade once its term is over. */
+const val BEAM_FADE_TICKS = 10
 
 /** A flash at [at]: those within [radius] who look at it see their screen whiten by up to [strength]. */
 fun flash(level: ServerLevel, at: Vec3, radius: Double, strength: Float, color: RgbColor) {
@@ -171,6 +204,11 @@ private const val LIGHT_FLAGS = 2
 
 /** How far beyond its own half-length a beam is still sent: about the distance particles are drawn at. */
 private const val BEAM_AUDIENCE = 64.0
+/** The stretch of a beam, back from where it lands, that lights the air — and the step between its lights. */
+private const val BEAM_LIT_REACH = 16.0
+private const val BEAM_LIT_STEP = 4.0
+/** The light a thread gives off; a pillar a block across gives the full 15. */
+private const val BEAM_LIGHT = 9
 
 private const val WARD_POINTS = 36
 private const val WARD_SPREAD = 0.85

@@ -55,7 +55,10 @@ interface Effects {
 
     /**
      * A line of light from [from] to [to]: it holds for [durationTicks], then fades on its own.
-     * [width] 0 is a thread, 1 a pillar a block across. It glows — where it is thick it whitens.
+     * [width] 0 is a thin ray, 1 a pillar a block across. It is a solid shaft of light in hazy air,
+     * white-hot at its heart and soft at its edges, and it keeps its colour against a bright sky.
+     * It reaches [to] `BEAM_REACH_TICKS` after the call, and lights the air near where it lands.
+     * [sourceWidth] is its width at [from], evenly in between: a shaft out of the sun is the sun's breadth up there.
      */
     fun beam(
         level: ServerLevel,
@@ -64,6 +67,7 @@ interface Effects {
         durationTicks: Int = BEAM_TICKS,
         width: Float = 0f,
         color: RgbColor? = null,
+        sourceWidth: Float = width,
     )
 
     /**

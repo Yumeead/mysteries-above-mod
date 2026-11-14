@@ -213,7 +213,7 @@ class AbilityPayloadCodecTest {
     @Test
     @DisplayName("Обидві форми світла проїжджають кожна своєю")
     fun worldEffectsRoundTrip() {
-        val beam = WorldEffectPayload.Beam(Vec3(1.5, 64.0, -3.25), Vec3(1.5, 96.0, -3.25), 0xFFD27A, 8, 1f)
+        val beam = WorldEffectPayload.Beam(Vec3(1.5, 96.0, -3.25), Vec3(1.5, 64.0, -3.25), 0xFFD27A, 8, 1f, 12f)
         val flash = WorldEffectPayload.Flash(Vec3(0.0, 70.0, 0.0), 0xFFFFFF, 24f, 0.8f)
 
         assertEquals(beam, roundTrip(beam, WorldEffectPayload.CODEC))
@@ -221,13 +221,14 @@ class AbilityPayloadCodecTest {
     }
 
     @Test
-    @DisplayName("Промінь до краю світу клієнт обрізає")
+    @DisplayName("Промінь з краю світу клієнт обрізає від джерела — місце, куди він падає, лишається")
     fun anOverlongBeamIsClamped() {
-        val beam = WorldEffectPayload.Beam(Vec3.ZERO, Vec3(0.0, 1e6, 0.0), 0xFFFFFF, 10_000, 99f)
+        val beam = WorldEffectPayload.Beam(Vec3(0.0, 1e6, 0.0), Vec3.ZERO, 0xFFFFFF, 10_000, 99f)
 
         val decoded = roundTrip(beam, WorldEffectPayload.CODEC) as WorldEffectPayload.Beam
 
-        assertEquals(WorldEffectPayload.MAX_LENGTH, decoded.to.y, 1e-6)
+        assertEquals(Vec3.ZERO, decoded.to)
+        assertEquals(WorldEffectPayload.MAX_LENGTH, decoded.from.y, 1e-6)
         assertEquals(WorldEffectPayload.MAX_TICKS, decoded.ticks)
         assertEquals(WorldEffectPayload.MAX_WIDTH, decoded.width)
     }

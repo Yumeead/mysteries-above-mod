@@ -1,54 +1,39 @@
 package me.vangoo.mysteries.client.render
 
-import me.vangoo.domain.valueobjects.RgbColor
 import me.vangoo.mysteries.client.ClientOptions
-import me.vangoo.mysteries.effect.ModParticles
+import me.vangoo.mysteries.effect.BEAM_FADE_TICKS
+import me.vangoo.mysteries.effect.BEAM_REACH_TICKS
 import me.vangoo.mysteries.modId
 import me.vangoo.mysteries.net.payload.WorldEffectPayload
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents
 import net.minecraft.client.DeltaTracker
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphicsExtractor
-import net.minecraft.core.particles.ColorParticleOption
 import net.minecraft.util.Mth
 import net.minecraft.world.level.ClipContext
 import net.minecraft.world.phys.HitResult
 import net.minecraft.world.phys.Vec3
-import kotlin.math.ceil
 
 /**
  * The client half of [me.vangoo.mysteries.effect.beam] and [me.vangoo.mysteries.effect.flash].
  *
- * A beam is sown here on the client's own clock: one packet says where and how long, and every tick
- * the line is filled with [ModParticles.SPIRIT_LIGHT] again. Each light lives longer than a tick,
- * so the line is always several generations deep — and because the light is additive, that depth
- * is what makes its middle white-hot. When the beam's term is over nothing is removed: the last
- * generations simply burn out, and the beam fades rather than switching off.
+ * A beam is a solid shaft of light ([LightShaft]), not a line of particles: one packet says where and
+ * how long, and every frame the shaft is drawn where it stands. Nothing about it switches: it runs
+ * out of its source over its first ticks — from the sky it falls, from the hand it flies — with its
+ * front thinning ahead of it, swells and brightens as it lands, holds, and then thins and fades away.
  *
  * A flash is weighed here too, because only this client knows where its camera looks: full in the
  * face, a quarter from the side or behind a wall, nothing beyond its radius.
- *
- * ponytail: a beam is made of particles, not of geometry — pixel-native and free of a render hook.
- * If a beam ever needs to be a solid shaft (seen end-on, or kilometres long), that is a
- * `LevelRenderEvents` pass with a vanilla `beaconBeam`/`lightning` render type.
  */
 object WorldEffects : HudElement {
 
-    /**
-     * [light] is the glow; [body] is a sparse translucent mote of the same colour under it. Additive
-     * light over a bright sky saturates to white and loses the pathway — the motes keep the hue
-     * where the glow alone cannot.
-     */
-    private class Beam(
-        val from: Vec3,
-        val to: Vec3,
-        val light: ColorParticleOption,
-        val body: ColorParticleOption,
-        val width: Float,
-        var ticksLeft: Int,
-    )
+    private class Beam(val from: Vec3, val to: Vec3, val rgb: Int, val width: Float, val sourceWidth: Float, val ticks: Int) {
+        var age = 0
+    }
 
     private val beams = mutableListOf<Beam>()
 
@@ -59,15 +44,16 @@ object WorldEffects : HudElement {
     fun register() {
         // Over the world, under the HUD: the screen whitens, the hearts stay readable.
         HudElementRegistry.attachElementBefore(VanillaHudElements.CROSSHAIR, modId("flash"), this)
+        // The shafts go in with the rest of the frame's geometry, after the entities and particles —
+        // and read the ground's depth, copied before anything else is drawn over it.
+        LevelRenderEvents.AFTER_OPAQUE_TERRAIN.register { if (beams.isNotEmpty() && !ShaderPacks.inUse) LightShaft.captureDepth() }
+        LevelRenderEvents.COLLECT_SUBMITS.register(::submit)
     }
 
     fun accept(payload: WorldEffectPayload) {
         when (payload) {
-            is WorldEffectPayload.Beam -> {
-                val color = RgbColor(payload.color and 0xFFFFFF)
-                beams += Beam(payload.from, payload.to, ModParticles.light(color), ModParticles.mote(color),
-                    payload.width, payload.ticks)
-            }
+            is WorldEffectPayload.Beam ->
+                beams += Beam(payload.from, payload.to, payload.color and 0xFFFFFF, payload.width, payload.sourceWidth, payload.ticks)
             is WorldEffectPayload.Flash -> weigh(payload)
         }
     }
@@ -76,10 +62,7 @@ object WorldEffects : HudElement {
         previousFlash = flash
         flash = if (flash < FLASH_GONE) 0f else flash * FLASH_DECAY
         if (Minecraft.getInstance().isPaused) return
-        beams.removeAll { beam ->
-            sow(beam)
-            --beam.ticksLeft <= 0
-        }
+        beams.removeAll { beam -> ++beam.age >= beam.ticks + BEAM_FADE_TICKS }
     }
 
     fun clear() {
@@ -94,31 +77,47 @@ object WorldEffects : HudElement {
         graphics.fill(0, 0, graphics.guiWidth(), graphics.guiHeight(), UiTheme.argb(flashColor, strength * FLASH_PEAK))
     }
 
-    private fun sow(beam: Beam) {
-        val level = Minecraft.getInstance().level ?: return
-        val random = level.random
-        val span = beam.to.subtract(beam.from)
-        val steps = ceil(span.length() / STEP).toInt().coerceAtLeast(1)
-        val across = 1 + (beam.width * ACROSS_PER_BLOCK).toInt()
-        val spread = beam.width / 2 + THREAD_SHIMMER
-        for (i in 0..steps) {
-            // Jittered along the line too: generations sown on the same points stack into beads.
-            val along = ((i + random.nextDouble() - 0.5) / steps).coerceIn(0.0, 1.0)
-            val at = beam.from.add(span.scale(along))
-            repeat(across) {
-                // Always visible: a pillar of light is seen from farther than a spark is.
-                level.addAlwaysVisibleParticle(
-                    beam.light,
-                    at.x + (random.nextDouble() - 0.5) * 2 * spread,
-                    at.y + (random.nextDouble() - 0.5) * 2 * THREAD_SHIMMER,
-                    at.z + (random.nextDouble() - 0.5) * 2 * spread,
-                    0.0, 0.0, 0.0,
-                )
-            }
-            if (random.nextFloat() < BODY_CHANCE) {
-                level.addAlwaysVisibleParticle(beam.body, at.x, at.y, at.z, 0.0, 0.0, 0.0)
+    /**
+     * Every shaft standing this frame, as one batch of geometry. The batch is written later, when the
+     * frame draws its translucent geometry — so it gets its own copy of the list and of the clock.
+     */
+    private fun submit(context: LevelRenderContext) {
+        if (beams.isEmpty()) return
+        // Under a shader pack the shaft's own shader is never run: the plain one is drawn instead.
+        val plain = ShaderPacks.inUse
+        if (!plain && !LightShaft.ready) return
+        val camera = context.levelState().cameraRenderState.pos
+        val partial = Minecraft.getInstance().deltaTracker.getGameTimeDeltaPartialTick(false)
+        val standing = beams.toList()
+        context.submitNodeCollector().submitCustomGeometry(context.poseStack(), if (plain) LightShaft.PLAIN else LightShaft.TYPE) { pose, buffer ->
+            for (beam in standing) {
+                val age = beam.age + partial
+                // It runs out of its source first, easing in and out, its front thin while it travels.
+                val reach = ease(age / BEAM_REACH_TICKS)
+                val span = beam.to.subtract(beam.from)
+                val to = beam.from.add(span.scale(reach.toDouble()))
+                val front = span.length() * reach * (1 - reach) * FRONT_SHARE
+                // It brightens and swells as it lands, and thins as it fades.
+                val appear = ease(age / APPEAR_TICKS)
+                val fading = ease((age - beam.ticks) / BEAM_FADE_TICKS)
+                val swell = (THIN + (1 - THIN) * appear) * (1 - (1 - THIN) * fading)
+                val source = haze(beam.sourceWidth) * swell
+                // Where its front stands now, between its width at the source and where it lands.
+                val radius = source + (haze(beam.width) * swell - source) * reach
+                val intensity = appear * (1 - fading)
+                if (plain) LightShaft.drawPlain(pose, buffer, camera, beam.from, to, source, radius, beam.rgb, intensity)
+                else LightShaft.draw(pose, buffer, camera, beam.from, to, source, radius, beam.rgb, intensity, age, front)
             }
         }
+    }
+
+    /** The haze's radius for a beam [width] blocks across: the width is the core, the haze reaches past it. */
+    private fun haze(width: Float): Double = maxOf(width, MIN_WIDTH) * HAZE_PER_WIDTH
+
+    /** 0 → 1 over 0 → 1, starting and settling gently; clamped outside. */
+    private fun ease(t: Float): Float {
+        val x = t.coerceIn(0f, 1f)
+        return x * x * (3 - 2 * x)
     }
 
     private fun weigh(payload: WorldEffectPayload.Flash) {
@@ -148,17 +147,16 @@ object WorldEffects : HudElement {
         return channel(16) or channel(8) or channel(0)
     }
 
-    /**
-     * Spacing of the lights along a beam. Each light outlives a tick by ten or so, so the line is
-     * that many generations deep: sparser than it looks, or the overlap saturates to white even
-     * where the pathway's colour should show.
-     */
-    private const val STEP = 0.5
-    private const val ACROSS_PER_BLOCK = 2f
-    /** The share of the line's points that also get a translucent mote of the beam's colour. */
-    private const val BODY_CHANCE = 0.2f
-    /** How much a thread wavers: a line held perfectly straight reads as geometry, not light. */
-    private const val THREAD_SHIMMER = 0.03f
+    /** How long a beam takes to come to full light: a little longer than to land, so it lands still growing. */
+    private const val APPEAR_TICKS = 5f
+    /** How thin a beam is at its first and last tick, as a share of its full width. */
+    private const val THIN = 0.55
+    /** How much of a travelling beam its front thins over, at the middle of its way. */
+    private const val FRONT_SHARE = 1.2
+    /** A "thread" of width 0 is still a ray of light, not nothing. */
+    private const val MIN_WIDTH = 0.12f
+    /** The shader's core is 0.16 of the haze, its glow reaching past it; a haze of 1.3 widths reads as the width. */
+    private const val HAZE_PER_WIDTH = 1.3
 
     private const val FLASH_PEAK = 0.85f
     private const val FLASH_DECAY = 0.62f
