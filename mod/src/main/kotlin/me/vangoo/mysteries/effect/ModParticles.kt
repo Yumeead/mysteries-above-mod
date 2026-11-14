@@ -97,12 +97,24 @@ object ModParticles {
         { type -> ColorParticleOption.streamCodec(type) },
     )
 
+    /**
+     * A scrap of paper: it flutters down, turning as it goes, settles and fades — the Fool's matter.
+     *
+     * Not light and not spirit: it takes the light of where it falls, as a page would. The tint is the
+     * paper's shade — white, ash, or the red of a wound taken off a body.
+     */
+    val PAPER_SCRAP: ParticleType<ColorParticleOption> = FabricParticleTypes.complex(
+        { type -> ColorParticleOption.codec(type) },
+        { type -> ColorParticleOption.streamCodec(type) },
+    )
+
     /** Forces the class to initialise before the registries close. */
     fun register() {
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, modId("spirit_mote"), SPIRIT_MOTE)
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, modId("spirit_glyph"), SPIRIT_GLYPH)
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, modId("spirit_light"), SPIRIT_LIGHT)
         Registry.register(BuiltInRegistries.PARTICLE_TYPE, modId("spirit_light_glyph"), SPIRIT_LIGHT_GLYPH)
+        Registry.register(BuiltInRegistries.PARTICLE_TYPE, modId("paper_scrap"), PAPER_SCRAP)
     }
 
     /**
@@ -125,6 +137,13 @@ object ModParticles {
     /** Light that rides its owner. The alpha is ours just the same. */
     fun lightGlyph(color: RgbColor): ColorParticleOption =
         ColorParticleOption.create(SPIRIT_LIGHT_GLYPH, OPAQUE or color.packed)
+
+    /** A scrap of paper in the given shade. The alpha is ours just the same. */
+    fun scrap(color: RgbColor = PAPER): ColorParticleOption =
+        ColorParticleOption.create(PAPER_SCRAP, OPAQUE or color.packed)
+
+    /** Plain paper: a warm white, never the pure white of light. */
+    val PAPER: RgbColor = RgbColor.of(240, 236, 224)
 
     /**
      * How [SPIRIT_LIGHT] brakes in flight: its speed is multiplied by this every tick, so it carries
