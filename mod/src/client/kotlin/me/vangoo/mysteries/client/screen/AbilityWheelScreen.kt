@@ -14,22 +14,39 @@ import me.vangoo.mysteries.net.ModChannels
 import me.vangoo.mysteries.net.payload.AbilityActionPayload
 import me.vangoo.mysteries.net.payload.AbilityActionPayload.Action
 import me.vangoo.mysteries.net.payload.AbilityRosterPayload
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper
 import net.minecraft.client.KeyMapping
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.input.KeyEvent
 import net.minecraft.client.input.MouseButtonEvent
+import net.minecraft.client.resources.sounds.SimpleSoundInstance
 import net.minecraft.network.chat.Component
+import net.minecraft.sounds.SoundEvents
 import net.minecraft.util.FormattedCharSequence
+import org.lwjgl.glfw.GLFW
+import kotlin.math.PI
+import kotlin.math.cos
 import kotlin.math.roundToInt
+import kotlin.math.sin
 
 /**
  * The ability wheel: hold the cast key, point, let go — and the card under the cursor is now the
  * one the cast key fires. The wheel **picks, it does not cast** (the player's decision): a tap of
  * the key casts what was picked, so choosing in calm and striking later are two separate moves.
  *
- * It lives only while [key] is held. Releasing it sends `SELECT` for the card under the cursor (a
+ * It lives while [key] is held. Releasing it sends `SELECT` for the card under the cursor (a
  * toggle too — tapping the key will flip it), or nothing from the dead centre.
+ *
+ * **Pinning.** Held past 1.5 s, a thin ring round the centre starts to fill; at 6 s it turns gold,
+ * clicks, and the wheel is pinned: letting go no longer closes it, a click on a card picks that card
+ * and the wheel stays, and the cast key (pressed and let go) or Escape closes it. The pin is for
+ * sorting out a loadout in calm, not for a fight — a fight never holds the key for six seconds.
+ *
+ * **Walking.** The wheel hands the movement keys back to the world every tick, so the player walks,
+ * jumps, sneaks and sprints with it open; the camera stays still, as the mouse is on the wheel.
+ * Vanilla reads those keys every tick whatever screen is open — the screen only stopped them by
+ * never setting them — and on close `grabMouse` re-reads every key, so nothing stays stuck down.
  *
  * It shows the active group. The mouse wheel walks the pages of every group in turn (a group of
  * more than twelve takes several), and the group of the page it stops on becomes the active one —
@@ -44,8 +61,8 @@ import kotlin.math.roundToInt
  *
  * Two motions, both on the client tick plus `partialTick` rather than a wall clock: the wheel
  * opens from 0.88 to full size in 100 ms, and the card under the cursor grows to 1.08 in 80 ms.
- * There is no closing motion on purpose — lingering on screen would stretch the moment the
- * player cannot move. `reducedMotion` turns both off.
+ * There is no closing motion on purpose: a screen lingering after the key is up would swallow the
+ * next tap of it. `reducedMotion` turns both off.
  *
  * **Modes.** A card whose ability has several ways of use (the Underworld door's four) opens a
  * column of mode pills beside itself once the cursor has rested on it for 200 ms — a dwell, so a
@@ -103,6 +120,14 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
     /** The player's own menu blur, borrowed while the wheel eases it in; `-1` — not read yet. */
     private var ownBlur = -1
 
+    /** Held long enough: the wheel outlives the key. [released] — the key has been let go since. */
+    private var pinned = false
+    private var released = false
+
+    /** The keys the wheel hands back to the world, and whether each was down on the last tick. */
+    private val movement by lazy { with(minecraft.options) { listOf(keyUp, keyDown, keyLeft, keyRight, keyJump, keyShift, keySprint) } }
+    private val movementDown = BooleanArray(7)
+
     override fun init() {
         // `init` runs again on a resize; the setting is read once, before the wheel touches it.
         if (ownBlur < 0) ownBlur = minecraft.options.menuBackgroundBlurriness().get()
@@ -150,7 +175,33 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
             rebuildPills()
             updateCaption()
         }
+        // A release the screen never saw (it beat the screen open, or the window lost focus) still
+        // counts — otherwise the wheel would sit there and pin itself.
+        if (!pinned && !ModKeys.isHeld(minecraft, KeyMappingHelper.getBoundKeyOf(key))) {
+            commit()
+            return
+        }
+        if (!pinned && age >= PIN_TICKS) {
+            pinned = true
+            minecraft.soundManager.play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK.value(), PIN_PITCH, PIN_VOLUME))
+            updateCaption()
+        }
+        walk()
         rebuild()
+    }
+
+    /**
+     * The movement keys follow the keyboard while the wheel is open. Only on an edge: a toggle-sneak
+     * flips on every `setDown(true)`, so writing the level each tick would flip it every tick.
+     */
+    private fun walk() {
+        movement.forEachIndexed { index, mapping ->
+            val down = ModKeys.isHeld(minecraft, KeyMappingHelper.getBoundKeyOf(mapping))
+            if (down != movementDown[index]) {
+                mapping.setDown(down)
+                movementDown[index] = down
+            }
+        }
     }
 
     // ── Input ───────────────────────────────────────────────────────────────────
@@ -183,6 +234,8 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
     override fun keyPressed(event: KeyEvent): Boolean {
         val size = onPage().size
         when {
+            // The key's own repeats while held, and its press on a pinned wheel: the release decides.
+            key.matches(event) -> Unit
             event.isRight && size > 0 -> hover(Math.floorMod(hovered + 1, size))
             event.isLeft && size > 0 -> hover(Math.floorMod(if (hovered < 0) -1 else hovered - 1, size))
             (event.isDown || event.isUp) && pills.isNotEmpty() -> {
@@ -258,22 +311,47 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
 
     override fun keyReleased(event: KeyEvent): Boolean {
         if (!key.matches(event)) return super.keyReleased(event)
-        commit()
+        castKeyReleased()
         return true
     }
 
     /** The cast key may be bound to a mouse button (Mouse4) — release works the same way. */
     override fun mouseReleased(event: MouseButtonEvent): Boolean {
         if (!key.matchesMouse(event)) return super.mouseReleased(event)
-        commit()
+        castKeyReleased()
         return true
     }
 
+    /** A pinned wheel takes clicks: the card under the cursor is picked, and the wheel stays. */
+    override fun mouseClicked(event: MouseButtonEvent, doubleClick: Boolean): Boolean {
+        if (!pinned || event.button() != GLFW.GLFW_MOUSE_BUTTON_LEFT || key.matchesMouse(event)) return super.mouseClicked(event, doubleClick)
+        select()
+        return true
+    }
+
+    /**
+     * The ordinary wheel: let go — pick and close. A pinned one ignores the release that pinned it
+     * and closes on the next, so the key is up when the world gets it back — a close on the press
+     * would hand the world a held key, and its release would cast.
+     */
+    private fun castKeyReleased() {
+        when {
+            !pinned -> commit()
+            released -> onClose()
+            else -> released = true
+        }
+    }
+
+    /** Pick the card under the cursor; only the ordinary wheel closes after it. */
     private fun commit() {
+        select()
+        if (!pinned) onClose()
+    }
+
+    private fun select() {
         hoveredEntry()?.takeIf { it.type != AbilityType.PERMANENT_PASSIVE }?.let {
             ModChannels.ABILITY_ACTION.sendToServer(AbilityActionPayload(Action.SELECT, it.identity, hoveredModeId()))
         }
-        onClose()
     }
 
     // ── State ───────────────────────────────────────────────────────────────────
@@ -310,6 +388,7 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
         val entry = hoveredEntry()
         val mode = hoveredMode.takeIf { it >= 0 }?.let { entry?.modes?.getOrNull(it) }
         val title = when {
+            entry == null && pinned -> Component.translatable("wheel.$MOD_ID.pinned", key.translatedKeyMessage)
             entry == null -> Component.translatable("wheel.$MOD_ID.cancel")
             mode != null -> entry.name.copy().append(" · ").append(mode.name)
             else -> entry.name
@@ -429,8 +508,10 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
             }
         }
 
-        // Centre: a cross-hair, the page counter, then the caption below the ring.
-        graphics.centeredText(font, "+", centerX, centerY - 4, UiTheme.argb(UiTheme.MUTED, alpha))
+        // Centre: a cross-hair (a pin once pinned) in the hold ring, the page counter, then the caption below the ring.
+        holdRing(graphics, now, alpha)
+        if (pinned) pin(graphics, UiTheme.argb(UiTheme.ACCENT, alpha))
+        else graphics.centeredText(font, "+", centerX, centerY - 4, UiTheme.argb(UiTheme.MUTED, alpha))
         pageLabel?.let { graphics.centeredText(font, it, centerX, centerY + 8, UiTheme.argb(UiTheme.MUTED, alpha)) }
 
         val ringBottom = centerY + WheelLayout.radius(cards.size) + CARD / 2 + font.lineHeight + 6
@@ -472,6 +553,34 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
             if (index == hoveredMode) graphics.outline(left - 1, top - 1, w + 2, h + 2, UiTheme.argb(accent, a))
             graphics.pose().popMatrix()
         }
+    }
+
+    /**
+     * The hold ring: a one-pixel circle round the centre, filled clockwise from the top between 1.5 s
+     * and 6 s of holding, breathing while it fills; gold and whole once pinned.
+     */
+    private fun holdRing(graphics: GuiGraphicsExtractor, now: Float, alpha: Float) {
+        val fill = if (pinned) 1f else ((now - RING_TICKS) / (PIN_TICKS - RING_TICKS)).coerceAtMost(1f)
+        if (fill <= 0f) return
+        val breath = if (pinned || ClientOptions.reducedMotion) 1f else 0.75f + 0.25f * sin(now * BREATH_RATE)
+        val lit = UiTheme.argb(if (pinned) UiTheme.ACCENT else UiTheme.TEXT, alpha * breath)
+        val track = UiTheme.argb(UiTheme.MUTED, alpha * TRACK_ALPHA)
+        val steps = (2 * PI * RING_RADIUS).roundToInt()
+        for (i in 0 until steps) {
+            val angle = 2 * PI * i / steps
+            val x = centerX + (sin(angle) * RING_RADIUS).roundToInt()
+            val y = centerY - (cos(angle) * RING_RADIUS).roundToInt()
+            graphics.fill(x, y, x + 1, y + 1, if (i < fill * steps) lit else track)
+        }
+    }
+
+    /** A pixel pin where the cross-hair was: a head three wide, a shoulder, and the point. */
+    private fun pin(graphics: GuiGraphicsExtractor, color: Int) {
+        val x = centerX - 2
+        val y = centerY - 4
+        graphics.fill(x + 1, y, x + 4, y + 2, color)
+        graphics.fill(x, y + 2, x + 5, y + 3, color)
+        graphics.fill(x + 2, y + 3, x + 3, y + 7, color)
     }
 
     /** Draws [body] scaled by [factor] about the card's centre; 1 draws it as it is. */
@@ -518,5 +627,14 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
 
         /** The hour marks stay quiet until their card is hovered. */
         const val NUMERAL_ALPHA = 0.6f
+
+        /** The hold ring shows from 1.5 s and pins at 6 s; its radius, unlit track and breathing. */
+        const val RING_TICKS = 30f
+        const val PIN_TICKS = 120
+        const val RING_RADIUS = 9
+        const val TRACK_ALPHA = 0.25f
+        const val BREATH_RATE = 0.5f
+        const val PIN_PITCH = 1.8f
+        const val PIN_VOLUME = 0.3f
     }
 }

@@ -286,6 +286,7 @@
   "wheel.mysteries_above.title": "Ability wheel",
   "wheel.mysteries_above.cancel": "Release here to cancel",
   "wheel.mysteries_above.modes_hint": "Rest the cursor here for modes",
+  "wheel.mysteries_above.pinned": "Pinned · %s or Esc to close",
   "hud.mysteries_above.no_selection": "Nothing selected",
   "subtitles.mysteries_above.whisper": "Voices that aren't there",
   "subtitles.mysteries_above.heartbeat": "Your own heart",

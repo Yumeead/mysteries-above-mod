@@ -206,20 +206,21 @@ object ModKeys {
             heldHotkeys.clear()
             return
         }
-        val window = client.window
         for ((name, target) in ClientOptions.group.hotkeys) {
             val identity = AbilityGroup.abilityOf(target)
-            val key = InputConstants.getKey(name)
-            val down = when (key.type) {
-                InputConstants.Type.MOUSE -> GLFW.glfwGetMouseButton(window.handle(), key.value) == GLFW.GLFW_PRESS
-                else -> InputConstants.isKeyDown(window, key.value)
-            }
-            if (!down) {
+            if (!isHeld(client, InputConstants.getKey(name))) {
                 heldHotkeys.remove(name)
             } else if (heldHotkeys.add(name) && ClientAbilityState.entry(identity) != null) {
                 use(identity, AbilityGroup.modeOf(target))
             }
         }
+    }
+
+    /** Whether [key] is physically down right now — keyboard or mouse — whatever screen is open. */
+    fun isHeld(client: Minecraft, key: InputConstants.Key): Boolean = when {
+        key == InputConstants.UNKNOWN -> false
+        key.type == InputConstants.Type.MOUSE -> GLFW.glfwGetMouseButton(client.window.handle(), key.value) == GLFW.GLFW_PRESS
+        else -> InputConstants.isKeyDown(client.window, key.value)
     }
 
     fun isBookKey(event: KeyEvent): Boolean = BOOK.matches(event)

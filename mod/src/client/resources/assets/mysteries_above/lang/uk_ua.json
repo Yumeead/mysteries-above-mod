@@ -286,6 +286,7 @@
   "wheel.mysteries_above.title": "Колесо здібностей",
   "wheel.mysteries_above.cancel": "Відпустіть тут — скасувати",
   "wheel.mysteries_above.modes_hint": "Затримайте курсор — режими",
+  "wheel.mysteries_above.pinned": "Закріплено · %s або Esc — закрити",
   "hud.mysteries_above.no_selection": "Нічого не обрано",
   "subtitles.mysteries_above.whisper": "Голоси, яких немає",
   "subtitles.mysteries_above.heartbeat": "Власне серце",
