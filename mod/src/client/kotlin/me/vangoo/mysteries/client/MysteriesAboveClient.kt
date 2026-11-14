@@ -90,8 +90,6 @@ object MysteriesAboveClient : ClientModInitializer {
             SpiritMoteParticle.Provider(sprites)
         }
         ParticleProviderRegistry.getInstance().register(ModParticles.SPIRIT_GLYPH) { sprites ->
-            // The threads are built of the glyph's pixels, spawned by hand rather than by a packet.
-            SpiritThreads.sprites = sprites
             SpiritGlyphParticle.Provider(sprites)
         }
         ParticleProviderRegistry.getInstance().register(ModParticles.SPIRIT_LIGHT) { sprites ->

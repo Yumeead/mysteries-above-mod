@@ -60,7 +60,7 @@ class Possession : ActiveAbility(AbilityIdentity.of("fool_marionette_possession"
 
         if (Marionettes.isPossessing(casterId)) {
             Marionettes.eject(context.caster)
-            return AbilityOutcome.done("Ви повернулись у власне тіло")
+            return AbilityOutcome.Done()
         }
 
         val puppet = Marionettes.selected(casterId)
@@ -76,7 +76,8 @@ class Possession : ActiveAbility(AbilityIdentity.of("fool_marionette_possession"
 
         Marionettes.possess(context.caster, puppet)
         Marionettes.pushState(context.caster)
-        return AbilityOutcome.done("Ви в тілі ${Marionettes.nameOf(puppet)}")
+        // The thread jerked taut between the two bodies says it; the book shows whose powers are lent.
+        return AbilityOutcome.Done()
     }
 
     private companion object {

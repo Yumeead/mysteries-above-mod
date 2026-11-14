@@ -54,6 +54,7 @@ object WorldEffects : HudElement {
         LevelRenderEvents.COLLECT_SUBMITS.register(Paper::submit)
         LevelRenderEvents.COLLECT_SUBMITS.register(PrivateSight::submit)
         LevelRenderEvents.COLLECT_SUBMITS.register(Strands::submit)
+        LevelRenderEvents.COLLECT_SUBMITS.register(SpiritThreads::submit)
     }
 
     fun accept(payload: WorldEffectPayload) {

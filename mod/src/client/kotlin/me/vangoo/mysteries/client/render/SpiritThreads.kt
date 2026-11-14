@@ -1,20 +1,19 @@
 package me.vangoo.mysteries.client.render
 
+import com.mojang.blaze3d.vertex.PoseStack
+import com.mojang.blaze3d.vertex.VertexConsumer
 import me.vangoo.mysteries.entity.MarionetteEntity
 import me.vangoo.mysteries.net.payload.ThreadSightPayload
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext
 import net.minecraft.client.Camera
 import net.minecraft.client.Minecraft
-import net.minecraft.client.multiplayer.ClientLevel
-import net.minecraft.client.particle.ParticleEngine
-import net.minecraft.client.particle.SingleQuadParticle
-import net.minecraft.client.particle.SpriteSet
-import net.minecraft.client.renderer.state.level.QuadParticleRenderState
-import net.minecraft.client.renderer.texture.TextureAtlasSprite
+import net.minecraft.client.renderer.rendertype.RenderTypes
 import net.minecraft.util.LightCoordsUtil
 import net.minecraft.util.Mth
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.decoration.ArmorStand
+import net.minecraft.world.phys.Vec3
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -39,19 +38,16 @@ import kotlin.math.sin
  * of a moving shoulder without trailing behind it (see pitfall 7 in CLAUDE.md, which the glyph
  * already paid for).
  *
- * ## Knots, not lines
+ * ## A line a pixel wide
  *
- * A strand is a row of the spirit glyph's own pixel diamonds — the mod's visual vocabulary, and
- * no smooth geometry over the game. The knots are spawned once per strand and live as long as
- * the strand does; each one asks its [Tangle] where it is, every frame.
+ * A strand is a hairline a pixel of a block across, bent along its curve in short straight runs —
+ * the Door's rim and the Magician's thread are drawn the same way. The first version strung it out
+ * of the spirit glyph's diamonds, and a bond across a few blocks read as a dotted line.
  *
- * ponytail: a fixed number of knots per strand, so a bond stretched across 30+ blocks reads as a
- * dotted line. Subdivide by length if long bonds start to matter.
+ * Drawn translucent rather than as light ([RenderTypes.textBackground]): a puppet's strands are
+ * black, and light can only add, so black light would not be there at all.
  */
 object SpiritThreads {
-
-    /** The glyph's sprites, handed over by its provider registration — filled once the atlas is. */
-    var sprites: SpriteSet? = null
 
     private var range = 0
     private var bonds: Map<Int, ThreadSightPayload.Bond> = emptyMap()
@@ -67,7 +63,6 @@ object SpiritThreads {
     }
 
     fun clear() {
-        tangles.values.forEach(Tangle::cut)
         tangles.clear()
         bonds = emptyMap()
         range = 0
@@ -79,9 +74,8 @@ object SpiritThreads {
         val mc = Minecraft.getInstance()
         val level = mc.level
         val me = mc.player
-        val sprites = sprites
         // The packets are the subscription: no beat for a second and a half — the sight is gone.
-        if (level == null || me == null || sprites == null || clock - heardAt > STALE_TICKS) {
+        if (level == null || me == null || clock - heardAt > STALE_TICKS) {
             if (tangles.isNotEmpty()) clear()
             return
         }
@@ -101,12 +95,22 @@ object SpiritThreads {
         wasCrouching = me.isShiftKeyDown
         if (focus) tangles.values.forEach(Tangle::notice)
 
-        tangles.entries.removeIf { (id, tangle) -> (wanted[id] !== tangle.body).also { gone -> if (gone) tangle.cut() } }
+        tangles.entries.removeIf { (id, tangle) -> wanted[id] !== tangle.body }
         wanted.forEach { (id, body) ->
             val bond = bonds[id]
-            val tangle = tangles.getOrPut(id) { Tangle(body) }
-            tangle.tick(bond?.grip ?: 0f, bond?.holder?.let(level::getEntity))
-            tangle.spin(level, mc.particleEngine, sprites, dense = bond != null)
+            tangles.getOrPut(id) { Tangle(body) }.tick(bond?.grip ?: 0f, bond?.holder?.let(level::getEntity))
+        }
+    }
+
+    fun submit(context: LevelRenderContext) {
+        if (tangles.isEmpty()) return
+        val mc = Minecraft.getInstance()
+        val camera = context.levelState().cameraRenderState.pos
+        val view = mc.gameRenderer.mainCamera()
+        val partial = mc.deltaTracker.getGameTimeDeltaPartialTick(false)
+        val all = tangles.values.toList()
+        context.submitNodeCollector().submitCustomGeometry(context.poseStack(), RenderTypes.textBackground()) { pose, buffer ->
+            for (tangle in all) tangle.draw(pose, buffer, camera, partial, view)
         }
     }
 
@@ -117,19 +121,13 @@ object SpiritThreads {
             !entity.isSpectator &&
             !(entity is MarionetteEntity && entity.hiddenForDriver)
 
-    /** One body's threads: its strands, its grip, and every knot on them. */
+    /** One body's threads: its strands and its grip. */
     private class Tangle(val body: LivingEntity) {
-
-        var alive = true
-            private set
 
         private val strands: List<Strand> = (if (body.bbHeight >= HUMANOID_HEIGHT) HUMANOID else SMALL)
             .mapIndexed { i, (side, height) ->
                 Strand(side, height, rise = RISE * (0.8f + 0.4f * hash(body.id, i)), phase = 6.28f * hash(body.id, i + 7))
             }
-        private val knots = ArrayList<Knot>()
-        private var dense = false
-
         private var grip = 0f
         private var gripO = 0f
         private var holder: Entity? = null
@@ -141,10 +139,11 @@ object SpiritThreads {
             noticedAt = clock
         }
 
-        /** Per-frame cache: the three control points of every strand (p0, p1, p2 — 9 doubles each). */
+        /** The three control points of every strand (p0, p1, p2 — 9 doubles each), for the frame being drawn. */
         private val curve = DoubleArray(strands.size * 9)
-        private var cachedTick = -1L
-        private var cachedPartial = -1f
+
+        /** Per strand, per point: this tick's twitch, −1..1 on each axis. */
+        private val jolts = FloatArray(strands.size * (SEGMENTS + 1) * 3)
 
         fun tick(target: Float, holder: Entity?) {
             // A grip being taken is watched the whole way; a blow draws the eye back.
@@ -153,39 +152,33 @@ object SpiritThreads {
             // Taken slowly, let go a little faster: a snapped grip springs back.
             grip = if (target >= grip) minOf(target, grip + GRIP_RISE) else maxOf(target, grip - GRIP_FALL)
             this.holder = holder
+            if (grip > 0f && grip < 1f) jolts.indices.forEach { jolts[it] = kotlin.random.Random.nextFloat() * 2f - 1f }
         }
 
-        /** Spawns the knots, or respawns them when the strand turns from free to held. */
-        fun spin(level: ClientLevel, engine: ParticleEngine, sprites: SpriteSet, dense: Boolean) {
-            if (knots.isNotEmpty() && this.dense == dense) return
-            knots.forEach(Knot::remove)
-            knots.clear()
-            this.dense = dense
-            val count = if (dense) HELD_KNOTS else FREE_KNOTS
-            strands.indices.forEach { s ->
-                repeat(count) { k ->
-                    val t = k / (count - 1f)
-                    Knot(level, this, s, t, ash = (k + s) % ASH_EVERY == 0, body.x, body.y, body.z, sprites.get(level.random))
-                        .also { knots += it; engine.add(it) }
+        fun draw(pose: PoseStack.Pose, buffer: VertexConsumer, camera: Vec3, partial: Float, view: Camera) {
+            val g = Mth.lerp(partial, gripO, grip)
+            if (attention(g) <= 0f) return
+            shape(partial, view)
+            val width = if (g >= 1f) PUPPET_WIDTH else FREE_WIDTH
+            strands.forEachIndexed { s, strand ->
+                var previous = point(s, strand, 0, g, partial)
+                for (k in 1..SEGMENTS) {
+                    val next = point(s, strand, k, g, partial)
+                    val t = (k - 0.5f) / SEGMENTS
+                    val alpha = alpha(t, g)
+                    if (alpha > MIN_ALPHA) {
+                        // A pixel of a block at arm's length is a band across the screen: near the eye, thinner.
+                        val near = (previous.add(next).scale(0.5).distanceTo(camera) / NEAR_EYE).coerceIn(NEAR_THINNEST, 1.0)
+                        pixelLine(pose, buffer, camera, previous, next, argbOf(paint(t, k + s, g), alpha), width * near, LightCoordsUtil.FULL_BRIGHT)
+                    }
+                    previous = next
                 }
             }
         }
 
-        fun cut() {
-            alive = false
-            knots.forEach(Knot::remove)
-            knots.clear()
-        }
-
-        /** Where a knot is and what it looks like, for this frame. */
-        fun place(knot: Knot, partial: Float, camera: Camera) {
-            if (cachedTick != clock || cachedPartial != partial) {
-                shape(partial, camera)
-                cachedTick = clock
-                cachedPartial = partial
-            }
-            val s = knot.strand
-            val t = knot.t.toDouble()
+        /** The [k]-th point along strand [s], for this frame. */
+        private fun point(s: Int, strand: Strand, k: Int, g: Float, partial: Float): Vec3 {
+            val t = k.toDouble() / SEGMENTS
             val u = 1.0 - t
             val i = s * 9
             val a = u * u
@@ -195,8 +188,6 @@ object SpiritThreads {
             var y = a * curve[i + 1] + b * curve[i + 4] + c * curve[i + 7]
             var z = a * curve[i + 2] + b * curve[i + 5] + c * curve[i + 8]
 
-            val g = Mth.lerp(partial, gripO, grip)
-            val strand = strands[s]
             // Free threads drift in a wind that is not of this world; a held one cannot.
             val sway = SWAY * (1f - g) * t
             val time = clock + partial
@@ -205,12 +196,12 @@ object SpiritThreads {
             // The victim resists: a strand being taken twitches like a plucked string, ends pinned.
             if (g > 0f && g < 1f) {
                 val jolt = (JOLT_START + JOLT_GAIN * g) * sin(PI * t)
-                x += knot.jx * jolt
-                y += knot.jy * jolt * 0.5
-                z += knot.jz * jolt
+                val j = (s * (SEGMENTS + 1) + k) * 3
+                x += jolts[j] * jolt
+                y += jolts[j + 1] * jolt * 0.5
+                z += jolts[j + 2] * jolt
             }
-
-            knot.put(x, y, z, paint(knot, g), alpha(knot.t, g), if (g >= 1f) PUPPET_SIZE else FREE_SIZE)
+            return Vec3(x, y, z)
         }
 
         private fun shape(partial: Float, camera: Camera) {
@@ -254,10 +245,10 @@ object SpiritThreads {
         }
 
         /** Ink runs down from the caster's end; behind its wet edge the strand is already dead. */
-        private fun paint(knot: Knot, g: Float): Int {
-            if (g >= 1f) return if (knot.ash) ASH else DEAD
+        private fun paint(t: Float, index: Int, g: Float): Int {
+            if (g >= 1f) return if (index % ASH_EVERY == 0) ASH else DEAD
             val front = g * INK_SPEED
-            val soaked = knot.t - (1f - front)
+            val soaked = t - (1f - front)
             if (soaked <= 0f) return PALE
             return lerpColor(WET, DEAD, (soaked / WET_EDGE).coerceIn(0f, 1f))
         }
@@ -284,68 +275,6 @@ object SpiritThreads {
 
     private data class Strand(val side: Float, val height: Float, val rise: Float, val phase: Float)
 
-    /**
-     * One pixel of a strand. Lives as long as its strand does and asks its tangle where to be —
-     * in the tick too, not only at render time: the particle engine culls by the **last** position,
-     * so a knot that only moved when drawn would, once off screen, never be drawn again.
-     */
-    private class Knot(
-        level: ClientLevel,
-        private val tangle: Tangle,
-        val strand: Int,
-        val t: Float,
-        val ash: Boolean,
-        x: Double, y: Double, z: Double,
-        sprite: TextureAtlasSprite,
-    ) : SingleQuadParticle(level, x, y, z, sprite) {
-
-        var jx = 0f
-        var jy = 0f
-        var jz = 0f
-
-        init {
-            lifetime = Int.MAX_VALUE
-            gravity = 0f
-            friction = 1f
-            hasPhysics = false
-            quadSize = FREE_SIZE
-            alpha = 0f
-        }
-
-        override fun getLayer(): SingleQuadParticle.Layer = SingleQuadParticle.Layer.TRANSLUCENT
-
-        /** Spirit Vision does not need light: the threads are as bright in a cave as at noon. */
-        override fun getLightCoords(partialTick: Float): Int = LightCoordsUtil.FULL_BRIGHT
-
-        override fun tick() {
-            if (!tangle.alive) {
-                remove()
-                return
-            }
-            jx = random.nextFloat() * 2f - 1f
-            jy = random.nextFloat() * 2f - 1f
-            jz = random.nextFloat() * 2f - 1f
-            tangle.place(this, 1f, Minecraft.getInstance().gameRenderer.mainCamera())
-        }
-
-        override fun extract(state: QuadParticleRenderState, camera: Camera, partialTick: Float) {
-            tangle.place(this, partialTick, camera)
-            super.extract(state, camera, partialTick)
-        }
-
-        fun put(x: Double, y: Double, z: Double, rgb: Int, alpha: Float, size: Float) {
-            this.x = x
-            this.y = y
-            this.z = z
-            // The renderer lerps from the previous place; it has been computed for this frame already.
-            xo = x
-            yo = y
-            zo = z
-            setColor((rgb shr 16 and 0xFF) / 255f, (rgb shr 8 and 0xFF) / 255f, (rgb and 0xFF) / 255f)
-            this.alpha = alpha
-            quadSize = size
-        }
-    }
 
     /**
      * The point the threads run to: the holder's right hand. For the local player in first
@@ -401,8 +330,9 @@ object SpiritThreads {
 
     private const val STALE_TICKS = 30
     private const val MAX_FREE = 24
-    private const val FREE_KNOTS = 12
-    private const val HELD_KNOTS = 40
+
+    /** Straight runs per strand: enough for the arch to read as a curve, not a polygon. */
+    private const val SEGMENTS = 24
 
     /** How far a free strand climbs before it is gone into the Spirit World. */
     private const val RISE = 2.6f
@@ -430,8 +360,12 @@ object SpiritThreads {
     private const val FREE_ALPHA = 0.5f
     private const val HELD_ALPHA = 0.9f
     private const val DEATH_TICKS = 20f
-    private const val FREE_SIZE = 0.045f
-    private const val PUPPET_SIZE = 0.055f
+    private const val FREE_WIDTH = PIXEL
+    private const val PUPPET_WIDTH = PIXEL * 1.5
+    private const val MIN_ALPHA = 0.004f
+    private const val NEAR_EYE = 4.0
+    private const val NEAR_THINNEST = 0.15
+    /** Every few runs of a puppet's strand: ash. */
     private const val ASH_EVERY = 5
 
     private const val HAND_SIDE = 0.4
@@ -447,6 +381,5 @@ object SpiritThreads {
     /** Dry, dead black with a breath of violet — the Fool's own. */
     private const val DEAD = 0x120C16
 
-    /** Every few knots of a puppet's strand: ash. */
     private const val ASH = 0x4A464C
 }

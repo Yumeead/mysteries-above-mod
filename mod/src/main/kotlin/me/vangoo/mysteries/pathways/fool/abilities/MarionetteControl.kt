@@ -9,6 +9,7 @@ import me.vangoo.mysteries.ability.CastContext
 import me.vangoo.mysteries.ability.grantAttribute
 import me.vangoo.mysteries.ability.modifierId
 import me.vangoo.mysteries.ability.revokeAttribute
+import me.vangoo.mysteries.ability.context.Fizzle
 import me.vangoo.mysteries.ability.context.on
 import me.vangoo.mysteries.ability.session
 import me.vangoo.mysteries.ability.sessionRunning
@@ -27,6 +28,7 @@ import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.Mob
 import net.minecraft.world.entity.ai.attributes.AttributeModifier
 import net.minecraft.world.entity.ai.attributes.Attributes
+import net.minecraft.world.phys.Vec3
 
 /**
  * Fool, Seq. 5 (Marionettist): **Marionette Control**.
@@ -52,6 +54,14 @@ import net.minecraft.world.entity.ai.attributes.Attributes
  * A single blow of 6 damage or more on the victim snaps the threads. So the way out of this is
  * for someone else to hit your friend once, hard.
  *
+ * ## The body is jerked like a puppet's
+ *
+ * The threads are seen by Marionettists only, but what they do is seen by everyone: while the will
+ * is breaking, every couple of seconds the victim's body is jerked a step towards the Marionettist,
+ * with the click of a string pulled taut — the sign, for whoever stands beside them, that it is
+ * time to hit their friend. When the will gives, the body is jerked three times on the beat, and
+ * goes still; then it is a puppet. Progress itself is drawn in the threads, not written anywhere.
+ *
  * ## The ticket is settled at the end, not at the start
  *
  * 500 spirituality is the most expensive thing on the pathway, and the fixation can fail for a
@@ -76,15 +86,16 @@ class MarionetteControl : ActiveAbility(AbilityIdentity.of("fool_marionettist_co
         "Нитки з ваших пальців беруть живе тіло під владу. Двофазний захват: спершу фіксація, потім злам волі.\n" +
             "▪ Ціль під прицілом, до ${REACH.toInt()} бл.; найшвидше — ближче ніж ${FAST_RADIUS.toInt()} бл., далі повільніше\n" +
             "▪ Фіксація 20→5 с (за засвоєнням), злам: звір ~15 с, людина ~5 хв (швидшає з Послідовністю)\n" +
-            "▪ Під час фіксації жертва нічого не помічає; під час зламу її стрибок слабшає\n" +
+            "▪ Під час фіксації жертва нічого не помічає; під час зламу її тіло смикає до вас — це видно всім\n" +
             "▪ Один удар від $BREAK шкоди по жертві рве нитки; ціна знімається лише за готову маріонетку\n" +
             "▪ Звір лишається живим; людина гине, а її Характеристика назавжди переходить у маріонетку",
     )
 
     override fun cast(context: CastContext): AbilityOutcome {
+        // Letting go is free: the threads were never paid for, and they snap where they were tied.
         if (context.sessionRunning) {
             context.stopSession()
-            return AbilityOutcome.done("Ви відпустили Нитки")
+            return AbilityOutcome.Awaiting()
         }
 
         val beyonder = context.beyonder
@@ -109,7 +120,7 @@ class MarionetteControl : ActiveAbility(AbilityIdentity.of("fool_marionettist_co
         }
 
         weave(context, target)
-        return AbilityOutcome.Awaiting(Component.literal("Нитки натягуються на ${target.name.string}"))
+        return AbilityOutcome.Awaiting()
     }
 
     /**
@@ -122,7 +133,6 @@ class MarionetteControl : ActiveAbility(AbilityIdentity.of("fool_marionettist_co
         val ticket = context.cast
         val messaging = context.messaging
         val targetId = target.uuid
-        val targetName = target.name.string
         val isPerson = target is ServerPlayer
         val lockTicks = MarionetteTiming.phase1LockTicks(context.beyonder.mastery.value)
         val breakTicks = if (isPerson) {
@@ -149,8 +159,16 @@ class MarionetteControl : ActiveAbility(AbilityIdentity.of("fool_marionettist_co
                     ),
                 )
 
-                if (!hold(lockTicks, targetId, targetName, "Фіксація ниток", messaging, restrain = false, grips = 0f..FIXATION_SHARE) { snapped }) return@session
-                if (!hold(breakTicks, targetId, targetName, "Злам волі", messaging, restrain = true, grips = FIXATION_SHARE..1f) { snapped }) return@session
+                if (!hold(lockTicks, targetId, messaging, restrain = false, grips = 0f..FIXATION_SHARE) { snapped }) return@session
+                if (!hold(breakTicks, targetId, messaging, restrain = true, grips = FIXATION_SHARE..1f) { snapped }) return@session
+
+                // The will gives: three jerks on the beat, and then the body is still.
+                repeat(FINAL_JERKS) {
+                    val holder = owner ?: return@session
+                    resolve(holder, targetId)?.let { jerk(it, holder, FINAL_PULL) }
+                    waitTicks(FINAL_BEAT_TICKS)
+                }
+                waitTicks(STILL_TICKS)
 
                 val caster2 = owner ?: return@session
                 val victim = resolve(caster2, targetId) ?: return@session
@@ -162,7 +180,6 @@ class MarionetteControl : ActiveAbility(AbilityIdentity.of("fool_marionettist_co
                     is Mob -> Marionettes.seize(caster2, victim)
                     else -> return@session
                 }
-                messaging.tell(caster2, Component.literal("$targetName тепер ваша маріонетка"))
                 Marionettes.pushState(caster2)
             } finally {
                 watch.cancel()
@@ -187,30 +204,31 @@ class MarionetteControl : ActiveAbility(AbilityIdentity.of("fool_marionettist_co
     private suspend fun me.vangoo.mysteries.ability.SessionScope.hold(
         ticks: Int,
         targetId: java.util.UUID,
-        targetName: String,
-        phase: String,
         messaging: me.vangoo.mysteries.ability.context.Messaging,
         restrain: Boolean,
         grips: ClosedFloatingPointRange<Float>,
         snapped: () -> Boolean,
     ): Boolean {
         var held = 0.0
+        var untilJerk = jerkInterval()
         while (held < ticks) {
             waitTicks(STEP_TICKS)
 
             val caster = owner ?: return false
             if (snapped()) {
-                messaging.actionBar(caster, Component.literal("Нитки збито ударом по жертві"))
+                resolve(caster, targetId)?.let { snap(it) }
+                messaging.hint(caster, Component.literal("Нитки збито ударом по жертві"), Fizzle.NONE)
                 return false
             }
             val victim = resolve(caster, targetId)
             if (victim == null || !victim.isAlive || victim.level() !== caster.level()) {
-                messaging.actionBar(caster, Component.literal("Ціль зникла — нитки обірвались"))
+                messaging.hint(caster, Component.literal("Ціль зникла — нитки обірвались"), Fizzle.NONE)
                 return false
             }
             val distance = caster.distanceTo(victim).toDouble()
             if (distance > REACH) {
-                messaging.actionBar(caster, Component.literal("Задалеко — нитки зісковзнули"))
+                snap(victim)
+                messaging.hint(caster, Component.literal("Задалеко — нитки зісковзнули"), Fizzle.NONE)
                 return false
             }
 
@@ -225,10 +243,38 @@ class MarionetteControl : ActiveAbility(AbilityIdentity.of("fool_marionettist_co
                 )
             }
             Marionettes.weave(victim, caster, grips.start + (grips.endInclusive - grips.start) * fraction.toFloat())
-            messaging.actionBar(caster, Component.literal("$phase: $targetName — ${(fraction * 100).toInt()}%"))
+            if (restrain) {
+                untilJerk -= STEP_TICKS
+                if (untilJerk <= 0) {
+                    jerk(victim, caster, PULL)
+                    untilJerk = jerkInterval()
+                }
+            }
         }
         return true
     }
+
+    /**
+     * The body jerked [pull] blocks towards [caster], with no wind-up and a string's click: the one
+     * thing about the grip that everyone can see. A player feels it — the push reaches their client.
+     */
+    private fun jerk(victim: LivingEntity, caster: ServerPlayer, pull: Double) {
+        val toward = caster.position().subtract(victim.position()).let { Vec3(it.x, 0.0, it.z) }
+        if (toward.lengthSqr() > 1e-4) {
+            val push = toward.normalize().scale(pull)
+            victim.push(push.x, LIFT, push.z)
+            victim.hurtMarked = true
+        }
+        victim.level().playSound(null, victim.x, victim.y + 1.0, victim.z, SoundEvents.TRIPWIRE_CLICK_ON, SoundSource.PLAYERS, 0.9f, 0.6f)
+    }
+
+    /** The threads tearing loose from a body: a string's snap where they were tied. */
+    private fun snap(victim: LivingEntity) {
+        victim.level().playSound(null, victim.x, victim.y + 1.0, victim.z, SoundEvents.TRIPWIRE_DETACH, SoundSource.PLAYERS, 1.0f, 1.4f)
+    }
+
+    /** Every two to three seconds, never on a steady beat: a steady beat would read as an effect, not a hand. */
+    private fun jerkInterval(): Int = JERK_MIN_TICKS + kotlin.random.Random.nextInt(JERK_SPREAD_TICKS)
 
     /** 1 within [FAST_RADIUS], then `FAST_RADIUS / distance` — a tenth of the speed at [REACH]. */
     private fun pace(distance: Double): Double = if (distance <= FAST_RADIUS) 1.0 else FAST_RADIUS / distance
@@ -258,5 +304,15 @@ class MarionetteControl : ActiveAbility(AbilityIdentity.of("fool_marionettist_co
 
         /** How much of the drawn grip the fixation covers; the will breaking is the rest. */
         const val FIXATION_SHARE = 0.35f
+
+        const val JERK_MIN_TICKS = 40
+        const val JERK_SPREAD_TICKS = 21
+        /** How hard a jerk pulls: about a third of a block, felt but not a leash. */
+        const val PULL = 0.3
+        const val LIFT = 0.12
+        const val FINAL_JERKS = 3
+        const val FINAL_PULL = 0.2
+        const val FINAL_BEAT_TICKS = 5
+        const val STILL_TICKS = 8
     }
 }
