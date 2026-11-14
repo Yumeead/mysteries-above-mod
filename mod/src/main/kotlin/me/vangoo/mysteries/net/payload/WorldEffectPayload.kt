@@ -90,6 +90,22 @@ sealed interface WorldEffectPayload : CustomPacketPayload {
     }
 
     /**
+     * An air bullet from [from] to [to]: it flies [ticks] at [SPEED] and [end]s by bursting on a body,
+     * stopping at a wall or spending itself in the air. [powered] — the heavier shot, bigger in all.
+     */
+    data class AirShot(val from: Vec3, val to: Vec3, val ticks: Int, val powered: Boolean, val end: End) : WorldEffectPayload {
+        enum class End { AIR, WALL, BODY }
+
+        companion object {
+            /** Blocks an air bullet covers in a tick. Shared, so the blow lands when the bullet does. */
+            const val SPEED = 8.0
+
+            /** Ticks a bullet takes to fly [distance] blocks: never less than one. */
+            fun flight(distance: Double): Int = maxOf(1, kotlin.math.ceil(distance / SPEED).toInt())
+        }
+    }
+
+    /**
      * The body of [entity] becomes paper where it stood, at [at] facing [yaw] (degrees, as the body
      * turns): a paper figure in its very pose is struck through at once, falls apart into scraps and is
      * gone. The client takes the pose from the entity if it has it, and stands the figure upright if not.
@@ -202,6 +218,14 @@ sealed interface WorldEffectPayload : CustomPacketPayload {
                             buf.writeVarInt(payload.ticks)
                             buf.writeBoolean(payload.hit)
                         }
+                        is AirShot -> {
+                            buf.writeByte(AIR_SHOT)
+                            Vec3.STREAM_CODEC.encode(buf, payload.from)
+                            Vec3.STREAM_CODEC.encode(buf, payload.to)
+                            buf.writeVarInt(payload.ticks)
+                            buf.writeBoolean(payload.powered)
+                            buf.writeByte(payload.end.ordinal)
+                        }
                         is Effigy -> {
                             buf.writeByte(EFFIGY)
                             buf.writeVarInt(payload.entity)
@@ -275,6 +299,15 @@ sealed interface WorldEffectPayload : CustomPacketPayload {
                             if (from.distanceTo(to) > MAX_PASSAGE) to = from.add(to.subtract(from).normalize().scale(MAX_PASSAGE))
                             Sheet(from, to, buf.readVarInt().coerceIn(1, MAX_TICKS), buf.readBoolean())
                         }
+                        AIR_SHOT -> {
+                            val from = Vec3.STREAM_CODEC.decode(buf)
+                            var to = Vec3.STREAM_CODEC.decode(buf)
+                            if (from.distanceTo(to) > MAX_PASSAGE) to = from.add(to.subtract(from).normalize().scale(MAX_PASSAGE))
+                            val ticks = buf.readVarInt().coerceIn(1, MAX_TICKS)
+                            val powered = buf.readBoolean()
+                            val end = AirShot.End.entries.getOrNull(buf.readByte().toInt()) ?: throw DecoderException("Невідомий кінець кулі")
+                            AirShot(from, to, ticks, powered, end)
+                        }
                         EFFIGY -> Effigy(buf.readVarInt(), Vec3.STREAM_CODEC.decode(buf), buf.readFloat().takeIf { it.isFinite() } ?: 0f)
                         WORDS -> Words(Vec3.STREAM_CODEC.decode(buf), buf.readVarInt() - 1, ComponentSerialization.STREAM_CODEC.decode(buf),
                             buf.readInt(), buf.readVarInt().coerceIn(1, MAX_TICKS))
@@ -306,6 +339,7 @@ sealed interface WorldEffectPayload : CustomPacketPayload {
         private const val THREAD = 8
         private const val SPOOL = 9
         private const val FACE = 10
+        private const val AIR_SHOT = 11
     }
 }
 
