@@ -3,7 +3,7 @@
   "id": "mysteries_above_gametest",
   "version": "1.0.0",
   "name": "Mysteries Above — game tests",
-  "description": "A real world for what a unit test cannot reach: creature minds on living bodies.",
+  "description": "A real world for what a unit test cannot reach: creature minds on living bodies, loot, and every power of every pathway.",
   "environment": "*",
   "entrypoints": {
     "fabric-gametest": [
@@ -14,6 +14,10 @@
       {
         "adapter": "kotlin",
         "value": "me.vangoo.mysteries.gametest.LootGameTests"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.gametest.AbilityGameTests"
       }
     ],
     "fabric-client-gametest": [

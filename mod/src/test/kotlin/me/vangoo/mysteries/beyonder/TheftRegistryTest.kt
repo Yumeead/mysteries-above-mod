@@ -88,6 +88,24 @@ class TheftRegistryTest {
     }
 
     @Test
+    @DisplayName("Резерв Крадія снів довший за вікно жертви, і запис доживає до кінця резерву")
+    fun theReserveOutwaitsTheVictimsWindow() {
+        // The Dream Stealer's own terms: 6 h unused, 30 min once called, the victim 1 h without it.
+        val reserve = 6L * 60 * 60 * 1000
+        val window = 60L * 60 * 1000
+        TheftRegistry.steal(thief, victim, power, hold = reserve, suppression = window, now = start, activeHold = 30L * 60 * 1000)
+        val revoked = mutableListOf<TheftRegistry.Theft>()
+
+        TheftRegistry.sweep(start + window + 1) { revoked += it }
+        assertFalse(TheftRegistry.isSuppressed(victim, power, start + window + 1), "жертва вже при силі")
+        assertTrue(revoked.isEmpty() && TheftRegistry.heldBy(thief) != null, "невикористане ще чекає в злодія")
+
+        TheftRegistry.sweep(start + reserve) { revoked += it }
+        assertEquals(1, revoked.size, "резерв скінчився — силу забрано")
+        assertNull(TheftRegistry.heldBy(thief))
+    }
+
+    @Test
     @DisplayName("Прометеїв тір резерву не має, тож перший каст нічого не міняє")
     fun withoutAReserveTermTheFirstUseIsANoOp() {
         val theft = TheftRegistry.steal(thief, victim, power, hold, suppression, now = start)
