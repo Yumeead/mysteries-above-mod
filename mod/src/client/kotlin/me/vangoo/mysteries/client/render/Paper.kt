@@ -80,7 +80,7 @@ object Paper {
         val entity = client.level?.getEntity(payload.from) ?: return
         val texture = when (payload.kind) {
             // The face the head wears now: for a drop, the borrowed one, still on until the skin goes back.
-            WorldEffectPayload.Face.Kind.TAKE, WorldEffectPayload.Face.Kind.DROP ->
+            WorldEffectPayload.Face.Kind.TAKE, WorldEffectPayload.Face.Kind.DROP, WorldEffectPayload.Face.Kind.SKETCH ->
                 (client.entityRenderDispatcher.extractEntity(entity, 1f) as? AvatarRenderState)?.skin?.body()?.texturePath() ?: return
             WorldEffectPayload.Face.Kind.MASK, WorldEffectPayload.Face.Kind.UNMASK -> BODY
         }
@@ -160,8 +160,10 @@ object Paper {
             val shown = alpha * ((frame.center.distanceTo(camera) - NEAR_EYE) / NEAR_FADE).toFloat().coerceIn(0f, 1f)
             if (shown <= 0f) continue
             val light = LightCoordsUtil.getLightCoords(level, BlockPos.containing(frame.center))
+            // A sketch is smaller than a face, and drawn in the dull ink of pencil on paper.
+            val sketch = face.kind == WorldEffectPayload.Face.Kind.SKETCH
             collector.submitCustomGeometry(poses, RenderTypes.entityTranslucent(face.texture)) { pose, buffer ->
-                square(pose, buffer, camera, frame, argbOf(0xFFFFFF, shown), light)
+                square(pose, buffer, camera, frame, argbOf(if (sketch) SKETCH_INK else 0xFFFFFF, shown), light, if (sketch) SKETCH_HALF else FACE_HALF)
             }
         }
     }
@@ -193,6 +195,17 @@ object Paper {
             val yaw = Mth.rotLerp(t, from.yaw, to.yaw)
             frame(eye, Mth.lerp(t, from.pitch, to.pitch), yaw, FACE_OUT - SINK * sink) to (1f - sink)
         }
+        WorldEffectPayload.Face.Kind.SKETCH -> {
+            // A scrap with the face drawn on it, off the head and into the Faceless's hand, and gone.
+            val from = face.start
+            val to = live(face.to, partial) ?: return null
+            val forward = Vec3.directionFromRotation(0f, to.yaw)
+            val hand = to.eye.add(0.0, HAND_DROP, 0.0).add(forward.scale(HAND_AHEAD))
+            val t = ease((age / SKETCH_FLIGHT).coerceIn(0f, 1f))
+            val eye = from.eye.lerp(hand, t.toDouble()).add(0.0, ARC * 4 * t * (1 - t), 0.0)
+            val gone = ((age - SKETCH_FLIGHT) / SKETCH_FADE).coerceIn(0f, 1f)
+            frame(eye, Mth.lerp(t, from.pitch, SKETCH_PITCH), Mth.rotLerp(t, from.yaw, to.yaw + 180f), FACE_OUT * (1 - t)) to (1f - gone)
+        }
         WorldEffectPayload.Face.Kind.MASK -> {
             val head = live(face.from, partial) ?: return null
             val settle = ease((age / MASK_SETTLE).coerceIn(0f, 1f))
@@ -216,9 +229,9 @@ object Paper {
     }
 
     /** Four corners of the skin's face, the head's right edge on the image's left as a skin is drawn. */
-    private fun square(pose: PoseStack.Pose, buffer: VertexConsumer, camera: Vec3, frame: Frame, argb: Int, light: Int) {
-        val r = frame.right.scale(FACE_HALF)
-        val u = frame.up.scale(FACE_HALF)
+    private fun square(pose: PoseStack.Pose, buffer: VertexConsumer, camera: Vec3, frame: Frame, argb: Int, light: Int, half: Double = FACE_HALF) {
+        val r = frame.right.scale(half)
+        val u = frame.up.scale(half)
         val n = frame.forward
         faceCorner(pose, buffer, camera, frame.center.add(r).add(u), FACE_U0, FACE_V0, argb, light, n)
         faceCorner(pose, buffer, camera, frame.center.add(r).subtract(u), FACE_U0, FACE_V1, argb, light, n)
@@ -392,6 +405,15 @@ object Paper {
     private const val ARC = 0.4
     private const val SINK = 0.08
     private const val MASK_SETTLE = 6f
+
+    /** The Faceless's sketch: its flight, its fade in the hand, its size and ink, and where the hand is. */
+    private const val SKETCH_FLIGHT = 12f
+    private const val SKETCH_FADE = 4f
+    private const val SKETCH_HALF = 0.16
+    private const val SKETCH_INK = 0xC8BFAE
+    private const val SKETCH_PITCH = 50f
+    private const val HAND_DROP = -0.55
+    private const val HAND_AHEAD = 0.45
     private const val MASK_AHEAD = 0.35
     private const val PEEL_TICKS = 3f
     private const val PEEL = 0.15f

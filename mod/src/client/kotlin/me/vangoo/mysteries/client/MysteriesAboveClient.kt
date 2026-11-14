@@ -18,6 +18,8 @@ import me.vangoo.mysteries.client.render.SpiritMoteParticle
 import me.vangoo.mysteries.client.render.SpiritThreads
 import me.vangoo.mysteries.client.render.WorldEffects
 import me.vangoo.mysteries.client.hud.DangerArrows
+import me.vangoo.mysteries.client.render.PuppetSkins
+import me.vangoo.mysteries.client.screen.FaceGalleryScreen
 import me.vangoo.mysteries.client.hud.HintHud
 import me.vangoo.mysteries.effect.ModParticles
 import me.vangoo.mysteries.entity.ModEntities
@@ -71,6 +73,8 @@ object MysteriesAboveClient : ClientModInitializer {
         // A power that did not come, and the light of one that did: both are drawn here, by this client alone.
         ModChannels.HINT.receiveOnClient { payload, _ -> HintHud.accept(payload) }
         ModChannels.DANGER.receiveOnClient { payload, _ -> DangerArrows.accept(payload) }
+        ModChannels.FACE_GALLERY.receiveOnClient { payload, context -> context.client().gui.setScreen(FaceGalleryScreen(payload)) }
+        ModChannels.WORN_FACE.receiveOnClient { payload, _ -> PuppetSkins.mask(payload.wearer, payload.face) }
         ModChannels.WORLD_EFFECT.receiveOnClient { payload, _ -> WorldEffects.accept(payload) }
 
         // The cooldown clock. The client tick, not wall time: a paused single-player game stands
@@ -133,6 +137,7 @@ object MysteriesAboveClient : ClientModInitializer {
             CreatureMoves.clear()
             HintHud.clear()
             DangerArrows.clear()
+            PuppetSkins.masks.clear()
             WorldEffects.clear()
         }
 

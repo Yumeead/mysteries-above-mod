@@ -156,6 +156,12 @@ sealed interface WorldEffectPayload : CustomPacketPayload {
 
             /** The paper mask peels off [from]'s face, falls and tears to scraps. */
             UNMASK,
+
+            /**
+             * A scrap of paper with [from]'s face sketched on it comes off their head, flies to [to]'s
+             * hand and is gone — the Faceless remembering a face. Sent to the Faceless alone.
+             */
+            SKETCH,
         }
     }
 

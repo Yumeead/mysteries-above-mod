@@ -22,7 +22,7 @@ import java.util.UUID
  */
 class PendingChoices(private val send: (UUID, ChoiceOfferPayload) -> Unit) {
 
-    private class Offer(val id: Int, val size: Int, val onChosen: (Int, String) -> Unit)
+    private class Offer(val id: Int, val size: Int, val onChosen: (Int, String) -> Unit, val onDropped: () -> Unit)
 
     private val byPlayer = HashMap<UUID, Offer>()
     private var nextId = 0
@@ -38,9 +38,24 @@ class PendingChoices(private val send: (UUID, ChoiceOfferPayload) -> Unit) {
         withText: Boolean = false,
         onChosen: (index: Int, text: String) -> Unit,
     ) {
+        present(player, options.size, { id -> send(player, ChoiceOfferPayload(id, title, options, withText)) }, onChosen = onChosen)
+    }
+
+    /**
+     * The same pick, put on a screen of the ability's own: [show] sends whatever the screen needs,
+     * carrying the offer's id, and the answer comes back as any other ([answer]). [onDropped] hears
+     * an offer that ends without a pick — cancelled, replaced, or its player gone.
+     */
+    fun present(
+        player: UUID,
+        size: Int,
+        show: (id: Int) -> Unit,
+        onDropped: () -> Unit = {},
+        onChosen: (index: Int, text: String) -> Unit,
+    ) {
         val id = ++nextId
-        byPlayer[player] = Offer(id, options.size, onChosen)
-        send(player, ChoiceOfferPayload(id, title, options, withText))
+        byPlayer.put(player, Offer(id, size, onChosen, onDropped))?.onDropped?.invoke()
+        show(id)
     }
 
     /**
@@ -50,10 +65,10 @@ class PendingChoices(private val send: (UUID, ChoiceOfferPayload) -> Unit) {
     fun answer(player: UUID, answer: ChoiceAnswerPayload) {
         val offer = byPlayer[player]?.takeIf { it.id == answer.id } ?: return
         byPlayer.remove(player)
-        if (answer.index in 0 until offer.size) offer.onChosen(answer.index, answer.text.trim())
+        if (answer.index in 0 until offer.size) offer.onChosen(answer.index, answer.text.trim()) else offer.onDropped()
     }
 
     fun forget(player: UUID) {
-        byPlayer.remove(player)
+        byPlayer.remove(player)?.onDropped?.invoke()
     }
 }
