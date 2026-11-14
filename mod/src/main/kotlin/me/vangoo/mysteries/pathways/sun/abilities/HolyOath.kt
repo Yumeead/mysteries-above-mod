@@ -7,6 +7,8 @@ import me.vangoo.mysteries.ability.AbilityOutcome
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
 import me.vangoo.mysteries.ability.context.on
+import me.vangoo.mysteries.ability.session
+import me.vangoo.mysteries.effect.ModParticles
 import me.vangoo.mysteries.event.IncomingDamage
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
 import net.minecraft.network.chat.Component
@@ -30,6 +32,11 @@ import net.minecraft.world.effect.MobEffects
  *
  * Mechanically it is the same boost, but you cannot lie in the bushes with it: a power that makes
  * you stronger makes you more noticeable too.
+ *
+ * ## The oath is seen being sworn
+ *
+ * At the moment of swearing a shaft of light falls on the High Priest from the sun, and for as long
+ * as the oath holds their fists burn — the hands every blow of it comes from.
  */
 class HolyOath : ActiveAbility(AbilityIdentity.of("sun_holy_oath")) {
 
@@ -63,12 +70,29 @@ class HolyOath : ActiveAbility(AbilityIdentity.of("sun_holy_oath")) {
             damage.victim.igniteForSeconds(FIRE_SECONDS.toFloat())
         }
 
-        context.effects.bodyAura(caster, ticks)
+        // The oath is heard above: for a moment a shaft of light falls from the sun on whoever swore it.
+        val feet = caster.position()
+        context.effects.beam(
+            context.level, feet.add(sunward(context.level).scale(SUN_REACH)), feet, BEAM_TICKS, BEAM_WIDTH, sourceWidth = SUN_WIDTH,
+        )
+        context.effects.flash(context.level, feet.add(0.0, caster.bbHeight * 0.6, 0.0), FLASH_RADIUS, FLASH_STRENGTH)
+
+        // And while it holds, the hands that keep it burn. The session only draws; the oath itself is the effects above.
+        val glow = ModParticles.lightGlyph(context.effects.pathwayColor)
+        context.session {
+            repeat(ticks / FIST_PERIOD_TICKS) {
+                val priest = owner ?: return@session
+                rideLight(priest, fromCrown(priest, HAND_ASIDE, HAND_DOWN, 0.0), glow)
+                rideLight(priest, fromCrown(priest, -HAND_ASIDE, HAND_DOWN, 0.0), glow)
+                waitTicks(FIST_PERIOD_TICKS)
+            }
+        }
+
         context.level.playSound(
             null, context.origin.x, context.origin.y, context.origin.z,
             SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1.0f, 0.9f,
         )
-        return AbilityOutcome.done("Клятву дано: $seconds с")
+        return AbilityOutcome.Done()
     }
 
     private fun duration(sequence: Sequence): Int =
@@ -78,5 +102,11 @@ class HolyOath : ActiveAbility(AbilityIdentity.of("sun_holy_oath")) {
         const val BASE_DURATION_SECONDS = 15
         const val COOLDOWN_SECONDS = 35
         const val FIRE_SECONDS = 2
+
+        const val BEAM_TICKS = 8
+        const val BEAM_WIDTH = 1.4f
+        const val FLASH_RADIUS = 10.0
+        const val FLASH_STRENGTH = 0.5f
+        const val FIST_PERIOD_TICKS = 2
     }
 }

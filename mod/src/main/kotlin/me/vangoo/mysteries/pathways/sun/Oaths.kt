@@ -2,8 +2,11 @@ package me.vangoo.mysteries.pathways.sun
 
 import com.mojang.serialization.Codec
 import com.mojang.serialization.codecs.RecordCodecBuilder
+import me.vangoo.domain.PathwayBranding
 import me.vangoo.domain.contracts.ContractTerm
 import me.vangoo.mysteries.ability.runtime.AbilityServices
+import me.vangoo.mysteries.effect.burst
+import me.vangoo.mysteries.effect.worldText
 import me.vangoo.mysteries.item.ModComponents
 import me.vangoo.mysteries.modId
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
@@ -13,9 +16,9 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.event.player.UseEntityCallback
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
+import net.minecraft.ChatFormatting
 import net.minecraft.core.UUIDUtil
 import net.minecraft.core.component.DataComponents
-import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.Identifier
@@ -165,7 +168,7 @@ object Oaths {
         val inventory = debtor.inventory
         val slots = (0 until inventory.containerSize).filter { inventory.getItem(it).item === terms.item }
         if (slots.sumOf { inventory.getItem(it).count } < terms.amount) {
-            messaging.actionBar(
+            messaging.hint(
                 debtor,
                 Component.literal("Для Клятви потрібно ${terms.amount} × ${ItemStack(terms.item).hoverName.string}"),
             )
@@ -185,13 +188,16 @@ object Oaths {
         debt.settle()
         debts.remove(debt)
 
+        // Both stand face to face, so the answer is said where they stand: the scroll burns in light
+        // over the holder, and the words hang there for a few seconds.
         val level = holder.level()
-        level.sendParticles(ParticleTypes.END_ROD, holder.x, holder.y + 1.2, holder.z, 24, 0.4, 0.5, 0.4, 0.03)
+        val chest = holder.position().add(0.0, holder.bbHeight * 0.6, 0.0)
+        burst(level, chest, 0.4, PathwayBranding.liquidOf(Sun.NAME), 28, 0.12)
         level.playSound(null, holder.x, holder.y, holder.z, SoundEvents.BELL_RESONATE, SoundSource.PLAYERS, 1.0f, 1.4f)
-        messaging.tell(debtor, Component.literal("☀ Клятву виконано — сувій згорів"))
-        messaging.tell(
-            holder,
-            Component.literal("☀ ${debtor.name.string} виконав Клятву: ${terms.amount} × ${ItemStack(terms.item).hoverName.string}"),
+        worldText(
+            AbilityServices.scheduling, level, holder.position().add(0.0, holder.bbHeight + 0.5, 0.0),
+            Component.literal("Клятву виконано — сувій згорів").withStyle(ChatFormatting.GOLD),
+            PAID_TEXT_TICKS,
         )
         return true
     }
@@ -292,6 +298,7 @@ object Oaths {
     private const val RETRIBUTION_DAMAGE = 12f
     private const val SEAL_MIN_MINUTES = 10
     private const val SEAL_MAX_MINUTES = 15
+    private const val PAID_TEXT_TICKS = 4 * TICKS_PER_SECOND
 
     private val DATE: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM HH:mm").withZone(ZoneId.systemDefault())
 }

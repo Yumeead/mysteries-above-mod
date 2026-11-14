@@ -10,14 +10,15 @@ import me.vangoo.mysteries.ability.session
 import me.vangoo.mysteries.ability.sessionRunning
 import me.vangoo.mysteries.effect.ModParticles
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
+import net.minecraft.core.BlockPos
 import net.minecraft.core.particles.ParticleOptions
-import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.phys.AABB
+import net.minecraft.world.phys.HitResult
 import net.minecraft.world.phys.Vec3
 import kotlin.math.cos
 import kotlin.math.sin
@@ -38,6 +39,9 @@ import kotlin.math.sin
  * Hence the bigger radius, the smaller damage per trigger than the pillar, and the fact that it
  * burns where the High Priest is no longer looking: the flame lives in its own session and does
  * not ask where the caster is now.
+ *
+ * The flame is light in both senses: tongues of additive light, and a real light block in the
+ * middle of the patch, so a cave mouth held by the Fire is lit for everyone as long as it burns.
  */
 class FireOfLight : ActiveAbility(AbilityIdentity.of("sun_fire_of_light")) {
 
@@ -54,30 +58,38 @@ class FireOfLight : ActiveAbility(AbilityIdentity.of("sun_fire_of_light")) {
             "▪ Нечисть у полум'ї спалахує",
     )
 
-    /** A second fire on top of the first puts the first out — a player has one session. */
-    override fun canCast(context: CastContext): Boolean = !context.sessionRunning
-
     override fun cast(context: CastContext): AbilityOutcome {
-        val centre = context.caster.pick(MAX_RANGE, 1.0f, false).location
-        val mote = ModParticles.mote(context.effects.pathwayColor)
+        // A second fire on top of the first would put the first out — a player has one session.
+        if (context.sessionRunning) return AbilityOutcome.failed("Вогонь Світла уже горить")
+
+        val aim = context.caster.pick(MAX_RANGE, 1.0f, false)
+        // A fire takes ground: aimed at the open air, it would hang there burning nothing.
+        if (aim.type == HitResult.Type.MISS) return AbilityOutcome.failed("Немає де розпалити: наведіть приціл на землю")
+        val centre = aim.location
+        val light = ModParticles.light(context.effects.pathwayColor)
         val hit = tickDamage(context.sequence)
         val beyonders = context.beyonders
         val level = context.level
         val caster = context.caster
 
+        // The fire lights the place for real, all the while it burns.
+        context.effects.flare(level, BlockPos.containing(centre), BURN_SECONDS * TICKS_PER_SECOND)
+
         context.session {
-            repeat(BURN_SECONDS) {
-                blaze(level, centre, mote)
-                level.getEntitiesOfClass(
-                    LivingEntity::class.java,
-                    AABB.ofSize(centre, RADIUS * 2, HEIGHT, RADIUS * 2),
-                )
-                    .filter { it.position().distanceToSqr(centre.x, it.y, centre.z) <= RADIUS * RADIUS }
-                    .forEach { target ->
-                        smite(level, caster, beyonders, target, hit)
-                        if (target.isProfane(beyonders)) target.igniteForSeconds(FIRE_SECONDS.toFloat())
-                    }
-                waitTicks(TICKS_PER_SECOND)
+            repeat(BURN_SECONDS * FLICKERS_PER_SECOND) { flicker ->
+                blaze(level, centre, light)
+                if (flicker % FLICKERS_PER_SECOND == 0) {
+                    level.getEntitiesOfClass(
+                        LivingEntity::class.java,
+                        AABB.ofSize(centre, RADIUS * 2, HEIGHT, RADIUS * 2),
+                    )
+                        .filter { it.position().distanceToSqr(centre.x, it.y, centre.z) <= RADIUS * RADIUS }
+                        .forEach { target ->
+                            smite(level, caster, beyonders, target, hit)
+                            if (target.isProfane(beyonders)) target.igniteForSeconds(FIRE_SECONDS.toFloat())
+                        }
+                }
+                waitTicks(TICKS_PER_SECOND / FLICKERS_PER_SECOND)
             }
         }
 
@@ -85,26 +97,27 @@ class FireOfLight : ActiveAbility(AbilityIdentity.of("sun_fire_of_light")) {
             null, centre.x, centre.y, centre.z,
             SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 1.4f, 0.8f,
         )
-        return AbilityOutcome.done("Вогонь Світла зайнявся на $BURN_SECONDS с")
+        return AbilityOutcome.Done()
     }
 
-    /** The patch burns unevenly: a different pattern every second, otherwise it is a carpet, not a fire. */
-    private fun blaze(level: ServerLevel, centre: Vec3, mote: ParticleOptions) {
-        repeat(TONGUES) { i ->
-            // The clock is the server tick: `Level.gameTime` is gone on 26.2.
-            val angle = TAU * i / TONGUES + level.server.tickCount * 0.05
-            val r = RADIUS * ((i % 3) + 1) / 3.0
+    /**
+     * Tongues of light rising off the patch, scattered anew each flicker — a fire, not a carpet. The
+     * light is additive, so where tongues cross the flame burns white at its heart.
+     */
+    private fun blaze(level: ServerLevel, centre: Vec3, light: ParticleOptions) {
+        val random = level.random
+        repeat(TONGUES) {
+            // Thicker at the middle: a power of 0.5 would spread the tongues evenly over the disc,
+            // a larger one pulls them inwards.
+            val r = RADIUS * Math.pow(random.nextDouble(), 0.75)
+            val angle = TAU * random.nextDouble()
+            // `count = 0`: an exact velocity — the tongue rises straight up.
             level.sendParticles(
-                mote,
-                centre.x + r * cos(angle), centre.y + 0.2, centre.z + r * sin(angle),
-                2, 0.1, 0.5, 0.1, 0.02,
+                light,
+                centre.x + r * cos(angle), centre.y + 0.1, centre.z + r * sin(angle),
+                0, 0.0, RISE_MIN + random.nextDouble() * RISE_SPREAD, 0.0, 1.0,
             )
         }
-        level.sendParticles(
-            ParticleTypes.END_ROD,
-            centre.x, centre.y + 0.5, centre.z,
-            6, RADIUS * 0.4, 0.3, RADIUS * 0.4, 0.01,
-        )
     }
 
     private fun tickDamage(sequence: Sequence): Int =
@@ -118,7 +131,11 @@ class FireOfLight : ActiveAbility(AbilityIdentity.of("sun_fire_of_light")) {
         const val BURN_SECONDS = 7
         const val FIRE_SECONDS = 3
         const val COOLDOWN_SECONDS = 30
-        const val TONGUES = 18
+        /** Five times a second: one light lives up to fourteen ticks, so the fire never gaps. */
+        const val FLICKERS_PER_SECOND = 5
+        const val TONGUES = 30
+        const val RISE_MIN = 0.08
+        const val RISE_SPREAD = 0.1
         const val TAU = 2.0 * Math.PI
     }
 }

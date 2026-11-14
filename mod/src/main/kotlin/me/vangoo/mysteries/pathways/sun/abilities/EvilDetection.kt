@@ -6,8 +6,13 @@ import me.vangoo.domain.valueobjects.Sequence
 import me.vangoo.mysteries.ability.AbilityContext
 import me.vangoo.mysteries.ability.PermanentPassiveAbility
 import me.vangoo.mysteries.ability.Ticking
+import me.vangoo.mysteries.effect.burst
+import me.vangoo.mysteries.effect.wave
+import me.vangoo.mysteries.effect.waveArrival
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
 import net.minecraft.network.chat.Component
+import net.minecraft.server.level.ServerLevel
+import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 
@@ -27,6 +32,13 @@ import net.minecraft.world.effect.MobEffects
  * The vanilla [MobEffects.GLOWING] removes that need entirely: it **expires by itself**. The tick
  * refreshes it for [GLOW_TICKS], i.e. a little longer than its own period, and a target that has
  * left the radius fades in a second and a half with not a line of bookkeeping.
+ *
+ * ## The light goes out to find it
+ *
+ * Whatever is already outlined is only refreshed. Something **new** in the radius sends a ring of
+ * light out from the Seeker, and each find flares into its outline as the front passes it. A
+ * passive that pulsed every second would fill the night with rings; one that answers only a new
+ * presence shows the moment of finding, which is the whole of what it does.
  *
  * ## The price of transparency
  *
@@ -49,11 +61,30 @@ class EvilDetection :
     )
 
     override fun tick(context: AbilityContext) {
-        context.targeting.livingNear(range(context.sequence))
+        val range = range(context.sequence)
+        val (known, found) = context.targeting.livingNear(range)
             .filter { it !== context.caster && it.isProfane(context.beyonders) }
-            .forEach { profane ->
-                profane.addEffect(MobEffectInstance(MobEffects.GLOWING, GLOW_TICKS, 0, true, false, false))
+            .partition { it.hasEffect(MobEffects.GLOWING) }
+        known.forEach(::mark)
+        if (found.isEmpty()) return
+
+        // Something new is near: the light goes out from the Seeker, and outlines each one the
+        // moment its front gets there — the same numbers time both, so the flare meets the wave.
+        val caster = context.caster
+        val color = context.effects.pathwayColor
+        wave(context.level, caster.position().add(0.0, caster.bbHeight * CHEST, 0.0), range, color)
+        found.forEach { profane ->
+            context.scheduling.after(waveArrival(profane.distanceTo(caster).toDouble(), range).coerceAtLeast(1)) {
+                if (!profane.isAlive) return@after
+                mark(profane)
+                val chest = profane.position().add(0.0, profane.bbHeight * CHEST, 0.0)
+                burst(profane.level() as ServerLevel, chest, FLARE_RADIUS, color, FLARE_POINTS, FLARE_SPEED)
             }
+        }
+    }
+
+    private fun mark(profane: LivingEntity) {
+        profane.addEffect(MobEffectInstance(MobEffects.GLOWING, GLOW_TICKS, 0, true, false, false))
     }
 
     private fun range(sequence: Sequence): Double =
@@ -63,5 +94,9 @@ class EvilDetection :
         const val BASE_RANGE = 20
         /** One and a half ticks' worth: the outline does not blink between scans, nor does it outlive leaving the radius. */
         const val GLOW_TICKS = 30
+        const val CHEST = 0.6
+        const val FLARE_RADIUS = 0.3
+        const val FLARE_POINTS = 12
+        const val FLARE_SPEED = 0.06
     }
 }
