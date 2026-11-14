@@ -8,14 +8,16 @@ import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
 import me.vangoo.mysteries.ability.session
 import me.vangoo.mysteries.ability.sustain
+import me.vangoo.mysteries.net.payload.DoorKind
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
 import net.minecraft.core.BlockPos
-import net.minecraft.core.particles.ParticleTypes
+import net.minecraft.core.Direction
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
+import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.world.phys.HitResult
@@ -38,6 +40,13 @@ import java.util.UUID
  *
  * Each person goes through **once**: without that, a player who stayed standing by the entrance
  * would be shuttled back and forth every tick.
+ *
+ * ## The door opens before anyone goes through
+ *
+ * The first revisions moved the Apprentice in the very tick of the cast, so they never saw their
+ * own door. Now a crack runs round the arch, the wall's own face swings open on its jambs, and only
+ * then — [DoorKind.WALL]'s `opened`, under half a second — does the passage take whoever stands at
+ * it (the user's call, 14.11.2026). `Blink` stays instant: it is a dodge, this is a door.
  */
 class DoorOpening : ActiveAbility(AbilityIdentity.of("door_opening")) {
 
@@ -62,16 +71,20 @@ class DoorOpening : ActiveAbility(AbilityIdentity.of("door_opening")) {
     )
 
     override fun cast(context: CastContext): AbilityOutcome {
-        if (Vec3(context.look.x, 0.0, context.look.z).lengthSqr() < 1.0e-6) {
-            return AbilityOutcome.failed("Дивіться на стіну, а не вгору")
-        }
-        val forward = horizontal(context.look)
-
-        val wall = wallInFront(context)
+        val hit = wallInFront(context)
             ?: return AbilityOutcome.failed("Підійдіть упритул до суцільної стіни")
+        // The passage runs square through the face that was touched, not along the gaze: a door
+        // stands square in its wall, and its leaves are that wall's own face.
+        val outward = hit.direction
+        if (outward.axis.isVertical) return AbilityOutcome.failed("Двері відчиняються лише в стіні")
+        val through = Vec3(-outward.stepX.toDouble(), 0.0, -outward.stepZ.toDouble())
+        // A door stands on the floor the Apprentice stands on, not at the height their eyes met the
+        // wall: a glance straight ahead strikes the block above the floor.
+        val feet = context.caster.blockPosition().y
+        val wall = hit.blockPos.let { if (it.y == feet + 1 && context.level.getBlockState(it.below()).isSolid) it.below() else it }
 
         val maxThickness = thickness(context.sequence)
-        val exit = exitBehind(context.level, wall, forward, maxThickness)
+        val exit = exitBehind(context.level, wall, outward.opposite, maxThickness)
             ?: run {
                 context.level.playSound(
                     null, context.origin.x, context.origin.y, context.origin.z,
@@ -82,91 +95,75 @@ class DoorOpening : ActiveAbility(AbilityIdentity.of("door_opening")) {
                 )
             }
 
-        // The door stands **on the face** of the wall rather than in the centre of the block the
-        // ray hit. Otherwise the frame ends up inside the stone — and a particle inside a block's
-        // body is not visible at all, so the power looks as if it had no effect.
-        //
-        // The Y is taken from `wall` rather than from `context.caster.y`: both halves of the
-        // passage must stand at the same level. Previously the entrance was drawn at the
-        // Apprentice's eye height while the exit was at the wall block's height (`exitBehind`
-        // always keeps the wall's Y), and if the player was not standing exactly on a whole block
-        // the doors turned out "not quite level with each other".
-        val face = Vec3(wall.x + 0.5, wall.y.toDouble(), wall.z + 0.5).subtract(forward.scale(FACE_CLEARANCE))
-        val open = if (context.sequence.level <= SHARED_FROM_SEQUENCE) PORTAL_TICKS else DOOR_FLASH_TICKS
-        doorway(context.scheduling, context.level, face, forward, open, context.effects.pathwayColor)
-        doorway(
-            context.scheduling, context.level,
-            exit.add(forward.scale(FACE_CLEARANCE)), forward, open, context.effects.pathwayColor,
-        )
-
-        step(context.caster, exit)
-
-        if (context.sequence.level > SHARED_FROM_SEQUENCE) {
-            return AbilityOutcome.done("Ви пройшли крізь стіну")
-        }
+        // Both doors stand at the same height, so the two halves of the passage are level with each
+        // other: one on the face in front, one on the far face behind the exit, opening the other way.
+        val shared = context.sequence.level <= SHARED_FROM_SEQUENCE
+        val hold = if (shared) PORTAL_TICKS else DOOR_FLASH_TICKS
+        val depth = corridor(context.sequence)
+        val color = context.effects.pathwayColor
+        val entrance = Vec3.atBottomCenterOf(wall).subtract(through.scale(0.5))
+        val far = Vec3.atBottomCenterOf(exit).subtract(through.scale(0.5))
+        doorway(context.scheduling, context.level, entrance, through, hold, color, DoorKind.WALL, depth)
+        doorway(context.scheduling, context.level, far, through.reverse(), hold, color, DoorKind.WALL, depth)
 
         // Who has already gone through. State of one cast, not a field of the ability: the ability
         // instance is shared by every Apprentice on the server.
         val passed = HashSet<UUID>()
         context.session {
-            sustain(periodTicks = WATCH_PERIOD_TICKS, durationTicks = PORTAL_TICKS) { opener ->
+            // The leaves open first: a door is walked through, it is not a button.
+            waitTicks(DoorKind.WALL.opened)
+            sustain(periodTicks = WATCH_PERIOD_TICKS, durationTicks = hold) { opener ->
                 val level = opener.level() as? ServerLevel ?: return@sustain
-                level.getEntitiesOfClass(
-                    ServerPlayer::class.java,
-                    AABB.ofSize(face, ENTRY_RADIUS * 2, ENTRY_RADIUS * 2, ENTRY_RADIUS * 2),
-                ).forEach { walker ->
-                    if (!passed.add(walker.uuid)) return@forEach
-                    step(walker, exit)
+                val reach = AABB.ofSize(entrance, ENTRY_RADIUS * 2, ENTRY_RADIUS * 2, ENTRY_RADIUS * 2)
+                // Up to Seq. 7 the door is the Apprentice's alone; from it, anyone who comes up walks through.
+                val walkers = if (shared) level.getEntitiesOfClass(ServerPlayer::class.java, reach) else listOf(opener)
+                walkers.forEach { walker ->
+                    if (walker.boundingBox.intersects(reach) && passed.add(walker.uuid)) step(walker, exit)
                 }
             }
         }
 
-        return AbilityOutcome.done("Прохід відкрито — крізь нього пройдуть й інші")
+        return AbilityOutcome.Done()
     }
 
     /** A solid block at arm's length; liquids and grass do not become doors. */
-    private fun wallInFront(context: CastContext): BlockPos? {
+    private fun wallInFront(context: CastContext): BlockHitResult? {
         val hit = context.caster.pick(ACTIVATION_RANGE, 1.0f, false) as? BlockHitResult ?: return null
         if (hit.type != HitResult.Type.BLOCK) return null
-        return hit.blockPos.takeIf { context.level.getBlockState(it).isSolid }
+        return hit.takeIf { context.level.getBlockState(it.blockPos).isSolid }
     }
 
     /**
-     * The first place beyond the wall where the player fits: air is needed under the feet and
-     * under the head. No footing is required — the Apprentice comes out where the passage comes
-     * out, not where it is convenient.
-     *
-     * The direction is rounded to one of the eight grid axes **once**, not at every step of the
-     * depth. `Math.round(forward.x * depth)` rounded X and Z independently at every `depth` — and
-     * for a slanted gaze (not exactly along an axis or a diagonal) that gave an uneven drift: a
-     * step could move into a cell that was not in the previous step. The exit ended up not
-     * opposite the entrance but somewhere off to the side, and the teleport aimed there too. A
-     * fixed `(dx, dz)` multiplied by `depth` keeps every step on one straight grid line — the one
-     * the Apprentice is looking along.
+     * The first place beyond the wall, straight through it along [through], where the player fits:
+     * air is needed under the feet and under the head. No footing is required — the Apprentice
+     * comes out where the passage comes out, not where it is convenient.
      */
     private fun exitBehind(
         level: ServerLevel,
         wall: BlockPos,
-        forward: Vec3,
+        through: Direction,
         maxThickness: Int,
-    ): Vec3? {
-        val dx = Math.round(forward.x).toInt()
-        val dz = Math.round(forward.z).toInt()
-        for (depth in 1..maxThickness) {
-            val step = wall.offset(dx * depth, 0, dz * depth)
-            if (level.getBlockState(step).isAir && level.getBlockState(step.above()).isAir) {
-                return Vec3(step.x + 0.5, step.y.toDouble(), step.z + 0.5)
-            }
-        }
-        return null
+    ): BlockPos? = (1..maxThickness)
+        .map { wall.relative(through, it) }
+        .firstOrNull { fits(level, it) }
+
+    private fun fits(level: ServerLevel, at: BlockPos): Boolean = open(level, at) && open(level, at.above())
+
+    /** Air, or the door's own light: the far door kindles one right in the exit. */
+    private fun open(level: ServerLevel, at: BlockPos): Boolean =
+        level.getBlockState(at).let { it.isAir || it.`is`(Blocks.LIGHT) }
+
+    private fun step(walker: ServerPlayer, exit: BlockPos) {
+        val level = walker.level() as? ServerLevel ?: return
+        // Someone may have walled the far side up while the leaves were opening.
+        if (!fits(level, exit)) return
+        val at = Vec3.atBottomCenterOf(exit)
+        level.playSound(null, at.x, at.y, at.z, SoundEvents.IRON_DOOR_OPEN, SoundSource.PLAYERS, 1.0f, 1.5f)
+        walker.teleportTo(at.x, at.y, at.z)
     }
 
-    private fun step(walker: ServerPlayer, exit: Vec3) {
-        val level = walker.level() as? ServerLevel ?: return
-        level.playSound(null, exit.x, exit.y, exit.z, SoundEvents.IRON_DOOR_OPEN, SoundSource.PLAYERS, 1.0f, 1.5f)
-        walker.teleportTo(exit.x, exit.y, exit.z)
-        level.sendParticles(ParticleTypes.PORTAL, exit.x, exit.y + 1.0, exit.z, 20, 0.3, 0.5, 0.3, 0.1)
-    }
+    /** How far the corridor behind the leaves seems to run: deeper than the wall, and deeper the higher the Sequence. */
+    private fun corridor(sequence: Sequence): Float = 1.5f + (9 - sequence.level) * 1.125f
 
     /** The pathway's specialty, hence `STRONG`: this is what the Door is kept for. */
     private fun thickness(sequence: Sequence): Int =
@@ -178,11 +175,9 @@ class DoorOpening : ActiveAbility(AbilityIdentity.of("door_opening")) {
         const val COOLDOWN_SECONDS = 15
         const val SHARED_FROM_SEQUENCE = 7
         const val PORTAL_TICKS = 5 * TICKS_PER_SECOND
-        /** How long the door is visible when the passage is single-use: just enough to see what happened. */
+        /** How long the door stands open when it is the Apprentice's alone. */
         const val DOOR_FLASH_TICKS = 2 * TICKS_PER_SECOND
         const val WATCH_PERIOD_TICKS = 5
         const val ENTRY_RADIUS = 3.0
-        /** How far the door is pushed out in front of the block's face: particles are invisible inside stone. */
-        const val FACE_CLEARANCE = 0.55
     }
 }
