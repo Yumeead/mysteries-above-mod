@@ -12,6 +12,7 @@ import me.vangoo.domain.valueobjects.SanityLoss
 import me.vangoo.mysteries.net.payload.AbilityStatePayload
 import me.vangoo.mysteries.ability.context.Fizzle
 import me.vangoo.mysteries.net.payload.HintPayload
+import me.vangoo.mysteries.net.payload.DoorKind
 import me.vangoo.mysteries.net.payload.WorldEffectPayload
 import net.minecraft.world.phys.Vec3
 import net.minecraft.core.RegistryAccess
@@ -218,6 +219,22 @@ class AbilityPayloadCodecTest {
 
         assertEquals(beam, roundTrip(beam, WorldEffectPayload.CODEC))
         assertEquals(flash, roundTrip(flash, WorldEffectPayload.CODEC))
+    }
+
+    @Test
+    @DisplayName("Двері й прохід проїжджають, а глибина й строк — у межах")
+    fun doorsRoundTripAndAreClamped() {
+        val door = WorldEffectPayload.Door(Vec3(3.5, 64.0, -2.0), 1.5f, DoorKind.WALL, 100, 3.75f, 0x6AE6F7, 0xD8F7FC)
+        val passage = WorldEffectPayload.Passage(Vec3(0.0, 65.0, 0.0), Vec3(0.0, 65.0, 15.0), 0xB0F0FA, 3, 4)
+
+        assertEquals(door, roundTrip(door, WorldEffectPayload.CODEC))
+        assertEquals(passage, roundTrip(passage, WorldEffectPayload.CODEC))
+
+        val wild = roundTrip(door.copy(holdTicks = 10_000, depth = 1e9f), WorldEffectPayload.CODEC) as WorldEffectPayload.Door
+        assertEquals(WorldEffectPayload.MAX_TICKS, wild.holdTicks)
+        assertEquals(WorldEffectPayload.MAX_DEPTH, wild.depth)
+        val long = roundTrip(passage.copy(to = Vec3(0.0, 65.0, 1e6)), WorldEffectPayload.CODEC) as WorldEffectPayload.Passage
+        assertEquals(WorldEffectPayload.MAX_PASSAGE, long.from.distanceTo(long.to), 1e-6)
     }
 
     @Test
