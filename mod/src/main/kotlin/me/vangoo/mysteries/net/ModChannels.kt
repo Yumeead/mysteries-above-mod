@@ -6,6 +6,7 @@ import me.vangoo.mysteries.net.payload.AbilityStatePayload
 import me.vangoo.mysteries.net.payload.ChoiceAnswerPayload
 import me.vangoo.mysteries.net.payload.ChoiceOfferPayload
 import me.vangoo.mysteries.net.payload.CreatureMovePayload
+import me.vangoo.mysteries.net.payload.DangerPayload
 import me.vangoo.mysteries.net.payload.HintPayload
 import me.vangoo.mysteries.net.payload.MarionetteOrderPayload
 import me.vangoo.mysteries.net.payload.MarionetteStatePayload
@@ -73,6 +74,10 @@ object ModChannels {
     /** A creature's technique, by the name of its animation — for the bodies that have a model. */
     val CREATURE_MOVE: ClientboundChannel<CreatureMovePayload> =
         clientbound(CreatureMovePayload.TYPE, CreatureMovePayload.CODEC)
+
+    /** A threat the Seer feels coming: an arrow around the crosshair turns towards it. */
+    val DANGER: ClientboundChannel<DangerPayload> =
+        clientbound(DangerPayload.TYPE, DangerPayload.CODEC)
 
     /** A power that did not come: the fizzle at the hand, and the reason for those who want it. */
     val HINT: ClientboundChannel<HintPayload> =

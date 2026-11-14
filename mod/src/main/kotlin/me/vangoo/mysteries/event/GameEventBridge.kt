@@ -1,6 +1,8 @@
 package me.vangoo.mysteries.event
 
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents
+import net.minecraft.world.entity.projectile.Projectile
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.LivingEntity
@@ -75,6 +77,11 @@ object GameEventBridge {
             val parked = pending
             pending = null
             parked == null || parked.victim !== entity || !parked.isCancelled
+        }
+
+        // A fresh projectile, not one coming back with its chunk: those have ticked before they were saved.
+        ServerEntityEvents.ENTITY_LOAD.register { entity, _ ->
+            if (entity is Projectile && entity.tickCount == 0 && entity.deltaMovement.lengthSqr() > 0.0) sink(ProjectileLaunched(entity))
         }
     }
 

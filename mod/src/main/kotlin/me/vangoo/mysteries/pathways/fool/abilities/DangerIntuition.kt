@@ -14,19 +14,27 @@ import me.vangoo.mysteries.effect.privateGlow
 import me.vangoo.mysteries.effect.privateSound
 import me.vangoo.mysteries.effect.privateText
 import me.vangoo.mysteries.event.MobTargeting
+import me.vangoo.mysteries.event.ProjectileLaunched
+import me.vangoo.mysteries.net.ModChannels
+import me.vangoo.mysteries.net.payload.DangerPayload
+import me.vangoo.domain.services.ProjectileForecast
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
 import net.minecraft.tags.ItemTags
+import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.Mob
+import net.minecraft.world.entity.item.PrimedTnt
+import net.minecraft.world.entity.monster.Creeper
 import net.minecraft.world.entity.projectile.Projectile
+import net.minecraft.world.item.BowItem
+import net.minecraft.world.item.CrossbowItem
 import net.minecraft.world.level.block.DoorBlock
 import net.minecraft.world.level.block.FenceGateBlock
 import net.minecraft.world.level.block.TrapDoorBlock
-import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.world.phys.Vec3
 import java.util.UUID
@@ -47,9 +55,14 @@ import kotlin.random.Random
  * - **The lethal dodge cancels through [IncomingDamage], not `EntityDamageEvent.setCancelled`.**
  *   Same mechanism `PowerProhibition`'s kill-ban already uses.
  *
- * Everything else — the armed-player scan, the incoming-projectile heading check, the
- * behind-the-door reveal, the occasional prediction — has no vanilla hook to lean on, so it stays
- * a half-second poll, same as the plugin and same as Justiciar's `Intuition`.
+ * - **A projectile is foreseen the moment it leaves the string** ([ProjectileLaunched]): its whole
+ *   flight is forecast with gravity ([ProjectileForecast]), and if it will pass by the Seer the
+ *   warning comes at once, with the time to the blow. The half-second poll it replaces let an arrow
+ *   cross thirty blocks unseen.
+ *
+ * What stays a half-second poll has no moment to wait for — it is a state, not an event: a bow drawn
+ * or a crossbow loaded and aimed at the Seer, an armed player close and looking straight at them, a
+ * mob closing in, a creeper hissing, a lit fuse; and the behind-the-door reveal and the prediction.
  *
  * Balance numbers live in [DangerPremonition] (`core`, phase 08 already ported it); this file is
  * effects only.
@@ -58,7 +71,9 @@ import kotlin.random.Random
  *
  * The first port wrote "a zombie took aim at you from the south-west" into the action bar. Now the
  * threat itself flares: an outline only the Seer sees, and a bell heard by the Seer alone, played
- * **from where the threat is** — the ear already knows the direction, so nothing has to name it. A
+ * **from where the threat is**. And because a bell in a fight is easily missed and an outline behind
+ * the back is not seen at all, a pixel arrow by the crosshair turns towards each threat
+ * ([DangerPayload]) — pale while it is a presence, red and pulsing under a second from the blow. A
  * glimpse of what the target will do next hangs over its head as a single word.
  */
 class DangerIntuition :
@@ -72,7 +87,8 @@ class DangerIntuition :
     override fun description(sequence: Sequence): Component {
         val dodge = (DangerPremonition.lethalDodgeChance(sequence) * 100).roundToInt()
         return Component.literal(
-            "Передчуваєте загрозу: ворожих мобів, озброєних гравців і снаряди в радіусі ${SCAN_RADIUS.toInt()} бл.\n" +
+            "Передчуваєте загрозу до удару: снаряд, що летить у вас, натягнутий лук, озброєного ворога поруч, крипера, підпалений TNT.\n" +
+                "▪ Стрілка біля прицілу показує, звідки загроза; червона — удар менш ніж за секунду\n" +
                 "▪ Загроза спалахує обрисом, і дзвін лунає з її боку — бачите й чуєте лише ви\n" +
                 "▪ Бачите крізь двері, на які дивитесь\n" +
                 "▪ Зрідка вгадуєте наступну дію цілі під прицілом\n" +
@@ -91,10 +107,13 @@ class DangerIntuition :
 
         context.events.on<MobTargeting> { event ->
             if (event.target !== context.caster) return@on
-            warn(context, event.mob.uuid, event.mob)
+            warn(context, event.mob)
+            point(context, event.mob, PRESENCE_TICKS, urgent = false)
         }
 
         context.events.on<IncomingDamage> { damage -> tryLethalDodge(context, damage) }
+
+        context.events.on<ProjectileLaunched> { event -> forecast(context, event.projectile) }
     }
 
     override fun onDeactivate(context: AbilityContext) {
@@ -106,48 +125,90 @@ class DangerIntuition :
     }
 
     override fun tick(context: AbilityContext) {
-        scanArmedPlayers(context)
-        scanProjectiles(context)
+        scanArmed(context)
+        scanChasers(context)
+        scanExplosives(context)
         revealBehindDoor(context)
         predictNextAction(context)
     }
 
-    // ── Armed players looking at the caster ─────────────────────────────────────
+    // ── A projectile on its way ─────────────────────────────────────────────────
 
-    private fun scanArmedPlayers(context: AbilityContext) {
-        for (player in context.targeting.playersNear(SCAN_RADIUS)) {
-            if (!holdsWeapon(player) || !isLookingAt(player, context.caster)) continue
-            warn(context, player.uuid, player)
+    /** The flight forecast from the moment of launch: a warning only if it will pass by the Seer, and when. */
+    private fun forecast(context: AbilityContext, projectile: Projectile) {
+        val caster = context.caster
+        if (projectile.owner === caster || projectile.level() !== caster.level()) return
+        if (projectile.distanceToSqr(caster) > PROJECTILE_RADIUS * PROJECTILE_RADIUS) return
+        val from = projectile.position()
+        val velocity = projectile.deltaMovement
+        val body = caster.boundingBox.center
+        val ticks = ProjectileForecast.ticksToReach(
+            from.x, from.y, from.z, velocity.x, velocity.y, velocity.z, projectile.gravity,
+            body.x, body.y, body.z, HIT_RADIUS, FORECAST_TICKS,
+        ) ?: return
+        warn(context, projectile)
+        point(context, projectile, ticks, urgent = true)
+    }
+
+    // ── Weapons turned on the caster ────────────────────────────────────────────
+
+    /**
+     * A bow drawn or a crossbow loaded and aimed at the Seer, from anywhere in range; a melee weapon
+     * only close by and looking straight at them — holding a sword in their direction is not a threat.
+     */
+    private fun scanArmed(context: AbilityContext) {
+        val caster = context.caster
+        for (body in context.targeting.livingNear(SCAN_RADIUS)) {
+            if (body === caster) continue
+            val aimed = aimsRanged(body) && isLookingAt(body, caster, AIM_CONE)
+            val swinging = body is ServerPlayer && holdsMelee(body) &&
+                body.distanceTo(caster) <= MELEE_RANGE && isLookingAt(body, caster, MELEE_CONE)
+            if (!aimed && !swinging) continue
+            warn(context, body)
+            point(context, body, PRESENCE_TICKS, urgent = false)
         }
     }
 
-    private fun holdsWeapon(player: ServerPlayer): Boolean =
+    private fun aimsRanged(body: LivingEntity): Boolean =
+        (body.isUsingItem && body.useItem.item is BowItem) ||
+            CrossbowItem.isCharged(body.mainHandItem) || CrossbowItem.isCharged(body.offhandItem)
+
+    private fun holdsMelee(player: ServerPlayer): Boolean =
         player.mainHandItem.typeHolder().`is`(ItemTags.WEAPON_ENCHANTABLE)
 
-    private fun isLookingAt(observer: LivingEntity, target: LivingEntity): Boolean {
-        val toTarget = target.eyePosition.subtract(observer.eyePosition).normalize()
-        return observer.getViewVector(1.0f).normalize().dot(toTarget) > 0.5
+    private fun isLookingAt(observer: LivingEntity, target: LivingEntity, cone: Double): Boolean {
+        val toTarget = target.boundingBox.center.subtract(observer.eyePosition).normalize()
+        return observer.getViewVector(1.0f).normalize().dot(toTarget) > cone
     }
 
-    // ── Incoming projectiles ─────────────────────────────────────────────────────
+    // ── A mob closing in ─────────────────────────────────────────────────────────
 
-    private fun scanProjectiles(context: AbilityContext) {
+    /** Not only the moment it took aim: a mob already on the Seer's trail keeps being felt while it closes in. */
+    private fun scanChasers(context: AbilityContext) {
         val caster = context.caster
-        val box = AABB.ofSize(caster.position(), PROJECTILE_SCAN_RADIUS * 2, PROJECTILE_SCAN_RADIUS * 2, PROJECTILE_SCAN_RADIUS * 2)
-        val projectiles = context.level.getEntitiesOfClass(Projectile::class.java, box) { it.deltaMovement.lengthSqr() > 0.01 }
-
-        for (projectile in projectiles) {
-            if (!isHeadingTowards(projectile.position(), projectile.deltaMovement, caster.position(), 3.0)) continue
-            warn(context, projectile.uuid, projectile)
+        for (body in context.targeting.livingNear(SCAN_RADIUS)) {
+            if (body !is Mob || body.target !== caster) continue
+            val toward = caster.position().subtract(body.position()).normalize()
+            if (body.deltaMovement.dot(toward) < CLOSING_SPEED && body.distanceTo(caster) > CLOSE_RANGE) continue
+            warn(context, body)
+            point(context, body, PRESENCE_TICKS, urgent = false)
         }
     }
 
-    private fun isHeadingTowards(from: Vec3, velocity: Vec3, target: Vec3, threshold: Double): Boolean {
-        val toTarget = target.subtract(from)
-        val heading = velocity.normalize()
-        if (heading.dot(toTarget.normalize()) < 0.8) return false
-        val closest = from.add(heading.scale(toTarget.dot(heading)))
-        return closest.distanceTo(target) < threshold
+    // ── A fuse burning ───────────────────────────────────────────────────────────
+
+    /** A hissing creeper and a lit TNT near enough to hurt: the arrow counts down to the blast. */
+    private fun scanExplosives(context: AbilityContext) {
+        val caster = context.caster
+        val around = caster.boundingBox.inflate(BLAST_RANGE)
+        for (creeper in context.level.getEntitiesOfClass(Creeper::class.java, around) { it.swellDir > 0 }) {
+            warn(context, creeper)
+            point(context, creeper, ((1f - creeper.getSwelling(1f)) * CREEPER_FUSE).toInt(), urgent = true)
+        }
+        for (tnt in context.level.getEntitiesOfClass(PrimedTnt::class.java, around)) {
+            warn(context, tnt)
+            point(context, tnt, tnt.fuse, urgent = true)
+        }
     }
 
     // ── Behind the door ──────────────────────────────────────────────────────────
@@ -208,11 +269,15 @@ class DangerIntuition :
         damage.cancel()
         lastDodge[owner] = now
 
-        // Yanked aside with no wind-up, a beat before the blow: where the body was, a grey trace hangs.
-        val look = caster.getViewVector(1.0f)
-        val side = Vec3(-look.z, 0.0, look.x).normalize().scale(if (Random.nextBoolean()) DODGE_SPEED else -DODGE_SPEED)
+        // Yanked away from the blow with no wind-up, a beat before it lands: where the body was, a grey
+        // trace hangs. Away from whoever struck — or aside, if the blow came from nowhere in particular.
+        val from = (damage.directCause ?: damage.attacker)?.position()
+        val away = from?.let { caster.position().subtract(it) }?.let { Vec3(it.x, 0.0, it.z) }?.takeIf { it.lengthSqr() > 1e-4 }
+        val push = away?.normalize()?.scale(DODGE_SPEED) ?: caster.getViewVector(1.0f).let { look ->
+            Vec3(-look.z, 0.0, look.x).normalize().scale(if (Random.nextBoolean()) DODGE_SPEED else -DODGE_SPEED)
+        }
         context.level.sendParticles(ModParticles.mote(TRACE), caster.x, caster.y + 1.0, caster.z, TRACE_MOTES, 0.25, 0.5, 0.25, 0.0)
-        caster.setDeltaMovement(side.x, DODGE_LIFT, side.z)
+        caster.setDeltaMovement(push.x, DODGE_LIFT, push.z)
         // The server's own push reaches the client only if it is marked: without this the dodge never moved anyone.
         caster.hurtMarked = true
         context.level.playSound(null, caster.x, caster.y, caster.z, SoundEvents.ENDER_DRAGON_FLAP, SoundSource.PLAYERS, 0.8f, 1.6f)
@@ -220,13 +285,18 @@ class DangerIntuition :
 
     // ── Shared warning throttle ──────────────────────────────────────────────────
 
-    private fun warn(context: AbilityContext, sourceId: UUID, source: net.minecraft.world.entity.Entity) {
+    /** The arrow by the crosshair: sent on every sighting, it stays as long as [ticks] say. */
+    private fun point(context: AbilityContext, source: Entity, ticks: Int, urgent: Boolean) {
+        ModChannels.DANGER.sendTo(context.caster, DangerPayload(source.id, source.boundingBox.center, ticks.coerceAtLeast(0), urgent))
+    }
+
+    private fun warn(context: AbilityContext, source: Entity) {
         val owner = context.caster.uuid
         val warnings = lastWarnings.getOrPut(owner) { HashMap() }
         val now = context.scheduling.tick
-        val last = warnings[sourceId]
+        val last = warnings[source.uuid]
         if (last != null && now - last < WARNING_COOLDOWN_TICKS) return
-        warnings[sourceId] = now
+        warnings[source.uuid] = now
 
         val distance = context.caster.position().distanceTo(source.position())
         val volume = (1.0 - (distance / SCAN_RADIUS)).coerceAtLeast(0.3).toFloat()
@@ -237,8 +307,29 @@ class DangerIntuition :
 
     private companion object {
         const val SCAN_RADIUS = 15.0
-        const val PROJECTILE_SCAN_RADIUS = 25.0
         const val SCAN_PERIOD_TICKS = 10
+
+        /** An arrow is felt from as far as a bow reaches, and its flight forecast three seconds ahead. */
+        const val PROJECTILE_RADIUS = 48.0
+        const val FORECAST_TICKS = 60
+        /** How near the Seer's middle a forecast path must pass to count: a body, with a little to spare. */
+        const val HIT_RADIUS = 1.4
+
+        /** How narrow "looking at me" is: an aimed bow (~15 degrees) and a blade at arm's length (~25). */
+        const val AIM_CONE = 0.965
+        const val MELEE_CONE = 0.9
+        const val MELEE_RANGE = 5.0
+
+        /** A mob counts as closing in at this speed towards the Seer, or once it is this near. */
+        const val CLOSING_SPEED = 0.03
+        const val CLOSE_RANGE = 4.0
+
+        /** A creeper's or TNT's blast hurts this far; a creeper takes 30 ticks to blow once it hisses. */
+        const val BLAST_RANGE = 8.0
+        const val CREEPER_FUSE = 30f
+
+        /** A threat that is a presence rather than a timed blow is felt until the next scan, and a little after. */
+        const val PRESENCE_TICKS = SCAN_PERIOD_TICKS + 5
         val WARNING_COOLDOWN_TICKS = 3L * TICKS_PER_SECOND
 
         const val DOOR_LOOK_RANGE = 3.0

@@ -148,6 +148,9 @@ object ClientOptions {
      */
     var hints: Boolean by persisted(false)
 
+    /** The Seer's chevrons round the crosshair, pointing at what Danger Intuition feels coming. */
+    var dangerArrows: Boolean by persisted(true)
+
     /** The wheel's look; geometry and input are the same for every skin. */
     var wheelSkin: WheelSkin by persisted(WheelSkin.ATMOSPHERIC)
 
@@ -216,6 +219,7 @@ object ClientOptions {
             dto.showDescriptions?.let { showDescriptions = it }
             dto.reducedMotion?.let { reducedMotion = it }
             dto.hints?.let { hints = it }
+            dto.dangerArrows?.let { dangerArrows = it }
             dto.wheelSkin?.let { name -> wheelSkin = enumOrNull<WheelSkin>(name) ?: wheelSkin }
 
             dto.groups?.let { saved ->
@@ -279,6 +283,7 @@ object ClientOptions {
             it.showDescriptions = showDescriptions
             it.reducedMotion = reducedMotion
             it.hints = hints
+            it.dangerArrows = dangerArrows
             it.wheelSkin = wheelSkin.name
             it.groups = groups.map { group -> GroupDto(group.name, group.abilities, group.hotkeys) }
             it.activeGroup = activeGroup
@@ -371,6 +376,7 @@ object ClientOptions {
         var showDescriptions: Boolean? = null
         var reducedMotion: Boolean? = null
         var hints: Boolean? = null
+        var dangerArrows: Boolean? = null
         var wheelSkin: String? = null
         var groups: List<GroupDto>? = null
         var activeGroup: Int? = null
