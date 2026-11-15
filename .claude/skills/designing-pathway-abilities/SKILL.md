@@ -37,8 +37,8 @@ the plugin paid, not a decision it made. Pay it off here:
 | effect approximated by particles | the real mechanic — real blocks, real light, real dimension |
 | number where the fiction wants a shape | the shape (a door you walk through, an altar you light, a world you cross) |
 
-Measured examples with before/after line counts live in `CLAUDE.md` → «Шар здібностей: плагін —
-це список сил, а не їхня реалізація». The cost of this rule is real and accepted: parity can no
+Measured examples with before/after line counts live in `.claude/rules/ability-layer.md` («Шар здібностей: плагін —
+це список сил, а не їхня реалізація»). The cost of this rule is real and accepted: parity can no
 longer be checked by diffing two files, so the roster and the names are what must match.
 
 ## The mapping trap (read this first)
