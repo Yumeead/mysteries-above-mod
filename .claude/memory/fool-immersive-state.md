@@ -9,7 +9,7 @@ metadata:
 ---
 
 Branch `feat/fool-immersive`, committed 14.11.2026 in six commits starting at c55cd8d: all 16 own Fool powers speak through the world
-(packets Sheet, Effigy, Thread, Spool, Face, Words, Glow; PrivateSight seam). Documented in CLAUDE.md,
+(packets Sheet, Effigy, Thread, Spool, Face, Words, Glow; PrivateSight seam). Documented in `.claude/rules/fool-pathway.md`,
 section «Папір і нитки».
 
 Left: two-client play — a puppet made from a player (conversion, possession pull, the Spool when it dies),
