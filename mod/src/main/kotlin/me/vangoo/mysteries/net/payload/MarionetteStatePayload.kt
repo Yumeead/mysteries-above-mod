@@ -2,14 +2,19 @@ package me.vangoo.mysteries.net.payload
 
 import me.vangoo.mysteries.modId
 import net.minecraft.network.RegistryFriendlyByteBuf
+import net.minecraft.network.codec.ByteBufCodecs
 import net.minecraft.network.codec.StreamCodec
 import net.minecraft.network.codec.StreamDecoder
 import net.minecraft.network.codec.StreamMemberEncoder
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.component.ResolvableProfile
+import net.minecraft.world.phys.Vec3
 import java.util.UUID
 
 /**
- * Server → client: the row of threads, everything the Marionettist's HUD draws.
+ * Server → client: the row of threads, everything the Marionettist's HUD and the wheel's threads
+ * tab draw.
  *
  * A third snapshot beside the roster and the ability state, and separate for the same reason they
  * are separate from each other: its rhythm is its own. The roster flies a handful of times a
@@ -30,10 +35,15 @@ data class MarionetteStatePayload(
 ) : CustomPacketPayload {
 
     /**
-     * One puppet on the row.
+     * One puppet on the row — and enough of its body for the wheel to draw it even when it stands
+     * too far away for this client to have it: what it is ([type]), whose face it wears ([face]),
+     * what it holds and wears ([equipment]: main hand, head, chest, legs, feet) and where ([at]).
      *
-     * @property order what it is doing — the ordinal of [Order]
+     * @property entity its network id, to draw the live body when this client has it
+     * @property order what it is doing
      * @property strandSeconds how long until the thread snaps; `0` — it is in reach
+     * @property distance blocks to the Marionettist; `-1` — another world
+     * @property pathway what it was made of, if it was a Beyonder; [sequence] `-1` otherwise
      */
     data class Entry(
         val id: UUID,
@@ -43,14 +53,24 @@ data class MarionetteStatePayload(
         val order: Order,
         val strandSeconds: Int,
         val distance: Int,
+        val entity: Int,
+        val type: String,
+        val face: ResolvableProfile?,
+        val pathway: String?,
+        val sequence: Int,
+        val equipment: List<ItemStack>,
+        val at: Vec3,
     )
 
-    /** The four verbs, as the HUD says them back. */
+    /** The verbs, as the HUD and the wheel say them back. */
     enum class Order(val caption: String) {
-        STAND("чекає"),
+        STAND("стоїть"),
         GOING("іде"),
         FOLLOWING("за вами"),
         ATTACKING("б'ється"),
+        GUARDING("охороняє вас"),
+        ASSISTING("б'є вашу ціль"),
+        USING("іде натиснути"),
     }
 
     override fun type(): CustomPacketPayload.Type<MarionetteStatePayload> = TYPE
@@ -58,6 +78,9 @@ data class MarionetteStatePayload(
     companion object {
 
         val EMPTY = MarionetteStatePayload(emptyList(), null, null, 0)
+
+        /** Main hand, head, chest, legs, feet — the order [Entry.equipment] travels in. */
+        const val EQUIPMENT_SLOTS = 5
 
         val TYPE: CustomPacketPayload.Type<MarionetteStatePayload> =
             CustomPacketPayload.Type(modId("marionette_state"))
@@ -67,6 +90,9 @@ data class MarionetteStatePayload(
                 StreamMemberEncoder { payload, buf -> write(payload, buf) },
                 StreamDecoder { buf -> read(buf) },
             )
+
+        private val FACE: StreamCodec<io.netty.buffer.ByteBuf, java.util.Optional<ResolvableProfile>> =
+            ByteBufCodecs.optional(ResolvableProfile.STREAM_CODEC)
 
         private fun write(payload: MarionetteStatePayload, buf: RegistryFriendlyByteBuf) {
             buf.writeVarInt(payload.limit)
@@ -79,6 +105,13 @@ data class MarionetteStatePayload(
                 buf.writeVarInt(entry.order.ordinal)
                 buf.writeVarInt(entry.strandSeconds)
                 buf.writeVarInt(entry.distance)
+                buf.writeVarInt(entry.entity)
+                buf.writeUtf(entry.type)
+                FACE.encode(buf, java.util.Optional.ofNullable(entry.face))
+                buf.writeNullable(entry.pathway) { b, name -> b.writeUtf(name) }
+                buf.writeVarInt(entry.sequence)
+                repeat(EQUIPMENT_SLOTS) { ItemStack.OPTIONAL_STREAM_CODEC.encode(buf, entry.equipment.getOrElse(it) { ItemStack.EMPTY }) }
+                Vec3.STREAM_CODEC.encode(buf, entry.at)
             }
             buf.writeBoolean(payload.selected != null)
             payload.selected?.let(buf::writeUUID)
@@ -97,6 +130,13 @@ data class MarionetteStatePayload(
                     order = order(buf.readVarInt()),
                     strandSeconds = buf.readVarInt(),
                     distance = buf.readVarInt(),
+                    entity = buf.readVarInt(),
+                    type = buf.readUtf(),
+                    face = FACE.decode(buf).orElse(null),
+                    pathway = buf.readNullable { it.readUtf() },
+                    sequence = buf.readVarInt(),
+                    equipment = List(EQUIPMENT_SLOTS) { ItemStack.OPTIONAL_STREAM_CODEC.decode(buf) },
+                    at = Vec3.STREAM_CODEC.decode(buf),
                 )
             }
             val selected = if (buf.readBoolean()) buf.readUUID() else null

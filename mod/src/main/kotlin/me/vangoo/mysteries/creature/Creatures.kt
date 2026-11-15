@@ -8,6 +8,7 @@ import me.vangoo.mysteries.creature.ai.Minds
 import me.vangoo.mysteries.entity.HumanEntity
 import me.vangoo.mysteries.item.ModItems
 import me.vangoo.mysteries.modId
+import me.vangoo.mysteries.pathways.fool.Marionettes
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
@@ -214,10 +215,12 @@ object Creatures {
      * projectile. Its target and its grudges always may; beyond them the wild strike any player, a
      * hostile Beyonder too, and the town only monsters. A guard's volley never hurts a bystander.
      */
-    fun isFoe(caster: Mob, other: LivingEntity): Boolean {
+    fun isFoe(caster: LivingEntity, other: LivingEntity): Boolean {
         if (other === caster || !other.isAlive) return false
         if (other is Player && (other.isCreative || other.isSpectator)) return false
-        if (caster.target === other) return true
+        // A puppet's techniques are its Marionettist's: they spare the hand that holds the threads.
+        Marionettes.ownerOf(caster)?.let { owner -> return Marionettes.isFoe(caster, owner, other) }
+        if ((caster as? Mob)?.target === other) return true
         val mind = mindOf(caster) ?: return other is Player
         if (mind.threat.of(other.uuid) > 0.0) return true
         if (areAllies(caster, other)) return false

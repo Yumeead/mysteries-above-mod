@@ -6,7 +6,12 @@ import com.mojang.authlib.properties.Property
 import com.mojang.authlib.properties.PropertyMap
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
+import me.vangoo.mysteries.net.ModChannels
+import me.vangoo.mysteries.net.payload.WornFacePayload
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.contents.PlainTextContents
+import net.minecraft.network.chat.contents.TranslatableContents
+import net.minecraft.world.item.component.ResolvableProfile
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket
 import net.minecraft.server.level.ServerPlayer
@@ -33,10 +38,16 @@ import java.util.concurrent.ConcurrentHashMap
  *
  * ## The wearer is left out on purpose
  *
- * The mask is never sent to the caster's own client. Removing your own player-info entry and
- * building it back is the one case with nothing to gain (you would see a different skin in F5 and
- * a different name in your own tab row) and a real client to desync. The Beyonder is told whose
- * face they wear on the action bar instead.
+ * The mask is never sent to the caster's own client as a player-info entry: removing your own and
+ * building it back is the one case with a real client to desync.
+ *
+ * ## The skin goes by a second packet
+ *
+ * A player-info entry carries its profile as a name and properties only; the client files it under
+ * the entry's own id, the wearer's. With no textures (an offline server has none) the client then
+ * picks the default skin by the **wearer's** id, and the face never changes — the long-standing
+ * "the name changes, the skin does not". So every mod client is also told the whole face
+ * ([WornFacePayload]) and draws it itself: on others, and on the wearer in F5 and on the arm.
  *
  * ## Who has to be told again
  *
@@ -76,13 +87,18 @@ object Disguise {
     fun wear(caster: ServerPlayer, face: Face) {
         worn[caster.uuid] = face
         show(caster, viewersOf(caster), profile(face))
+        ModChannels.WORN_FACE.sendTo(caster.level().server.playerList.players, WornFacePayload(caster.uuid, profileOf(face)))
     }
 
     /** Back to their own face, for everyone still watching. */
     fun remove(caster: ServerPlayer) {
         if (worn.remove(caster.uuid) == null) return
         show(caster, viewersOf(caster), caster.gameProfile)
+        ModChannels.WORN_FACE.sendTo(caster.level().server.playerList.players, WornFacePayload(caster.uuid, null))
     }
+
+    /** A face ready to be shown: [face]'s own profile, skin and all. */
+    fun profileOf(face: Face): ResolvableProfile = ResolvableProfile.createResolved(profile(face))
 
     /** The wearer is gone: their entry left with them, so only the bookkeeping is left to drop. */
     fun forget(id: UUID) {
@@ -96,7 +112,15 @@ object Disguise {
                 val masked = server.playerList.getPlayer(id) ?: continue
                 if (masked.uuid == newcomer.uuid) continue
                 show(masked, listOf(newcomer), profile(face))
+                ModChannels.WORN_FACE.sendTo(newcomer, WornFacePayload(id, profileOf(face)))
             }
+        }
+
+        // A masked player leaving: every client forgets the mask, or the same id coming back would wear it.
+        ServerPlayConnectionEvents.DISCONNECT.register { handler, server ->
+            val id = handler.player.uuid
+            if (!worn.containsKey(id)) return@register
+            ModChannels.WORN_FACE.sendTo(server.playerList.players.filter { it.uuid != id }, WornFacePayload(id, null))
         }
 
         // A chat line carries the speaker's name resolved on the **server**, from the real profile
@@ -113,6 +137,58 @@ object Disguise {
             )
             false
         }
+
+        // The game names a player by their real name in its own lines too — a death, an advancement,
+        // leaving the game — and each would give the mask away. Such a line is held back and said
+        // again with the borrowed name in place; the second time round there is nothing left to swap.
+        ServerMessageEvents.ALLOW_GAME_MESSAGE.register { server, message, overlay ->
+            if (worn.isEmpty() || retelling) return@register true
+            // All at once: two masks may be each other's faces, and one swap after another would undo itself.
+            val names = worn.mapNotNull { (id, face) -> server.playerList.getPlayer(id)?.let { it.gameProfile.name to face.name } }.toMap()
+            val renamed = rename(message, names)
+            if (renamed === message) return@register true
+            retelling = true
+            try {
+                server.playerList.broadcastSystemMessage(renamed, overlay)
+            } finally {
+                retelling = false
+            }
+            false
+        }
+    }
+
+    /** Set while a renamed line is being said again: it goes through as it is. */
+    private var retelling = false
+
+    /**
+     * [line] with every piece that reads exactly a real name in [names] — an argument of a translated
+     * line, or plain text — swapped for the borrowed one, its hover card and click with it. The same
+     * instance if nothing was.
+     */
+    private fun rename(line: Component, names: Map<String, String>): Component {
+        names[line.string]?.let { return Component.literal(it) }
+        var changed = false
+        val contents = when (val own = line.contents) {
+            is TranslatableContents -> {
+                val args = own.args.map { arg ->
+                    val swapped = when {
+                        arg is Component -> rename(arg, names)
+                        arg is String && arg in names -> names.getValue(arg)
+                        else -> arg
+                    }
+                    if (swapped !== arg) changed = true
+                    swapped
+                }
+                if (changed) TranslatableContents(own.key, own.fallback, args.toTypedArray()) else own
+            }
+            is PlainTextContents -> own
+            else -> own
+        }
+        val siblings = line.siblings.map { sibling -> rename(sibling, names).also { if (it !== sibling) changed = true } }
+        if (!changed) return line
+        val copy = net.minecraft.network.chat.MutableComponent.create(contents).setStyle(line.style)
+        siblings.forEach(copy::append)
+        return copy
     }
 
     private fun viewersOf(caster: ServerPlayer): List<ServerPlayer> =

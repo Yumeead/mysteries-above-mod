@@ -5,6 +5,7 @@ import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.projectile.Projectile
 import net.minecraft.world.entity.Mob
 
 /**
@@ -191,3 +192,17 @@ class MobTargeting(
         "MobTargeting(${mob.name.string} → ${target.name.string}" +
             if (isCancelled) ", denied)" else ")"
 }
+
+/**
+ * A projectile has **just been launched** — an arrow off a string, a trident, a snowball, a fireball —
+ * in the tick it entered the world, already moving.
+ *
+ * A ready Fabric hook, step one of the search order: `ServerEntityEvents.ENTITY_LOAD` fires for a
+ * fresh spawn too, and a projectile is given its velocity before it is added. The Seer's Danger
+ * Intuition forecasts the whole flight from this one moment: polling every half-second let an arrow
+ * cross thirty blocks unseen.
+ *
+ * @property projectile what was launched; its owner, if any, is the one who launched it
+ */
+class ProjectileLaunched(val projectile: Projectile) : GameEvent
+

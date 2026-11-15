@@ -10,12 +10,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * A possessing Marionettist wears the puppet's skin on their own screen — in F5 and on the
- * first-person arm alike.
+ * first-person arm alike — and a player in a borrowed face wears it on every mod client.
  *
  * <p>Every player on the client draws through {@code getSkin()}, and there is no Fabric hook for
  * it. The injection sits at the method's {@code HEAD} and does one thing: ask
  * {@link PuppetSkins#worn} and return its answer if there is one. Nothing else changes, and for
- * every player who is not the local one inside a puppet it returns straight away.
+ * every player who is neither inside a puppet nor masked it returns straight away.
  */
 @Mixin(AbstractClientPlayer.class)
 abstract class AbstractClientPlayerSkinMixin {

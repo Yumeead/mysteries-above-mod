@@ -8,7 +8,6 @@ import com.mojang.blaze3d.pipeline.RenderPipeline
 import com.mojang.blaze3d.platform.CompareOp
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.textures.FilterMode
-import com.mojang.blaze3d.textures.GpuTexture
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.blaze3d.vertex.VertexConsumer
@@ -18,7 +17,6 @@ import net.minecraft.client.renderer.BindGroupLayouts
 import net.minecraft.client.renderer.rendertype.RenderSetup
 import net.minecraft.client.renderer.rendertype.RenderType
 import net.minecraft.client.renderer.rendertype.RenderTypes
-import net.minecraft.client.renderer.texture.AbstractTexture
 import net.minecraft.world.phys.Vec3
 import kotlin.math.abs
 import kotlin.math.ceil
@@ -227,36 +225,7 @@ object LightShaft {
     private fun short(blocks: Double): Int = (blocks * 64).toInt().coerceIn(0, Short.MAX_VALUE.toInt())
 
     /** The frame's depth, copied into a texture the shaft's shader samples as `Sampler0`. */
-    private object SceneDepth : AbstractTexture() {
-
-        private var registered = false
-
-        val ready: Boolean get() = textureView != null
-
-        fun capture() {
-            val source = Minecraft.getInstance().gameRenderer.mainRenderTarget().depthTexture ?: return
-            val width = source.getWidth(0)
-            val height = source.getHeight(0)
-            val device = RenderSystem.getDevice()
-            val copy = texture?.takeIf { !it.isClosed && it.getWidth(0) == width && it.getHeight(0) == height }
-                ?: run {
-                    releaseTextures()
-                    device.createTexture("Light shaft depth", COPY_USAGE, source.format, width, height, 1, 1).also {
-                        texture = it
-                        textureView = device.createTextureView(it)
-                    }
-                }
-            device.createCommandEncoder().copyTextureToTexture(source, copy, 0, 0, 0, 0, 0, width, height)
-            if (!registered) {
-                Minecraft.getInstance().textureManager.register(DEPTH, this)
-                registered = true
-            }
-        }
-
-        /** What vanilla gives a depth target: a copy is written by blitting into it, so it must be attachable. */
-        private const val COPY_USAGE = GpuTexture.USAGE_COPY_DST or GpuTexture.USAGE_COPY_SRC or
-            GpuTexture.USAGE_TEXTURE_BINDING or GpuTexture.USAGE_RENDER_ATTACHMENT
-    }
+    private val SceneDepth = FrameCopy(DEPTH, "Light shaft depth") { Minecraft.getInstance().gameRenderer.mainRenderTarget().depthTexture }
 
     private const val MIN_LENGTH = 0.05
     /** Blocks per segment of the strip. */

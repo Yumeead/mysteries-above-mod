@@ -65,12 +65,12 @@ object ModKeys {
     )
 
     /**
-     * Fool, Seq. 5: hold it and your hands are on the threads.
+     * Fool, Seq. 5: hold it and your hands are on the threads — the quick orders, given by pointing.
      *
-     * A held key rather than a screen, and the whole reason the marionettes needed no menu: while
-     * it is down the mouse wheel steps along the row of puppets on the HUD, right-click gives the
-     * one you picked an order, and sneak plus left-click cuts its thread. Let go and the mouse is
-     * a mouse again.
+     * While it is down the mouse wheel steps along the row of puppets on the HUD and right-click
+     * gives the one you picked an order by what the crosshair is on. Everything else a puppet can be
+     * told, cutting its thread included, is on the wheel's threads tab: the wheel hides the world, so
+     * pointing stays here. Let go and the mouse is a mouse again.
      */
     private val THREADS: KeyMapping = KeyMappingHelper.registerKeyMapping(
         KeyMapping("key.$MOD_ID.threads", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G, CATEGORY),
@@ -206,20 +206,21 @@ object ModKeys {
             heldHotkeys.clear()
             return
         }
-        val window = client.window
         for ((name, target) in ClientOptions.group.hotkeys) {
             val identity = AbilityGroup.abilityOf(target)
-            val key = InputConstants.getKey(name)
-            val down = when (key.type) {
-                InputConstants.Type.MOUSE -> GLFW.glfwGetMouseButton(window.handle(), key.value) == GLFW.GLFW_PRESS
-                else -> InputConstants.isKeyDown(window, key.value)
-            }
-            if (!down) {
+            if (!isHeld(client, InputConstants.getKey(name))) {
                 heldHotkeys.remove(name)
             } else if (heldHotkeys.add(name) && ClientAbilityState.entry(identity) != null) {
                 use(identity, AbilityGroup.modeOf(target))
             }
         }
+    }
+
+    /** Whether [key] is physically down right now — keyboard or mouse — whatever screen is open. */
+    fun isHeld(client: Minecraft, key: InputConstants.Key): Boolean = when {
+        key == InputConstants.UNKNOWN -> false
+        key.type == InputConstants.Type.MOUSE -> GLFW.glfwGetMouseButton(client.window.handle(), key.value) == GLFW.GLFW_PRESS
+        else -> InputConstants.isKeyDown(client.window, key.value)
     }
 
     fun isBookKey(event: KeyEvent): Boolean = BOOK.matches(event)
@@ -292,11 +293,9 @@ object ModKeys {
         if (client.options.keyUse.consumeClick()) {
             ModChannels.MARIONETTE_ORDER.sendToServer(MarionetteOrderPayload(MarionetteOrderPayload.Action.ORDER))
         }
-        // Sneak plus left-click: cut the thread. The sneak is the confirmation — a puppet does not
-        // get to die to a stray click.
-        if (client.options.keyAttack.consumeClick() && player.isShiftKeyDown) {
-            ModChannels.MARIONETTE_ORDER.sendToServer(MarionetteOrderPayload(MarionetteOrderPayload.Action.CUT))
-        }
+        // Left-click does nothing while the hands are on the threads: cutting one is the wheel's, with a second's hold.
+        @Suppress("ControlFlowWithEmptyBody")
+        while (client.options.keyAttack.consumeClick()) { }
     }
 
     /**

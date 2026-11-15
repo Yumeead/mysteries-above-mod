@@ -58,6 +58,14 @@ fabricApi {
     }
 }
 
+// `-Pvulkan` runs the client tests on the Vulkan backend. The test client resets every option to its
+// default, the preferred backend too, so it goes in as the launch argument that overrides the setting.
+if (providers.gradleProperty("vulkan").isPresent) {
+    tasks.withType<JavaExec>().matching { it.name == "runClientGameTest" }.configureEach {
+        args("--graphicsBackend", "vulkan")
+    }
+}
+
 // `-Ponly=fool` runs only the game tests with that word in their name, server and client alike, so a
 // run does not wait through every other scene first. The server filter is vanilla's test selector.
 providers.gradleProperty("only").orNull?.lowercase()?.let { only ->

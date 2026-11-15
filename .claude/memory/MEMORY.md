@@ -2,7 +2,7 @@
 - [Духовний світ](spirit-world-dimension.md) — перший власний вимір; світи додаються датапаком, не кодом
 - [Fool, Посл. 5 — Маріонетник](fool-sequence-5-marionettist.md) — що там усередині, чому це найбільша здібність порту і що вже готове під неї
 - [Керування маріонетками](marionette-control-surface.md) — HUD-ряд замість предметів; Avatar, START_CLIENT_TICK; вселення переносить гравця, не камеру
-- [Перевтілення: скін](shapeshifting-skin-open-question.md) — ім'я працює, скін ні; що вже виключено й чому тест відкладено
+- [Перевтілення: скін](shapeshifting-skin-open-question.md) — resolved: player-info profile id is not on the wire; WORN_FACE + skin mixin; one-client test via a server-made second player
 - [Перевірка у грі на двох клієнтах](in-game-verification-with-two-clients.md) — здібності перевіряються грою, а не збіркою; чого не показує dev-середовище
 - [Ask questions in Ukrainian](ask-questions-in-ukrainian.md) — AskUserQuestion prompts and clarifying questions should be in Ukrainian
 - [Resumed session: re-read files first](resumed-session-reread-files-first.md) — an interrupted session may have changed files since your earlier Read
@@ -16,3 +16,6 @@
 - [Fool immersive — state](fool-immersive-state.md) — paper + threads committed on feat/fool-immersive; left: two-client play of player puppets, Face, Spool
 - [Door slice](door-slice.md) — rendering-engine vertical slice on the Door: one packet per door, wall leaves, rift corridor; 0.4 s step delay (user, 14.11)
 - [Run only the needed game test](run-only-the-needed-game-test.md) — -Ponly=<word> on runGameTest/runClientGameTest, not the whole suite
+- [Fool + wheel rework plan](fool-and-wheel-rework-plan.md) — 14.11 decisions: Air Bullet refraction+flight, wheel walk/pin, threads tab, danger arrows, face registry, divination; order
+- [No dots, arrows, dashes in player text](player-text-no-dots-arrows-dashes.md) — never `·`, `→`, `—` or UI-explaining hints in anything the player reads; ~336 old literals remain
+- [Marionette will and orders](marionette-will-and-orders.md) — 15.11 decisions: no own will, follow/come/guard/assist semantics, weapons+kits, gather/arm removed, arrow switch, left panel, 4 s pin

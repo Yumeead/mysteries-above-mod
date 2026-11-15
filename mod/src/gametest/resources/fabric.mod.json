@@ -18,6 +18,10 @@
       {
         "adapter": "kotlin",
         "value": "me.vangoo.mysteries.gametest.AbilityGameTests"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.gametest.MarionetteGameTests"
       }
     ],
     "fabric-client-gametest": [
@@ -40,6 +44,30 @@
       {
         "adapter": "kotlin",
         "value": "me.vangoo.mysteries.gametest.FoolClientGameTest"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.gametest.WheelClientGameTest"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.gametest.AirBulletClientGameTest"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.gametest.DangerClientGameTest"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.gametest.ThreadsClientGameTest"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.gametest.FacesClientGameTest"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.gametest.DivinationClientGameTest"
       }
     ]
   },

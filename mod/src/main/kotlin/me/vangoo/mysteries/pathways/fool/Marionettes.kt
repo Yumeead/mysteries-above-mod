@@ -11,6 +11,7 @@ import me.vangoo.mysteries.ability.modifierId
 import me.vangoo.mysteries.ability.revokeAttribute
 import me.vangoo.mysteries.ability.runtime.AbilityServices
 import me.vangoo.mysteries.pathways.ModPathways
+import me.vangoo.mysteries.beyonder.AbilityRequests
 import me.vangoo.mysteries.beyonder.BeyonderStatus
 import me.vangoo.mysteries.effect.ModSounds
 import me.vangoo.mysteries.effect.privateSound
@@ -35,7 +36,22 @@ import net.minecraft.core.UUIDUtil
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
+import net.fabricmc.fabric.api.entity.FakePlayer
+import net.minecraft.core.BlockPos
+import net.minecraft.core.Direction
+import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.core.registries.Registries
+import net.minecraft.util.StringUtil
+import me.vangoo.mysteries.creature.Creatures
+import net.minecraft.world.damagesource.DamageSource
+import net.minecraft.world.entity.ai.goal.FloatGoal
+import net.minecraft.world.entity.monster.Enemy
+import net.minecraft.world.level.block.ButtonBlock
+import net.minecraft.world.level.block.DoorBlock
+import net.minecraft.world.level.block.FenceGateBlock
+import net.minecraft.world.level.block.LeverBlock
+import net.minecraft.world.level.block.TrapDoorBlock
+import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.resources.ResourceKey
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
@@ -108,10 +124,19 @@ object Marionettes {
         AttachmentRegistry.create(modId("stranded_until")) { it.persistent(Codec.LONG) }
     }
 
-    /** A seized mob's standing order. [MarionetteEntity] keeps its own — it steers itself every tick. */
+    /** A seized mob's standing order. [MarionetteEntity] keeps its own: it steers itself every tick. */
     private val mobOrders = ConcurrentHashMap<UUID, MarionetteEntity.Order>()
 
+    /** What a seized mob's order means this moment, for its [PuppetGoal]; see [refresh]. */
+    private val mobSteps = ConcurrentHashMap<UUID, MarionetteEntity.Order>()
+
+    /** Whom a guarding or assisting puppet is set on, by the puppet: see [mark]. */
+    private val marks = ConcurrentHashMap<UUID, UUID>()
+
     private val possessions = ConcurrentHashMap<UUID, Possession>()
+
+    /** When each Marionettist may swap places again, in mod ticks. */
+    private val swapReady = ConcurrentHashMap<UUID, Long>()
 
     /**
      * A Marionettist inside one of their puppets.
@@ -209,17 +234,11 @@ object Marionettes {
 
     // ── Taking a body ───────────────────────────────────────────────────────────
 
-    /**
-     * A mob goes on the threads without dying: it loses the right to choose its own enemies and
-     * keeps everything else, its own pathfinding included.
-     *
-     * ponytail: only the target selector is cleared, so the mob's melee goals still do the hitting
-     * for us. Clearing every goal would leave a puppet that can be ordered to attack and then
-     * stands there.
-     */
+    /** A mob goes on the threads without dying: its will goes ([tame]), its body stays. */
     fun seize(owner: ServerPlayer, mob: Mob) {
-        mob.targetSelector.removeAllGoals { true }
-        mob.setTarget(null)
+        tame(mob)
+        // Nor what to pick up: whatever it holds is what it was seized with.
+        mob.setCanPickUpLoot(false)
         mob.setPersistenceRequired()
         mob.setAttached(PUPPET_OF, owner.uuid)
         register(owner.uuid, mob)
@@ -265,7 +284,7 @@ object Marionettes {
             beyonder.demote()
             AbilityServices.messaging.tell(
                 victim.uuid,
-                Component.literal("Вашу Характеристику вирвано в маріонетку — Послідовність ослабла до ${beyonder.sequence.level}"),
+                Component.literal("Вашу Характеристику вирвано в маріонетку. Послідовність ослабла до ${beyonder.sequence.level}"),
             )
             AbilityServices.beyonders.of(victim.uuid)?.let { BeyonderStatus.pushRoster(victim) }
         }
@@ -281,8 +300,7 @@ object Marionettes {
             ?: puppet.getAttached(PUPPET_OF)
             ?: return
         (puppet as? Mob)?.let {
-            it.targetSelector.removeAllGoals { true }
-            it.target = null
+            tame(it)
             // Saved mid-possession by a crash: a possession never survives a restart, its NoAI must not either.
             it.isNoAi = false
         }
@@ -290,48 +308,173 @@ object Marionettes {
         if (puppets.none { it === puppet }) puppets += puppet
     }
 
+    /**
+     * Everything the mob did of its own accord is taken from it: choosing an enemy, wandering,
+     * grazing, looking round, running from danger, its brain's whole day. It is left standing.
+     *
+     * What stays is how its body fights ([PuppetGoal.fights]), which wakes only when the threads
+     * name a target, the creature engine's own goals (they already know an owned body has no will),
+     * and the float that keeps it from drowning. [PuppetGoal] does all the rest. Goals are not saved,
+     * so a mob that comes back from disk is tamed again in [adopt].
+     */
+    private fun tame(mob: Mob) {
+        mob.targetSelector.removeAllGoals { true }
+        mob.goalSelector.removeAllGoals { goal ->
+            !(goal is FloatGoal || PuppetGoal.fights(goal) || goal.javaClass.packageName.startsWith(CREATURE_GOALS))
+        }
+        mob.brain.removeAllBehaviors()
+        Creatures.aim(mob, null)
+        mob.navigation.stop()
+        mob.goalSelector.addGoal(PuppetGoal.PRIORITY, PuppetGoal(mob))
+    }
+
     private fun register(ownerId: UUID, puppet: LivingEntity) {
         byOwner.computeIfAbsent(ownerId) { mutableListOf() } += puppet
         chosen[ownerId] = puppet.uuid
         mobOrders.remove(puppet.uuid)
+        mobSteps.remove(puppet.uuid)
         if (puppet is MarionetteEntity) puppet.ownerId = ownerId
     }
 
     // ── Orders ──────────────────────────────────────────────────────────────────
 
     fun command(puppet: LivingEntity, order: MarionetteEntity.Order) {
+        marks.remove(puppet.uuid)
         when (puppet) {
-            is MarionetteEntity -> puppet.order = order
-            else -> {
-                mobOrders[puppet.uuid] = order
-                applyToMob(puppet, order)
+            is MarionetteEntity -> {
+                puppet.order = order
+                puppet.step = null
+            }
+            else -> mobOrders[puppet.uuid] = order
+        }
+        refresh(ownerOf(puppet)?.let(::player), puppet)
+    }
+
+    /** What a seized mob does this moment: the plain verb its order comes to. */
+    internal fun stepOf(mob: Mob): MarionetteEntity.Order = mobSteps[mob.uuid] ?: orderOf(mob)
+
+    /** The enemy an attack names, while it is still there to be fought. */
+    internal fun victimOf(puppet: LivingEntity, step: MarionetteEntity.Order.Attack): LivingEntity? =
+        ((puppet.level() as? ServerLevel)?.getEntityInAnyDimension(step.victimId) as? LivingEntity)
+            ?.takeIf { it.isAlive && it.level() === puppet.level() }
+
+    /** The puppet's Marionettist, if they are in its world. */
+    internal fun ownerBeside(puppet: LivingEntity): ServerPlayer? =
+        ownerOf(puppet)?.let(::player)?.takeIf { it.level() === puppet.level() }
+
+    /**
+     * Whom a puppet's techniques may land on in passing: never its Marionettist, nor another puppet
+     * on the same threads; its enemy of the moment, and monsters.
+     */
+    fun isFoe(puppet: LivingEntity, ownerId: UUID, other: LivingEntity): Boolean {
+        if (other.uuid == ownerId || ownerOf(other) == ownerId) return false
+        val now = when (puppet) {
+            is MarionetteEntity -> if (puppet.order.isErrand()) puppet.step else puppet.order
+            is Mob -> stepOf(puppet)
+            else -> null
+        }
+        return other.uuid == (now as? MarionetteEntity.Order.Attack)?.victimId || other is Enemy
+    }
+
+    private fun MarionetteEntity.Order.isErrand(): Boolean =
+        this is MarionetteEntity.Order.Guard || this is MarionetteEntity.Order.Assist || this is MarionetteEntity.Order.Use
+
+    // ── The longer errands ──────────────────────────────────────────────────────
+
+    /**
+     * Guarding, assisting and pressing a block are errands, not single moves: a few times a second
+     * each one is turned into the plain move it means right now (follow, walk there, strike that)
+     * and handed to the body. A player-made puppet takes it as its [MarionetteEntity.step], a seized
+     * mob through its [PuppetGoal], so both kinds run the same errands.
+     */
+    private fun drive() {
+        byOwner.forEach { (ownerId, puppets) ->
+            val owner = player(ownerId)
+            puppets.forEach { puppet ->
+                if (puppet.isAlive && possessions[ownerId]?.puppet !== puppet) refresh(owner, puppet)
             }
         }
     }
 
-    private fun applyToMob(puppet: LivingEntity, order: MarionetteEntity.Order) {
-        val mob = puppet as? Mob ?: return
-        when (order) {
-            is MarionetteEntity.Order.Stand -> {
-                mob.navigation.stop()
-                mob.target = null
-            }
-            is MarionetteEntity.Order.GoTo -> {
-                mob.target = null
-                mob.navigation.moveTo(order.target.x, order.target.y, order.target.z, MOB_SPEED)
-            }
-            is MarionetteEntity.Order.Follow -> {
-                val owner = ownerOf(mob)?.let { (mob.level() as? ServerLevel)?.getPlayerInAnyDimension(it) }
-                if (owner != null && owner.level() === mob.level() && mob.distanceToSqr(owner) > 9.0) {
-                    mob.navigation.moveTo(owner, MOB_SPEED)
-                }
-            }
-            is MarionetteEntity.Order.Attack -> {
-                val victim = (mob.level() as? ServerLevel)?.getEntityInAnyDimension(order.victimId) as? LivingEntity
-                mob.target = victim
+    /**
+     * Works out what the order means now and hands it to the body. A seized mob's own fighting is
+     * woken for exactly the enemy that comes out of it, and put to sleep again after.
+     */
+    private fun refresh(owner: ServerPlayer?, puppet: LivingEntity) {
+        val step = stepFor(owner, puppet)
+        when (puppet) {
+            is MarionetteEntity -> puppet.step = step
+            is Mob -> {
+                mobSteps[puppet.uuid] = step
+                val victim = (step as? MarionetteEntity.Order.Attack)?.let { victimOf(puppet, it) }
+                if (puppet.target !== victim) Creatures.aim(puppet, victim)
             }
         }
     }
+
+    private fun stepFor(owner: ServerPlayer?, puppet: LivingEntity): MarionetteEntity.Order =
+        when (val order = orderOf(puppet)) {
+            is MarionetteEntity.Order.Guard, is MarionetteEntity.Order.Assist -> escortStep(owner, puppet)
+            is MarionetteEntity.Order.Use -> useStep(puppet, order) ?: MarionetteEntity.Order.Stand
+            is MarionetteEntity.Order.Attack -> if (victimOf(puppet, order) != null) order else {
+                command(puppet, MarionetteEntity.Order.Stand)
+                MarionetteEntity.Order.Stand
+            }
+            else -> order
+        }
+
+    /**
+     * Guarding and assisting: at the Marionettist's side, and on whoever the threads last named, for
+     * as long as that one is alive and near the Marionettist. Then back to their side.
+     */
+    private fun escortStep(owner: ServerPlayer?, puppet: LivingEntity): MarionetteEntity.Order {
+        if (owner == null || owner.level() !== puppet.level()) return MarionetteEntity.Order.Stand
+        val victim = marks[puppet.uuid]?.let { victimOf(puppet, MarionetteEntity.Order.Attack(it)) }
+        if (victim != null && victim.distanceToSqr(owner) < ESCORT_LEASH * ESCORT_LEASH) {
+            return MarionetteEntity.Order.Attack(victim.uuid)
+        }
+        marks.remove(puppet.uuid)
+        return MarionetteEntity.Order.Follow
+    }
+
+    /**
+     * Whom the escorts go for. A blow the Marionettist lands names the enemy of the puppets told to
+     * strike their target; a blow on the Marionettist names the enemy of their guards. The source's
+     * entity is whoever is behind the blow: the archer, not the arrow, the caster, not the spell.
+     */
+    private fun mark(struck: LivingEntity, source: DamageSource) {
+        val attacker = source.entity as? LivingEntity ?: return
+        if (attacker === struck) return
+        markFor(attacker.uuid, struck, MarionetteEntity.Order.Assist)
+        markFor(struck.uuid, attacker, MarionetteEntity.Order.Guard)
+    }
+
+    private fun markFor(ownerId: UUID, enemy: LivingEntity, errand: MarionetteEntity.Order) {
+        val puppets = byOwner[ownerId] ?: return
+        if (enemy.uuid == ownerId || puppets.any { it === enemy }) return
+        puppets.filter { it.isAlive && orderOf(it) == errand }.forEach { puppet ->
+            marks[puppet.uuid] = enemy.uuid
+            refresh(player(ownerId), puppet)
+        }
+    }
+
+    /** Walks up to the block and presses it once, then waits. */
+    private fun useStep(puppet: LivingEntity, order: MarionetteEntity.Order.Use): MarionetteEntity.Order? {
+        val center = Vec3.atCenterOf(order.pos)
+        if (puppet.eyePosition.distanceToSqr(center) > USE_REACH * USE_REACH) return MarionetteEntity.Order.GoTo(center)
+        val level = puppet.level() as? ServerLevel ?: return null
+        val state = level.getBlockState(order.pos)
+        if (pressable(state.block)) {
+            puppet.swing(InteractionHand.MAIN_HAND)
+            state.useWithoutItem(level, FakePlayer.get(level), BlockHitResult(center, Direction.UP, order.pos, false))
+        }
+        command(puppet, MarionetteEntity.Order.Stand)
+        return null
+    }
+
+    /** What a puppet will press: the things a hand opens or flips, not a bed or a chest. */
+    private fun pressable(block: net.minecraft.world.level.block.Block): Boolean =
+        block is ButtonBlock || block is LeverBlock || block is DoorBlock || block is TrapDoorBlock || block is FenceGateBlock
 
     // ── Possession ──────────────────────────────────────────────────────────────
 
@@ -560,14 +703,107 @@ object Marionettes {
                 pushState(owner)
             }
             MarionetteOrderPayload.Action.CUT -> {
-                val puppet = selected(owner.uuid) ?: return
+                val puppet = payload.puppet?.let { id -> of(owner.uuid).firstOrNull { it.uuid == id } } ?: selected(owner.uuid) ?: return
                 // A string snapping where it was tied; the row loses the puppet on the same beat.
                 puppet.level().playSound(null, puppet.x, puppet.y + 1.0, puppet.z, SoundEvents.TRIPWIRE_DETACH, SoundSource.PLAYERS, 1.0f, 1.4f)
                 release(puppet)
                 pushState(owner)
             }
             MarionetteOrderPayload.Action.ORDER -> order(owner)
+            MarionetteOrderPayload.Action.SELECT -> {
+                payload.puppet?.let { select(owner.uuid, it) }
+                pushState(owner)
+            }
+            else -> act(owner, payload)
         }
+    }
+
+    /**
+     * The wheel's verbs, each for the puppet it names. The thread has to reach it; the one the
+     * Marionettist is standing inside takes no orders but Possession's own (stepping back out).
+     */
+    private fun act(owner: ServerPlayer, payload: MarionetteOrderPayload) {
+        val puppet = payload.puppet?.let { id -> of(owner.uuid).firstOrNull { it.uuid == id } } ?: return
+        val beyonder = AbilityServices.beyonders.of(owner.uuid) ?: return
+        val messaging = AbilityServices.messaging
+        if (possessions[owner.uuid]?.puppet === puppet && payload.action != MarionetteOrderPayload.Action.POSSESS) {
+            messaging.hint(owner, Component.literal("Спершу вийдіть із неї"), Fizzle.NONE)
+            return
+        }
+        val range = controlRange(beyonder)
+        if (puppet.level() !== owner.level() || owner.distanceToSqr(puppet) > range * range) {
+            messaging.hint(owner, Component.literal("Нитка не дістає до ${nameOf(puppet)}"), Fizzle.NONE)
+            return
+        }
+        val level = owner.level()
+        val done = when (payload.action) {
+            MarionetteOrderPayload.Action.COME -> {
+                command(puppet, MarionetteEntity.Order.GoTo(possessions[owner.uuid]?.vessel?.position() ?: owner.position()))
+                true
+            }
+            MarionetteOrderPayload.Action.FOLLOW -> true.also { command(puppet, MarionetteEntity.Order.Follow) }
+            MarionetteOrderPayload.Action.STAND -> true.also { command(puppet, MarionetteEntity.Order.Stand) }
+            MarionetteOrderPayload.Action.GUARD -> true.also { command(puppet, MarionetteEntity.Order.Guard) }
+            MarionetteOrderPayload.Action.ATTACK -> true.also { command(puppet, MarionetteEntity.Order.Assist) }
+            MarionetteOrderPayload.Action.USE -> {
+                val pos = payload.block
+                if (pos == null || !level.isLoaded(pos) || !pressable(level.getBlockState(pos).block) ||
+                    owner.distanceToSqr(Vec3.atCenterOf(pos)) > ORDER_REACH * ORDER_REACH
+                ) {
+                    messaging.hint(owner, Component.literal("Подивіться на важіль, кнопку чи двері й тоді відкрийте колесо"), Fizzle.NONE)
+                    false
+                } else true.also { command(puppet, MarionetteEntity.Order.Use(pos)) }
+            }
+            MarionetteOrderPayload.Action.POSSESS -> {
+                select(owner.uuid, puppet.uuid)
+                AbilityRequests.cast(owner, POSSESSION)
+                pushState(owner)
+                return
+            }
+            MarionetteOrderPayload.Action.SWAP -> swap(owner, puppet, beyonder)
+            MarionetteOrderPayload.Action.SPEAK -> speak(owner, puppet, payload.say)
+            else -> false
+        }
+        if (!done) return
+        level.playSound(null, owner.x, owner.y, owner.z, SoundEvents.TRIPWIRE_ATTACH, SoundSource.PLAYERS, 0.5f, 1.6f)
+        pushState(owner)
+    }
+
+    /**
+     * The Marionettist and the puppet trade places in one jerk of the threads — Klein's way out of
+     * more than one corner. Bought with spirituality and a breath between swaps: a puppet left at the
+     * edge of the thread's reach would otherwise be a free door across two hundred blocks.
+     */
+    private fun swap(owner: ServerPlayer, puppet: LivingEntity, beyonder: Beyonder): Boolean {
+        val messaging = AbilityServices.messaging
+        val now = AbilityServices.scheduling.tick
+        if (now < (swapReady[owner.uuid] ?: 0L)) {
+            messaging.hint(owner, Component.literal("Нитки ще не натяглись знову"), Fizzle.NONE)
+            return false
+        }
+        if (!beyonder.payUpkeep(SWAP_COST)) {
+            messaging.hint(owner, Component.literal("Бракує духовності: потрібно $SWAP_COST"), Fizzle.EMPTY)
+            return false
+        }
+        swapReady[owner.uuid] = now + SWAP_COOLDOWN_TICKS
+        val level = owner.level()
+        val mine = owner.position()
+        val theirs = puppet.position()
+        owner.teleportTo(level, theirs.x, theirs.y, theirs.z, emptySet(), owner.yRot, owner.xRot, false)
+        puppet.teleportTo(mine.x, mine.y, mine.z)
+        pull(level, puppet, owner)
+        return true
+    }
+
+    /** A line said in the puppet's name, as if it spoke — the same chat line a possession says. */
+    private fun speak(owner: ServerPlayer, puppet: LivingEntity, say: String): Boolean {
+        val line = StringUtil.filterText(say).trim().take(MarionetteOrderPayload.MAX_SAY)
+        if (line.isEmpty()) return false
+        owner.level().server.playerList.broadcastSystemMessage(
+            Component.translatable("chat.type.text", Component.literal(nameOf(puppet)), Component.literal(line)),
+            false,
+        )
+        return true
     }
 
     private fun order(owner: ServerPlayer) {
@@ -585,7 +821,7 @@ object Marionettes {
         val puppet = selected(owner.uuid) ?: return
         val beyonder = AbilityServices.beyonders.of(owner.uuid) ?: return
         if (owner.distanceToSqr(puppet) > controlRange(beyonder) * controlRange(beyonder)) {
-            AbilityServices.messaging.hint(owner, Component.literal("Нитка не дістає — ${nameOf(puppet)} задалеко"), Fizzle.NONE)
+            AbilityServices.messaging.hint(owner, Component.literal("Нитка не дістає до ${nameOf(puppet)}"), Fizzle.NONE)
             return
         }
 
@@ -652,9 +888,19 @@ object Marionettes {
                         is MarionetteEntity.Order.GoTo -> MarionetteStatePayload.Order.GOING
                         is MarionetteEntity.Order.Follow -> MarionetteStatePayload.Order.FOLLOWING
                         is MarionetteEntity.Order.Attack -> MarionetteStatePayload.Order.ATTACKING
+                        is MarionetteEntity.Order.Guard -> MarionetteStatePayload.Order.GUARDING
+                        is MarionetteEntity.Order.Assist -> MarionetteStatePayload.Order.ASSISTING
+                        is MarionetteEntity.Order.Use -> MarionetteStatePayload.Order.USING
                     },
                     strandSeconds = puppet.getAttached(STRANDED_UNTIL)?.let { ((it - now) / 1000L).coerceAtLeast(0L).toInt() } ?: 0,
                     distance = if (owner.level() === puppet.level()) owner.distanceTo(puppet).toInt() else -1,
+                    entity = puppet.id,
+                    type = BuiltInRegistries.ENTITY_TYPE.getKey(puppet.type).toString(),
+                    face = (puppet as? MarionetteEntity)?.profile,
+                    pathway = (puppet as? MarionetteEntity)?.capture?.pathway,
+                    sequence = (puppet as? MarionetteEntity)?.capture?.sequence ?: -1,
+                    equipment = SHOWN_SLOTS.map { puppet.getItemBySlot(it).copy() },
+                    at = puppet.position(),
                 )
             },
             selected = selected(owner.uuid)?.uuid,
@@ -702,6 +948,7 @@ object Marionettes {
 
         ServerTickEvents.END_SERVER_TICK.register { server ->
             steerPossessed()
+            if (server.tickCount % DRIVE_PERIOD_TICKS == 0) drive()
             if (server.tickCount % TICKS_PER_SECOND == 0) sweep()
         }
 
@@ -734,7 +981,10 @@ object Marionettes {
             false
         }
 
-        // The driver cannot see their own body being struck — so they hear it.
+        // The escorts: what the Marionettist strikes, and whoever strikes them.
+        ServerLivingEntityEvents.AFTER_DAMAGE.register { entity, source, _, _, _ -> mark(entity, source) }
+
+        // The driver cannot see their own body being struck, so they hear it.
         ServerLivingEntityEvents.AFTER_DAMAGE.register { entity, _, _, taken, _ ->
             val owner = (entity as? MarionetteEntity)?.vesselOf?.let(::player) ?: return@register
             if (taken <= 0f) return@register
@@ -774,12 +1024,12 @@ object Marionettes {
             val owner = player(ownerId) ?: return@forEach
             val puppet = possession.puppet
             if (broken.remove(ownerId)) {
-                eject(owner, Component.literal("Маріонетку розбито — вас викинуло у власне тіло"))
+                eject(owner, Component.literal("Маріонетку розбито, вас викинуло у власне тіло"))
                 release(puppet)
                 return@forEach
             }
             if (!puppet.isAlive) {
-                eject(owner, Component.literal("Маріонетку розбито — вас викинуло у власне тіло"))
+                eject(owner, Component.literal("Маріонетку розбито, вас викинуло у власне тіло"))
                 return@forEach
             }
             if (owner.level() !== puppet.level()) {
@@ -843,7 +1093,7 @@ object Marionettes {
         ownerOf(puppet)?.let { ownerId ->
             AbilityServices.messaging.tell(
                 ownerId,
-                Component.literal("Нитка натягнулась до краю: ${nameOf(puppet)} поза зоною контролю. Десять хвилин — і вона обірветься."),
+                Component.literal("Нитка натягнулась до краю: ${nameOf(puppet)} поза зоною контролю. За десять хвилин вона обірветься."),
             )
         }
     }
@@ -882,8 +1132,10 @@ object Marionettes {
 
         byOwner[ownerId]?.removeIf { it === puppet }
         mobOrders.remove(puppet.uuid)
+        mobSteps.remove(puppet.uuid)
+        marks.remove(puppet.uuid)
         if (possessions[ownerId]?.puppet === puppet) {
-            player(ownerId)?.let { eject(it, Component.literal("Маріонетку розбито — вас викинуло у власне тіло")) }
+            player(ownerId)?.let { eject(it, Component.literal("Маріонетку розбито, вас викинуло у власне тіло")) }
         }
 
         val capture = (puppet as? MarionetteEntity)?.capture
@@ -961,8 +1213,11 @@ object Marionettes {
         byOwner.clear()
         chosen.clear()
         mobOrders.clear()
+        mobSteps.clear()
+        marks.clear()
         possessions.clear()
         weaves.clear()
+        swapReady.clear()
     }
 
     private fun player(id: UUID): ServerPlayer? = AbilityServices.playerOf(id)
@@ -978,8 +1233,6 @@ object Marionettes {
     private val FOOL_COLOR = PathwayBranding.liquidOf(Fool.NAME)
     private const val PULL_TICKS = 12
 
-    private const val MOB_SPEED = 1.1
-
     /** The player inventory's main part: hotbar plus the three rows above it. */
     private const val MAIN_SLOTS = 36
 
@@ -993,4 +1246,27 @@ object Marionettes {
 
     /** How far an order can be pointed. Further than a hand reaches, and rightly: it is a gesture. */
     private const val ORDER_REACH = 64.0
+
+    private val POSSESSION = AbilityIdentity.of("fool_marionette_possession")
+
+    /** What the wheel draws a puppet holding and wearing — the order of [MarionetteStatePayload.Entry.equipment]. */
+    private val SHOWN_SLOTS = listOf(
+        EquipmentSlot.MAINHAND, EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET,
+    )
+
+    /** How often the longer errands are turned into moves. */
+    private const val DRIVE_PERIOD_TICKS = 5
+
+    /** An escort lets an enemy go once it is this far from the Marionettist. */
+    private const val ESCORT_LEASH = 32.0
+
+    /** The creature engine's goals: kept on a seized creature, they already know it has no will. */
+    private const val CREATURE_GOALS = "me.vangoo.mysteries.creature"
+
+    /** A hand reaches a block this far from the eye. */
+    private const val USE_REACH = 2.5
+
+    /** Swapping places: its price and the breath between two swaps. */
+    private const val SWAP_COST = 40
+    private const val SWAP_COOLDOWN_TICKS = 10L * TICKS_PER_SECOND
 }

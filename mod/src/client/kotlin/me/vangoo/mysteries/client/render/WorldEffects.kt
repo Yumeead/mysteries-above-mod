@@ -55,6 +55,10 @@ object WorldEffects : HudElement {
         LevelRenderEvents.COLLECT_SUBMITS.register(PrivateSight::submit)
         LevelRenderEvents.COLLECT_SUBMITS.register(Strands::submit)
         LevelRenderEvents.COLLECT_SUBMITS.register(SpiritThreads::submit)
+        // Bent air reads the frame's colour once the solid entities are in it; it is drawn with the translucent ones.
+        LevelRenderEvents.AFTER_SOLID_FEATURES.register { if (AirShots.active && !ShaderPacks.inUse) Refraction.captureColor() }
+        LevelRenderEvents.COLLECT_SUBMITS.register(AirShots::submit)
+        LevelRenderEvents.COLLECT_SUBMITS.register(Pendulums::submit)
     }
 
     fun accept(payload: WorldEffectPayload) {
@@ -71,6 +75,9 @@ object WorldEffects : HudElement {
             is WorldEffectPayload.Thread -> Strands.accept(payload)
             is WorldEffectPayload.Spool -> Strands.accept(payload)
             is WorldEffectPayload.Face -> Paper.accept(payload)
+            is WorldEffectPayload.AirShot -> AirShots.accept(payload)
+            is WorldEffectPayload.Pendulum -> Pendulums.accept(payload)
+            is WorldEffectPayload.Vision -> me.vangoo.mysteries.client.hud.DreamVision.accept(payload)
         }
     }
 
@@ -83,6 +90,9 @@ object WorldEffects : HudElement {
         Paper.tick()
         PrivateSight.tick()
         Strands.tick()
+        AirShots.tick()
+        Pendulums.tick()
+        me.vangoo.mysteries.client.hud.DreamVision.tick()
     }
 
     fun clear() {
@@ -91,6 +101,9 @@ object WorldEffects : HudElement {
         Paper.clear()
         PrivateSight.clear()
         Strands.clear()
+        AirShots.clear()
+        Pendulums.clear()
+        me.vangoo.mysteries.client.hud.DreamVision.clear()
         flash = 0f
         previousFlash = 0f
     }

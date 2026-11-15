@@ -84,11 +84,14 @@ class MarionetteControl : ActiveAbility(AbilityIdentity.of("fool_marionettist_co
 
     override fun description(sequence: Sequence): Component = Component.literal(
         "Нитки з ваших пальців беруть живе тіло під владу. Двофазний захват: спершу фіксація, потім злам волі.\n" +
-            "▪ Ціль під прицілом, до ${REACH.toInt()} бл.; найшвидше — ближче ніж ${FAST_RADIUS.toInt()} бл., далі повільніше\n" +
-            "▪ Фіксація 20→5 с (за засвоєнням), злам: звір ~15 с, людина ~5 хв (швидшає з Послідовністю)\n" +
-            "▪ Під час фіксації жертва нічого не помічає; під час зламу її тіло смикає до вас — це видно всім\n" +
+            "▪ Ціль під прицілом, до ${REACH.toInt()} бл.; найшвидше ближче ніж ${FAST_RADIUS.toInt()} бл.\n" +
+            "▪ Фіксація від 20 до 5 с (за засвоєнням), злам: звір ~15 с, людина ~5 хв (швидшає з Послідовністю)\n" +
+            "▪ Під час фіксації жертва нічого не помічає; під час зламу її тіло смикає до вас, і це видно всім\n" +
             "▪ Один удар від $BREAK шкоди по жертві рве нитки; ціна знімається лише за готову маріонетку\n" +
-            "▪ Звір лишається живим; людина гине, а її Характеристика назавжди переходить у маріонетку",
+            "▪ Звір лишається живим; людина гине, а її Характеристика назавжди переходить у маріонетку\n" +
+            "▪ Маріонетка не має власної волі: без наказу стоїть на місці\n" +
+            "▪ Накази в колесі R: стрілка праворуч від кола веде до маріонеток\n" +
+            "▪ Швидкий наказ: тримайте G і ПКМ по істоті, блоку чи в повітря",
     )
 
     override fun cast(context: CastContext): AbilityOutcome {
@@ -102,12 +105,12 @@ class MarionetteControl : ActiveAbility(AbilityIdentity.of("fool_marionettist_co
         val limit = Marionettes.limitFor(beyonder)
         if (Marionettes.of(context.caster.uuid).size >= limit) {
             return AbilityOutcome.failed(
-                "Ниток більше немає: ви тримаєте $limit. Обріжте одну або підніміть засвоєння",
+                "Ниток більше немає: ви тримаєте $limit. Обріжте одну в колесі R або підніміть засвоєння",
             )
         }
 
         val target = context.targeting.lookingAt(REACH)
-            ?: return AbilityOutcome.failed("Немає цілі — гляньте на живу істоту")
+            ?: return AbilityOutcome.failed("Подивіться на живу істоту")
         if (Marionettes.isPuppet(target)) {
             return AbilityOutcome.failed("Ця істота вже на чиїхось нитках")
         }
@@ -222,13 +225,13 @@ class MarionetteControl : ActiveAbility(AbilityIdentity.of("fool_marionettist_co
             }
             val victim = resolve(caster, targetId)
             if (victim == null || !victim.isAlive || victim.level() !== caster.level()) {
-                messaging.hint(caster, Component.literal("Ціль зникла — нитки обірвались"), Fizzle.NONE)
+                messaging.hint(caster, Component.literal("Ціль зникла, нитки обірвались"), Fizzle.NONE)
                 return false
             }
             val distance = caster.distanceTo(victim).toDouble()
             if (distance > REACH) {
                 snap(victim)
-                messaging.hint(caster, Component.literal("Задалеко — нитки зісковзнули"), Fizzle.NONE)
+                messaging.hint(caster, Component.literal("Задалеко, нитки зісковзнули"), Fizzle.NONE)
                 return false
             }
 

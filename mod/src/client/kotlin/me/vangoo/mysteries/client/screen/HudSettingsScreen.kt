@@ -80,6 +80,9 @@ class HudSettingsScreen(private val parent: Screen) : Screen(tr("settings")) {
                 options("hints", listOf("disabled", "enabled"), { ClientOptions.hints == (it == 1) }) {
                     ClientOptions.hints = it == 1
                 }
+                options("danger_arrows", listOf("disabled", "enabled"), { ClientOptions.dangerArrows == (it == 1) }) {
+                    ClientOptions.dangerArrows = it == 1
+                }
             }
             1 -> {
                 val names = SpiritualityNumbers.entries.map { "numbers.${it.name.lowercase()}" }
