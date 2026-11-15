@@ -1,6 +1,5 @@
 package me.vangoo.mysteries.creature
 
-import me.vangoo.domain.creatures.AbilityCastPlanner
 import me.vangoo.domain.creatures.BossPhases
 import me.vangoo.domain.creatures.SequencePressure
 import me.vangoo.domain.creatures.ThreatTable
@@ -29,7 +28,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier
 import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.entity.monster.Enemy
 import net.minecraft.world.entity.player.Player
-import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
 import java.util.IdentityHashMap
 import java.util.UUID
@@ -71,10 +69,8 @@ class Mind(
 
     val threat = ThreatTable<UUID>()
 
-    var kit: CreatureKit? = null
-        private set
-    private var planner: AbilityCastPlanner? = null
-    private val kitSkills = HashMap<String, CreatureSkill>()
+    private var repertoire: Repertoire? = null
+    val kit: CreatureKit? get() = repertoire?.kit
     private val readyAt = IdentityHashMap<Reaction, Long>()
 
     /** A technique being wound up: the spot is marked, the blow has not landed. */
@@ -129,17 +125,8 @@ class Mind(
 
     private fun equip(kitKey: ResourceKey<CreatureKit>?) {
         val resolved = kitKey?.let { Creatures.kit(level, it) }
-        kit = resolved
-        kitSkills.clear()
+        repertoire = resolved?.let { Repertoire(level, it) }
         readyAt.clear()
-        planner = resolved?.let { k ->
-            k.skills.forEach { entry -> Creatures.skill(level, entry.skill)?.let { kitSkills[entry.skill.identifier().toString()] = it } }
-            AbilityCastPlanner(
-                k.skills.filter { it.skill.identifier().toString() in kitSkills }
-                    .map { AbilityCastPlanner.KitEntry(it.skill.identifier().toString(), it.cooldown.toLong()) },
-                k.gcd.toLong(),
-            )
-        }
         val haste = resolved?.haste ?: 0
         if (haste > 0) {
             mob.grantAttribute(Attributes.MOVEMENT_SPEED, HASTE_ID, haste * HASTE_STEP, AttributeModifier.Operation.ADD_MULTIPLIED_BASE)
@@ -218,14 +205,8 @@ class Mind(
             }
         }
 
-        val sees = mob.sensing.hasLineOfSight(target)
-        val distance = Math.sqrt(distanceSq)
-        val pick = planner?.pickNext(now) { id ->
-            val skill = kitSkills[id]
-            skill != null && distance <= (skill.range ?: kit.range) && (sees || skill.aroundSelf) &&
-                (!skill.beyondersOnly || Creatures.sequenceOf(target) != null)
-        } ?: return
-        begin(kitSkills.getValue(pick), target)
+        val pick = repertoire?.next(now, mob, target, mob.sensing.hasLineOfSight(target)) ?: return
+        begin(pick, target)
     }
 
     private fun begin(skill: CreatureSkill, target: LivingEntity) {
@@ -249,27 +230,7 @@ class Mind(
         }
     }
 
-    fun release(skill: CreatureSkill, target: LivingEntity?, impact: Vec3) {
-        val cast = SkillCast(mob, target, impact, power)
-        skill.self.forEach { it.apply(cast, mob) }
-        subjectsOf(skill, target, impact).forEach { subject -> skill.target.forEach { it.apply(cast, subject) } }
-    }
-
-    private fun subjectsOf(skill: CreatureSkill, target: LivingEntity?, impact: Vec3): List<LivingEntity> {
-        if (skill.target.isEmpty()) return emptyList()
-        if (skill.area > 0.0) {
-            val center = if (skill.aroundSelf) mob.position() else impact
-            val reach = skill.area * 2
-            return level.getEntitiesOfClass(LivingEntity::class.java, AABB.ofSize(center, reach, reach, reach)) {
-                it.distanceToSqr(center) <= skill.area * skill.area && Creatures.isFoe(mob, it)
-            }
-        }
-        if (target == null || !target.isAlive) return emptyList()
-        // A projectile carries its own chance to miss; anything else wound up misses whoever stepped off the mark.
-        val dodged = skill.windup > 0 && skill.target.none { it is Projectile } &&
-            target.position().distanceToSqr(impact) > DODGE * DODGE
-        return if (dodged) emptyList() else listOf(target)
-    }
+    fun release(skill: CreatureSkill, target: LivingEntity?, impact: Vec3) = skill.release(mob, target, impact, power)
 
     private fun ready(reaction: Reaction): Boolean = now >= (readyAt[reaction] ?: Long.MIN_VALUE)
 
@@ -496,7 +457,6 @@ class Mind(
         const val SECOND = 20L
         const val BAR_EVERY = 10L
         const val TELEGRAPH_EVERY = 4L
-        const val DODGE = 2.5
         const val PROVOKE = 3.0
         const val PROVOKED_TICKS = 80L
         const val PANIC_TICKS = 200L

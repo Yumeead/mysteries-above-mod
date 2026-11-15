@@ -64,12 +64,12 @@ data class MarionetteStatePayload(
 
     /** The verbs, as the HUD and the wheel say them back. */
     enum class Order(val caption: String) {
-        STAND("чекає"),
+        STAND("стоїть"),
         GOING("іде"),
         FOLLOWING("за вами"),
         ATTACKING("б'ється"),
-        GUARDING("охороняє"),
-        GATHERING("збирає"),
+        GUARDING("охороняє вас"),
+        ASSISTING("б'є вашу ціль"),
         USING("іде натиснути"),
     }
 

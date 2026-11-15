@@ -18,6 +18,10 @@
       {
         "adapter": "kotlin",
         "value": "me.vangoo.mysteries.gametest.AbilityGameTests"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.gametest.MarionetteGameTests"
       }
     ],
     "fabric-client-gametest": [

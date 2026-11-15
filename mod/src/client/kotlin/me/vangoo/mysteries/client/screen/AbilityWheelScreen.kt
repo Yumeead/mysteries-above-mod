@@ -159,8 +159,6 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
         GUARD(MarionetteOrderPayload.Action.GUARD),
         ATTACK(MarionetteOrderPayload.Action.ATTACK),
         USE(MarionetteOrderPayload.Action.USE),
-        GATHER(MarionetteOrderPayload.Action.GATHER),
-        ARM(MarionetteOrderPayload.Action.ARM),
         SPEAK(MarionetteOrderPayload.Action.SPEAK),
         SWAP(MarionetteOrderPayload.Action.SWAP),
         POSSESS(MarionetteOrderPayload.Action.POSSESS),
@@ -513,7 +511,6 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
             else -> MarionetteOrderPayload(
                 verb.action,
                 puppet = puppet.id,
-                entity = (openedOn as? net.minecraft.world.phys.EntityHitResult)?.entity?.id ?: -1,
                 block = (openedOn as? BlockHitResult)?.blockPos,
             )
         }

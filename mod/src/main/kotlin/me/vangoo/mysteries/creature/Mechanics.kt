@@ -5,6 +5,7 @@ import com.mojang.serialization.DataResult
 import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
 import me.vangoo.domain.abilities.AbilityType
+import me.vangoo.domain.creatures.AbilityCastPlanner
 import me.vangoo.mysteries.ability.Ability
 import me.vangoo.mysteries.ability.runtime.AbilityServices
 import me.vangoo.mysteries.beyonder.TheftRegistry
@@ -24,7 +25,6 @@ import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.EntitySpawnReason
 import net.minecraft.world.entity.EntityTypes
 import net.minecraft.world.entity.LivingEntity
-import net.minecraft.world.entity.Mob
 import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.level.ClipContext
 import net.minecraft.world.phys.AABB
@@ -38,9 +38,65 @@ import net.minecraft.world.phys.Vec3
  * may no longer be standing on it
  * @property power the caster's current strength: `1` normally, more for an enraged boss
  */
-class SkillCast(val caster: Mob, val target: LivingEntity?, val impact: Vec3, val power: Float) {
+class SkillCast(val caster: LivingEntity, val target: LivingEntity?, val impact: Vec3, val power: Float) {
     val level: ServerLevel get() = caster.level() as ServerLevel
 }
+
+/**
+ * A kit made ready for one body: its techniques looked up once, and the rotation that paces them.
+ *
+ * A creature's [Mind] holds one, and so does a puppet made from a Beyonder: it has no mind of its
+ * own, but it fights with the techniques of what it was.
+ */
+class Repertoire(level: ServerLevel, val kit: CreatureKit) {
+
+    private val skills: Map<String, CreatureSkill> = kit.skills.mapNotNull { entry ->
+        Creatures.skill(level, entry.skill)?.let { entry.skill.identifier().toString() to it }
+    }.toMap()
+
+    private val planner = AbilityCastPlanner(
+        kit.skills.filter { it.skill.identifier().toString() in skills }
+            .map { AbilityCastPlanner.KitEntry(it.skill.identifier().toString(), it.cooldown.toLong()) },
+        kit.gcd.toLong(),
+    )
+
+    /** The technique [caster] throws at [target] now, its cooldown spent; `null` — none is ready or reaches. */
+    fun next(now: Long, caster: LivingEntity, target: LivingEntity, sees: Boolean): CreatureSkill? {
+        val distance = caster.distanceTo(target).toDouble()
+        val pick = planner.pickNext(now) { id ->
+            val skill = skills[id]
+            skill != null && distance <= (skill.range ?: kit.range) && (sees || skill.aroundSelf) &&
+                (!skill.beyondersOnly || Creatures.sequenceOf(target) != null)
+        } ?: return null
+        return skills.getValue(pick)
+    }
+}
+
+/** The technique lands: first on [caster] itself, then on everyone it reaches. */
+fun CreatureSkill.release(caster: LivingEntity, target: LivingEntity?, impact: Vec3, power: Float) {
+    val cast = SkillCast(caster, target, impact, power)
+    self.forEach { it.apply(cast, caster) }
+    subjects(caster, target, impact).forEach { subject -> this.target.forEach { it.apply(cast, subject) } }
+}
+
+private fun CreatureSkill.subjects(caster: LivingEntity, target: LivingEntity?, impact: Vec3): List<LivingEntity> {
+    if (this.target.isEmpty()) return emptyList()
+    if (area > 0.0) {
+        val center = if (aroundSelf) caster.position() else impact
+        val reach = area * 2
+        return caster.level().getEntitiesOfClass(LivingEntity::class.java, AABB.ofSize(center, reach, reach, reach)) {
+            it.distanceToSqr(center) <= area * area && Creatures.isFoe(caster, it)
+        }
+    }
+    if (target == null || !target.isAlive) return emptyList()
+    // A projectile carries its own chance to miss; anything else wound up misses whoever stepped off the mark.
+    val dodged = windup > 0 && this.target.none { it is Projectile } &&
+        target.position().distanceToSqr(impact) > DODGE * DODGE
+    return if (dodged) emptyList() else listOf(target)
+}
+
+/** How far off its mark a wound-up technique's target must step to be missed. */
+private const val DODGE = 2.5
 
 /**
  * One thing a technique does to one living [subject]. The vocabulary is the plugin's MythicMobs

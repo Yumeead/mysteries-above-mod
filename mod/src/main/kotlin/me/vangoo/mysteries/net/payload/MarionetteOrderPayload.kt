@@ -19,15 +19,14 @@ import java.util.UUID
  *
  * Two ways in. The threads key ([Action.CYCLE], [Action.ORDER]) is the quick one: the server reads
  * the Marionettist's own crosshair and sneak and picks the verb, so no target travels. The wheel's
- * threads tab names the [puppet] and the verb outright — the rest of the actions — and, where the
- * verb needs one, what the crosshair held the moment the wheel opened: an [entity] to attack, a
- * [block] to use. The server checks both against its own world; a line to [say] is filtered there.
+ * threads tab names the [puppet] and the verb outright (the rest of the actions) and, for "use", the
+ * [block] the crosshair held the moment the wheel opened. The server checks it against its own
+ * world; a line to [say] is filtered there.
  */
 data class MarionetteOrderPayload(
     val action: Action,
     val delta: Int = 0,
     val puppet: UUID? = null,
-    val entity: Int = -1,
     val block: BlockPos? = null,
     val say: String = "",
 ) : CustomPacketPayload {
@@ -49,8 +48,8 @@ data class MarionetteOrderPayload(
         GUARD,
         POSSESS,
         SWAP,
-        ARM,
-        GATHER,
+
+        /** Strike whoever the Marionettist strikes, from now on. */
         ATTACK,
         SPEAK,
         USE,
@@ -81,7 +80,6 @@ data class MarionetteOrderPayload(
             buf.writeVarInt(payload.action.ordinal)
             buf.writeVarInt(payload.delta)
             buf.writeNullable(payload.puppet) { b, id -> b.writeUUID(id) }
-            buf.writeVarInt(payload.entity)
             buf.writeNullable(payload.block) { b, pos -> b.writeBlockPos(pos) }
             buf.writeUtf(payload.say, MAX_SAY)
         }
@@ -91,7 +89,6 @@ data class MarionetteOrderPayload(
                 action = action(buf.readVarInt()),
                 delta = buf.readVarInt(),
                 puppet = buf.readNullable { it.readUUID() },
-                entity = buf.readVarInt(),
                 block = buf.readNullable { it.readBlockPos() },
                 say = buf.readUtf(MAX_SAY),
             )

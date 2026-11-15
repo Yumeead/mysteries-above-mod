@@ -98,30 +98,6 @@ class ThreadsClientGameTest : FabricClientGameTest {
                 check(lever.getValue(LeverBlock.POWERED)) { "Маріонетка не натиснула важіль" }
             }
 
-            // Gather: three things dropped near the husk end up at the Marionettist's feet.
-            server.runCommand("summon item ~3 ~ ~8 {Item:{id:\"minecraft:apple\",count:1}}")
-            server.runCommand("summon item ~1 ~ ~9 {Item:{id:\"minecraft:bread\",count:2}}")
-            order(server, EntityTypes.HUSK, Action.GATHER)
-            context.waitTicks(300)
-            server.on { _, player ->
-                // Dropped at the feet, and a player picks up what lies at their feet.
-                val near = player.level().getEntitiesOfClass(ItemEntity::class.java, player.boundingBox.inflate(3.0)).map { it.item.item } +
-                    player.inventory.nonEquipmentItems.filterNot { it.isEmpty }.map { it.item }
-                check(Items.APPLE in near && Items.BREAD in near) {
-                    val husk = puppet(player, EntityTypes.HUSK)
-                    val lying = player.level().getEntitiesOfClass(ItemEntity::class.java, player.boundingBox.inflate(30.0)).map { "${it.item.item}@${it.blockPosition()}" }
-                    "Зібране не принесено: $near; гравець ${player.blockPosition()}, лушпак ${husk.blockPosition()} ${Marionettes.orderOf(husk)} у руці ${husk.mainHandItem}; лежить $lying"
-                }
-            }
-
-            // Hand over: the stick goes to the pig, its empty hand comes back.
-            server.on { _, player -> player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack(Items.STICK)) }
-            order(server, EntityTypes.PIG, Action.ARM)
-            context.waitTicks(2)
-            server.on { _, player ->
-                check(puppet(player, EntityTypes.PIG).mainHandItem.`is`(Items.STICK) && player.mainHandItem.isEmpty) { "Предмет не передано" }
-            }
-
             // Swap places with the husk.
             var before = net.minecraft.world.phys.Vec3.ZERO
             server.on { _, player -> before = puppet(player, EntityTypes.HUSK).position() }
