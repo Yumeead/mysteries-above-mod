@@ -1,107 +1,100 @@
-# mysteries-above-mod
+# Mysteries Above
 
-Порт [mysteries-above](https://github.com/Yumeead/mysteries-above) зі Spigot/Paper-плагіна
-на Fabric-мод мовою Kotlin за мотивами *Lord of the Mysteries*. Гравці стають **Потойбічними**,
-п'ють зілля й просуваються **Шляхом** через **Послідовності** (9 — найслабша → 0 — найсильніша).
+A Fabric mod for Minecraft 26.2, written in Kotlin and based on *Lord of the Mysteries*. You drink a potion,
+become a Beyonder, and climb a Pathway from Sequence 9 to Sequence 0, picking up new powers on the way.
 
-**Навіщо порт.** Плагін уперся в стелю Bukkit: шість із дев'яти його рантайм-залежностей
-(MythicMobs, Citizens, BetterModel, glowingentities, triumph-gui, packetevents) існували
-лише для того, щоб емулювати те, що мод робить нативно — свої сутності, свої моделі, свої
-екрани. Три «кишенькові світи» підміняли справжні виміри. Мод прибирає посередників і
-відкриває міксини.
+It started as a Spigot/Paper plugin, [mysteries-above](https://github.com/Yumeead/mysteries-above). The plugin
+was frozen on 26.08.2026 and everything happens here now, but it is still the reference for rules, balance and
+lore.
 
-Плагін заморожено 26.08.2026 — уся розробка тепер тут. Порт не транслітерує Java: костилі,
-які плагін платив Spigot'у (меню замість предмета, опитування замість події, телепорт замість
-подорожі), замінюються справжньою механікою.
+## Why move off Spigot
 
-## Що вже є в грі
+Six of the plugin's nine runtime dependencies (MythicMobs, Citizens, BetterModel, glowingentities, triumph-gui,
+packetevents) existed only to fake things a mod can just do: its own entities, models and screens. Its three
+"pocket worlds" stood in for real dimensions. A lot of the abilities were shaped by the same limits, with a
+chest menu where an item in your hand should be, a polling loop where an event should be, and a teleport
+where an actual journey should be.
 
-- **Цикл Потойбічного**: зілля → піднесення → каст. Одне зілля на всі 220 варіантів,
-  духовність, засвоєння, втрата глузду з шепотом, серцебиттям і вицвітанням екрана.
-- **Усі 22 шляхи**: 9 повних (Посл. 9–5) — WhiteTower, Sun, Door, Error, Visionary, Tyrant,
-  Justiciar, Fool, Death; 13 — заглушки (зілля, Характеристика, колір, без здібностей).
-- **Власні виміри**: Духовний світ (двері Мандрівника) і Загробний світ (Смерть).
-- **Маріонетник** (Fool, Посл. 5): власна сутність із тілом гравця, нитки Духовного Тіла,
-  вселення.
-- **Інтерфейс**: колесо здібностей (утримання R), книга-гримуар (B) з групами й хоткеями,
-  режими здібностей, HUD, вибір посеред касту, власний стиль ванільних екранів.
-- **Рушій істот** замість MythicMobs: 64 істоти з плагіна + городяни, варта, дикі Потойбічні
-  й бос із трьома актами; розум (загроза, страх Послідовності, телеграфовані удари) поверх
-  ванільних тіл, дані — датапак-реєстри.
-- **Збереження**: стан Потойбічного, маріонетки, крадіжки, клятви живуть у файлах гравця й
-  світу — окремих JSON немає.
-- **Ассети в джарі**: ресурспак і датапак плагіна більше не роздаються окремо — 24 світові
-  споруди, 163 інгредієнти як справжні предмети, чотири моделі істот із `.bbmodel` з анімаціями.
-- **Лут**: інгредієнти й зілля в ванільних скринях, нахилені до місця (корабель — до Тирана),
-  до шляху того, хто відчиняє, і до його Послідовності; числа спавну — ігрові правила.
-- **Ігрові тести**: кожна здібність кожного шляху кастується на справжньому сервері в кожній
-  Послідовності й кожному режимі; збій сили валить збірку.
+So this isn't a line-by-line translation. Each ability keeps its pathway, Sequence, name and lore from the
+plugin, and gets rebuilt where the mod can do it properly. The Spirit World is a real dimension you walk
+into through a door. A ritual is candles and offerings on an actual altar. When Fool's Paper Figurine
+Substitution takes a hit for you, your body turns into a paper figure in your exact pose, the blow cuts
+through it, and you step out of thin air a few blocks away.
 
-## Стан фаз
+## What works today
 
-Повний план — **17 фаз** із поміряними обсягами, рішеннями й ризиками:
-https://claude.ai/code/artifact/79182c35-c186-4232-b3b3-773466c48901
+- The core loop: potion, advancement, casting. Spirituality, mastery, and sanity loss that you hear and see
+  (whispers, a heartbeat, the screen draining of colour).
+- Nine pathways are playable from Sequence 9 to 5: White Tower, Sun, Door, Error, Visionary, Tyrant,
+  Justiciar, Fool and Death. The other 13 already have potions, characteristics and colours, but no
+  abilities yet.
+- Two custom dimensions, the Spirit World and the Underworld.
+- An ability wheel (hold R) and a grimoire (B) for groups and hotkeys, plus a small HUD.
+- A creature engine that replaces MythicMobs: the plugin's 64 creatures, townsfolk and guards with daily
+  routines, wild Beyonders, and a three-act boss. Creatures are datapack entries running on vanilla mob
+  bodies, and they react to threat and to your Sequence.
+- Structures, 163 ingredient items and four animated creature models ship inside the jar, so there is no
+  separate resource pack or datapack to install.
+- Loot in vanilla chests leans toward the place (shipwrecks favour Tyrant ingredients) and toward the
+  pathway and Sequence of whoever opens the chest.
+- Sun, Door and Fool have been reworked so their abilities show themselves in the world (light, doors you
+  can see into, paper and threads) instead of printing to chat.
 
-| Фаза | Що | Стан |
+Game tests cast every ability of every pathway, at every Sequence and in every mode, on a real server. If a
+power throws, the build fails.
+
+Player-facing text is Ukrainian for now. Item names have English translations, but ability descriptions
+and in-game messages don't yet.
+
+## What's next
+
+The port itself is almost done. Persistence and the final retest still need full playthroughs with two
+clients, and after that comes the first release. Beyond that, roughly in this order:
+
+- Move the remaining six pathways off chat and onto the same in-world visuals as Sun, Door and Fool. Bloom
+  comes after that, carefully, because Iris shader packs don't run custom shaders.
+- Potion brewing with real recipes, and foraging as an actual plant block.
+- The underground market (the Gathering) with its broker NPC.
+- Churches and secret orders. They were left out of the port on purpose and will be designed from scratch.
+- Generated cities with living NPCs.
+- Abilities for the 13 stub pathways.
+- Sequences 4 to 0. The plugin never got past 5 on any pathway, so there's nothing to port here and all of
+  it has to be designed.
+
+## Layout
+
+| Module | Contents | Builds without Minecraft |
 |---|---|---|
-| 00–01 | `core`: чисті правила, перенесено цілком | ✅ |
-| 02 | клієнтський каркас, мережевий шар | ✅ |
-| 03–04 | хребет здібностей, планувальник і сесії-корутини | ✅ |
-| 05 | вертикальний зріз: видав шлях → випив зілля → скастував | ✅ |
-| 06–07 | шина подій і міксини; частинки, звуки, шейдери | ✅ |
-| 08 | шар здібностей: 9 шляхів + 13 заглушок | ✅ |
-| 09 | персистентність | 🔄 у грі ще не перевірено |
-| 10–11 | команди `/mysteries`, екрани | ✅ |
-| 12 | рушій істот | ✅ |
-| 13 | NPC замість Citizens: поглинуто фазами 08–12 | ✅ |
-| 14 | ассети й моделі: споруди, інгредієнти, моделі істот | ✅ |
-| 15 | лут і числа світу | ✅ |
-| 16 | перетест і катовер: автоматичний прогін усіх здібностей готовий, проходження в грі — далі | 🔄 |
-| далі | міста, варіння, ринок | ⏳ |
+| `core` | pure game rules: progression, balance, state, creature AI rules | yes |
+| `mod` | the Fabric side: abilities, effects, mixins, persistence, UI | no |
 
-Церкви й таємні ордени свідомо не переносяться — підсистему буде перероблено з нуля.
+`core` has no Loom plugin and no Minecraft dependency, so if a platform type leaks in, it simply won't
+compile. Inside `mod`, `src/main` is shared code and `src/client` holds rendering and screens, so a client
+class used on the server is a compile error rather than a crash on a dedicated server.
 
-## Структура
+## Building
 
-| Модуль | Що всередині | Збирається без Minecraft |
-|---|---|---|
-| `core` | чисті правила: прогресія, баланс, стан, істоти | **так** |
-| `mod`  | Fabric: здібності, ефекти, міксини, персистентність, UI | ні |
-
-Поділ не декоративний. `core` НЕ має ні `fabric-loom`, ні залежності на `minecraft` —
-якщо туди протече платформний тип, модуль не збереться. Усередині `mod` так само розділені
-`src/main` (спільний код) і `src/client` (рендер, екрани): клієнтський тип у серверному коді —
-помилка збірки, а не падіння виділеного сервера.
-
-## Версії
-
-Звірені з `FabricMC/fabric-example-mod` (гілка `26.2`), не вгадані:
-
-| | |
-|---|---|
-| Minecraft | 26.2 (потребує **Java 25**) |
-| Fabric Loader | 0.19.3 |
-| Fabric API | 0.158.0+26.2 |
-| Loom | 1.17-SNAPSHOT |
-| Kotlin | 2.4.10 (мусить збігатися з тим, що несе `fabric-language-kotlin`) |
-| Мапінги | немає — гра на 26.x не обфускована |
-
-## Збірка
+You need Java 25. If it's missing, Gradle downloads it through the Foojay resolver.
 
 ```bash
-./gradlew build                  # усе, разом з ігровими тестами
-./gradlew :core:test             # лише правила, без гри — швидко
-./gradlew :mod:runGameTest       # ігрові тести: істоти, лут, кожна здібність кожного шляху
-./gradlew :mod:runClient         # клієнт розробки
-./gradlew :mod:runServer         # сервер розробки
+./gradlew build              # everything, game tests included
+./gradlew :core:test         # rules only, fast, no game
+./gradlew :mod:runGameTest   # server game tests: creatures, loot, every ability
+./gradlew :mod:runClient     # dev client
+./gradlew :mod:runServer     # dev server
 ```
 
-Швидкий старт у грі (оператор):
+To try it in game as an operator:
 
 ```
-/mysteries potion Tyrant 9       # видати зілля
-/mysteries mastery 100           # добити засвоєння
-/mysteries creature spawn <id>   # прикликати істоту
+/mysteries potion Tyrant 9       # get a potion
+/mysteries mastery 100           # max out mastery so you can advance
+/mysteries creature spawn <id>   # summon a creature
 ```
 
-Деталі архітектури, конвенції конвертації, пастки тулчейну й ухвалені рішення — у `CLAUDE.md`.
+Versions are taken from `FabricMC/fabric-example-mod` (branch `26.2`): Minecraft 26.2, Fabric Loader 0.19.3,
+Fabric API 0.158.0+26.2, Loom 1.17-SNAPSHOT, Kotlin 2.4.10. There's no mappings line, because 26.x isn't
+obfuscated.
+
+Architecture notes, conversion conventions, toolchain traps and past decisions are in `CLAUDE.md` (in
+Ukrainian).
