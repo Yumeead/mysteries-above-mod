@@ -87,7 +87,7 @@ object MarionetteHud : HudElement {
             strained -> Component.literal("нитка рветься ${entry.strandSeconds / 60}:${"%02d".format(entry.strandSeconds % 60)}")
             state.possessing == entry.id -> Component.literal("ви всередині")
             entry.distance < 0 -> Component.literal(entry.order.caption)
-            else -> Component.literal("${entry.order.caption} · ${entry.distance} бл.")
+            else -> Component.literal("${entry.order.caption}, ${entry.distance} бл.")
         }
         return Card(
             name = Component.literal(entry.name.take(NAME_CHARS)),
@@ -136,10 +136,9 @@ object MarionetteHud : HudElement {
         val nameColor = if (card.possessed) UiTheme.ACCENT else UiTheme.TEXT
         graphics.text(font, card.name, x + PADDING + MARK_WIDTH, y + PADDING, UiTheme.argb(nameColor, alpha))
 
-        // The selected card carries the only mark, and it is the same arrow the ability panel uses
-        // for "this is the one in your hand".
+        // The selected card carries the only mark: a short gold bar before the name.
         if (card.selected) {
-            graphics.text(font, MARK, x + PADDING, y + PADDING, UiTheme.argb(UiTheme.ACCENT, alpha))
+            graphics.fill(x + PADDING, y + PADDING + 1, x + PADDING + MARK_BAR, y + PADDING + font.lineHeight - 2, UiTheme.argb(UiTheme.ACCENT, alpha))
         }
 
         val barColor = if (card.strained) UiTheme.CRITICAL else UiTheme.ACCENT
@@ -153,9 +152,8 @@ object MarionetteHud : HudElement {
         graphics.pose().popMatrix()
     }
 
-    private val MARK: Component = Component.literal("▸")
-
     private const val MARK_WIDTH = 6
+    private const val MARK_BAR = 2
     private const val NAME_CHARS = 12
     private const val CARD_WIDTH = 84
     private const val CARD_HEIGHT = 34

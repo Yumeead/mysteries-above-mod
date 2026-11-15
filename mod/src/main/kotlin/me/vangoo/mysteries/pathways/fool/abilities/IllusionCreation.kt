@@ -44,7 +44,7 @@ class IllusionCreation : ActiveAbility(AbilityIdentity.of("fool_illusion_creatio
 
     override fun modes(sequence: Sequence): List<AbilityMode> =
         IllusionKind.entries.map { AbilityMode(it.name.lowercase(), Component.literal(it.displayName)) } +
-            AbilityMode(SOUND_MODE, Component.literal("Фальшивий звук (на ціль)"))
+            AbilityMode(SOUND_MODE, Component.literal("Фальшивий звук"))
 
     override fun description(sequence: Sequence): Component = Component.literal(
         "Виконує обраний режим ілюзії. Присід + застосування — безкоштовно перемикає режим.\n" +

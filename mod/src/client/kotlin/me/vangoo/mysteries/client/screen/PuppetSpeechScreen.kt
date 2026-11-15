@@ -25,7 +25,6 @@ class PuppetSpeechScreen(private val puppet: UUID, name: String) :
     override fun init() {
         val box = EditBox(font, (width - WIDTH) / 2, height / 2 - HEIGHT / 2, WIDTH, HEIGHT, title)
         box.setMaxLength(MarionetteOrderPayload.MAX_SAY)
-        box.setHint(Component.translatable("wheel.$MOD_ID.speech.hint"))
         line?.let { box.value = it.value }
         addRenderableWidget(box)
         setInitialFocus(box)

@@ -1,12 +1,15 @@
 package me.vangoo.mysteries.client.render
 
 import kotlin.math.PI
+import kotlin.math.abs
+import kotlin.math.acos
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.floor
 import kotlin.math.hypot
 import kotlin.math.roundToInt
 import kotlin.math.sin
+import kotlin.math.sqrt
 
 /**
  * The wheel's geometry and nothing else: pages, card positions, which card the cursor points at.
@@ -30,6 +33,16 @@ object WheelLayout {
     fun countOn(count: Int, page: Int): Int = (count - page * PAGE_SIZE).coerceIn(0, PAGE_SIZE)
 
     fun radius(onPage: Int): Int = if (onPage <= SMALL_RING) RADIUS else WIDE_RADIUS
+
+    /** How far off the ring the arrow card to the other ring stands. */
+    const val SWITCH_GAP = 14
+
+    /**
+     * The arrow card to the other ring, `[x, y, w, h]` from the centre: off the ring's right side,
+     * level with the centre. Always the right: the left of the screen is the side panel's.
+     */
+    fun switcher(onPage: Int, card: Int): IntArray =
+        intArrayOf(radius(onPage) + card / 2 + SWITCH_GAP, -card / 2, card, card)
 
     /** The card centre's offset from the wheel centre, `[dx, dy]`. */
     fun offset(index: Int, onPage: Int): IntArray {
@@ -63,46 +76,103 @@ object WheelLayout {
         return intArrayOf((cardDx + ux * reach).roundToInt(), (cardDy + uy * reach).roundToInt())
     }
 
-    // ── Modes ───────────────────────────────────────────────────────────────────
+    // ── The arc of sub-choices ──────────────────────────────────────────────────
 
-    /** Height of one mode pill, the gap between pills, and the gap between the card and its column. */
-    const val MODE_HEIGHT = 12
-    const val MODE_GAP = 2
-    const val MODE_OFFSET = 6
+    /** One row of an open arc: where its label starts and the slice of the band it owns. */
+    class Slice(
+        /** The label's near end from the centre: its left edge on the right side, its right edge on the left. */
+        val x: Int,
+        /** The row's top; the row is [ROW] tall. */
+        val y: Int,
+        /** The band slice level with the row, in degrees clockwise from straight up, [from] below [to]. */
+        val from: Double,
+        val to: Double,
+        /** Where the stem back to the card ends, for the row nearest it when the rows had to slide away. */
+        val stem: Double? = null,
+    ) {
+        val right: Boolean get() = x >= 0
+
+        /** The whole stretch of band the row answers to: its slice and its stem. */
+        val start: Double get() = minOf(from, stem ?: from)
+        val end: Double get() = maxOf(to, stem ?: to)
+    }
+
+    /** One label line; how far past the ring the band runs, and how far past the band the labels start. */
+    const val ROW = 11
+    const val BAND_GAP = 19
+    const val LABEL_GAP = 5
+
+    /** The band's radius: clear of every card, a hovered (grown) one's corners included. */
+    fun band(onPage: Int): Int = radius(onPage) + BAND_GAP
 
     /**
-     * Where the mode pills of a card stand: a column beside the card, on the side away from the
-     * centre (right for the right half and the top and bottom cards, left otherwise), centred on
-     * the card's height. A column rather than an arc because the pills carry names, and names
-     * laid along an arc overlap. Each rectangle is `[x, y, w, h]` relative to the wheel centre.
+     * Where the sub-choices of a card stand once it is hovered. Names laid along a curve overlap, so
+     * each gets a row of its own: the rows stack on the card's height and each is pushed out just far
+     * enough to clear the ring at its height — together they curve round the ring as an arc and still
+     * never share a line, and none reaches a card. A card on the left half opens to the left, every
+     * other to the right. The stack slides to stay within [half] of the centre and on the band; on the
+     * right it parts round [avoid] (the arrow card's rows). Each row owns the slice of band level with
+     * it; when the rows slid away from the card, the nearest one carries a stem back to it, so the arc
+     * always grows out of its card.
      */
-    fun modeColumn(cardDx: Int, cardDy: Int, card: Int, widths: IntArray): List<IntArray> {
-        val total = widths.size * MODE_HEIGHT + (widths.size - 1).coerceAtLeast(0) * MODE_GAP
-        val top = cardDy - total / 2
+    fun arc(cardDx: Int, cardDy: Int, onPage: Int, count: Int, half: Int, avoid: IntRange?): List<Slice> {
+        if (count <= 0) return emptyList()
+        val band = band(onPage).toDouble()
+        val reach = band + LABEL_GAP
         val right = cardDx >= 0
-        return widths.mapIndexed { i, w ->
-            val x = if (right) cardDx + card / 2 + MODE_OFFSET else cardDx - card / 2 - MODE_OFFSET - w
-            intArrayOf(x, top + i * (MODE_HEIGHT + MODE_GAP), w, MODE_HEIGHT)
-        }
+        val tops = stack(count, cardDy, minOf(half, band.toInt() - 1), avoid.takeIf { right })
+        val slices = tops.map { top ->
+            // The row's edge nearest the centre line is where the ring bulges out furthest.
+            val near = if (top < 0 && top + ROW > 0) 0.0 else minOf(abs(top), abs(top + ROW)).toDouble()
+            val x = sqrt(reach * reach - near * near).roundToInt()
+            val a = bandAngle(top.toDouble(), band, right)
+            val b = bandAngle((top + ROW).toDouble(), band, right)
+            Slice(if (right) x else -x, top, minOf(a, b), maxOf(a, b))
+        }.toMutableList()
+        val card = degrees(cardDx.toDouble(), cardDy.toDouble())
+        val first = slices.indices.minBy { slices[it].from }
+        val last = slices.indices.maxBy { slices[it].to }
+        if (card < slices[first].from) slices[first] = slices[first].let { Slice(it.x, it.y, it.from, it.to, stem = card) }
+        if (card > slices[last].to) slices[last] = slices[last].let { Slice(it.x, it.y, it.from, it.to, stem = card) }
+        return slices
     }
-
-    /** The pill under the cursor, or `-1`. */
-    fun pickMode(dx: Double, dy: Double, pills: List<IntArray>): Int =
-        pills.indexOfFirst { (x, y, w, h) -> dx >= x && dx < x + w && dy >= y - MODE_GAP && dy < y + h + MODE_GAP }
 
     /**
-     * Whether the cursor is still on its way from the card to its pills: inside the box that
-     * holds both, with a margin. While it is, the card under the angle must not change — the
-     * column usually stands across the neighbour's sector, and reaching for a mode would
-     * otherwise drop the card the modes belong to.
+     * The row under a cursor at ([dx], [dy]), or `-1`. Only past the ring and on the arc's side: inside
+     * the ring the cursor points at cards, so going back onto the card, or another, leaves the arc. A
+     * row is its whole line, so the label itself can be pointed at; above and below the rows, close to
+     * the band, its slices decide, which is how the stretch of band back to the card picks its row.
      */
-    fun inCorridor(dx: Double, dy: Double, cardDx: Int, cardDy: Int, card: Int, pills: List<IntArray>): Boolean {
-        if (pills.isEmpty()) return false
-        val margin = MODE_OFFSET
-        val left = minOf(cardDx - card / 2, pills.minOf { it[0] }) - margin
-        val right = maxOf(cardDx + card / 2, pills.maxOf { it[0] + it[2] }) + margin
-        val top = minOf(cardDy - card / 2, pills.first()[1]) - margin
-        val bottom = maxOf(cardDy + card / 2, pills.last()[1] + MODE_HEIGHT) + margin
-        return dx in left.toDouble()..right.toDouble() && dy in top.toDouble()..bottom.toDouble()
+    fun pickArc(dx: Double, dy: Double, onPage: Int, card: Int, slices: List<Slice>): Int {
+        val distance = hypot(dx, dy)
+        if (slices.isEmpty() || distance < radius(onPage) + card / 2) return -1
+        if ((dx >= 0) != slices.first().right) return -1
+        val row = slices.indexOfFirst { dy >= it.y && dy < it.y + ROW }
+        if (row >= 0) return row
+        if (dy >= slices.minOf { it.y } && dy < slices.maxOf { it.y } + ROW) return -1 // the parting round the arrow card
+        if (distance > band(onPage) + LABEL_GAP + ROW) return -1
+        val angle = degrees(dx, dy)
+        return slices.indexOfFirst { angle >= it.start && angle <= it.end }
     }
+
+    /** The tops of [count] rows centred on [centre] within ±[limit], parted round [avoid] if they would cross it. */
+    private fun stack(count: Int, centre: Int, limit: Int, avoid: IntRange?): IntArray {
+        val total = count * ROW
+        val top = (centre - total / 2).coerceIn(-limit, (limit - total).coerceAtLeast(-limit))
+        val plain = IntArray(count) { top + it * ROW }
+        if (avoid == null || plain.none { it < avoid.last && it + ROW > avoid.first }) return plain
+        var above = plain.count { it + ROW / 2 < (avoid.first + avoid.last) / 2 }
+        while (above > 0 && avoid.first - above * ROW < -limit) above--
+        while (above < count && avoid.last + (count - above) * ROW > limit) above++
+        return IntArray(count) { if (it < above) avoid.first - (above - it) * ROW else avoid.last + (it - above) * ROW }
+    }
+
+    /** Where height [y] meets the band, on the right or the left. */
+    private fun bandAngle(y: Double, band: Double, right: Boolean): Double {
+        val a = Math.toDegrees(acos((-y / band).coerceIn(-1.0, 1.0)))
+        return if (right) a else 360.0 - a
+    }
+
+    /** Degrees clockwise from straight up, 0 until 360. */
+    fun degrees(dx: Double, dy: Double): Double = (Math.toDegrees(atan2(dx, -dy)) + 360.0) % 360.0
 }

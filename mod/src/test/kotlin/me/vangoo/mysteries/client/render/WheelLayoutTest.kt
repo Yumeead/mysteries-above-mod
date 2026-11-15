@@ -1,6 +1,7 @@
 package me.vangoo.mysteries.client.render
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import kotlin.math.cos
 import kotlin.math.sin
@@ -65,27 +66,58 @@ class WheelLayoutTest {
     }
 
     @Test
-    fun modeColumnStandsAwayFromTheCentre() {
-        val right = WheelLayout.modeColumn(80, 0, 24, intArrayOf(40, 30))
-        assertEquals(80 + 12 + WheelLayout.MODE_OFFSET, right[0][0])
-        // Two pills of 12 with a gap of 2: 26 tall, centred on the card.
-        assertEquals(-13, right[0][1])
-        assertEquals(-13 + 14, right[1][1])
-
-        val left = WheelLayout.modeColumn(-80, 0, 24, intArrayOf(40))
-        assertEquals(-80 - 12 - WheelLayout.MODE_OFFSET - 40, left[0][0])
+    fun arcRowsNeverShareALineNorReachACard() {
+        val half = 118
+        val arrow = -16..16
+        for (onPage in listOf(2, 5, 8, 12)) {
+            val reach = WheelLayout.band(onPage) + WheelLayout.LABEL_GAP
+            for (index in 0 until onPage) {
+                val (dx, dy) = WheelLayout.offset(index, onPage)
+                for (count in 1..10) {
+                    val arc = WheelLayout.arc(dx, dy, onPage, count, half, arrow)
+                    assertEquals(count, arc.size)
+                    val tops = arc.map { it.y }.sorted()
+                    tops.zipWithNext { a, b -> assertTrue(b - a >= WheelLayout.ROW) { "rows overlap: $tops" } }
+                    arc.forEach { slice ->
+                        assertTrue(slice.y >= -half && slice.y + WheelLayout.ROW <= half) { "row off screen: ${slice.y}" }
+                        // The label's corner nearest the centre stays on the label circle, outside every card.
+                        val near = if (slice.y < 0 && slice.y + WheelLayout.ROW > 0) 0 else minOf(kotlin.math.abs(slice.y), kotlin.math.abs(slice.y + WheelLayout.ROW))
+                        assertTrue(kotlin.math.hypot(slice.x.toDouble(), near.toDouble()) >= reach - 1) { "label inside the ring: $index/$onPage" }
+                        if (slice.right) assertTrue(slice.y >= arrow.last || slice.y + WheelLayout.ROW <= arrow.first) { "row on the arrow card: ${slice.y}" }
+                        assertTrue(slice.from < slice.to)
+                    }
+                }
+            }
+        }
     }
 
     @Test
-    fun modePickAndCorridor() {
-        val pills = WheelLayout.modeColumn(80, 0, 24, intArrayOf(40, 40))
-        assertEquals(0, WheelLayout.pickMode(110.0, -8.0, pills))
-        assertEquals(1, WheelLayout.pickMode(110.0, 6.0, pills))
-        assertEquals(-1, WheelLayout.pickMode(60.0, 0.0, pills))
-        // Between the card and its pills: still the same card.
-        assertEquals(true, WheelLayout.inCorridor(95.0, 0.0, 80, 0, 24, pills))
-        assertEquals(false, WheelLayout.inCorridor(0.0, -80.0, 80, 0, 24, pills))
-        assertEquals(false, WheelLayout.inCorridor(0.0, 0.0, 80, 0, 24, emptyList()))
+    fun arcOpensOnTheCardsSideAndGrowsOutOfIt() {
+        // The top card opens to the right, away from the panel, and its band reaches back up to it.
+        val top = WheelLayout.arc(0, -80, 8, 4, 118, null)
+        assertTrue(top.all { it.right })
+        assertEquals(0.0, top.minOf { it.start })
+        assertTrue(top.minOf { it.from } > 0.0)
+        // A card on the left opens to the left; one at three o'clock is centred on its own height.
+        assertTrue(WheelLayout.arc(-80, 0, 8, 3, 118, null).none { it.right })
+        val side = WheelLayout.arc(80, 0, 8, 2, 118, null)
+        assertEquals(listOf(-11, 0), side.map { it.y })
+    }
+
+    @Test
+    fun arcIsReadPastTheRingByRow() {
+        val arc = WheelLayout.arc(80, 0, 8, 2, 118, null)
+        // On the label itself, far out: its row.
+        assertEquals(0, WheelLayout.pickArc(160.0, -5.0, 8, 24, arc))
+        assertEquals(1, WheelLayout.pickArc(160.0, 5.0, 8, 24, arc))
+        // On the card, inside the ring: the cards, not the arc.
+        assertEquals(-1, WheelLayout.pickArc(85.0, 0.0, 8, 24, arc))
+        // The other side of the wheel, and well above the rows.
+        assertEquals(-1, WheelLayout.pickArc(-160.0, 0.0, 8, 24, arc))
+        assertEquals(-1, WheelLayout.pickArc(160.0, -60.0, 8, 24, arc))
+        // Close to the band just above the rows of the top card: the stretch back to the card.
+        val top = WheelLayout.arc(0, -80, 8, 4, 118, null)
+        assertEquals(0, WheelLayout.pickArc(4.0, -100.0, 8, 24, top))
     }
 
     @Test
