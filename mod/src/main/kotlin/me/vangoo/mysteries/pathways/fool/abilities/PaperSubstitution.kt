@@ -8,19 +8,26 @@ import me.vangoo.mysteries.ability.AbilityOutcome
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
 import me.vangoo.mysteries.ability.context.EVENT_FOREVER
+import me.vangoo.mysteries.ability.context.Fizzle
 import me.vangoo.mysteries.ability.context.Subscription
 import me.vangoo.mysteries.ability.context.on
+import me.vangoo.mysteries.effect.privateText
 import me.vangoo.mysteries.event.IncomingDamage
 import me.vangoo.mysteries.modId
+import me.vangoo.mysteries.pathways.fool.gather
+import me.vangoo.mysteries.pathways.fool.paperBody
+import me.vangoo.mysteries.pathways.fool.scraps
+import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType
 import net.minecraft.core.BlockPos
-import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundEvent
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
+import net.minecraft.world.entity.PositionMoveRotation
+import net.minecraft.world.entity.Relative
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.phys.Vec3
 import java.util.UUID
@@ -33,6 +40,15 @@ import kotlin.random.Random
  * A plain cast folds a batch of paper dolls, which sit accumulated until spent. Sneak + cast
  * toggles a free "protection" switch: while it's on and dolls remain, the next heavy blow is
  * eaten by one and the Magician is yanked to safety nearby instead.
+ *
+ * ## The blow lands on paper
+ *
+ * The plugin spent a doll in a puff of smoke and teleported the Magician off with an Enderman's
+ * sound. Here the body itself becomes the doll: where the blow lands there stands a paper figure in
+ * the Magician's very pose, the blow cuts straight through it, and it falls apart into scraps and is
+ * gone (`paperBody`) — while the Magician is already a few blocks away, stepping out of nothing with
+ * a little paper still falling off them. The yank keeps no momentum: whatever they were doing, they
+ * stand still where they land.
  */
 class PaperSubstitution : ActiveAbility(AbilityIdentity.of("fool_paper_substitution")) {
 
@@ -56,15 +72,14 @@ class PaperSubstitution : ActiveAbility(AbilityIdentity.of("fool_paper_substitut
 
     private fun toggleProtection(context: CastContext): AbilityOutcome {
         val casterId = context.caster.uuid
+        // Switching the guard is free either way: the ticket stays unpaid and no cooldown starts.
         if (protecting.remove(casterId)) {
             absorbSubscriptions.remove(casterId)?.cancel()
-            context.messaging.actionBar(context.caster, Component.literal("📜 Захист вимкнено"))
             chime(context, SoundEvents.IRON_DOOR_CLOSE, 1.4f)
-            return AbilityOutcome.failed("Захист вимкнено")
+            return AbilityOutcome.Awaiting()
         }
         if (dollsOf(context) <= 0) {
-            context.messaging.actionBar(context.caster, Component.literal("📜 Немає ляльок — спершу складіть партію"))
-            return AbilityOutcome.failed("Немає ляльок")
+            return AbilityOutcome.failed("Немає ляльок — спершу складіть партію")
         }
 
         protecting.add(casterId)
@@ -73,9 +88,10 @@ class PaperSubstitution : ActiveAbility(AbilityIdentity.of("fool_paper_substitut
             if (damage.victim.uuid != casterId || damage.amount < DollBatch.DAMAGE_THRESHOLD) return@on
             if (absorb(context)) damage.cancel()
         }
-        context.messaging.actionBar(context.caster, Component.literal("📜 Захист увімкнено (${dollsOf(context)} ляльок)"))
+        // A doll is standing ready behind the Magician: a scrap or two of it shows for a moment.
+        scraps(context.level, context.caster.position().add(0.0, 1.2, 0.0), READY_SCRAPS, 0.3, 0.02)
         chime(context, SoundEvents.BEACON_ACTIVATE, 1.5f)
-        return AbilityOutcome.failed("Захист увімкнено")
+        return AbilityOutcome.Awaiting()
     }
 
     private fun craftBatch(context: CastContext): AbilityOutcome {
@@ -93,9 +109,8 @@ class PaperSubstitution : ActiveAbility(AbilityIdentity.of("fool_paper_substitut
         PaperInventory.consume(context.caster, paperNeeded)
         context.caster.setAttached(PaperDolls.TYPE, current + added)
 
-        craftAnimation(context)
-        context.messaging.actionBar(context.caster, Component.literal("📜 Складено $added ляльок (усього ${current + added})"))
-        return AbilityOutcome.done("Складено $added ляльок")
+        craftAnimation(context, current + added)
+        return AbilityOutcome.Done()
     }
 
     /** @return true if a doll took the hit. */
@@ -105,31 +120,27 @@ class PaperSubstitution : ActiveAbility(AbilityIdentity.of("fool_paper_substitut
         if (casterId !in protecting || dolls <= 0) return false
 
         dolls--
-        context.caster.setAttached(PaperDolls.TYPE, dolls)
-        val origin = context.caster.position()
-        scatter(context, origin)
+        val caster = context.caster
+        caster.setAttached(PaperDolls.TYPE, dolls)
+        val origin = caster.position()
+        // The body where the blow lands is paper now; the figure is drawn from the packet, not from them.
+        paperBody(context.level, caster)
 
         val escape = randomSafeSpotNear(context, origin, DollBatch.TELEPORT_RADIUS)
         if (escape != null) {
-            context.caster.teleportTo(escape.x, escape.y, escape.z)
-            context.level.sendParticles(ParticleTypes.END_ROD, escape.x, escape.y + 1.0, escape.z, 12, 0.3, 0.4, 0.3, 0.0)
-            context.level.playSound(null, escape.x, escape.y, escape.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1.0f, 1.4f)
+            // No momentum carried over: `teleportTo(x, y, z)` keeps the client's velocity (see Blink).
+            caster.connection.teleport(PositionMoveRotation(escape, Vec3.ZERO, 0f, 0f), Relative.ROTATION)
+            caster.resetFallDistance()
+            scraps(context.level, escape.add(0.0, 1.3, 0.0), ARRIVAL_SCRAPS, 0.25, 0.015)
+            context.level.playSound(null, escape.x, escape.y, escape.z, SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 0.8f, 1.3f)
         }
 
-        context.messaging.actionBar(context.caster, Component.literal("📜 Лялька прийняла удар! (лишилось $dolls)"))
         if (dolls <= 0) {
             protecting.remove(casterId)
             absorbSubscriptions.remove(casterId)?.cancel()
-            context.messaging.actionBar(context.caster, Component.literal("📜 Ляльки скінчились — захист знято"))
+            context.messaging.hint(caster, Component.literal("Ляльки скінчились — захист знято"), Fizzle.NONE)
         }
         return true
-    }
-
-    private fun scatter(context: CastContext, origin: Vec3) {
-        context.level.playSound(null, origin.x, origin.y, origin.z, SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.1f, 0.8f)
-        val at = origin.add(0.0, 1.4, 0.0)
-        context.level.sendParticles(ParticleTypes.POOF, at.x, at.y, at.z, 18, 0.35, 0.15, 0.35, 0.0)
-        context.level.sendParticles(ParticleTypes.CLOUD, at.x, at.y, at.z, 6, 0.3, 0.1, 0.3, 0.01)
     }
 
     private fun randomSafeSpotNear(context: CastContext, origin: Vec3, radius: Int): Vec3? {
@@ -154,10 +165,12 @@ class PaperSubstitution : ActiveAbility(AbilityIdentity.of("fool_paper_substitut
             feet.block != Blocks.LAVA
     }
 
-    private fun craftAnimation(context: CastContext) {
+    /** The paper folds in the hands; how many figurines are ready, the Magician reads off them. */
+    private fun craftAnimation(context: CastContext, ready: Int) {
         chime(context, SoundEvents.BOOK_PAGE_TURN, 1.2f)
-        val at = context.caster.position()
-        context.level.sendParticles(ParticleTypes.POOF, at.x, at.y + 1.2, at.z, 8, 0.4, 0.3, 0.4, 0.02)
+        val hands = context.eye.add(context.look.scale(0.6)).add(0.0, -0.35, 0.0)
+        gather(context.level, hands, FOLD_SCRAPS)
+        privateText(context.caster, hands, Component.literal("Паперових ляльок: $ready"), COUNT_TICKS)
     }
 
     private fun chime(context: CastContext, sound: SoundEvent, pitch: Float) {
@@ -171,6 +184,10 @@ class PaperSubstitution : ActiveAbility(AbilityIdentity.of("fool_paper_substitut
 
         const val BASE_COST = 60
         const val BASE_COOLDOWN_SECONDS = 8
+        const val READY_SCRAPS = 2
+        const val ARRIVAL_SCRAPS = 4
+        const val FOLD_SCRAPS = 10
+        val COUNT_TICKS = 2 * TICKS_PER_SECOND
     }
 }
 

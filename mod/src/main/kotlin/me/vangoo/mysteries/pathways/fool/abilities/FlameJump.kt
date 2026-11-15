@@ -2,12 +2,14 @@ package me.vangoo.mysteries.pathways.fool.abilities
 
 import me.vangoo.domain.valueobjects.AbilityIdentity
 import me.vangoo.domain.valueobjects.FlameJumpRange
+import me.vangoo.domain.valueobjects.RgbColor
 import me.vangoo.domain.valueobjects.Sequence
 import me.vangoo.mysteries.ability.AbilityOutcome
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
 import me.vangoo.mysteries.ability.session
 import me.vangoo.mysteries.ability.sustain
+import me.vangoo.mysteries.effect.BEAM_REACH_TICKS
 import net.minecraft.core.BlockPos
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.chat.Component
@@ -27,6 +29,13 @@ import kotlin.math.min
  *
  * Steps through any flame in a cone ahead — a torch, a campfire, a jack-o'-lantern — and steps
  * out next to it, unburned for as long as they stay standing in it.
+ *
+ * ## A jump through the fire, not a teleport with sparks
+ *
+ * The Magician's body flares up where it stands and is drawn down into the ground as a column of
+ * fire sinking into its own feet; the moment it has gone, the flame they are jumping to rises into
+ * a column of its own and they step out of it, the place lit by it for a moment. The jump takes the
+ * time the fire takes to sink — a few ticks — instead of happening before anyone could see it.
  */
 class FlameJump : ActiveAbility(AbilityIdentity.of("fool_flame_jump")) {
 
@@ -56,17 +65,23 @@ class FlameJump : ActiveAbility(AbilityIdentity.of("fool_flame_jump")) {
 
         val safe = safeSpotNear(level, fire) ?: return AbilityOutcome.failed("Немає безпечного місця біля вогню")
 
-        level.sendParticles(ParticleTypes.FLAME, origin.x, origin.y + 1.0, origin.z, 30, 0.3, 0.5, 0.3, 0.02)
-        level.sendParticles(ParticleTypes.SMOKE, origin.x, origin.y + 1.0, origin.z, 20, 0.4, 0.6, 0.4, 0.02)
+        // The body flares and sinks: a column of fire running down into the feet.
+        val effects = context.effects
+        effects.beam(level, origin.add(0.0, BODY_FLAME, 0.0), origin, SINK_HOLD_TICKS, FLAME_WIDTH, FIRE)
+        level.sendParticles(ParticleTypes.FLAME, origin.x, origin.y + 0.2, origin.z, 12, 0.3, 0.05, 0.3, 0.01)
         level.playSound(null, origin.x, origin.y, origin.z, SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1.5f, 1.2f)
 
-        context.caster.teleportTo(safe.x + 0.5, safe.y.toDouble(), safe.z + 0.5)
-
-        level.sendParticles(ParticleTypes.FLAME, safe.x + 0.5, safe.y + 0.5, safe.z + 0.5, 25, 0.3, 0.3, 0.3, 0.02)
-        level.sendParticles(ParticleTypes.LAVA, safe.x + 0.5, safe.y + 1.0, safe.z + 0.5, 10, 0.2, 0.3, 0.2, 0.0)
-        level.playSound(null, safe.x + 0.5, safe.y.toDouble(), safe.z + 0.5, SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1.0f, 0.8f)
-
+        val exit = Vec3(safe.x + 0.5, safe.y.toDouble(), safe.z + 0.5)
+        val base = Vec3.atBottomCenterOf(fire)
         context.session {
+            waitTicks(BEAM_REACH_TICKS)
+            val jumper = owner ?: return@session
+            // The flame they jump to rises into a column, and they step out of it.
+            effects.beam(level, base, base.add(0.0, RISE_FLAME, 0.0), RISE_HOLD_TICKS, FLAME_WIDTH, FIRE)
+            effects.flare(level, fire, RISE_LIGHT_TICKS)
+            jumper.teleportTo(exit.x, exit.y, exit.z)
+            level.playSound(null, exit.x, exit.y, exit.z, SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1.0f, 0.8f)
+
             sustain(periodTicks = 2, durationTicks = FIRE_IMMUNITY_MAX_TICKS) { player ->
                 if (standingInFire(player.level(), player.blockPosition())) {
                     player.addEffect(MobEffectInstance(MobEffects.FIRE_RESISTANCE, 40, 0))
@@ -75,7 +90,7 @@ class FlameJump : ActiveAbility(AbilityIdentity.of("fool_flame_jump")) {
             }
         }
 
-        return AbilityOutcome.done("Стрибок крізь полум'я")
+        return AbilityOutcome.Done()
     }
 
     private fun nearestFireInCone(level: ServerLevel, from: Vec3, look: Vec3, radius: Int): BlockPos? {
@@ -133,6 +148,14 @@ class FlameJump : ActiveAbility(AbilityIdentity.of("fool_flame_jump")) {
         const val BASE_COOLDOWN_SECONDS = 6
         const val CONE_ANGLE_DEGREES = 60.0
         const val FIRE_IMMUNITY_MAX_TICKS = 300
+
+        val FIRE: RgbColor = RgbColor.of(255, 148, 56)
+        const val FLAME_WIDTH = 0.7f
+        const val BODY_FLAME = 2.2
+        const val RISE_FLAME = 2.6
+        const val SINK_HOLD_TICKS = 3
+        const val RISE_HOLD_TICKS = 6
+        const val RISE_LIGHT_TICKS = 30
 
         val FIRE_SOURCES: Set<Block> = setOf(
             Blocks.TORCH, Blocks.WALL_TORCH, Blocks.SOUL_TORCH, Blocks.SOUL_WALL_TORCH,

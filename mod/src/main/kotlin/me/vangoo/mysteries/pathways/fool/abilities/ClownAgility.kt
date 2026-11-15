@@ -10,7 +10,9 @@ import me.vangoo.mysteries.ability.grantAttribute
 import me.vangoo.mysteries.ability.modifierId
 import me.vangoo.mysteries.ability.revokeAttribute
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
+import me.vangoo.mysteries.pathways.fool.scraps
 import net.minecraft.core.BlockPos
+import net.minecraft.core.particles.BlockParticleOption
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
@@ -94,11 +96,14 @@ class ClownAgility : PermanentPassiveAbility(IDENTITY), Ticking {
         )
     }
 
-    /** The name earns itself: from Seq. 6 a long drop is visibly slowed rather than merely survived. */
+    /**
+     * The name earns itself: from Seq. 6 a long drop is the fall of a sheet, not of a body — a scrap
+     * or two of paper flutters off it on the way down, every few ticks, and settles where it lands.
+     */
     private fun traceDescent(context: AbilityContext, player: ServerPlayer) {
         if (player.onGround() || player.deltaMovement.y > DESCENT_SPEED) return
-        val at = player.position()
-        context.level.sendParticles(ParticleTypes.CLOUD, at.x, at.y + 0.1, at.z, 1, 0.2, 0.0, 0.2, 0.0)
+        if (context.scheduling.tick % DESCENT_TRAIL_TICKS != 0L) return
+        scraps(context.level, player.position().add(0.0, 0.9, 0.0), 1, 0.25, 0.02)
     }
 
     private fun climbWall(context: AbilityContext, player: ServerPlayer) {
@@ -121,9 +126,11 @@ class ClownAgility : PermanentPassiveAbility(IDENTITY), Ticking {
         player.setDeltaMovement(push.x, climb, push.z)
         player.resetFallDistance()
 
+        // The wall answers the hands: a crumb of its own face falls as the tumbler goes up.
         if (context.scheduling.tick % 4 == 0L) {
-            val at = player.position()
-            level.sendParticles(ParticleTypes.CRIT, at.x, at.y + 1.0, at.z, 2, 0.1, 0.2, 0.1, 0.0)
+            val grip = level.getBlockState(if (level.getBlockState(aheadHead).blocksMotion()) aheadHead else aheadPos)
+            val at = player.position().add(toward)
+            level.sendParticles(BlockParticleOption(ParticleTypes.BLOCK, grip), at.x, at.y + 1.0, at.z, 2, 0.1, 0.2, 0.1, 0.0)
         }
     }
 
@@ -143,5 +150,8 @@ class ClownAgility : PermanentPassiveAbility(IDENTITY), Ticking {
 
         /** Falling at least this fast counts as a descent worth marking. */
         private const val DESCENT_SPEED = -0.6
+
+        /** How often a falling tumbler sheds a scrap: sparse, so a long drop leaves a trail, not a cloud. */
+        private const val DESCENT_TRAIL_TICKS = 4L
     }
 }

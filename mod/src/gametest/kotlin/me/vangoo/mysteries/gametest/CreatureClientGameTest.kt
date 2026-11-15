@@ -20,6 +20,7 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext
 class CreatureClientGameTest : FabricClientGameTest {
 
     override fun runTest(context: ClientGameTestContext) {
+        if (skipped()) return
         context.worldBuilder().create().use { world ->
             world.connection.waitForChunksRender()
             val server = world.server

@@ -20,7 +20,8 @@ import net.minecraft.world.phys.Vec3
 
 /**
  * The client half of [me.vangoo.mysteries.effect.beam] and [me.vangoo.mysteries.effect.flash]; the
- * Door's doors and passages arrive by the same packet and are handed to [Doors].
+ * Door's doors and passages arrive by the same packet and are handed to [Doors], the Fool's paper to
+ * [Paper], and what a power shows its caster alone to [PrivateSight].
  *
  * A beam is a solid shaft of light ([LightShaft]), not a line of particles: one packet says where and
  * how long, and every frame the shaft is drawn where it stands. Nothing about it switches: it runs
@@ -50,6 +51,10 @@ object WorldEffects : HudElement {
         LevelRenderEvents.AFTER_OPAQUE_TERRAIN.register { if (beams.isNotEmpty() && !ShaderPacks.inUse) LightShaft.captureDepth() }
         LevelRenderEvents.COLLECT_SUBMITS.register(::submit)
         LevelRenderEvents.COLLECT_SUBMITS.register(Doors::submit)
+        LevelRenderEvents.COLLECT_SUBMITS.register(Paper::submit)
+        LevelRenderEvents.COLLECT_SUBMITS.register(PrivateSight::submit)
+        LevelRenderEvents.COLLECT_SUBMITS.register(Strands::submit)
+        LevelRenderEvents.COLLECT_SUBMITS.register(SpiritThreads::submit)
     }
 
     fun accept(payload: WorldEffectPayload) {
@@ -59,6 +64,13 @@ object WorldEffects : HudElement {
             is WorldEffectPayload.Flash -> weigh(payload)
             is WorldEffectPayload.Door -> Doors.accept(payload)
             is WorldEffectPayload.Passage -> Doors.accept(payload)
+            is WorldEffectPayload.Sheet -> Paper.accept(payload)
+            is WorldEffectPayload.Effigy -> Paper.accept(payload)
+            is WorldEffectPayload.Words -> PrivateSight.accept(payload)
+            is WorldEffectPayload.Glow -> PrivateSight.accept(payload)
+            is WorldEffectPayload.Thread -> Strands.accept(payload)
+            is WorldEffectPayload.Spool -> Strands.accept(payload)
+            is WorldEffectPayload.Face -> Paper.accept(payload)
         }
     }
 
@@ -68,11 +80,17 @@ object WorldEffects : HudElement {
         if (Minecraft.getInstance().isPaused) return
         beams.removeAll { beam -> ++beam.age >= beam.ticks + BEAM_FADE_TICKS }
         Doors.tick()
+        Paper.tick()
+        PrivateSight.tick()
+        Strands.tick()
     }
 
     fun clear() {
         beams.clear()
         Doors.clear()
+        Paper.clear()
+        PrivateSight.clear()
+        Strands.clear()
         flash = 0f
         previousFlash = 0f
     }

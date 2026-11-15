@@ -57,3 +57,7 @@ internal fun GameTestHelper.player(x: Int, z: Int, name: String = "test-survivor
         it.snapTo(spot.x, spot.y, spot.z)
     }
 }
+
+/** `-Ponly=<word>`: a client test whose class name lacks the word steps aside. */
+internal fun net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest.skipped(): Boolean =
+    System.getProperty("mysteries.gametest.only")?.let { it !in javaClass.simpleName.lowercase() } ?: false

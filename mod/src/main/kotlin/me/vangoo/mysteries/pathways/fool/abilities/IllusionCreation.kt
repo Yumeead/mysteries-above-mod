@@ -7,6 +7,9 @@ import me.vangoo.domain.valueobjects.Sequence
 import me.vangoo.mysteries.ability.AbilityOutcome
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
+import me.vangoo.mysteries.effect.privateSound
+import net.minecraft.core.BlockPos
+import net.minecraft.core.particles.BlockParticleOption
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
@@ -20,8 +23,16 @@ import net.minecraft.world.phys.Vec3
  * A right-click plays whichever illusion is selected; Shift + right-click only cycles the
  * selection, free of charge — the same "sneak switches, plain click acts" split `IllusionCreation`
  * already used in the plugin, ported as-is because nothing about it was a Spigot workaround.
- * A cycle is reported as [AbilityOutcome.Failed]: nothing happened that costs spirituality or a
- * cooldown, which is exactly what that outcome already means.
+ * A cycle is reported as [AbilityOutcome.Awaiting]: nothing happened that costs spirituality or a
+ * cooldown, and the illusion now chosen is on the HUD beside the power's name.
+ *
+ * ## An illusion is made of the real thing — almost
+ *
+ * The explosion, the fire and the steps are vanilla's own particles and sounds, and that is the
+ * point: an illusion that looked like a power would fool nobody. What gives it away is what it
+ * lacks. The fire lights nothing and burns nothing; the steps walk past and leave no one behind;
+ * the voice "from nowhere" is played to its one listener alone, from just behind their back, and
+ * nobody standing beside them hears a thing.
  */
 class IllusionCreation : ActiveAbility(AbilityIdentity.of("fool_illusion_creation")) {
 
@@ -43,13 +54,9 @@ class IllusionCreation : ActiveAbility(AbilityIdentity.of("fool_illusion_creatio
 
     override fun cast(context: CastContext): AbilityOutcome {
         if (context.caster.isShiftKeyDown) {
-            val next = context.modes.cycle(context.caster.uuid, this, context.sequence)
-            context.level.playSound(
-                null, context.origin.x, context.origin.y, context.origin.z,
-                SoundEvents.UI_BUTTON_CLICK.value(), SoundSource.PLAYERS, 0.7f, 1.5f,
-            )
-            context.messaging.actionBar(context.caster, Component.literal("🎭 Режим: ${next?.name?.string}"))
-            return AbilityOutcome.failed("Режим перемкнуто")
+            context.modes.cycle(context.caster.uuid, this, context.sequence)
+            privateSound(context.caster, context.origin, SoundEvents.UI_BUTTON_CLICK.value(), 0.7f, 1.5f)
+            return AbilityOutcome.Awaiting()
         }
 
         val mode = mode(context)
@@ -67,11 +74,7 @@ class IllusionCreation : ActiveAbility(AbilityIdentity.of("fool_illusion_creatio
                 level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y, at.z, 3, 0.4, 0.4, 0.4, 0.0)
                 level.sendParticles(ParticleTypes.LARGE_SMOKE, at.x, at.y, at.z, 30, 1.0, 1.0, 1.0, 0.0)
             }
-            IllusionKind.FOOTSTEPS -> {
-                level.playSound(null, at.x, at.y, at.z, SoundEvents.GRAVEL_STEP, SoundSource.PLAYERS, 1.2f, 1.0f)
-                level.playSound(null, at.x, at.y, at.z, SoundEvents.GRAVEL_STEP, SoundSource.PLAYERS, 1.2f, 0.9f)
-                level.sendParticles(ParticleTypes.ASH, at.x, at.y, at.z, 10, 0.3, 0.1, 0.3, 0.0)
-            }
+            IllusionKind.FOOTSTEPS -> footsteps(context, at)
             IllusionKind.FIRE -> {
                 level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRE_AMBIENT, SoundSource.PLAYERS, 2.0f, 1.0f)
                 level.sendParticles(ParticleTypes.FLAME, at.x, at.y, at.z, 40, 0.6, 0.6, 0.6, 0.02)
@@ -79,27 +82,42 @@ class IllusionCreation : ActiveAbility(AbilityIdentity.of("fool_illusion_creatio
             }
         }
 
-        context.messaging.actionBar(context.caster, Component.literal("🎭 ${kind.displayName}"))
-        return AbilityOutcome.done(kind.displayName)
+        return AbilityOutcome.Done()
+    }
+
+    /**
+     * Someone walks past the spot: [STEPS] steps across the Magician's line of sight, each sounding of
+     * the ground it falls on and kicking up a crumb of it — and nobody there.
+     */
+    private fun footsteps(context: CastContext, at: Vec3) {
+        val level = context.level
+        val scheduling = context.scheduling
+        // Taken out now: the steps fall later, and a context lives one call.
+        val look = context.look
+        val across = Vec3(-look.z, 0.0, look.x).let { if (it.lengthSqr() < 1e-4) Vec3(1.0, 0.0, 0.0) else it.normalize() }
+        val start = at.subtract(across.scale(STEP_LENGTH * STEPS / 2)).subtract(0.0, 0.5, 0.0)
+        for (step in 0 until STEPS) {
+            scheduling.after(step * STEP_TICKS) {
+                // Left foot, right foot: a little to either side of the line walked.
+                val side = if (step % 2 == 0) 0.15 else -0.15
+                val foot = start.add(across.scale(step * STEP_LENGTH)).add(look.x * side, 0.0, look.z * side)
+                val ground = BlockPos.containing(foot.x, foot.y - 0.2, foot.z)
+                val state = level.getBlockState(ground)
+                level.playSound(null, foot.x, foot.y, foot.z, state.soundType.stepSound, SoundSource.PLAYERS, 0.9f, 1.0f)
+                if (!state.isAir) level.sendParticles(BlockParticleOption(ParticleTypes.BLOCK, state), foot.x, foot.y, foot.z, 2, 0.05, 0.0, 0.05, 0.0)
+            }
+        }
     }
 
     private fun soundProjection(context: CastContext): AbilityOutcome {
         val target = context.targeting.playerLookingAt(TARGET_RANGE)
             ?: return AbilityOutcome.failed("Немає гравця-цілі в радіусі ${TARGET_RANGE.toInt()} бл.")
 
-        // The "from nowhere" trick is the pitch and placement, not a real point in space — the
-        // sound is played straight to the target's own ears, same as any other actionBar-scoped cue.
-        context.level.playSound(
-            null, target.x, target.y, target.z,
-            SoundEvents.ZOMBIE_AMBIENT, SoundSource.PLAYERS, 1.5f, 1.0f,
-        )
-        context.level.playSound(
-            null, target.x, target.y, target.z,
-            SoundEvents.GRAVEL_STEP, SoundSource.PLAYERS, 1.2f, 0.9f,
-        )
-
-        context.messaging.actionBar(context.caster, Component.literal("🎭 Ви послали фальшивий звук ${target.name.string}"))
-        return AbilityOutcome.done("Фальшивий звук надіслано")
+        // To the target's ears alone, from a step behind their back: they turn, and there is nobody.
+        val behind = target.position().subtract(Vec3(target.lookAngle.x, 0.0, target.lookAngle.z).normalize().scale(BEHIND)).add(0.0, 1.2, 0.0)
+        privateSound(target, behind, SoundEvents.ZOMBIE_AMBIENT, 1.5f, 1.0f)
+        privateSound(target, behind, SoundEvents.GRAVEL_STEP, 1.2f, 0.9f)
+        return AbilityOutcome.Done()
     }
 
     private fun illusionLocation(context: CastContext): Vec3 {
@@ -113,5 +131,9 @@ class IllusionCreation : ActiveAbility(AbilityIdentity.of("fool_illusion_creatio
         const val LOOK_RANGE = 20.0
         const val TARGET_RANGE = 20.0
         const val SOUND_MODE = "sound"
+        const val STEPS = 6
+        const val STEP_TICKS = 6
+        const val STEP_LENGTH = 0.7
+        const val BEHIND = 2.5
     }
 }

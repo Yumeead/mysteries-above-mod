@@ -6,11 +6,13 @@ import me.vangoo.mysteries.ability.AbilityMode
 import me.vangoo.mysteries.ability.AbilityOutcome
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
+import me.vangoo.domain.valueobjects.RgbColor
+import me.vangoo.mysteries.effect.privateSound
+import me.vangoo.mysteries.effect.privateText
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
-import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
-import net.minecraft.sounds.SoundSource
+import net.minecraft.world.phys.Vec3
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.item.ItemStack
@@ -37,6 +39,13 @@ import net.minecraft.world.item.Items
  * ability's mode, picked ahead on the wheel (or by sneak + cast), and the chain answers it at
  * once. Two of the plugin's six are left, both about the Seer's own fate and surroundings: am I
  * ready to advance, and am I alone. The ingredient question returns with brewing.
+ *
+ * ## The answer is the Seer's alone
+ *
+ * It hangs in the air before them — words by the swinging chain, stars over their gaze — and
+ * nobody beside them sees it: a fate read aloud to the whole street would not be divination.
+ * The sounds go to the Seer's ears only, for the same reason: a fanfare for a lucky omen would
+ * give the omen away.
  */
 class DivinationArts : ActiveAbility(AbilityIdentity.of("fool_divination_arts")) {
 
@@ -61,8 +70,9 @@ class DivinationArts : ActiveAbility(AbilityIdentity.of("fool_divination_arts"))
 
     override fun cast(context: CastContext): AbilityOutcome {
         if (context.caster.isShiftKeyDown) {
-            val next = context.modes.cycle(context.caster.uuid, this, context.sequence)
-            return AbilityOutcome.Awaiting(Component.literal("Питання маятника: ${next?.name?.string}"))
+            // The question now asked is on the HUD beside the power's name.
+            context.modes.cycle(context.caster.uuid, this, context.sequence)
+            return AbilityOutcome.Awaiting()
         }
         return when (context.caster.mainHandItem.item) {
             Items.SPYGLASS -> astrology(context)
@@ -78,21 +88,20 @@ class DivinationArts : ActiveAbility(AbilityIdentity.of("fool_divination_arts"))
         val effect = if (lucky) MobEffects.HASTE else MobEffects.WEAKNESS
         context.caster.addEffect(MobEffectInstance(effect, OMEN_TICKS, 0))
 
-        val at = context.origin
-        context.level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 2.0, at.z, 30, 0.6, 0.4, 0.6, 0.02)
-        context.level.playSound(
-            null, at.x, at.y, at.z,
-            if (lucky) SoundEvents.PLAYER_LEVELUP else SoundEvents.ELDER_GUARDIAN_CURSE,
-            SoundSource.PLAYERS, 0.8f, if (lucky) 2.0f else 1.0f,
+        // The stars come out over the Seer's gaze: in a row if they favour, scattered and dim if they warn.
+        val sky = ahead(context, SKY_REACH).add(0.0, SKY_RISE, 0.0)
+        val omen = if (lucky) {
+            Component.literal("✦ ✦ ✦ ✦ ✦\nЗірки прихильні")
+        } else {
+            Component.literal("✦   ✧ ✦     ✧\nЗірки застерігають")
+        }
+        privateText(context.caster, sky, omen, ANSWER_TICKS, if (lucky) FAVOUR else WARNING)
+        privateSound(
+            context.caster, sky,
+            if (lucky) SoundEvents.AMETHYST_BLOCK_CHIME else SoundEvents.ELDER_GUARDIAN_CURSE,
+            0.8f, if (lucky) 1.6f else 1.0f,
         )
-
-        return AbilityOutcome.done(
-            if (lucky) {
-                "✦ Зірки прихильні: квапливість на ${OMEN_TICKS / TICKS_PER_SECOND / 60} хв"
-            } else {
-                "✦ Зірки застерігають: слабкість на ${OMEN_TICKS / TICKS_PER_SECOND / 60} хв"
-            },
-        )
+        return AbilityOutcome.Done()
     }
 
     // ── The pendulum: the question picked as the mode ───────────────────────────────
@@ -103,13 +112,22 @@ class DivinationArts : ActiveAbility(AbilityIdentity.of("fool_divination_arts"))
     }
 
     private fun pendulum(context: CastContext): AbilityOutcome {
-        chime(context)
         val question = Question.entries.first { it.name.lowercase() == mode(context) }
         val answer = when (question) {
             Question.ADVANCE -> advanceAnswer(context)
             Question.BEYONDERS -> beyondersAnswer(context)
         }
-        return AbilityOutcome.done("❓ ${question.label} — $answer")
+        // Below the gaze, where the chain hangs from the hand: the answer is read off the pendulum.
+        val chain = ahead(context, CHAIN_REACH).add(0.0, CHAIN_DROP, 0.0)
+        privateText(context.caster, chain, Component.literal(answer), ANSWER_TICKS)
+        privateSound(context.caster, chain, SoundEvents.NOTE_BLOCK_BELL.value(), 0.4f, 1.5f)
+        return AbilityOutcome.Done()
+    }
+
+    /** [reach] blocks ahead of the eye, along the look flattened to the horizon. */
+    private fun ahead(context: CastContext, reach: Double): Vec3 {
+        val flat = Vec3(context.look.x, 0.0, context.look.z).let { if (it.lengthSqr() < 1e-4) Vec3(0.0, 0.0, 1.0) else it.normalize() }
+        return context.eye.add(flat.scale(reach))
     }
 
     private fun advanceAnswer(context: CastContext): String {
@@ -135,18 +153,17 @@ class DivinationArts : ActiveAbility(AbilityIdentity.of("fool_divination_arts"))
         }
     }
 
-    private fun chime(context: CastContext) {
-        val at = context.origin
-        context.level.playSound(
-            null, at.x, at.y, at.z,
-            SoundEvents.NOTE_BLOCK_BELL, SoundSource.PLAYERS, 0.4f, 1.5f,
-        )
-    }
-
     private companion object {
         const val BASE_COST = 70
         const val SENSE_RADIUS = 30.0
         const val BASE_COOLDOWN_SECONDS = 60
         const val OMEN_TICKS = 10 * 60 * TICKS_PER_SECOND
+        const val ANSWER_TICKS = 4 * TICKS_PER_SECOND
+        const val SKY_REACH = 2.5
+        const val SKY_RISE = 1.4
+        const val CHAIN_REACH = 1.2
+        const val CHAIN_DROP = -0.45
+        val FAVOUR: RgbColor = RgbColor.of(255, 214, 122)
+        val WARNING: RgbColor = RgbColor.of(196, 84, 84)
     }
 }

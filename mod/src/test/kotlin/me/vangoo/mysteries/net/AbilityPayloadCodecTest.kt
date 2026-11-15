@@ -238,6 +238,23 @@ class AbilityPayloadCodecTest {
     }
 
     @Test
+    @DisplayName("Папір, нитки, клубок, обличчя, слова й обриси проїжджають; слова без прив'язки лишаються без неї")
+    fun paperAndPrivateSightRoundTrip() {
+        val sheet = WorldEffectPayload.Sheet(Vec3(0.0, 65.6, 0.0), Vec3(4.0, 65.0, 9.0), 4, true)
+        val body = WorldEffectPayload.Effigy(42, Vec3(1.5, 64.0, -7.5), 135f)
+        val loose = WorldEffectPayload.Words(Vec3(0.5, 66.0, 0.5), WorldEffectPayload.NO_ANCHOR, Component.literal("Так"), 0xECECF4, 60)
+        val riding = loose.copy(anchor = 0)
+        val glow = WorldEffectPayload.Glow(listOf(3, 17, 256), 40)
+        val thread = WorldEffectPayload.Thread(3, 17, 0xA0A0FF, 12, true)
+        val spool = WorldEffectPayload.Spool(Vec3(1.5, 64.6, -7.5), 0x8040C0, 600)
+        val faces = WorldEffectPayload.Face.Kind.entries.map { WorldEffectPayload.Face(it, 3, 17) }
+
+        (listOf(sheet, body, loose, riding, glow, thread, spool) + faces).forEach { assertEquals(it, roundTrip(it, WorldEffectPayload.CODEC)) }
+        assertEquals(4, WorldEffectPayload.Sheet.flight(9.6))
+        assertEquals(1, WorldEffectPayload.Sheet.flight(0.0))
+    }
+
+    @Test
     @DisplayName("Промінь з краю світу клієнт обрізає від джерела — місце, куди він падає, лишається")
     fun anOverlongBeamIsClamped() {
         val beam = WorldEffectPayload.Beam(Vec3(0.0, 1e6, 0.0), Vec3.ZERO, 0xFFFFFF, 10_000, 99f)

@@ -3,7 +3,7 @@ package me.vangoo.mysteries.pathways.fool
 import me.vangoo.mysteries.event.IncomingDamage
 import me.vangoo.mysteries.item.ModComponents
 import me.vangoo.mysteries.item.PaperWeapon
-import net.minecraft.core.particles.ParticleTypes
+
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
@@ -46,7 +46,8 @@ object PaperWeaponHits {
         }
 
         val at = victim.position()
-        attacker.level().sendParticles(ParticleTypes.CRIT, at.x, at.y + 1.0, at.z, 8, 0.2, 0.3, 0.2, 0.0)
+        // A blow with paper sheds paper: a few scraps off the weapon, where it struck.
+        scraps(attacker.level(), at.add(0.0, 1.0, 0.0), HIT_SCRAPS, 0.2, 0.06)
         attacker.level().playSound(null, attacker.x, attacker.y, attacker.z, SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.8f, 1.3f)
 
         degrade(attacker, hand, weapon.degraded())
@@ -55,10 +56,14 @@ object PaperWeaponHits {
     private fun degrade(attacker: ServerPlayer, hand: ItemStack, degraded: PaperWeapon) {
         if (degraded.usesLeft <= 0) {
             attacker.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY)
-            attacker.level().sendParticles(ParticleTypes.SMOKE, attacker.x, attacker.y + 1.0, attacker.z, 12, 0.3, 0.4, 0.3, 0.0)
+            // Worn through: the weapon comes apart in the hand.
+            scraps(attacker.level(), attacker.position().add(0.0, 1.0, 0.0), BREAK_SCRAPS, 0.3, 0.08)
             attacker.level().playSound(null, attacker.x, attacker.y, attacker.z, SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 0.8f, 0.6f)
         } else {
             hand.set(ModComponents.PAPER_WEAPON, degraded)
         }
     }
+
+    private const val HIT_SCRAPS = 3
+    private const val BREAK_SCRAPS = 16
 }

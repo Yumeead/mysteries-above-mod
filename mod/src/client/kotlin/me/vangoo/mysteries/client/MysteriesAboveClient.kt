@@ -9,6 +9,7 @@ import me.vangoo.mysteries.client.render.BbModelRenderer
 import me.vangoo.mysteries.client.render.CreatureMoves
 import me.vangoo.mysteries.client.render.HumanRenderer
 import me.vangoo.mysteries.client.render.MarionetteRenderer
+import me.vangoo.mysteries.client.render.PaperScrapParticle
 import me.vangoo.mysteries.client.screen.ChoiceScreen
 import me.vangoo.mysteries.client.render.SpiritGlyphParticle
 import me.vangoo.mysteries.client.render.SunEyesLayer
@@ -89,8 +90,6 @@ object MysteriesAboveClient : ClientModInitializer {
             SpiritMoteParticle.Provider(sprites)
         }
         ParticleProviderRegistry.getInstance().register(ModParticles.SPIRIT_GLYPH) { sprites ->
-            // The threads are built of the glyph's pixels, spawned by hand rather than by a packet.
-            SpiritThreads.sprites = sprites
             SpiritGlyphParticle.Provider(sprites)
         }
         ParticleProviderRegistry.getInstance().register(ModParticles.SPIRIT_LIGHT) { sprites ->
@@ -98,6 +97,9 @@ object MysteriesAboveClient : ClientModInitializer {
         }
         ParticleProviderRegistry.getInstance().register(ModParticles.SPIRIT_LIGHT_GLYPH) { sprites ->
             SpiritGlyphParticle.Provider(sprites, SpiritLightParticle.LAYER, SpiritLightParticle.GLYPH_SIZE)
+        }
+        ParticleProviderRegistry.getInstance().register(ModParticles.PAPER_SCRAP) { sprites ->
+            PaperScrapParticle.Provider(sprites)
         }
 
         // The next world starts with a clean slate: someone else's roster is neither drawable nor wanted.

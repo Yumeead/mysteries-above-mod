@@ -32,6 +32,7 @@ import net.minecraft.world.entity.EntityTypes
 class LightClientGameTest : FabricClientGameTest {
 
     override fun runTest(context: ClientGameTestContext) {
+        if (skipped()) return
         context.worldBuilder().create().use { world ->
             world.connection.waitForChunksRender()
             val server = world.server

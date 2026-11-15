@@ -4,6 +4,8 @@ import me.vangoo.domain.entities.Beyonder
 import me.vangoo.domain.valueobjects.AbilityIdentity
 import me.vangoo.domain.valueobjects.Sequence
 import me.vangoo.mysteries.ability.SelectiveVisibility
+import me.vangoo.mysteries.ability.context.Fizzle
+import me.vangoo.domain.PathwayBranding
 import me.vangoo.mysteries.ability.grantAttribute
 import me.vangoo.mysteries.ability.modifierId
 import me.vangoo.mysteries.ability.revokeAttribute
@@ -11,6 +13,7 @@ import me.vangoo.mysteries.ability.runtime.AbilityServices
 import me.vangoo.mysteries.pathways.ModPathways
 import me.vangoo.mysteries.beyonder.BeyonderStatus
 import me.vangoo.mysteries.effect.ModSounds
+import me.vangoo.mysteries.effect.privateSound
 import me.vangoo.mysteries.entity.MarionetteEntity
 import me.vangoo.mysteries.entity.ModEntities
 import me.vangoo.mysteries.item.ModItems
@@ -20,6 +23,7 @@ import me.vangoo.mysteries.net.payload.AbilityRosterPayload
 import me.vangoo.mysteries.net.payload.MarionetteStatePayload
 import net.fabricmc.fabric.api.message.v1.ServerMessageEvents
 import me.vangoo.mysteries.net.payload.ThreadSightPayload
+import me.vangoo.mysteries.net.payload.WorldEffectPayload
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
 import com.mojang.serialization.Codec
 import me.vangoo.mysteries.modId
@@ -31,12 +35,9 @@ import net.minecraft.core.UUIDUtil
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
-import net.minecraft.core.particles.ParticleTypes
-import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.core.registries.Registries
 import net.minecraft.resources.ResourceKey
 import net.minecraft.network.chat.Component
-import net.minecraft.network.protocol.game.ClientboundSoundPacket
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
@@ -256,7 +257,6 @@ object Marionettes {
         level.addFreshEntity(puppet)
         register(owner.uuid, puppet)
 
-        conversionEffects(level, puppet.position())
         victim.kill(level)
 
         // The Law of Convergence, and it is permanent: the Characteristic has left the original
@@ -410,7 +410,7 @@ object Marionettes {
         level.players().filter { it !== owner }.forEach { SelectiveVisibility.hide(owner, it) }
 
         possessions[owner.uuid] = Possession(puppet, vessel, lend(owner, puppet))
-        swapEffects(level, vessel.position(), puppet.position())
+        pull(level, vessel, puppet, driver = owner)
         BeyonderStatus.pushRoster(owner)
         pushState(owner)
     }
@@ -489,8 +489,8 @@ object Marionettes {
 
         owner.level().players().filter { it !== owner }.forEach { SelectiveVisibility.show(owner, it) }
         if (puppet !is MarionetteEntity && puppet.isAlive) SelectiveVisibility.show(puppet, owner)
-        swapEffects(owner.level(), owner.position(), puppet.position())
-        reason?.let { AbilityServices.messaging.actionBar(owner, it) }
+        pull(owner.level(), owner, puppet)
+        reason?.let { AbilityServices.messaging.hint(owner, it, Fizzle.NONE) }
         BeyonderStatus.pushRoster(owner)
         pushState(owner)
     }
@@ -561,10 +561,8 @@ object Marionettes {
             }
             MarionetteOrderPayload.Action.CUT -> {
                 val puppet = selected(owner.uuid) ?: return
-                AbilityServices.messaging.actionBar(
-                    owner,
-                    Component.literal("✂ Нитку обрізано: ${nameOf(puppet)}"),
-                )
+                // A string snapping where it was tied; the row loses the puppet on the same beat.
+                puppet.level().playSound(null, puppet.x, puppet.y + 1.0, puppet.z, SoundEvents.TRIPWIRE_DETACH, SoundSource.PLAYERS, 1.0f, 1.4f)
                 release(puppet)
                 pushState(owner)
             }
@@ -578,7 +576,8 @@ object Marionettes {
         // "choose it in the world" answer, sitting on top of the HUD row rather than replacing it.
         lookingAtOwn(owner)?.let { seen ->
             select(owner.uuid, seen.uuid)
-            AbilityServices.messaging.actionBar(owner, Component.literal("▸ ${nameOf(seen)}"))
+            // The row shows which; the click comes from the puppet picked, for its owner alone.
+            privateSound(owner, seen.position(), SoundEvents.TRIPWIRE_CLICK_ON, 0.6f, 1.8f)
             pushState(owner)
             return
         }
@@ -586,7 +585,7 @@ object Marionettes {
         val puppet = selected(owner.uuid) ?: return
         val beyonder = AbilityServices.beyonders.of(owner.uuid) ?: return
         if (owner.distanceToSqr(puppet) > controlRange(beyonder) * controlRange(beyonder)) {
-            AbilityServices.messaging.actionBar(owner, Component.literal("Нитка не дістає — ${nameOf(puppet)} задалеко"))
+            AbilityServices.messaging.hint(owner, Component.literal("Нитка не дістає — ${nameOf(puppet)} задалеко"), Fizzle.NONE)
             return
         }
 
@@ -595,7 +594,6 @@ object Marionettes {
             else -> aim(owner)
         }
         command(puppet, order)
-        AbilityServices.messaging.actionBar(owner, Component.literal("${nameOf(puppet)} — ${caption(order)}"))
         owner.level().playSound(
             null, owner.x, owner.y, owner.z, SoundEvents.TRIPWIRE_ATTACH, SoundSource.PLAYERS, 0.5f, 1.6f,
         )
@@ -628,13 +626,6 @@ object Marionettes {
             return MarionetteEntity.Order.GoTo(block.location)
         }
         return MarionetteEntity.Order.Follow
-    }
-
-    private fun caption(order: MarionetteEntity.Order): String = when (order) {
-        is MarionetteEntity.Order.Stand -> "стій"
-        is MarionetteEntity.Order.GoTo -> "іди туди"
-        is MarionetteEntity.Order.Follow -> "за мною"
-        is MarionetteEntity.Order.Attack -> "бий"
     }
 
     // ── What the client sees ────────────────────────────────────────────────────
@@ -747,16 +738,8 @@ object Marionettes {
         ServerLivingEntityEvents.AFTER_DAMAGE.register { entity, _, _, taken, _ ->
             val owner = (entity as? MarionetteEntity)?.vesselOf?.let(::player) ?: return@register
             if (taken <= 0f) return@register
-            owner.connection.send(
-                ClientboundSoundPacket(
-                    BuiltInRegistries.SOUND_EVENT.wrapAsHolder(ModSounds.HEARTBEAT),
-                    SoundSource.MASTER,
-                    owner.x, owner.y, owner.z,
-                    1.4f, 0.7f,
-                    owner.level().random.nextLong(),
-                ),
-            )
-            AbilityServices.messaging.actionBar(owner, Component.literal("❤ Ваше тіло б'ють!"))
+            // From where the body stands: the direction is the whole message.
+            privateSound(owner, entity.position(), ModSounds.HEARTBEAT, 1.4f, 0.7f)
         }
 
         // A crash mid-possession: the stash is still on the player, and it goes back first thing.
@@ -916,7 +899,7 @@ object Marionettes {
 
         val pathway = capture?.pathway ?: return
         val sequence = capture.sequence ?: return
-        condense(level, where, pathway, sequence, capture.name)
+        condense(level, where, pathway, sequence)
     }
 
     /**
@@ -926,17 +909,15 @@ object Marionettes {
      * saw the puppet fall has half a minute to reach the spot and take it. The plugin condensed
      * instantly, into an invulnerable drop — the invulnerability is kept, the instant is not.
      */
-    private fun condense(level: ServerLevel, where: Vec3, pathway: String, sequence: Int, name: String) {
+    private fun condense(level: ServerLevel, where: Vec3, pathway: String, sequence: Int) {
         val scheduling = AbilityServices.scheduling
+        val core = where.add(0.0, CORE_HEIGHT, 0.0)
+        spool(level, core, PathwayBranding.liquidOf(pathway), CONDENSE_TICKS)
         var ticks = 0
         lateinit var handle: me.vangoo.mysteries.schedule.TaskHandle
         handle = scheduling.every(CONDENSE_STEP_TICKS) {
             ticks += CONDENSE_STEP_TICKS
             val progress = ticks.toFloat() / CONDENSE_TICKS
-            level.sendParticles(
-                ParticleTypes.SOUL, where.x, where.y + 0.6, where.z,
-                CONDENSE_PARTICLES, (1.6 * (1.0 - progress)), 0.4, (1.6 * (1.0 - progress)), 0.01,
-            )
             level.playSound(
                 null, where.x, where.y, where.z, SoundEvents.AMETHYST_BLOCK_CHIME,
                 SoundSource.AMBIENT, 0.7f, 0.5f + progress,
@@ -944,36 +925,32 @@ object Marionettes {
             if (ticks < CONDENSE_TICKS) return@every
 
             handle.cancel()
-            level.sendParticles(ParticleTypes.END_ROD, where.x, where.y + 0.6, where.z, 30, 0.1, 0.3, 0.1, 0.02)
             level.playSound(
                 null, where.x, where.y, where.z, SoundEvents.BEACON_ACTIVATE, SoundSource.AMBIENT, 1.2f, 0.6f,
             )
-            val core = net.minecraft.world.entity.item.ItemEntity(
-                level, where.x, where.y + 0.6, where.z, ModItems.characteristicOf(pathway, sequence),
+            // The ball closes on it: no word needed, the core is lying there.
+            val item = net.minecraft.world.entity.item.ItemEntity(
+                level, core.x, core.y, core.z, ModItems.characteristicOf(pathway, sequence),
             )
             // The scarcest thing in the game does not burn away in a lava pool it happened to fall in.
-            core.setUnlimitedLifetime()
-            core.isInvulnerable = true
-            level.addFreshEntity(core)
-            level.players().forEach { nearby ->
-                if (nearby.position().distanceToSqr(where) < CONDENSE_HERALD_RANGE) {
-                    AbilityServices.messaging.actionBar(nearby, Component.literal("З $name згустилась Характеристика"))
-                }
-            }
+            item.setUnlimitedLifetime()
+            item.isInvulnerable = true
+            item.setDeltaMovement(Vec3.ZERO)
+            level.addFreshEntity(item)
         }
     }
 
-    private fun conversionEffects(level: ServerLevel, where: Vec3) {
-        level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, where.x, where.y + 1.0, where.z, 60, 0.4, 0.8, 0.4, 0.02)
-        level.sendParticles(ParticleTypes.SQUID_INK, where.x, where.y + 1.0, where.z, 40, 0.5, 0.7, 0.5, 0.0)
-        level.playSound(null, where.x, where.y, where.z, SoundEvents.WITHER_DEATH, SoundSource.HOSTILE, 1.2f, 0.5f)
-    }
-
-    private fun swapEffects(level: ServerLevel, from: Vec3, to: Vec3) {
-        listOf(from, to).forEach { at ->
-            level.sendParticles(ParticleTypes.PORTAL, at.x, at.y + 1.0, at.z, 40, 0.4, 0.8, 0.4, 0.3)
-            level.playSound(null, at.x, at.y, at.z, SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 0.8f, 0.7f)
-        }
+    /**
+     * Stepping into a puppet or out of one is a string pulled: a thread from the body that stays to
+     * the body that walks, jerked taut, with the click of it. Everyone near sees this one.
+     *
+     * A [driver] stepping in has no puppet on their own client to tie it to — a beast is taken off it,
+     * and they stand in its place anyway — so theirs runs to their own body.
+     */
+    private fun pull(level: ServerLevel, from: LivingEntity, to: LivingEntity, driver: ServerPlayer? = null) {
+        thread(level, from, to, FOOL_COLOR, PULL_TICKS, pull = true, except = driver)
+        driver?.let { ModChannels.WORLD_EFFECT.sendTo(it, WorldEffectPayload.Thread(from.id, it.id, FOOL_COLOR.packed, PULL_TICKS, true)) }
+        level.playSound(null, to.x, to.y + 1.0, to.z, SoundEvents.TRIPWIRE_CLICK_ON, SoundSource.PLAYERS, 0.9f, 0.6f)
     }
 
     fun nameOf(puppet: LivingEntity): String =
@@ -994,9 +971,12 @@ object Marionettes {
     private const val STRAND_MILLIS = 10L * 60L * 1000L
 
     private const val CONDENSE_TICKS = 30 * TICKS_PER_SECOND
-    private const val CONDENSE_STEP_TICKS = 5
-    private const val CONDENSE_PARTICLES = 12
-    private const val CONDENSE_HERALD_RANGE = 32.0 * 32.0
+    /** The chime rises once a second while the ball winds. */
+    private const val CONDENSE_STEP_TICKS = TICKS_PER_SECOND
+    private const val CORE_HEIGHT = 0.6
+
+    private val FOOL_COLOR = PathwayBranding.liquidOf(Fool.NAME)
+    private const val PULL_TICKS = 12
 
     private const val MOB_SPEED = 1.1
 

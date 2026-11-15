@@ -11,8 +11,10 @@ import me.vangoo.mysteries.ability.session
 import me.vangoo.mysteries.ability.sessionRunning
 import me.vangoo.mysteries.ability.stopSession
 import me.vangoo.mysteries.ability.sustain
+import me.vangoo.mysteries.ability.context.Fizzle
+import me.vangoo.mysteries.net.payload.WorldEffectPayload.Face.Kind
+import me.vangoo.mysteries.pathways.fool.face
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
-import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
@@ -38,6 +40,12 @@ import net.minecraft.sounds.SoundSource
  * lives outside the ability where the ability cannot reach it. A session ends itself, and its
  * `finally` is what guarantees the borrowed face is handed back on every exit there is: a second
  * cast, exhaustion, death, logging out, the server stopping.
+ *
+ * ## The face is seen changing hands
+ *
+ * It peels off the one it was taken from and flies onto the Faceless's head; when the mask falls,
+ * the borrowed face peels off and tears like paper on the way down. Nothing is written: whoever is
+ * near sees it happen, and the Faceless sees their own new face in any mirror the game has.
  */
 class Shapeshifting : ActiveAbility(AbilityIdentity.of("fool_shapeshifting")) {
 
@@ -59,7 +67,7 @@ class Shapeshifting : ActiveAbility(AbilityIdentity.of("fool_shapeshifting")) {
     override fun cast(context: CastContext): AbilityOutcome {
         if (context.sessionRunning) {
             context.stopSession()
-            return AbilityOutcome.done("🎭 Личину знято")
+            return AbilityOutcome.Done()
         }
 
         val target = context.targeting.playerLookingAt(RANGE)
@@ -69,10 +77,12 @@ class Shapeshifting : ActiveAbility(AbilityIdentity.of("fool_shapeshifting")) {
         val messaging = context.messaging
         val casterId = context.caster.uuid
 
+        face(context.level, Kind.TAKE, target, context.caster)
         Disguise.wear(context.caster, face)
-        veil(context, SoundEvents.ILLUSIONER_PREPARE_MIRROR, 1.0f)
+        val at = context.origin
+        context.level.playSound(null, at.x, at.y, at.z, SoundEvents.ILLUSIONER_PREPARE_MIRROR, SoundSource.PLAYERS, 1.0f, 1.0f)
         if (face.textures == null) {
-            messaging.actionBar(context.caster, Component.literal("⚠ Скін цієї личини не збережено — узято лише ім'я"))
+            messaging.hint(context.caster, Component.literal("Скін цієї личини не збережено — узято лише ім'я"), Fizzle.NONE)
         }
 
         context.session {
@@ -81,22 +91,19 @@ class Shapeshifting : ActiveAbility(AbilityIdentity.of("fool_shapeshifting")) {
                     periodTicks = TICKS_PER_SECOND,
                     upkeep = periodicCost,
                     upkeepPeriodTicks = TICKS_PER_SECOND,
-                ) { masked ->
-                    messaging.actionBar(masked, Component.literal("🎭 ${face.name}"))
-                }
+                ) { }
                 if (end == SessionEnd.EXHAUSTED) {
-                    messaging.actionBar(casterId, Component.literal("🎭 Духовність вичерпана — личина спала"))
+                    messaging.hint(casterId, Component.literal("Духовність вичерпана — личина спала"), Fizzle.EMPTY)
                 }
             } finally {
                 val masked = owner
                 if (masked != null) {
+                    // Before the skin goes back: the client peels off the face the head wears when this lands.
+                    face(masked.level(), Kind.DROP, masked)
                     Disguise.remove(masked)
                     masked.level().playSound(
                         null, masked.x, masked.y, masked.z,
                         SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 1.0f, 0.8f,
-                    )
-                    masked.level().sendParticles(
-                        ParticleTypes.SMOKE, masked.x, masked.y + 1.0, masked.z, 20, 0.3, 0.5, 0.3, 0.0,
                     )
                 } else {
                     // Gone from the world: their player-info entry left with them, so there is
@@ -106,13 +113,7 @@ class Shapeshifting : ActiveAbility(AbilityIdentity.of("fool_shapeshifting")) {
             }
         }
 
-        return AbilityOutcome.done("🎭 Ви — ${face.name}")
-    }
-
-    private fun veil(context: CastContext, sound: net.minecraft.sounds.SoundEvent, pitch: Float) {
-        val at = context.origin
-        context.level.sendParticles(ParticleTypes.SMOKE, at.x, at.y + 1.0, at.z, 30, 0.4, 0.8, 0.4, 0.0)
-        context.level.playSound(null, at.x, at.y, at.z, sound, SoundSource.PLAYERS, 1.0f, pitch)
+        return AbilityOutcome.Done()
     }
 
     private companion object {

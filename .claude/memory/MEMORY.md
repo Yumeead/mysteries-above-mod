@@ -13,4 +13,6 @@
 - [Sun pilot — state](immersive-sun-pilot-next.md) — milestone B built (uncommitted): what is left, screenshot lessons for the next pathway
 - [Stale dev server drops new packets](stale-dev-server-drops-new-packets.md) — restart runServer after server-side changes before debugging "nothing happens"
 - [Light-shaft beam](light-shaft-beam.md) — the solid beam in its own shader: sun-angled sky shafts, depth-soft ground, Iris fallback, knobs, open problems, how to verify
+- [Fool immersive — state](fool-immersive-state.md) — paper + threads committed on feat/fool-immersive; left: two-client play of player puppets, Face, Spool
 - [Door slice](door-slice.md) — rendering-engine vertical slice on the Door: one packet per door, wall leaves, rift corridor; 0.4 s step delay (user, 14.11)
+- [Run only the needed game test](run-only-the-needed-game-test.md) — -Ponly=<word> on runGameTest/runClientGameTest, not the whole suite

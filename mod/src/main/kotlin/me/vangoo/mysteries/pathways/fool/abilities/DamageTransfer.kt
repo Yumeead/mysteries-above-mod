@@ -6,8 +6,10 @@ import me.vangoo.domain.valueobjects.Sequence
 import me.vangoo.mysteries.ability.AbilityOutcome
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
+import me.vangoo.domain.valueobjects.RgbColor
 import me.vangoo.mysteries.pathways.fool.RecentDamageLedger
-import net.minecraft.core.particles.ParticleTypes
+import me.vangoo.mysteries.pathways.fool.scraps
+import me.vangoo.mysteries.pathways.fool.thread
 import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
@@ -22,6 +24,12 @@ import kotlin.math.roundToInt
  * else, but a heal that closes half of whatever wound is still fresh. A plain cast heals the
  * Magician's own recent damage; sneaking and looking at someone heals **their** recent damage
  * instead — the pool comes from [RecentDamageLedger], not from watching this one cast.
+ *
+ * ## The wound comes off as paper
+ *
+ * A Magician's trick, not a priest's blessing: the wound peels off the body in red-stained scraps
+ * that flutter down and are gone, and the skin under them is whole. Healing someone else, a thread
+ * runs from the Magician's hand to them first, and the scraps peel off at its end.
  */
 class DamageTransfer : ActiveAbility(AbilityIdentity.of("fool_damage_transfer")) {
 
@@ -47,11 +55,10 @@ class DamageTransfer : ActiveAbility(AbilityIdentity.of("fool_damage_transfer"))
 
         caster.heal(heal.toFloat())
         val at = caster.position()
-        context.level.sendParticles(ParticleTypes.HEART, at.x, at.y + 2.0, at.z, 8, 0.3, 0.2, 0.3, 0.0)
-        context.level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 1.0, at.z, 12, 0.3, 0.4, 0.3, 0.0)
+        peel(context, caster, heal)
         context.level.playSound(null, at.x, at.y, at.z, SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 1.0f, 1.4f)
 
-        return AbilityOutcome.done("✦ Ви загоїли %.1f HP".format(heal))
+        return AbilityOutcome.Done()
     }
 
     private fun healTarget(context: CastContext): AbilityOutcome {
@@ -61,26 +68,29 @@ class DamageTransfer : ActiveAbility(AbilityIdentity.of("fool_damage_transfer"))
         val heal = RecentDamageHeal.healAmount(RecentDamageLedger.take(target.uuid), context.sequence)
         if (heal <= 0) return AbilityOutcome.failed("Ціль не отримувала шкоди останнім часом")
 
-        streak(context, context.origin, target.position())
+        thread(context.level, context.caster, target, context.effects.pathwayColor, THREAD_TICKS)
         target.heal(heal.toFloat())
         val at = target.position()
-        context.level.sendParticles(ParticleTypes.HEART, at.x, at.y + 1.5, at.z, 8, 0.3, 0.3, 0.3, 0.0)
+        peel(context, target, heal)
         context.level.playSound(null, at.x, at.y, at.z, SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 1.2f, 1.2f)
 
-        return AbilityOutcome.done("✦ Ви зцілили ${target.name.string} на %.1f HP".format(heal))
+        return AbilityOutcome.Done()
     }
 
-    private fun streak(context: CastContext, from: Vec3, to: Vec3) {
-        val steps = 12
-        for (i in 1..steps) {
-            val point = from.add(0.0, 1.0, 0.0).lerp(to.add(0.0, 1.0, 0.0), i.toDouble() / steps)
-            context.level.sendParticles(ParticleTypes.HAPPY_VILLAGER, point.x, point.y, point.z, 1, 0.0, 0.0, 0.0, 0.0)
-        }
+    /** The wound off [body] in stained scraps — more of them the more was healed. */
+    private fun peel(context: CastContext, body: LivingEntity, heal: Double) {
+        val count = (MIN_SCRAPS + heal * SCRAPS_PER_HP).toInt().coerceAtMost(MAX_SCRAPS)
+        scraps(context.level, body.position().add(0.0, body.bbHeight * 0.6, 0.0), count, 0.25, 0.04, WOUND)
     }
 
     private companion object {
         const val BASE_COST = 100
         const val BASE_COOLDOWN_SECONDS = 45
         const val MAX_RANGE = 8.0
+        const val THREAD_TICKS = 12
+        const val MIN_SCRAPS = 4
+        const val SCRAPS_PER_HP = 1.0
+        const val MAX_SCRAPS = 16
+        val WOUND: RgbColor = RgbColor.of(184, 70, 62)
     }
 }

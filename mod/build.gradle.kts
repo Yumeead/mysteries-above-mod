@@ -58,6 +58,17 @@ fabricApi {
     }
 }
 
+// `-Ponly=fool` runs only the game tests with that word in their name, server and client alike, so a
+// run does not wait through every other scene first. The server filter is vanilla's test selector.
+providers.gradleProperty("only").orNull?.lowercase()?.let { only ->
+    tasks.withType<JavaExec>().matching { it.name == "runGameTest" }.configureEach {
+        systemProperty("fabric-api.gametest.filter", "*:*$only*")
+    }
+    tasks.withType<JavaExec>().matching { it.name == "runClientGameTest" }.configureEach {
+        systemProperty("mysteries.gametest.only", only)
+    }
+}
+
 dependencies {
     // Рядка `mappings` тут навмисно немає: на 26.x гра вже не обфускована
     // (yarn зупинився на 1.21.11, intermediary віддає сентинел 0.0.0), і loom
