@@ -17,3 +17,5 @@
 - [Door slice](door-slice.md) — rendering-engine vertical slice on the Door: one packet per door, wall leaves, rift corridor; 0.4 s step delay (user, 14.11)
 - [Run only the needed game test](run-only-the-needed-game-test.md) — -Ponly=<word> on runGameTest/runClientGameTest, not the whole suite
 - [Fool + wheel rework plan](fool-and-wheel-rework-plan.md) — 14.11 decisions: Air Bullet refraction+flight, wheel walk/pin, threads tab, danger arrows, face registry, divination; order
+- [No dots, arrows, dashes in player text](player-text-no-dots-arrows-dashes.md) — never `·`, `→`, `—` or UI-explaining hints in anything the player reads; ~336 old literals remain
+- [Marionette will and orders](marionette-will-and-orders.md) — 15.11 decisions: no own will, follow/come/guard/assist semantics, weapons+kits, gather/arm removed, arrow switch, left panel, 4 s pin
