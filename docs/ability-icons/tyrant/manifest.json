@@ -1,0 +1,287 @@
+{
+  "pathway": "Tyrant",
+  "palette": "#4673C7",
+  "size": 32,
+  "icons": [
+    {
+      "asset": "tyrant_physique",
+      "identity": "tyrant_physique",
+      "sequence": 9,
+      "name": "Морська спорідненість → Володар Безодні",
+      "concept": "Сильна постать пливе під водою, обтікаючи плечима глибоку течію.",
+      "mode": "generate",
+      "source": "source/tyrant_physique.png"
+    },
+    {
+      "asset": "tyrant_illusory_scales",
+      "identity": "tyrant_illusory_scales",
+      "sequence": 9,
+      "name": "Ілюзорна луска",
+      "concept": "Під водою на шкірі проявляються великі міцні риб’ячі луски.",
+      "mode": "generate",
+      "source": "source/tyrant_illusory_scales.png"
+    },
+    {
+      "asset": "tyrant_stance",
+      "identity": "tyrant_stance",
+      "sequence": 9,
+      "name": "Рівновага → Повітряна подушка",
+      "concept": "Дві стійкі стопи над хиткою палубою та подушкою стисненого повітря.",
+      "mode": "generate",
+      "source": "source/tyrant_stance.png"
+    },
+    {
+      "asset": "tyrant_sea_lunge",
+      "identity": "tyrant_sea_lunge",
+      "sequence": 9,
+      "name": "Морський ривок",
+      "concept": "Постать виривається вперед із водяного сплеску, відкидаючи ворога.",
+      "mode": "generate",
+      "source": "source/tyrant_sea_lunge.png"
+    },
+    {
+      "asset": "tyrant_wrath",
+      "identity": "tyrant_wrath",
+      "sequence": 8,
+      "name": "Лють",
+      "concept": "Палаючий погляд і напружені плечі в синьому вихорі гніву.",
+      "mode": "generate",
+      "source": "source/tyrant_wrath.png"
+    },
+    {
+      "asset": "tyrant_raging_blow",
+      "identity": "tyrant_raging_blow",
+      "sequence": 8,
+      "name": "Нищівний Удар",
+      "concept": "Один заряджений кулак розриває повітря фронтальним ударом.",
+      "mode": "generate",
+      "source": "source/tyrant_raging_blow.png"
+    },
+    {
+      "asset": "tyrant_sea_memory",
+      "identity": "tyrant_sea_memory",
+      "sequence": 7,
+      "name": "Морська Пам’ять",
+      "concept": "Заряджений компас пам’ятає берег і веде стрілку до нього.",
+      "mode": "generate",
+      "source": "source/tyrant_sea_memory.png"
+    },
+    {
+      "asset": "tyrant_precise_throw",
+      "identity": "tyrant_precise_throw",
+      "sequence": 7,
+      "name": "Точний Кидок",
+      "concept": "Кинутий водяний болт вивертає коротку точну дугу до однієї цілі.",
+      "mode": "generate",
+      "source": "source/tyrant_precise_throw.png"
+    },
+    {
+      "asset": "tyrant_water_film",
+      "identity": "tyrant_water_film",
+      "sequence": 7,
+      "name": "Плівка Задухи",
+      "concept": "Тонка вода щільно огортає голову, затримуючи останню бульбашку біля рота.",
+      "mode": "generate",
+      "source": "source/tyrant_water_film.png"
+    },
+    {
+      "asset": "tyrant_azure_wave",
+      "identity": "tyrant_azure_wave",
+      "sequence": 7,
+      "name": "Лазурна Хвиля",
+      "concept": "Високий водяний гребінь котиться вздовж землі й зносить темну постать.",
+      "mode": "generate",
+      "source": "source/tyrant_azure_wave.png"
+    },
+    {
+      "asset": "tyrant_restorative_water",
+      "identity": "tyrant_restorative_water",
+      "sequence": 7,
+      "name": "Цілюща вода",
+      "concept": "Синя вода огортає руку союзника й змикає над нею світлий відновлювальний потік.",
+      "mode": "generate",
+      "source": "source/tyrant_restorative_water.png"
+    },
+    {
+      "asset": "tyrant_cleansing_light",
+      "identity": "tyrant_cleansing_light",
+      "sequence": 7,
+      "name": "Очищувальне Світло",
+      "concept": "Чиста синя вода змиває гарячі язики полум’я з поверхні.",
+      "mode": "generate",
+      "source": "source/tyrant_cleansing_light.png"
+    },
+    {
+      "asset": "tyrant_windblades",
+      "identity": "tyrant_windblades",
+      "sequence": 6,
+      "name": "Леза Вітру",
+      "concept": "Три нерівні вигнуті леза стисненого повітря розходяться різальним віялом.",
+      "mode": "edit",
+      "input": "docs/ability-icons/source/tyrant_windblades.png",
+      "source": "source/tyrant_windblades.png"
+    },
+    {
+      "asset": "tyrant_pressure_wave",
+      "identity": "tyrant_pressure_wave",
+      "sequence": 6,
+      "name": "Владар Вітру",
+      "concept": "Кільце стисненого повітря розходиться від постаті й відкидає уламки.",
+      "mode": "generate",
+      "source": "source/tyrant_pressure_wave.png"
+    },
+    {
+      "asset": "tyrant_wind_flight",
+      "identity": "tyrant_wind_flight",
+      "sequence": 6,
+      "name": "Політ на вітрі",
+      "concept": "Постать підіймається над урвищем на широкій спіралі повітря.",
+      "mode": "generate",
+      "source": "source/tyrant_wind_flight.png"
+    },
+    {
+      "asset": "tyrant_wind_sprint",
+      "identity": "tyrant_wind_sprint",
+      "sequence": 6,
+      "name": "Вітряний біг",
+      "concept": "Нога в швидкому кроці тягне за собою довгі сині смуги вітру.",
+      "mode": "generate",
+      "source": "source/tyrant_wind_sprint.png"
+    },
+    {
+      "asset": "tyrant_wind_imbued_hands",
+      "identity": "tyrant_wind_imbued_hands",
+      "sequence": 6,
+      "name": "Руки Вітру",
+      "concept": "Дві долоні охоплені щільними синіми обручами повітря для ближніх ударів.",
+      "mode": "generate",
+      "source": "source/tyrant_wind_imbued_hands.png"
+    },
+    {
+      "asset": "tyrant_wind_pull",
+      "identity": "tyrant_wind_pull",
+      "sequence": 6,
+      "name": "Поклик Вітру",
+      "concept": "Вихор біля долоні підхоплює з землі кілька кинутих предметів.",
+      "mode": "generate",
+      "source": "source/tyrant_wind_pull.png"
+    },
+    {
+      "asset": "tyrant_eavesdrop",
+      "identity": "tyrant_eavesdrop",
+      "sequence": 6,
+      "name": "Шепіт Вітру",
+      "concept": "Велике вухо перехоплює принесений вітром відбиток далекого дихання.",
+      "mode": "generate",
+      "source": "source/tyrant_eavesdrop.png"
+    },
+    {
+      "asset": "tyrant_water_control",
+      "identity": "tyrant_water_control",
+      "sequence": 6,
+      "name": "Владарювання Водою",
+      "concept": "Рука піднімає й закручує струмінь із наявної води.",
+      "mode": "generate",
+      "source": "source/tyrant_water_control.png"
+    },
+    {
+      "asset": "tyrant_storm_heart",
+      "identity": "tyrant_storm_heart",
+      "sequence": 5,
+      "name": "Штормове Серце",
+      "concept": "Виснажене серце спалахує синім штормом усередині грудей.",
+      "mode": "generate",
+      "source": "source/tyrant_storm_heart.png"
+    },
+    {
+      "asset": "tyrant_abyssal_dominion",
+      "identity": "tyrant_abyssal_dominion",
+      "sequence": 5,
+      "name": "Володіння Безоднею",
+      "concept": "Постать під важкою товщею води захищена глибиною й сама б’є сильніше.",
+      "mode": "generate",
+      "source": "source/tyrant_abyssal_dominion.png"
+    },
+    {
+      "asset": "tyrant_lightning_strike",
+      "identity": "tyrant_lightning_strike",
+      "sequence": 5,
+      "name": "Удар Блискавки",
+      "concept": "Вертикальний розгалужений розряд уражає головну ціль і перескакує на сусідні.",
+      "mode": "generate",
+      "source": "source/tyrant_lightning_strike.png"
+    },
+    {
+      "asset": "tyrant_lightning_bolt_arrow",
+      "identity": "tyrant_lightning_bolt_arrow",
+      "sequence": 5,
+      "name": "Стріла-Блискавка",
+      "concept": "Прямий блискавичний спис наскрізь пробиває ряд темних цілей.",
+      "mode": "generate",
+      "source": "source/tyrant_lightning_bolt_arrow.png"
+    },
+    {
+      "asset": "tyrant_thunder_voice",
+      "identity": "tyrant_thunder_voice",
+      "sequence": 5,
+      "name": "Громовий Голос",
+      "concept": "Голос-блискавка переносить послання від уст до одного далекого адресата.",
+      "mode": "generate",
+      "source": "source/tyrant_thunder_voice.png"
+    },
+    {
+      "asset": "tyrant_singing",
+      "identity": "tyrant_singing",
+      "sequence": 5,
+      "name": "Спів",
+      "concept": "Широкий духовний голос хвилями пригнічує й розладнує ворогів.",
+      "mode": "generate",
+      "source": "source/tyrant_singing.png"
+    },
+    {
+      "asset": "tyrant_sea_tongue",
+      "identity": "tyrant_sea_tongue",
+      "sequence": 5,
+      "name": "Мова Моря",
+      "concept": "Морська істота повертається на поклик і веде за собою союзну живність.",
+      "mode": "generate",
+      "source": "source/tyrant_sea_tongue.png"
+    },
+    {
+      "asset": "tyrant_water_curtain",
+      "identity": "tyrant_water_curtain",
+      "sequence": 5,
+      "name": "Водяна Завіса",
+      "concept": "Стіна синьої води поглинає палаючий снаряд і закриває союзника.",
+      "mode": "generate",
+      "source": "source/tyrant_water_curtain.png"
+    },
+    {
+      "asset": "tyrant_corrosive_deluge",
+      "identity": "tyrant_corrosive_deluge",
+      "sequence": 5,
+      "name": "Їдка Злива",
+      "concept": "Підвішена синя сфера тріскається й обрушує їдкі краплі на землю.",
+      "mode": "generate",
+      "source": "source/tyrant_corrosive_deluge.png"
+    },
+    {
+      "asset": "tyrant_slick_water",
+      "identity": "tyrant_slick_water",
+      "sequence": 5,
+      "name": "Слизька Вода",
+      "concept": "Стопа з’їжджає убік по плоскому дзеркальному розливу води.",
+      "mode": "generate",
+      "source": "source/tyrant_slick_water.png"
+    },
+    {
+      "asset": "tyrant_wind_binding",
+      "identity": "tyrant_wind_binding",
+      "sequence": 5,
+      "name": "Вітряні Пута",
+      "concept": "Замкнений спіральний вихор охоплює тіло й утримує стопи на землі.",
+      "mode": "generate",
+      "source": "source/tyrant_wind_binding.png"
+    }
+  ]
+}

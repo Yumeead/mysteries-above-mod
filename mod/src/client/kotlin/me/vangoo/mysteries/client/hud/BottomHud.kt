@@ -6,6 +6,7 @@ import me.vangoo.mysteries.client.ClientOptions
 import me.vangoo.mysteries.client.HudMode
 import me.vangoo.mysteries.client.beyonder.ClientAbilityState
 import me.vangoo.mysteries.client.render.UiTheme
+import me.vangoo.mysteries.client.render.BookAbilityIcons
 import me.vangoo.mysteries.client.screen.HudEditorScreen
 import me.vangoo.mysteries.modId
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
@@ -221,7 +222,8 @@ object BottomHud : HudElement {
 
     fun drawAbility(g: GuiGraphicsExtractor, box: HudBox, preview: Boolean = false) {
         val x = box.rect.x; val y = box.rect.y
-        frame(g, x, y, 20, 20)
+        val size = box.rect.width
+        frame(g, x, y, size, size)
         val entry = ClientAbilityState.selected?.let(ClientAbilityState::entry)
         val font = Minecraft.getInstance().font
         val name = entry?.name ?: Component.translatable("hud.mysteries_above.no_selection")
@@ -234,15 +236,17 @@ object BottomHud : HudElement {
         for ((index, line) in lines.withIndex())
             g.text(font, line, 0, index * 9, opaque(UiTheme.TEXT), true)
         g.pose().popMatrix()
-        if (entry == null) { symbol(g, "rune", x + 7, y + 6, 0x65533A); return }
-        g.item(entry.icon, x + 2, y + 2)
+        if (entry == null) { symbol(g, "rune", x + size / 2 - 3, y + size / 2 - 4, 0x65533A); return }
+        if (!BookAbilityIcons.drawTexture(g, entry.identity, x + 2, y + 2, size - 4)) {
+            g.item(entry.icon, x + (size - 16) / 2, y + (size - 16) / 2)
+        }
         g.nextStratum()
-        corners(g, x, y, 20, 20, accent())
+        corners(g, x, y, size, size, accent())
         val remaining = ClientAbilityState.remainingSeconds(entry.identity)
         if (remaining > 0) {
-            UiTheme.cooldownVeil(g, x + 2, y + 2, 16, 1f - ClientAbilityState.cooldownProgress(entry), 1f)
+            UiTheme.cooldownVeil(g, x + 2, y + 2, size - 4, 1f - ClientAbilityState.cooldownProgress(entry), 1f)
             val label = remaining.toString()
-            text(g, label, x + 10 - Minecraft.getInstance().font.width(label) / 2, y + 6)
+            text(g, label, x + size / 2 - font.width(label) / 2, y + (size - font.lineHeight) / 2)
         }
     }
 

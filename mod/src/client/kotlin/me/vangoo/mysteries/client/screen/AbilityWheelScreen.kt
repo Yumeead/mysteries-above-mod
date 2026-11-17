@@ -9,6 +9,7 @@ import me.vangoo.mysteries.client.beyonder.ClientMarionettes
 import me.vangoo.mysteries.client.hud.SpiritualityHud
 import me.vangoo.mysteries.client.input.ModKeys
 import me.vangoo.mysteries.client.render.UiTheme
+import me.vangoo.mysteries.client.render.BookAbilityIcons
 import me.vangoo.mysteries.client.render.WheelLayout
 import me.vangoo.mysteries.client.net.sendToServer
 import me.vangoo.mysteries.net.ModChannels
@@ -756,7 +757,9 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
             val a = if (card.dim) alpha * DIM else alpha
             grown(graphics, card, if (index == hovered) grow else 1f) {
                 skin.body(graphics, x, y, a)
-                graphics.item(card.entry.icon, x + ICON_INSET, y + ICON_INSET)
+                if (!BookAbilityIcons.drawTexture(graphics, card.entry.identity, x + ICON_INSET, y + ICON_INSET, ICON, a)) {
+                    graphics.item(card.entry.icon, x + (CARD - 16) / 2, y + (CARD - 16) / 2)
+                }
             }
         }
 
@@ -945,9 +948,12 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
         val left = centerX + x
         val top = centerY + y
         ClientOptions.wheelSkin.body(graphics, left, top, alpha * if (switchHover) 1f else SWITCH_IDLE)
-        val icon = if (tab == Tab.ABILITIES) THREAD_ICON else
-            (ClientAbilityState.entries.firstOrNull { it.identity == ClientAbilityState.selected } ?: ClientAbilityState.entries.firstOrNull())?.icon
-        icon?.let { graphics.item(it, left + ICON_INSET, top + ICON_INSET) }
+        if (tab == Tab.ABILITIES) graphics.item(THREAD_ICON, left + (CARD - 16) / 2, top + (CARD - 16) / 2)
+        else (ClientAbilityState.entries.firstOrNull { it.identity == ClientAbilityState.selected } ?: ClientAbilityState.entries.firstOrNull())?.let { entry ->
+            if (!BookAbilityIcons.drawTexture(graphics, entry.identity, left + ICON_INSET, top + ICON_INSET, ICON, alpha)) {
+                graphics.item(entry.icon, left + (CARD - 16) / 2, top + (CARD - 16) / 2)
+            }
+        }
     }
 
     /** Over the icons: the pixel arrow pointing out, and the rest filling under the card until it turns. */
@@ -1062,8 +1068,8 @@ class AbilityWheelScreen(private val key: KeyMapping) : Screen(Component.transla
     }
 
     private companion object {
-        const val CARD = 24
-        const val ICON = 16
+        const val CARD = WheelLayout.CARD
+        const val ICON = BookAbilityIcons.SIZE
         const val ICON_INSET = (CARD - ICON) / 2
         const val DIM = 0.45f
         const val CAPTION_WIDTH = 200

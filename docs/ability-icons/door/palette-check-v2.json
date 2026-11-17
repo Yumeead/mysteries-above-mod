@@ -1,0 +1,103 @@
+{
+  "method": "Inner 30x30 pixels at 32x32; HSV saturation >= 0.18 and value >= 0.3; cyan hue 160-215 degrees. This checks color area; visual review checks readability.",
+  "icons": [
+    {
+      "identity": "door_opening",
+      "cyan_pixels": 363,
+      "secondary_pixels": 66,
+      "cyan_share": 0.846,
+      "changed_pixels": 1014
+    },
+    {
+      "identity": "door_flash",
+      "cyan_pixels": 426,
+      "secondary_pixels": 28,
+      "cyan_share": 0.938,
+      "changed_pixels": 1022
+    },
+    {
+      "identity": "door_escape_trick",
+      "cyan_pixels": 332,
+      "secondary_pixels": 50,
+      "cyan_share": 0.869,
+      "changed_pixels": 1018
+    },
+    {
+      "identity": "door_burning",
+      "cyan_pixels": 268,
+      "secondary_pixels": 65,
+      "cyan_share": 0.805,
+      "changed_pixels": 1021
+    },
+    {
+      "identity": "door_electric_shock",
+      "cyan_pixels": 264,
+      "secondary_pixels": 40,
+      "cyan_share": 0.868,
+      "changed_pixels": 1018
+    },
+    {
+      "identity": "door_divination_arts",
+      "cyan_pixels": 218,
+      "secondary_pixels": 79,
+      "cyan_share": 0.734,
+      "changed_pixels": 1022
+    },
+    {
+      "identity": "door_spiritual_vision",
+      "cyan_pixels": 257,
+      "secondary_pixels": 10,
+      "cyan_share": 0.963,
+      "changed_pixels": 1015
+    },
+    {
+      "identity": "door_spiritual_intuition",
+      "cyan_pixels": 121,
+      "secondary_pixels": 15,
+      "cyan_share": 0.89,
+      "changed_pixels": 1019
+    },
+    {
+      "identity": "door_anti_divination",
+      "cyan_pixels": 218,
+      "secondary_pixels": 51,
+      "cyan_share": 0.81,
+      "changed_pixels": 1021
+    },
+    {
+      "identity": "door_record",
+      "cyan_pixels": 423,
+      "secondary_pixels": 53,
+      "cyan_share": 0.889,
+      "changed_pixels": 1023
+    },
+    {
+      "identity": "door_decrypt_patterns",
+      "cyan_pixels": 207,
+      "secondary_pixels": 53,
+      "cyan_share": 0.796,
+      "changed_pixels": 1023
+    },
+    {
+      "identity": "door_physical_enhancement",
+      "cyan_pixels": 284,
+      "secondary_pixels": 72,
+      "cyan_share": 0.798,
+      "changed_pixels": 1015
+    },
+    {
+      "identity": "door_travellers_door",
+      "cyan_pixels": 403,
+      "secondary_pixels": 27,
+      "cyan_share": 0.937,
+      "changed_pixels": 1015
+    },
+    {
+      "identity": "door_blink",
+      "cyan_pixels": 353,
+      "secondary_pixels": 17,
+      "cyan_share": 0.954,
+      "changed_pixels": 1020
+    }
+  ]
+}

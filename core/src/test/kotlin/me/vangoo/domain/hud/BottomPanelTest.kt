@@ -56,6 +56,8 @@ class BottomPanelTest {
         for (width in listOf(320,427,480,640)) for (height in listOf(180,240,360)) {
             for (left in listOf(false,true)) {
                 val ability=BottomPanel.ability(width,height,left)
+                assertEquals(28,ability.width)
+                assertEquals(28,ability.height)
                 val orb=BottomPanel.orb(width,height,20,true)
                 val auxiliary=BottomPanel.auxiliary(width,height,ability)
                 assertEquals(62,auxiliary.width)

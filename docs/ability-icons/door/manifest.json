@@ -1,0 +1,121 @@
+{
+  "pathway": "Door",
+  "palette": "#6AE6F7",
+  "size": 32,
+  "icons": [
+    {
+      "identity": "door_opening",
+      "asset": "door_opening",
+      "name": "Відкриття дверей",
+      "sequence": 9,
+      "source": "docs/ability-icons/door/source-v2/door_opening.png",
+      "previous_source": "docs/ability-icons/door/source/door_opening.png"
+    },
+    {
+      "identity": "door_flash",
+      "asset": "door_flash",
+      "name": "Спалах",
+      "sequence": 8,
+      "source": "docs/ability-icons/door/source-v2/door_flash.png",
+      "previous_source": "docs/ability-icons/door/source/door_flash.png"
+    },
+    {
+      "identity": "door_escape_trick",
+      "asset": "door_escape_trick",
+      "name": "Трюк зі зникненням",
+      "sequence": 8,
+      "source": "docs/ability-icons/door/source-v2/door_escape_trick.png",
+      "previous_source": "docs/ability-icons/door/source/door_escape_trick.png"
+    },
+    {
+      "identity": "door_burning",
+      "asset": "door_burning",
+      "name": "Підпал",
+      "sequence": 8,
+      "source": "docs/ability-icons/door/source-v2/door_burning.png",
+      "previous_source": "docs/ability-icons/door/source/door_burning.png"
+    },
+    {
+      "identity": "door_electric_shock",
+      "asset": "door_electric_shock",
+      "name": "Електричний розряд",
+      "sequence": 8,
+      "source": "docs/ability-icons/door/source-v2/door_electric_shock.png",
+      "previous_source": "docs/ability-icons/door/source/door_electric_shock.png"
+    },
+    {
+      "identity": "door_divination_arts",
+      "asset": "door_divination_arts",
+      "name": "Мистецтво ворожіння",
+      "sequence": 7,
+      "source": "docs/ability-icons/door/source-v2/door_divination_arts.png",
+      "previous_source": "docs/ability-icons/door/source/door_divination_arts.png"
+    },
+    {
+      "identity": "door_spiritual_vision",
+      "asset": "door_spiritual_vision",
+      "name": "Духовне бачення",
+      "sequence": 7,
+      "source": "docs/ability-icons/door/source-v2/door_spiritual_vision.png",
+      "previous_source": "docs/ability-icons/door/source/door_spiritual_vision.png"
+    },
+    {
+      "identity": "door_spiritual_intuition",
+      "asset": "door_spiritual_intuition",
+      "name": "Духовна інтуїція",
+      "sequence": 7,
+      "source": "docs/ability-icons/door/source-v2/door_spiritual_intuition.png",
+      "previous_source": "docs/ability-icons/door/source/door_spiritual_intuition.png"
+    },
+    {
+      "identity": "door_anti_divination",
+      "asset": "door_anti_divination",
+      "name": "Протидія ворожінню",
+      "sequence": 7,
+      "source": "docs/ability-icons/door/source-v2/door_anti_divination.png",
+      "previous_source": "docs/ability-icons/door/source/door_anti_divination.png"
+    },
+    {
+      "identity": "door_record",
+      "asset": "door_record",
+      "name": "Запис здібності",
+      "sequence": 6,
+      "source": "docs/ability-icons/door/source-v2/door_record.png",
+      "previous_source": "docs/ability-icons/door/source/door_record.png"
+    },
+    {
+      "identity": "door_decrypt_patterns",
+      "asset": "door_decrypt_patterns",
+      "name": "Розшифрування патернів",
+      "sequence": 6,
+      "source": "docs/ability-icons/door/source-v2/door_decrypt_patterns.png",
+      "previous_source": "docs/ability-icons/door/source/door_decrypt_patterns.png"
+    },
+    {
+      "identity": "door_physical_enhancement",
+      "asset": "door_physical_enhancement",
+      "name": "Фізичні посилення",
+      "sequence": 6,
+      "source": "docs/ability-icons/door/source-v2/door_physical_enhancement.png",
+      "previous_source": "docs/ability-icons/door/source/door_physical_enhancement.png"
+    },
+    {
+      "identity": "door_travellers_door",
+      "asset": "door_travellers_door",
+      "name": "Двері Мандрівника",
+      "sequence": 5,
+      "source": "docs/ability-icons/door/source-v2/door_travellers_door.png",
+      "previous_source": "docs/ability-icons/door/source/door_travellers_door.png"
+    },
+    {
+      "identity": "door_blink",
+      "asset": "door_blink",
+      "name": "Миттєвий крок",
+      "sequence": 5,
+      "source": "docs/ability-icons/door/source-v2/door_blink.png",
+      "previous_source": "docs/ability-icons/source/door_blink.png"
+    }
+  ],
+  "version": 2,
+  "secondary_colors": "Mechanism-specific warm, violet, jade and natural-material accents; cyan remains dominant."
+}

@@ -1,0 +1,97 @@
+{
+  "pathway": "WhiteTower",
+  "palette": "#7686E1",
+  "size": 32,
+  "icons": [
+    {
+      "asset": "whitetower_ritual_magic",
+      "identity": "common_ritual_magic",
+      "sequence": 9,
+      "name": "Ритуальна магія",
+      "concept": "Чотири свічки оточують приношення на вівтарі; над ним підіймається барвінкове світло обряду.",
+      "mode": "generate",
+      "source": "source/whitetower_ritual_magic.png"
+    },
+    {
+      "asset": "whitetower_enhanced_mind",
+      "identity": "whitetower_enhanced_mind",
+      "sequence": 9,
+      "name": "Загострений розум",
+      "concept": "Профіль читача розпізнає внутрішню структуру каменю й живої цілі.",
+      "mode": "generate",
+      "source": "source/whitetower_enhanced_mind.png"
+    },
+    {
+      "asset": "whitetower_deduction",
+      "identity": "whitetower_deduction",
+      "sequence": 8,
+      "name": "Дедукція",
+      "concept": "Кілька слідів послідовних ударів сходяться у знайдену вразливу точку.",
+      "mode": "generate",
+      "source": "source/whitetower_deduction.png"
+    },
+    {
+      "asset": "whitetower_combat_proficiency",
+      "identity": "common_combat_proficiency",
+      "sequence": 7,
+      "name": "Бойова майстерність",
+      "concept": "Точний хват меча зупиняє чужий клинок біля гарди.",
+      "mode": "generate",
+      "source": "source/whitetower_combat_proficiency.png"
+    },
+    {
+      "asset": "whitetower_agility",
+      "identity": "whitetower_agility",
+      "sequence": 7,
+      "name": "Спритність",
+      "concept": "Легка постать перестрибує розрив між уступами, залишаючи короткий світлий слід.",
+      "mode": "generate",
+      "source": "source/whitetower_agility.png"
+    },
+    {
+      "asset": "whitetower_physical_enhancement",
+      "identity": "whitetower_physical_enhancement",
+      "sequence": 7,
+      "name": "Фізичні посилення",
+      "concept": "Міцні передпліччя читача підіймають важкий фоліант.",
+      "mode": "generate",
+      "source": "source/whitetower_physical_enhancement.png"
+    },
+    {
+      "asset": "whitetower_crime_reconstruction",
+      "identity": "whitetower_crime_reconstruction",
+      "sequence": 7,
+      "name": "Реконструкція",
+      "concept": "Два примарні учасники минулого бою з’єднані відновленою траєкторією удару.",
+      "mode": "generate",
+      "source": "source/whitetower_crime_reconstruction.png"
+    },
+    {
+      "asset": "whitetower_analysis",
+      "identity": "whitetower_analysis",
+      "sequence": 6,
+      "name": "Аналіз",
+      "concept": "Чужа магічна сила розбирається на складники й тимчасово відтворюється на долоні.",
+      "mode": "generate",
+      "source": "source/whitetower_analysis.png"
+    },
+    {
+      "asset": "whitetower_spellcasting",
+      "identity": "whitetower_spellcasting",
+      "sequence": 5,
+      "name": "Складене заклинання",
+      "concept": "Розкрита книга складає геометричні фрагменти у спрямований магічний промінь.",
+      "mode": "generate",
+      "source": "source/whitetower_spellcasting.png"
+    },
+    {
+      "asset": "whitetower_mirror_curse",
+      "identity": "whitetower_mirror_curse",
+      "sequence": 5,
+      "name": "Дзеркальне прокляття",
+      "concept": "Латунне дзеркало відбиває постать із тріщинами давніх ран.",
+      "mode": "generate",
+      "source": "source/whitetower_mirror_curse.png"
+    }
+  ]
+}

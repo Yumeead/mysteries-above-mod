@@ -21,11 +21,12 @@ import kotlin.math.sqrt
 object WheelLayout {
 
     const val PAGE_SIZE = 12
+    const val CARD = 30
 
     /** Up to eight cards fit the small ring; nine to twelve need it wider. */
     private const val SMALL_RING = 8
     const val RADIUS = 80
-    const val WIDE_RADIUS = 98
+    const val WIDE_RADIUS = 90
 
     fun pages(count: Int): Int = if (count <= 0) 1 else (count + PAGE_SIZE - 1) / PAGE_SIZE
 
@@ -99,7 +100,7 @@ object WheelLayout {
 
     /** One label line; how far past the ring the band runs, and how far past the band the labels start. */
     const val ROW = 11
-    const val BAND_GAP = 19
+    const val BAND_GAP = 24
     const val LABEL_GAP = 5
 
     /** The band's radius: clear of every card, a hovered (grown) one's corners included. */

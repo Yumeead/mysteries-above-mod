@@ -1,0 +1,10 @@
+{
+  "generator": "built-in image_gen",
+  "icons": [
+    {
+      "asset": "death_door_to_the_underworld",
+      "input": "previous/source/death_door_to_the_underworld.png",
+      "prompt": "EDIT TARGET: attached Death pathway Door to the Underworld icon. Make ONE tightly constrained correction: the neutral silver outer square bevel FRAME is currently too thin and vanishes on nearest-neighbor downsampling to 32x32. Preserve the entire interior composition, colors, dark gate, two grasping spectral hands, swallowed silhouette, mist, shape and pixel-art style. The ONLY change is a fully continuous, clearly readable SILVER FRAME band around all four canvas edges, exactly ONE LOGICAL PIXEL wide on a 32x32 grid (about 3.125 percent of full canvas width per edge, roughly 40 actual pixels on a 1254px source). Top and left band neutral pale silver #AAAAB4, bottom and right charcoal silver #4B4C58. The colored frame band must start at the absolute canvas edges; no outer black margin, no hairline black on top of frame, no empty presentation border. One narrow dark inset is allowed INSIDE the silver band. Fit the unchanged interior art within it; do not crop the hands. Flat plain functional bevel, no decorations or ornate corners, no green/gold frame. On all four sides the border must survive a 32x32 export as one pixel, matching the rest of this ability icon set. Keep all other colors and the pixel structure exactly, no text, symbols, new objects, blur or bloom. Deliver one square individual icon PNG."
+    }
+  ]
+}

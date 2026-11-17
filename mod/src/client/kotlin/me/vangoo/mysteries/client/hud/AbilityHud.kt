@@ -9,6 +9,7 @@ import me.vangoo.mysteries.client.HudMode
 import me.vangoo.mysteries.client.beyonder.ClientAbilityState
 import me.vangoo.mysteries.client.input.ModKeys
 import me.vangoo.mysteries.client.render.UiTheme
+import me.vangoo.mysteries.client.render.BookAbilityIcons
 import me.vangoo.mysteries.modId
 import me.vangoo.mysteries.net.payload.AbilityRosterPayload
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
@@ -267,7 +268,11 @@ object AbilityHud : HudElement {
         val left = x + PADDING
 
         UiTheme.panel(graphics, x, y, panel.width, panel.height, alpha)
-        panel.icon?.let { graphics.item(it, left, y + PADDING) }
+        panel.icon?.let {
+            if (!BookAbilityIcons.drawTexture(graphics, panel.entry?.identity.orEmpty(), left, y + PADDING, ICON, alpha)) {
+                graphics.item(it, left + (ICON - 16) / 2, y + PADDING + (ICON - 16) / 2)
+            }
+        }
 
         // Next comes everything that must lie on top of the icon. In retained-mode, items go in
         // a separate pass, so without a new stratum the cooldown veil would end up beneath them.
@@ -279,7 +284,7 @@ object AbilityHud : HudElement {
             val remaining = panel.entry?.let { 1f - ClientAbilityState.cooldownProgress(it) } ?: .55f
             UiTheme.cooldownVeil(graphics, left, y + PADDING, ICON, remaining, alpha)
             panel.cooldownLabel?.let {
-                graphics.centeredText(font, it, left + ICON / 2, y + PADDING + 4, UiTheme.argb(UiTheme.TEXT, alpha))
+                graphics.centeredText(font, it, left + ICON / 2, y + PADDING + (ICON - font.lineHeight) / 2, UiTheme.argb(UiTheme.TEXT, alpha))
             }
         }
 
@@ -302,12 +307,11 @@ object AbilityHud : HudElement {
     }
 
     private const val PADDING = 4
-    private const val ICON = 16
+    private const val ICON = BookAbilityIcons.SIZE
     private const val GAP = 4
     private const val MARKER_GAP = 3
 
-    /** The icon (16) plus the details line under it. */
-    private const val ROW_HEIGHT = 20
+    private const val ROW_HEIGHT = ICON + 4
     private const val DETAIL_OFFSET = 9
 
     /** 250 ms to appear and to fade; 5 s of quiet and AUTO hides the panel. */

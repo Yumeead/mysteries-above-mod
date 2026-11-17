@@ -290,7 +290,7 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
                 (query.isEmpty() || entry.name.string.lowercase().contains(query) || entry.description.string.lowercase().contains(query))
         }
         if (shown.none { it.identity == chosen }) chosen = shown.firstOrNull()?.identity
-        val width = lw - 8 - 24 - 34
+        val width = lw - 8 - (ICON + 9) - 34
         rows = shown.withIndex().flatMap { (i, entry) ->
             val heading = if (i == 0 || shown[i - 1].origin?.level != entry.origin?.level) {
                 listOf(Row(null, null, fit(originLine(entry.origin, pathwayRgb), lw - 12)))
@@ -310,9 +310,9 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
             return
         }
         val textW = rw - 16
-        detailName = fit(entry.name.copy().withColor(accent), rw - 40)
-        detailOrigin = fit(originLine(entry.origin, accent), rw - 40)
-        detailType = fit(tr("type.${entry.type.name.lowercase()}").withColor(UiTheme.MUTED), textW - 12)
+        detailName = fit(entry.name.copy().withColor(accent), rw - DETAIL_ICON - 24)
+        detailOrigin = fit(originLine(entry.origin, accent), rw - DETAIL_ICON - 24)
+        detailType = fit(tr("type.${entry.type.name.lowercase()}").withColor(UiTheme.MUTED), rw - DETAIL_ICON - 28)
         detailKey = fit(
             if (entry.type == AbilityType.PERMANENT_PASSIVE) tr("always_on").withColor(UiTheme.MUTED)
             else tr("key", ModKeys.hotkeyLabel(entry.identity) ?: tr("no_key")).withColor(UiTheme.TEXT),
@@ -326,7 +326,7 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
     /** Every bindable target of the active group: the abilities and, under each, its modes. */
     private fun rebuildKeys() {
         val bindable = ModKeys.visible(group).filter { it.type != AbilityType.PERMANENT_PASSIVE }
-        val nameW = cw - 16 - 24 - KEY_BADGE
+        val nameW = cw - 16 - (ICON + 9) - KEY_BADGE
         rows = bindable.flatMap { entry ->
             listOf(Row(entry, null, fit(entry.name, nameW))) + entry.modes.mapIndexed { index, mode ->
                 val branch = if (index == entry.modes.lastIndex) "└ " else "├ "
@@ -371,7 +371,7 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
             val count = if (it.isAll) entries.size else it.abilities!!.count { id -> entries.any { e -> e.identity == id } }
             FormattedCharSequence.forward("$count", net.minecraft.network.chat.Style.EMPTY)
         }
-        val nameW = rw - 16 - 32
+        val nameW = rw - 16 - (ICON + 17)
         rows = entries.map { Row(it, null, fit(it.name, nameW)) }
         scroll = scroll.coerceIn(0, (rows.size - groupVisible()).coerceAtLeast(0))
     }
@@ -742,15 +742,15 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
             val entry = row.entry ?: return@forEachIndexed
             if (entry.identity == chosen) sprite(graphics, ROW_ON, cx + 3, y, lw - 6 - 4, ROW - 1)
             else if (inside(mouseX, mouseY, cx + 3, y, lw - 10, ROW - 1)) graphics.outline(cx + 3, y, lw - 10, ROW - 1, UiTheme.argb(UiTheme.ACCENT_DEEP, 1f))
-            BookAbilityIcons.draw(graphics, entry.identity, cx + 6, y + 1, if (entry.identity == chosen) accent else GrimoireSkin.GOLD)
+            BookAbilityIcons.draw(graphics, entry.identity, cx + 6, y + 2, if (entry.identity == chosen) accent else GrimoireSkin.GOLD)
         }
         if (rows.isEmpty()) graphics.centeredText(font, tr(if (entries.isEmpty()) "no_abilities" else "nothing_found"), cx + lw / 2, top + 10, UiTheme.argb(UiTheme.MUTED, 1f))
         scrollbar(graphics, cx + lw - 5, top, visibleRows * ROW, rows.size, visibleRows, scroll)
 
         val entry = chosenEntry()
         if (entry != null) {
-            sprite(graphics, SLOT, rx + 6, cy + 6, 20, 20)
-            BookAbilityIcons.draw(graphics, entry.identity, rx + 8, cy + 8, accent)
+            sprite(graphics, SLOT, rx + 6, cy + 6, DETAIL_ICON + 4, DETAIL_ICON + 4)
+            BookAbilityIcons.draw(graphics, entry.identity, rx + 8, cy + 8, accent, DETAIL_ICON)
         }
         graphics.nextStratum()
 
@@ -758,30 +758,30 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
             val y = top + i * ROW
             val e = row.entry
             if (e == null) {
-                graphics.text(font, row.text, cx + 6, y + 6, -1)
+                graphics.text(font, row.text, cx + 6, y + (ROW - font.lineHeight) / 2, -1)
                 val tw = font.width(row.text)
-                UiTheme.hairline(graphics, cx + 10 + tw, y + 10, lw - 24 - tw, accent, 0.4f)
+                UiTheme.hairline(graphics, cx + 10 + tw, y + ROW / 2, lw - 24 - tw, accent, 0.4f)
                 return@forEachIndexed
             }
-            graphics.text(font, row.text, cx + 26, y + 5, UiTheme.argb(if (e.identity == chosen) UiTheme.TEXT else UiTheme.MUTED, 1f))
+            graphics.text(font, row.text, cx + ICON + 11, y + (ROW - font.lineHeight) / 2, UiTheme.argb(if (e.identity == chosen) UiTheme.TEXT else UiTheme.MUTED, 1f))
             var rx0 = cx + lw - 10
             if (row.right != FormattedCharSequence.EMPTY) {
                 rx0 -= font.width(row.right)
-                graphics.text(font, row.right, rx0, y + 5, UiTheme.argb(row.rightColor, 1f))
+                graphics.text(font, row.right, rx0, y + (ROW - font.lineHeight) / 2, UiTheme.argb(row.rightColor, 1f))
                 rx0 -= 2
             }
             val live = row.rightIcon
-            if (live != null) sprite(graphics, icon(live), rx0 - 9, y + 4, 9, 9, row.rightColor)
+            if (live != null) sprite(graphics, icon(live), rx0 - 9, y + (ROW - 9) / 2, 9, 9, row.rightColor)
         }
 
         if (entry == null) return
         val x0 = rx + 8
-        graphics.text(font, detailName, rx + 32, cy + 7, -1)
-        graphics.text(font, detailOrigin, rx + 32, cy + 17, -1)
-        var y = cy + 31
-        sprite(graphics, icon(typeIcon(entry.type)), x0, y, 9, 9, accent)
-        graphics.text(font, detailType, x0 + 12, y + 1, -1)
-        y += 12
+        val headerX = rx + DETAIL_ICON + 16
+        graphics.text(font, detailName, headerX, cy + 7, -1)
+        graphics.text(font, detailOrigin, headerX, cy + 18, -1)
+        sprite(graphics, icon(typeIcon(entry.type)), headerX, cy + 31, 9, 9, accent)
+        graphics.text(font, detailType, headerX + 12, cy + 32, -1)
+        var y = cy + DETAIL_ICON + 16
         if (entry.cost > 0) {
             graphics.text(font, tr("cost", entry.cost), x0, y, UiTheme.argb(if (ClientAbilityState.canAfford(entry)) UiTheme.MUTED else UiTheme.CRITICAL, 1f))
             y += LINE
@@ -838,7 +838,7 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
                 inside(mouseX, mouseY, cx + 4, y, cw - 8, ROW - 1) -> graphics.outline(cx + 4, y, cw - 8, ROW - 1, UiTheme.argb(UiTheme.ACCENT_DEEP, 1f))
             }
             sprite(graphics, INSET, badgeX, y + 2, KEY_BADGE, ROW - 5)
-            if (row.mode == null) BookAbilityIcons.draw(graphics, row.entry.identity, cx + 7, y + 1, GrimoireSkin.GOLD)
+            if (row.mode == null) BookAbilityIcons.draw(graphics, row.entry.identity, cx + 7, y + 2, GrimoireSkin.GOLD)
         }
         if (rows.isEmpty()) graphics.centeredText(font, tr("keys_empty"), cx + cw / 2, top + 10, UiTheme.argb(UiTheme.MUTED, 1f))
         scrollbar(graphics, cx + cw - 5, top, visibleRows * ROW, rows.size, visibleRows, scroll)
@@ -846,13 +846,13 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
 
         shown.forEachIndexed { i, row ->
             val y = top + i * ROW
-            val x = if (row.mode == null) cx + 28 else cx + 36
-            graphics.text(font, row.text, x, y + 5, UiTheme.argb(if (row.mode == null) UiTheme.TEXT else UiTheme.MUTED, 1f))
+            val x = if (row.mode == null) cx + ICON + 13 else cx + ICON + 21
+            graphics.text(font, row.text, x, y + (ROW - font.lineHeight) / 2, UiTheme.argb(if (row.mode == null) UiTheme.TEXT else UiTheme.MUTED, 1f))
             val bw = font.width(row.right)
             val conflictIcon = row.conflict != null
             val textX = badgeX + (KEY_BADGE - bw + if (conflictIcon) 11 else 0) / 2
-            if (conflictIcon) sprite(graphics, icon("warn"), textX - 12, y + 4, 9, 9, UiTheme.CRITICAL)
-            graphics.text(font, row.right, textX, y + 5, UiTheme.argb(row.rightColor, 1f))
+            if (conflictIcon) sprite(graphics, icon("warn"), textX - 12, y + (ROW - 9) / 2, 9, 9, UiTheme.CRITICAL)
+            graphics.text(font, row.right, textX, y + (ROW - font.lineHeight) / 2, UiTheme.argb(row.rightColor, 1f))
         }
 
         // The group these keys belong to, and the footer: hint, capture or clash.
@@ -914,16 +914,16 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
         shown.forEachIndexed { i, row ->
             val y = top + i * ROW
             if (inside(mouseX, mouseY, rx + 4, y, rw - 8, ROW - 1)) graphics.outline(rx + 4, y, rw - 8, ROW - 1, UiTheme.argb(UiTheme.ACCENT_DEEP, 1f))
-            sprite(graphics, INSET, rx + 7, y + 4, 10, 10)
-            BookAbilityIcons.draw(graphics, row.entry!!.identity, rx + 20, y + 1, GrimoireSkin.GOLD)
+            sprite(graphics, INSET, rx + 7, y + (ROW - 10) / 2, 10, 10)
+            BookAbilityIcons.draw(graphics, row.entry!!.identity, rx + 20, y + 2, GrimoireSkin.GOLD)
         }
         scrollbar(graphics, rx + rw - 5, top, groupVisible() * ROW, rows.size, groupVisible(), scroll)
         graphics.nextStratum()
         shown.forEachIndexed { i, row ->
             val y = top + i * ROW
             val member = group.contains(row.entry!!.identity)
-            if (member) sprite(graphics, icon("check"), rx + 7, y + 4, 9, 9, accent)
-            graphics.text(font, row.text, rx + 40, y + 5, UiTheme.argb(if (member) UiTheme.TEXT else UiTheme.MUTED, 1f))
+            if (member) sprite(graphics, icon("check"), rx + 7, y + (ROW - 10) / 2, 9, 9, accent)
+            graphics.text(font, row.text, rx + ICON + 25, y + (ROW - font.lineHeight) / 2, UiTheme.argb(if (member) UiTheme.TEXT else UiTheme.MUTED, 1f))
         }
     }
 
@@ -969,7 +969,7 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
     private fun modesTop(): Int {
         val entry = chosenEntry() ?: return 0
         val costs = listOf(entry.cost, entry.upkeep, entry.cooldownSeconds).count { it > 0 }
-        return cy + 31 + 12 + costs * LINE + 12
+        return cy + DETAIL_ICON + 16 + costs * LINE + 12
     }
     private fun keyLineY() = cy + ch - 15
     private fun detailVisibleFrom(y: Int) = ((keyLineY() - 6 - y) / LINE).coerceAtLeast(1)
@@ -1019,7 +1019,9 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
         private const val SPINE = 12
         private const val HEADER = 60
         private const val GAP = 6
-        private const val ROW = 18
+        private const val ICON = BookAbilityIcons.SIZE
+        private const val DETAIL_ICON = 32
+        private const val ROW = ICON + 4
         private const val LINE = 10
         private const val MODE_ROW = 12
         private const val GROUP_ROW = 18
