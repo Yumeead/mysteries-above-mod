@@ -8,7 +8,7 @@ import me.vangoo.mysteries.beyonder.AbilityRequests
 import me.vangoo.mysteries.beyonder.BeyonderStore
 import me.vangoo.mysteries.pathways.fool.abilities.PaperDolls
 import me.vangoo.mysteries.pathways.sun.Oaths
-import me.vangoo.mysteries.pathways.sun.abilities.NightVision
+import me.vangoo.mysteries.effect.Eyes
 import me.vangoo.mysteries.effect.ModParticles
 import me.vangoo.mysteries.effect.ModSounds
 import me.vangoo.mysteries.entity.ModEntities
@@ -97,7 +97,7 @@ object MysteriesAboveMod : ModInitializer {
         // Sun's Oaths are debts the world holds: paid by hand, broken on the wall clock.
         Oaths.install()
         // The suns in a Seeker's eyes are synced to every client, so both sides must know the attachment.
-        NightVision.install()
+        Eyes.install()
 
         // Last on purpose: the handlers above still change a Beyonder on the way out (a
         // Marionettist leaving their puppet), and the save must see the result.
