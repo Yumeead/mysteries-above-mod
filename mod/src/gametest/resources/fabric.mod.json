@@ -72,6 +72,26 @@
       {
         "adapter": "kotlin",
         "value": "me.vangoo.mysteries.gametest.DivinationClientGameTest"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.gametest.JusticiarProbeClientGameTest"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.gametest.JusticiarClientGameTest"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.gametest.JusticiarVerdictClientGameTest"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.gametest.JusticiarProhibitionClientGameTest"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.gametest.JusticiarPunishmentClientGameTest"
       }
     ]
   },
