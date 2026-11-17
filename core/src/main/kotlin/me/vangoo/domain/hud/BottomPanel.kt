@@ -3,6 +3,7 @@ package me.vangoo.domain.hud
 /** Geometry shared by rendering and the editor; hotbar items never move. */
 object BottomPanel {
     const val WIDTH = 270
+    const val ABILITY_SIZE = 28
 
     fun healthBar(settings: HudSettings, maximum: Float): Boolean =
         settings.health == HealthStyle.BAR || settings.compactHealthAbove40 && maximum > 40
@@ -15,12 +16,13 @@ object BottomPanel {
         (21 - textWidth / 2).coerceIn(1 - originX, screenWidth - originX - textWidth - 1)
 
     fun ability(width: Int, height: Int, leftHanded: Boolean): HudRect {
-        val preferred = width / 2 + if (leftHanded) -223 else 116
+        val preferred = width / 2 + if (leftHanded) -231 else 116
         val beside = if (preferred >= 1) preferred else width / 2 + 123
-        val fits = beside + 86 <= width - 1
+        val groupWidth = ABILITY_SIZE + 4 + 62
+        val fits = beside + groupWidth <= width - 1
         // Narrow viewports need the whole group above the hotbar instead of across its slots.
-        return HudRect(if (fits) beside else width - 87, height - if (fits) 21 else 80,
-            20, 20).clamped(width, height)
+        return HudRect(if (fits) beside else width - groupWidth - 1, height - if (fits) ABILITY_SIZE + 1 else 80,
+            ABILITY_SIZE, ABILITY_SIZE).clamped(width, height)
     }
 
     fun auxiliary(width: Int, height: Int, slot: HudRect = ability(width, height, false)): HudRect =

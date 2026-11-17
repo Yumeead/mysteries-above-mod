@@ -10,6 +10,22 @@ class WheelLayoutTest {
 
     private val dead = 0.28f
 
+    @Test
+    fun enlargedCardsAndTheirPricesFitWithoutTouchingAtTwelveAbilities() {
+        val card = WheelLayout.CARD
+        val points = (0 until WheelLayout.PAGE_SIZE).map { WheelLayout.offset(it, WheelLayout.PAGE_SIZE) }
+        val hoveredReach = card * 1.08 / 2 + 1.08 + card / 2.0
+        for ((i, point) in points.withIndex()) {
+            val (x, y) = point
+            assertTrue(120 + y - card / 2 >= 0)
+            assertTrue(120 + y + card / 2 + 2 + 11 <= 240, "price clipped at $i")
+            for (other in points.drop(i + 1)) {
+                assertTrue(kotlin.math.abs(x - other[0]) > hoveredReach || kotlin.math.abs(y - other[1]) > hoveredReach,
+                    "hovered cards overlap at $i")
+            }
+        }
+    }
+
     /** A cursor at [degrees] clockwise from straight up, well outside the dead zone. */
     private fun at(degrees: Double, onPage: Int): Int {
         val r = Math.toRadians(degrees)

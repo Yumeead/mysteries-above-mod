@@ -53,7 +53,7 @@ enum class WheelSkin {
     /** C — tarot: a portrait card inside the same square cell, the pathway emblem as its suit. */
     TAROT {
         override val left: Int = 3
-        override val right: Int get() = 21
+        override val right: Int get() = CARD - 3
 
         override fun ring(graphics: GuiGraphicsExtractor, cx: Int, cy: Int, radius: Int, count: Int, alpha: Float, accent: Int) {
             between(radius, count).forEach { (x, y) -> star(graphics, cx + x, cy + y, UiTheme.argb(UiTheme.ACCENT, alpha * 0.45f)) }
@@ -66,15 +66,15 @@ enum class WheelSkin {
 
         override fun selectedMark(graphics: GuiGraphicsExtractor, x: Int, y: Int, color: Int) {
             // The crest in the top band lights up.
-            graphics.fill(x + 10, y + 1, x + 14, y + 3, color)
+            graphics.fill(x + CARD / 2 - 2, y + 1, x + CARD / 2 + 2, y + 3, color)
         }
 
         override fun emblem(graphics: GuiGraphicsExtractor, x: Int, y: Int, pathway: String?, rgb: Int, alpha: Float) {
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, emblemOf(pathway), x + 10, y + 19, 5, 5, UiTheme.argb(rgb, alpha))
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, emblemOf(pathway), x + CARD / 2 - 1, y + CARD - 3, 3, 3, UiTheme.argb(rgb, alpha))
         }
     };
 
-    /** The visible card's horizontal extent within the 24-pixel cell: the tarot card is narrower. */
+    /** The visible card's horizontal extent within the square cell: the tarot card is narrower. */
     open val left: Int = 0
     open val right: Int get() = CARD
 
@@ -95,7 +95,7 @@ enum class WheelSkin {
 
     /** A short bar in the gap under the icon. */
     protected open fun selectedMark(graphics: GuiGraphicsExtractor, x: Int, y: Int, color: Int) {
-        graphics.fill(x + 9, y + 21, x + 15, y + 22, color)
+        graphics.fill(x + CARD / 2 - 3, y + CARD - 3, x + CARD / 2 + 3, y + CARD - 2, color)
     }
 
     /** The pathway emblem on the card; only the tarot carries one, as its suit. */
@@ -104,7 +104,7 @@ enum class WheelSkin {
     fun next(): WheelSkin = entries[(ordinal + 1) % entries.size]
 
     protected companion object {
-        const val CARD = 24
+        const val CARD = WheelLayout.CARD
 
         val ATMOS_CARD: Identifier = sprite("atmos_card")
         val SEAL: Identifier = sprite("atmos_seal")
