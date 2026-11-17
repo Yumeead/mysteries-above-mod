@@ -144,7 +144,7 @@ object Strands {
     }
 
     /** The right hand of a body, roughly where it hangs; the middle of anything without hands. */
-    private fun hand(entity: Entity, partial: Float): Vec3 {
+    internal fun hand(entity: Entity, partial: Float): Vec3 {
         val at = entity.getPosition(partial)
         val living = entity as? LivingEntity ?: return at.add(0.0, entity.bbHeight * 0.5, 0.0)
         val yaw = Math.toRadians(Mth.lerp(partial, living.yBodyRotO, living.yBodyRot).toDouble())
@@ -153,12 +153,12 @@ object Strands {
         return at.add(-forwardZ * HAND_SIDE + forwardX * HAND_AHEAD, living.bbHeight * HAND_HEIGHT, forwardX * HAND_SIDE + forwardZ * HAND_AHEAD)
     }
 
-    private fun body(entity: Entity, partial: Float): Vec3 = entity.getPosition(partial).add(0.0, entity.bbHeight * BODY_HEIGHT, 0.0)
+    internal fun body(entity: Entity, partial: Float): Vec3 = entity.getPosition(partial).add(0.0, entity.bbHeight * BODY_HEIGHT, 0.0)
 
     /** The pathway's colour, half washed to white: a thread is pale whatever pathway spun it. */
     private fun pale(rgb: Int): Int = mix(rgb and 0xFFFFFF, WHITE, 0.5f)
 
-    private fun mix(a: Int, b: Int, t: Float): Int {
+    internal fun mix(a: Int, b: Int, t: Float): Int {
         fun channel(shift: Int): Int {
             val x = a shr shift and 0xFF
             val y = b shr shift and 0xFF

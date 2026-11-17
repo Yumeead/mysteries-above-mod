@@ -13,6 +13,8 @@ import me.vangoo.mysteries.net.payload.AbilityStatePayload
 import me.vangoo.mysteries.ability.context.Fizzle
 import me.vangoo.mysteries.net.payload.HintPayload
 import me.vangoo.mysteries.net.payload.DoorKind
+import me.vangoo.mysteries.net.payload.EdictKind
+import me.vangoo.mysteries.net.payload.ProhibitionSign
 import me.vangoo.mysteries.net.payload.WorldEffectPayload
 import net.minecraft.world.phys.Vec3
 import net.minecraft.core.RegistryAccess
@@ -252,6 +254,20 @@ class AbilityPayloadCodecTest {
         (listOf(sheet, body, loose, riding, glow, thread, spool) + faces).forEach { assertEquals(it, roundTrip(it, WorldEffectPayload.CODEC)) }
         assertEquals(4, WorldEffectPayload.Sheet.flight(9.6))
         assertEquals(1, WorldEffectPayload.Sheet.flight(0.0))
+    }
+
+    @Test
+    @DisplayName("Едикти й лінії Justiciar проїжджають кожною формою")
+    fun justiciarShapesRoundTrip() {
+        val edicts = EdictKind.entries.map { WorldEffectPayload.Edict(it, 7, 0xEBC38E, 120) }
+        val laws = ProhibitionSign.entries.map { WorldEffectPayload.Prohibition(Vec3(1.0, 64.0, -3.5), 20f, it, 900, 0xEBC38E) } +
+            WorldEffectPayload.Prohibition(Vec3(1.0, 64.0, -3.5), 20f, ProhibitionSign.FLIGHT, 24, 0xEBC38E, breach = 42)
+        val lashes = WorldEffectPayload.Lash.Shape.entries.map { WorldEffectPayload.Lash(3, 17, it, 0xEBC38E) }
+
+        (edicts + laws + lashes).forEach { assertEquals(it, roundTrip(it, WorldEffectPayload.CODEC)) }
+        // A law may stand for a minute (the Prohibition, 45 s): longer than a light, and no longer than that.
+        val long = roundTrip(edicts.first().copy(ticks = 10_000), WorldEffectPayload.CODEC) as WorldEffectPayload.Edict
+        assertEquals(WorldEffectPayload.MAX_LAW_TICKS, long.ticks)
     }
 
     @Test
