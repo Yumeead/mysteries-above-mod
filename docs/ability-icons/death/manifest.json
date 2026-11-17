@@ -1,0 +1,189 @@
+{
+  "pathway": "Death",
+  "palette": "#728F6C",
+  "size": 32,
+  "icons": [
+    {
+      "asset": "death_undead_knowledge",
+      "identity": "death_undead_knowledge",
+      "sequence": 9,
+      "name": "Знання нежиті",
+      "concept": "Череп у розрізі з виразно підсвіченою вразливою тріщиною.",
+      "mode": "generate",
+      "source": "source/death_undead_knowledge.png"
+    },
+    {
+      "asset": "death_cadaveric_resilience",
+      "identity": "death_cadaveric_resilience",
+      "sequence": 9,
+      "name": "Стійкість до трупних аур",
+      "concept": "Холодна долоня лишається неушкодженою під морозом і краплями тліну.",
+      "mode": "generate",
+      "source": "source/death_cadaveric_resilience.png"
+    },
+    {
+      "asset": "death_gloomy_presence",
+      "identity": "death_gloomy_presence",
+      "sequence": 9,
+      "name": "Похмура присутність",
+      "concept": "Холодний спокійний силует проходить поруч із нежиттю, яка відвертається.",
+      "mode": "generate",
+      "source": "source/death_gloomy_presence.png"
+    },
+    {
+      "asset": "death_death_sight",
+      "identity": "death_death_sight",
+      "sequence": 9,
+      "name": "Бачення духів",
+      "concept": "Прихована темна постать видає себе густим світлим димком душі.",
+      "mode": "generate",
+      "source": "source/death_death_sight.png"
+    },
+    {
+      "asset": "death_spirit_vision",
+      "identity": "death_spirit_vision",
+      "sequence": 9,
+      "name": "Духовний зір",
+      "concept": "Відкрите око бачить зелену душу серед сірих тіл.",
+      "mode": "generate",
+      "source": "source/death_spirit_vision.png"
+    },
+    {
+      "asset": "death_physique",
+      "identity": "death_physique",
+      "sequence": 9,
+      "name": "Тіло Трупозбирача → Тіло Вартового",
+      "concept": "Міцні плечі зі спини та холодне світло вздовж хребта.",
+      "mode": "generate",
+      "source": "source/death_physique.png"
+    },
+    {
+      "asset": "death_spirit_communication",
+      "identity": "death_spirit_communication",
+      "sequence": 8,
+      "name": "Призив простого духа",
+      "concept": "Один дух обвиває щиколотки цілі й міцно їх утримує.",
+      "mode": "generate",
+      "source": "source/death_spirit_communication.png"
+    },
+    {
+      "asset": "death_eye_of_death",
+      "identity": "death_eye_of_death",
+      "sequence": 8,
+      "name": "Око Смерті",
+      "concept": "Безбарвне око згори відкриває один уразливий вузол у ребрах цілі.",
+      "mode": "generate",
+      "source": "source/death_eye_of_death.png"
+    },
+    {
+      "asset": "death_spirit_perception",
+      "identity": "death_spirit_perception",
+      "sequence": 7,
+      "name": "Сприйняття духів",
+      "concept": "Заплющені очі й духовний відбиток за кам’яною перешкодою.",
+      "mode": "generate",
+      "source": "source/death_spirit_perception.png"
+    },
+    {
+      "asset": "death_voice_of_the_dead",
+      "identity": "death_voice_of_the_dead",
+      "sequence": 7,
+      "name": "Голос мертвих",
+      "concept": "Менший духовний профіль відповідає зсередини грудей живої людини.",
+      "mode": "generate",
+      "source": "source/death_voice_of_the_dead.png"
+    },
+    {
+      "asset": "death_spirit_channeling",
+      "identity": "death_spirit_channeling",
+      "sequence": 7,
+      "name": "Допомога середніх духів",
+      "concept": "Долоня підносить крижане приношення одному морозному духові-помічнику.",
+      "mode": "generate",
+      "source": "source/death_spirit_channeling.png"
+    },
+    {
+      "asset": "death_corpse_guise",
+      "identity": "death_corpse_guise",
+      "sequence": 7,
+      "name": "Трупна личина",
+      "concept": "Людський профіль ховається під виразною зеленою оболонкою зомбі.",
+      "mode": "generate",
+      "source": "source/death_corpse_guise.png"
+    },
+    {
+      "asset": "death_ritual_magic",
+      "identity": "common_ritual_magic",
+      "sequence": 7,
+      "name": "Ритуальна магія",
+      "concept": "Низький кам’яний вівтар, три свічки та матеріальне приношення в зеленому світлі.",
+      "mode": "generate",
+      "source": "source/death_ritual_magic.png"
+    },
+    {
+      "asset": "death_spirit_world_knowledge",
+      "identity": "death_spirit_world_knowledge",
+      "sequence": 6,
+      "name": "Знання Світу Духів",
+      "concept": "Над чистими сторінками розкритої книги проявляється будова духа.",
+      "mode": "generate",
+      "source": "source/death_spirit_world_knowledge.png"
+    },
+    {
+      "asset": "death_language_of_the_dead",
+      "identity": "death_language_of_the_dead",
+      "sequence": 6,
+      "name": "Мова мертвих",
+      "concept": "Вимовлена сила відокремлює душу від тіла, залишаючи коротку духовну прив’язь.",
+      "mode": "generate",
+      "source": "source/death_language_of_the_dead.png"
+    },
+    {
+      "asset": "death_resurrection",
+      "identity": "death_resurrection",
+      "sequence": 6,
+      "name": "Воскресіння",
+      "concept": "Мертва кисть і передпліччя підіймаються з могильної землі.",
+      "mode": "generate",
+      "source": "source/death_resurrection.png"
+    },
+    {
+      "asset": "death_spirit_pact",
+      "identity": "death_spirit_pact",
+      "sequence": 6,
+      "name": "Домовленість з духами",
+      "concept": "Владна долоня спрямовує впорядкований почет нежиті й духів.",
+      "mode": "generate",
+      "source": "source/death_spirit_pact.png"
+    },
+    {
+      "asset": "death_gatekeeper_step",
+      "identity": "death_gatekeeper_step",
+      "sequence": 5,
+      "name": "Крок Вартового",
+      "concept": "Важкий крок із зеленою хвилею руху розколює землю при приземленні.",
+      "mode": "generate",
+      "source": "source/death_gatekeeper_step.png"
+    },
+    {
+      "asset": "death_door_to_the_underworld",
+      "identity": "death_door_to_the_underworld",
+      "sequence": 5,
+      "name": "Двері в Загробний Світ",
+      "concept": "Темна брама й примарні руки затягують душу через поріг.",
+      "mode": "generate",
+      "source": "source/death_door_to_the_underworld.png",
+      "refinement": "refinements.json",
+      "previous_source": "previous/source/death_door_to_the_underworld.png"
+    },
+    {
+      "asset": "death_internal_underworld",
+      "identity": "death_internal_underworld",
+      "sequence": 5,
+      "name": "Внутрішній Загробний Світ",
+      "concept": "Грудна клітка утворює темну камеру з одним замкненим духом.",
+      "mode": "generate",
+      "source": "source/death_internal_underworld.png"
+    }
+  ]
+}

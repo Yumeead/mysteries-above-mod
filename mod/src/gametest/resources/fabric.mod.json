@@ -27,6 +27,10 @@
     "fabric-client-gametest": [
       {
         "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.gametest.IconsClientGameTest"
+      },
+      {
+        "adapter": "kotlin",
         "value": "me.vangoo.mysteries.gametest.CreatureClientGameTest"
       },
       {

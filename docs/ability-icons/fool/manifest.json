@@ -1,0 +1,133 @@
+{
+  "pathway": "Fool",
+  "palette": "#A26ED7",
+  "size": 32,
+  "icons": [
+    {
+      "identity": "fool_divination_arts",
+      "asset": "fool_divination_arts",
+      "name": "Мистецтво ворожіння",
+      "sequence": 9,
+      "source": "docs/ability-icons/fool/source/fool_divination_arts.png"
+    },
+    {
+      "identity": "fool_spirit_vision",
+      "asset": "fool_spirit_vision",
+      "name": "Духовне бачення",
+      "sequence": 9,
+      "source": "docs/ability-icons/fool/source/fool_spirit_vision.png"
+    },
+    {
+      "identity": "fool_danger_intuition",
+      "asset": "fool_danger_intuition",
+      "name": "Інтуїція небезпеки",
+      "sequence": 9,
+      "source": "docs/ability-icons/fool/source/fool_danger_intuition.png"
+    },
+    {
+      "identity": "common_ritual_magic",
+      "asset": "fool_ritual_magic",
+      "name": "Ритуальна магія",
+      "sequence": 9,
+      "source": "docs/ability-icons/fool/source/fool_ritual_magic.png"
+    },
+    {
+      "identity": "fool_paper_cutter",
+      "asset": "fool_paper_cutter",
+      "name": "Паперовий різак",
+      "sequence": 8,
+      "source": "docs/ability-icons/fool/source/fool_paper_cutter.png"
+    },
+    {
+      "identity": "fool_expression_control",
+      "asset": "fool_expression_control",
+      "name": "Контроль міміки",
+      "sequence": 8,
+      "source": "docs/ability-icons/fool/source/fool_expression_control.png"
+    },
+    {
+      "identity": "fool_agility",
+      "asset": "fool_agility",
+      "name": "Спритність клоуна",
+      "sequence": 8,
+      "source": "docs/ability-icons/fool/source/fool_agility.png"
+    },
+    {
+      "identity": "fool_flame_jump",
+      "asset": "fool_flame_jump",
+      "name": "Стрибок крізь полум'я",
+      "sequence": 7,
+      "source": "docs/ability-icons/fool/source/fool_flame_jump.png"
+    },
+    {
+      "identity": "fool_paper_substitution",
+      "asset": "fool_paper_substitution",
+      "name": "Заміна паперовою лялькою",
+      "sequence": 7,
+      "source": "docs/ability-icons/source/fool_paper_substitution.png"
+    },
+    {
+      "identity": "fool_air_bullet",
+      "asset": "fool_air_bullet",
+      "name": "Повітряна куля",
+      "sequence": 7,
+      "source": "docs/ability-icons/fool/source/fool_air_bullet.png"
+    },
+    {
+      "identity": "fool_damage_transfer",
+      "asset": "fool_damage_transfer",
+      "name": "Перенос шкоди",
+      "sequence": 7,
+      "source": "docs/ability-icons/fool/source/fool_damage_transfer.png"
+    },
+    {
+      "identity": "fool_aquatic_breath",
+      "asset": "fool_aquatic_breath",
+      "name": "Підводне дихання",
+      "sequence": 7,
+      "source": "docs/ability-icons/fool/source/fool_aquatic_breath.png"
+    },
+    {
+      "identity": "fool_illusion_creation",
+      "asset": "fool_illusion_creation",
+      "name": "Створення ілюзій",
+      "sequence": 7,
+      "source": "docs/ability-icons/fool/source/fool_illusion_creation.png"
+    },
+    {
+      "identity": "door_burning",
+      "asset": "fool_burning",
+      "name": "Підпал",
+      "sequence": 7,
+      "source": "docs/ability-icons/fool/source/fool_burning.png"
+    },
+    {
+      "identity": "fool_shapeshifting",
+      "asset": "fool_shapeshifting",
+      "name": "Перевтілення",
+      "sequence": 6,
+      "source": "docs/ability-icons/fool/source/fool_shapeshifting.png"
+    },
+    {
+      "identity": "fool_thread_sight",
+      "asset": "fool_thread_sight",
+      "name": "Бачення ниток",
+      "sequence": 5,
+      "source": "docs/ability-icons/fool/source/fool_thread_sight.png"
+    },
+    {
+      "identity": "fool_marionettist_control",
+      "asset": "fool_marionettist_control",
+      "name": "Контроль Маріонетки",
+      "sequence": 5,
+      "source": "docs/ability-icons/fool/source/fool_marionettist_control.png"
+    },
+    {
+      "identity": "fool_marionette_possession",
+      "asset": "fool_marionette_possession",
+      "name": "Вселення",
+      "sequence": 5,
+      "source": "docs/ability-icons/fool/source/fool_marionette_possession.png"
+    }
+  ]
+}

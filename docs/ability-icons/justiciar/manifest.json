@@ -1,0 +1,155 @@
+{
+  "pathway": "Justiciar",
+  "palette": "#EBC38E",
+  "size": 32,
+  "icons": [
+    {
+      "asset": "justiciar_physique",
+      "identity": "justiciar_physique",
+      "sequence": 9,
+      "name": "Фізичні посилення",
+      "concept": "Напружена зігнута рука й плече з теплим світлом у м’язах, сліди швидкого руху.",
+      "mode": "generate",
+      "source": "source/justiciar_physique.png"
+    },
+    {
+      "asset": "justiciar_combat_proficiency",
+      "identity": "common_combat_proficiency",
+      "sequence": 9,
+      "name": "Бойова майстерність",
+      "concept": "Два клинки сходяться у виразному парируванні; світлий осередок контакту.",
+      "mode": "generate",
+      "source": "source/justiciar_combat_proficiency.png"
+    },
+    {
+      "asset": "justiciar_authority",
+      "identity": "justiciar_authority",
+      "sequence": 9,
+      "name": "Авторитет",
+      "concept": "Замкнена золота рамка над долонею тисне на схилену постать.",
+      "mode": "generate",
+      "source": "source/justiciar_authority.png"
+    },
+    {
+      "asset": "justiciar_arbiters_gaze",
+      "identity": "justiciar_arbiters_gaze",
+      "sequence": 9,
+      "name": "Погляд Судді",
+      "concept": "Одне суворе золоте око схиляє чужу голову під тиском погляду.",
+      "mode": "generate",
+      "source": "source/justiciar_arbiters_gaze.png"
+    },
+    {
+      "asset": "justiciar_area_of_jurisdiction",
+      "identity": "justiciar_area_of_jurisdiction",
+      "sequence": 8,
+      "name": "Сфера Юрисдикції",
+      "concept": "Окреслена світлом територія закону на камені з постаттю всередині.",
+      "mode": "generate",
+      "source": "source/justiciar_area_of_jurisdiction.png"
+    },
+    {
+      "asset": "justiciar_recognition",
+      "identity": "justiciar_recognition",
+      "sequence": 8,
+      "name": "Ідентифікація",
+      "concept": "Чіткий світлий контур вивченої цілі між золотими осередками уваги.",
+      "mode": "generate",
+      "source": "source/justiciar_recognition.png"
+    },
+    {
+      "asset": "justiciar_intuition",
+      "identity": "justiciar_intuition",
+      "sequence": 8,
+      "name": "Інтуїція Небезпеки",
+      "concept": "Золоті хвилі передчуття біля вуха помічають клинок позаду.",
+      "mode": "generate",
+      "source": "source/justiciar_intuition.png"
+    },
+    {
+      "asset": "justiciar_whip_of_pain",
+      "identity": "justiciar_whip_of_pain",
+      "sequence": 7,
+      "name": "Хлист Болю",
+      "concept": "Батіг із залізних ланок розгортається дугою та б’є світлим ударом.",
+      "mode": "generate",
+      "source": "source/justiciar_whip_of_pain.png"
+    },
+    {
+      "asset": "justiciar_psychic_piercing",
+      "identity": "justiciar_psychic_piercing",
+      "sequence": 7,
+      "name": "Психічний Прокол",
+      "concept": "Два розряди з очей пробивають голову та зсувають блідий духовний двійник.",
+      "mode": "generate",
+      "source": "source/justiciar_psychic_piercing.png",
+      "refinement": "refinements.json",
+      "previous_source": "previous/source/justiciar_psychic_piercing.png"
+    },
+    {
+      "asset": "justiciar_brand_of_restraint",
+      "identity": "justiciar_brand_of_restraint",
+      "sequence": 7,
+      "name": "Клеймо Обмеження",
+      "concept": "Три ланцюги сковують тіло й ноги; залізний обруч замикається на голові.",
+      "mode": "generate",
+      "source": "source/justiciar_brand_of_restraint.png",
+      "refinement": "refinements.json",
+      "previous_source": "previous/source/justiciar_brand_of_restraint.png"
+    },
+    {
+      "asset": "justiciar_psychic_lashing",
+      "identity": "justiciar_psychic_lashing",
+      "sequence": 7,
+      "name": "Психічне Шмагання",
+      "concept": "Сталеве лезо сокири вкривають ілюзорні блискавки для удару по духу.",
+      "mode": "generate",
+      "source": "source/justiciar_psychic_lashing.png"
+    },
+    {
+      "asset": "justiciar_verdict",
+      "identity": "justiciar_verdict",
+      "sequence": 6,
+      "name": "Вердикт",
+      "concept": "Суддівський молот опускається над терезами як символ винесення різних вироків.",
+      "mode": "generate",
+      "source": "source/justiciar_verdict.png"
+    },
+    {
+      "asset": "justiciar_power_prohibition",
+      "identity": "justiciar_power_prohibition",
+      "sequence": 6,
+      "name": "Заборона",
+      "concept": "Закон замикає світлий затискач навколо клинка, припиняючи заборонену дію.",
+      "mode": "generate",
+      "source": "source/justiciar_power_prohibition.png"
+    },
+    {
+      "asset": "justiciar_spawn_prohibition",
+      "identity": "justiciar_spawn_prohibition",
+      "sequence": 6,
+      "name": "Заборона Спавну",
+      "concept": "Нечисть розпадається на темні уламки біля світлої межі забороненої території.",
+      "mode": "generate",
+      "source": "source/justiciar_spawn_prohibition.png"
+    },
+    {
+      "asset": "justiciar_punishment",
+      "identity": "justiciar_punishment",
+      "sequence": 5,
+      "name": "Покарання",
+      "concept": "Силует судді виникає позаду порушника для неминучого карального удару.",
+      "mode": "generate",
+      "source": "source/justiciar_punishment.png"
+    },
+    {
+      "asset": "justiciar_anti_divination",
+      "identity": "door_anti_divination",
+      "sequence": 5,
+      "name": "Протидія ворожінню",
+      "concept": "Непрозора світла завіса приховує постать і відхиляє фіолетовий пошуковий промінь.",
+      "mode": "generate",
+      "source": "source/justiciar_anti_divination.png"
+    }
+  ]
+}

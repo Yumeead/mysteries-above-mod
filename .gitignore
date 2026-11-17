@@ -29,3 +29,10 @@ mod/logs/
 
 # Local design sandbox (HTML previews, references), not part of the mod
 art/
+
+# Ability icon working material: generated sources, earlier versions and in-game shots stay on disk only.
+docs/ability-icons/**/source/
+docs/ability-icons/**/source-v2/
+docs/ability-icons/**/previous/
+docs/ability-icons/**/v1/
+docs/ability-icons/**/in-game/

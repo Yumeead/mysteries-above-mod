@@ -1,0 +1,15 @@
+{
+  "generator": "built-in image_gen",
+  "icons": [
+    {
+      "asset": "justiciar_brand_of_restraint",
+      "prompt": "EDIT TARGET: attached Brand of Restraint icon from the Justiciar set. Improve SMALL UI READABILITY while keeping the same full-body chained captive concept, centered standing pose, iron head ring, grounded chains, dark background and silver bevel frame. The present chains are too fine after 32x32 downsampling. Redraw the INNER ART with a strict coarse 32x32 LOGICAL PIXEL GRID and bold clusters, each important chain band TWO TO THREE logical pixels thick. Make the captive wider (about 17 logical pixels across shoulders), not taller; its feet must remain visible. The THREE wraps at chest, waist/arms and ankles must be immediately distinct as three broad champagne #EBC38E linked-metal bands with dark holes, warm ivory highlights, not thin lines. Three heavy chain runs still rise diagonally from stones into these wraps. Each has a small coherent ember-orange/red-hot segment but most of the lit metal remains PALE CHAMPAGNE and slate shadows. Brighten the links and head ring substantially, fill enough central area that the bright chain silhouette reads at 15x15. Dark plum captive is a simple two-tone supporting silhouette, not the main lit area. Do not cover the body with fire or plate armor, no writing/sigil/seal/crown jewels. Maintain clear square block edges, no smooth gradients, excessive bloom or painterly detail. One individual square icon, full canvas.",
+      "input": "previous/source/justiciar_brand_of_restraint.png"
+    },
+    {
+      "asset": "justiciar_psychic_piercing",
+      "prompt": "EDIT TARGET: attached Psychic Piercing icon from Justiciar. Correct the origin of the psychic attack and improve 15x15 readability. Keep the two jagged champagne-bone-white psychic bolts, physical target head at right, offset spectral double knocked backward above right, muted burgundy shoulder, dark background and neutral silver frame. Replace the vertically stacked floating eyes at far left with TWO SMALL HUMAN EYES SIDE BY SIDE ON THE SAME HORIZONTAL EYELINE, set into one simple dark brow at UPPER LEFT. Two thick separate lightning needles must visibly leave those eyes and travel diagonally down-right into the temple of the target head. The two eyes belong to one ordinary frontal human face, no sideways eye stacking. Use strict 32x32 logical pixel blocks and broad clusters: paired lightning is at least 2 logical pixels thick and is the clear dominant bright champagne #EBC38E / ivory #FFF3DA shape. Lower the brightness and area of the lavender ghost to a secondary dark-violet silhouette with only a small pale lavender contour, so it does not dominate the attack; keep it readable as an offset same-head Spirit Body. Simplify tiny debris to 2 or 3 broad pixels. Actual power is white-eyed concentration then piercing the Spirit Body, not a generic electricity spell or physical weapon. Preserve all other shapes as much as possible. No text, number, symbols, gore, blur or excessive bloom. Single square pixel-art icon, not sheet.",
+      "input": "previous/source/justiciar_psychic_piercing.png"
+    }
+  ]
+}

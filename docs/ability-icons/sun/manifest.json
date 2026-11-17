@@ -1,0 +1,177 @@
+{
+  "pathway": "Sun",
+  "palette": "#FBE86B",
+  "size": 32,
+  "icons": [
+    {
+      "identity": "sun_fire_of_light",
+      "asset": "sun_fire_of_light",
+      "name": "Вогонь Світла",
+      "concept": "Три язики стаціонарного святого полум’я на камені; мідь та помаранчевий жар.",
+      "sequence": 7,
+      "source": "source/sun_fire_of_light.png",
+      "mode": "edit"
+    },
+    {
+      "identity": "sun_holy_oath",
+      "asset": "sun_holy_oath",
+      "name": "Свята клятва",
+      "concept": "Осяяний променем кулак із полум’ям: посилені палаючі удари та видимий заклинач.",
+      "sequence": 7,
+      "source": "source/sun_holy_oath.png",
+      "mode": "edit"
+    },
+    {
+      "identity": "sun_singing",
+      "asset": "sun_singing",
+      "name": "Спів",
+      "concept": "Золоті хвилі голосу від співака до слухача; нефритовий акцент відновлення.",
+      "sequence": 9,
+      "source": "source/sun_singing.png",
+      "mode": "generate"
+    },
+    {
+      "identity": "sun_physical_enhancement",
+      "asset": "sun_physical_enhancement",
+      "name": "Фізичні посилення",
+      "concept": "Світло в м’язах торса й руки, бронзові площини та слід прискореного руху.",
+      "sequence": 9,
+      "source": "source/sun_physical_enhancement.png",
+      "mode": "generate",
+      "refinement": "palette-refinements.json",
+      "previous_source": "previous/source/sun_physical_enhancement.png"
+    },
+    {
+      "identity": "common_ritual_magic",
+      "asset": "sun_ritual_magic",
+      "name": "Ритуальна магія",
+      "concept": "Косий вівтар із мідною чашею приношення й трьома свічками.",
+      "sequence": 8,
+      "source": "source/sun_ritual_magic.png",
+      "mode": "generate",
+      "refinement": "palette-refinements.json",
+      "previous_source": "previous/source/sun_ritual_magic.png"
+    },
+    {
+      "identity": "sun_sunshine",
+      "asset": "sun_sunshine",
+      "name": "Сонячне сяйво",
+      "concept": "Вузький спрямований промінь влучає в темну нежить; гарячий осередок удару.",
+      "sequence": 8,
+      "source": "source/sun_sunshine.png",
+      "mode": "generate"
+    },
+    {
+      "identity": "sun_blessing",
+      "asset": "sun_blessing",
+      "name": "Благословення",
+      "concept": "Розкриті долоні оберігають союзника золотим світлом; малий нефритовий акцент зцілення.",
+      "sequence": 8,
+      "source": "source/sun_blessing.png",
+      "mode": "generate"
+    },
+    {
+      "identity": "sun_evil_detection",
+      "asset": "sun_evil_detection",
+      "name": "Виявлення зла",
+      "concept": "Золотий контур скелетної постаті видно крізь кам’яну перешкоду.",
+      "sequence": 8,
+      "source": "source/sun_evil_detection.png",
+      "mode": "generate"
+    },
+    {
+      "identity": "sun_daytime",
+      "asset": "sun_daytime",
+      "name": "Денне світло",
+      "concept": "Мініатюрне сонце над плечем освітлює темний кам’яний закуток.",
+      "sequence": 8,
+      "source": "source/sun_daytime.png",
+      "mode": "generate",
+      "refinement": "palette-refinements.json",
+      "previous_source": "previous/source/sun_daytime.png"
+    },
+    {
+      "identity": "sun_night_vision",
+      "asset": "sun_night_vision",
+      "name": "Нічне бачення",
+      "concept": "Два золоті сонця в зіницях, бронзова шкіра й синьо-фіолетові тіні.",
+      "sequence": 8,
+      "source": "source/sun_night_vision.png",
+      "mode": "generate",
+      "refinement": "palette-refinements.json",
+      "previous_source": "previous/source/sun_night_vision.png"
+    },
+    {
+      "identity": "sun_holy_light_summoning",
+      "asset": "sun_holy_light_summoning",
+      "name": "Святе світло",
+      "concept": "Стовп світла падає з відкритого неба на камінь; фіолетові хмари й мідний удар.",
+      "sequence": 7,
+      "source": "source/sun_holy_light_summoning.png",
+      "mode": "generate"
+    },
+    {
+      "identity": "sun_halo",
+      "asset": "sun_halo",
+      "name": "Німб Сонця",
+      "concept": "Еліптичний німб над головою та край очисного імпульсу внизу.",
+      "sequence": 7,
+      "source": "source/sun_halo.png",
+      "mode": "generate"
+    },
+    {
+      "identity": "sun_cleave_of_purification",
+      "asset": "sun_cleave_of_purification",
+      "name": "Очищувальний удар",
+      "concept": "Сталевий меч із золотим освяченим лезом і зарядами біля гарди.",
+      "sequence": 7,
+      "source": "source/sun_cleave_of_purification.png",
+      "mode": "generate"
+    },
+    {
+      "identity": "sun_resistance_to_horror",
+      "asset": "sun_resistance_to_horror",
+      "name": "Стійкість до жаху",
+      "concept": "Спокійний профіль і золота завіса розчиняють фіолетову примарну лапу.",
+      "sequence": 7,
+      "source": "source/sun_resistance_to_horror.png",
+      "mode": "generate"
+    },
+    {
+      "identity": "sun_holy_water",
+      "asset": "sun_holy_water",
+      "name": "Свята вода Сонця",
+      "concept": "Скляна пляшка виливає дугу золотої святої води; бірюзові грані скла.",
+      "sequence": 7,
+      "source": "source/sun_holy_water.png",
+      "mode": "generate"
+    },
+    {
+      "identity": "sun_notarization",
+      "asset": "sun_notarization",
+      "name": "Нотаріальність",
+      "concept": "Золотий штамп засвідчує чистий аркуш; бордовий край воскової печатки.",
+      "sequence": 6,
+      "source": "source/sun_notarization.png",
+      "mode": "generate"
+    },
+    {
+      "identity": "sun_contract",
+      "asset": "sun_contract",
+      "name": "Магічне засвідчення",
+      "concept": "Двоє тримають чистий сувій із печаткою: взаємний мир або боргова клятва.",
+      "sequence": 6,
+      "source": "source/sun_contract.png",
+      "mode": "generate"
+    },
+    {
+      "identity": "sun_holy_wave",
+      "asset": "sun_holy_wave",
+      "name": "Хвиля святості",
+      "concept": "Широкий золотий фронт хвилі лікує союзника й руйнує нечисть; нефрит і фіолетові уламки.",
+      "sequence": 5,
+      "source": "source/sun_holy_wave.png",
+      "mode": "generate"
+    }
+  ]
+}

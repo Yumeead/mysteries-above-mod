@@ -5,12 +5,186 @@ import me.vangoo.mysteries.GameRegistries
 import me.vangoo.mysteries.pathways.ModPathways
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import javax.imageio.ImageIO
 import kotlin.math.pow
 
 class BookArtTest {
+    @Test
+    fun paintedIconsExistAsSeparateUniqueSpritesForRegisteredPowers() {
+        GameRegistries.bootstrap()
+        val registered = ModPathways.all.flatMap { pathway ->
+            (0..9).flatMap { pathway.abilitiesFor(it) }.map { it.identity.id }
+        }.toSet()
+        val painted = listOf(
+            BookAbilityIcons.textures, BookAbilityIcons.foolOverrides, BookAbilityIcons.doorOverrides,
+            BookAbilityIcons.sunOverrides, BookAbilityIcons.justiciarOverrides, BookAbilityIcons.deathOverrides,
+            BookAbilityIcons.errorOverrides, BookAbilityIcons.whiteTowerOverrides,
+        )
+        assertTrue(painted.flatMap { it.keys }.all { it in registered })
+        val pixels = painted.flatMap { it.values }.map { texture ->
+            val identity = texture.path
+            val resource = javaClass.getResource("/assets/${texture.namespace}/textures/gui/sprites/${texture.path}.png")
+            assertNotNull(resource, identity)
+            val image = ImageIO.read(resource)
+            assertEquals(32, image.width, identity)
+            assertEquals(32, image.height, identity)
+            image.getRGB(0, 0, 32, 32, null, 0, 32).toList()
+        }
+        assertTrue(pixels.isNotEmpty())
+        assertEquals(pixels.size, pixels.distinct().size)
+    }
+
+    @Test
+    fun everyFoolPowerHasItsOwnIconAndSharedPurpleVariantsStayInFool() {
+        GameRegistries.bootstrap()
+        val fool = ModPathways.byName("Fool")!!
+        val identities = (0..9).flatMap { fool.abilitiesFor(it) }.map { it.identity.id }.toSet()
+        val icons = identities.map { identity ->
+            BookAbilityIcons.texture(identity, "Fool").also { assertNotNull(it, identity) }
+        }
+        assertEquals(18, identities.size)
+        assertEquals(icons.size, icons.toSet().size)
+        for (identity in BookAbilityIcons.foolOverrides.keys) {
+            for (pathway in listOf("Sun", "WhiteTower", "Door", "Justiciar", "Death", "Error", null)) {
+                assertNotEquals(BookAbilityIcons.foolOverrides[identity], BookAbilityIcons.texture(identity, pathway), "$identity in $pathway")
+            }
+        }
+    }
+
+    @Test
+    fun everyDoorPowerHasItsOwnIconWithoutRecoloringFoolOrJusticiar() {
+        GameRegistries.bootstrap()
+        val door = ModPathways.byName("Door")!!
+        val identities = (0..9).flatMap { door.abilitiesFor(it) }.map { it.identity.id }.toSet()
+        val icons = identities.map { identity ->
+            BookAbilityIcons.texture(identity, "Door").also { assertNotNull(it, identity) }
+        }
+        assertEquals(14, identities.size)
+        assertEquals(icons.size, icons.toSet().size)
+        assertEquals(BookAbilityIcons.foolOverrides["door_burning"], BookAbilityIcons.texture("door_burning", "Fool"))
+        assertEquals(BookAbilityIcons.justiciarOverrides["door_anti_divination"], BookAbilityIcons.texture("door_anti_divination", "Justiciar"))
+        assertNull(BookAbilityIcons.texture("door_anti_divination", null))
+    }
+
+    @Test
+    fun everySunPowerHasItsOwnIconAndGoldenRitualStaysInSun() {
+        GameRegistries.bootstrap()
+        val sun = ModPathways.byName("Sun")!!
+        val identities = (0..9).flatMap { sun.abilitiesFor(it) }.map { it.identity.id }.toSet()
+        val icons = identities.map { identity ->
+            BookAbilityIcons.texture(identity, "Sun").also { assertNotNull(it, identity) }
+        }
+        assertEquals(18, identities.size)
+        assertEquals(icons.size, icons.toSet().size)
+        assertEquals(BookAbilityIcons.sunOverrides["common_ritual_magic"], BookAbilityIcons.texture("common_ritual_magic", "Sun"))
+        assertEquals(BookAbilityIcons.foolOverrides["common_ritual_magic"], BookAbilityIcons.texture("common_ritual_magic", "Fool"))
+        assertEquals(BookAbilityIcons.whiteTowerOverrides["common_ritual_magic"], BookAbilityIcons.texture("common_ritual_magic", "WhiteTower"))
+        assertNull(BookAbilityIcons.texture("common_ritual_magic", null))
+    }
+
+    @Test
+    fun everyJusticiarPowerHasItsOwnIconAndSharedVariantsKeepTheirPathway() {
+        GameRegistries.bootstrap()
+        val justiciar = ModPathways.byName("Justiciar")!!
+        val identities = (0..9).flatMap { justiciar.abilitiesFor(it) }.map { it.identity.id }.toSet()
+        val icons = identities.map { identity ->
+            BookAbilityIcons.texture(identity, "Justiciar").also { assertNotNull(it, identity) }
+        }
+        assertEquals(16, identities.size)
+        assertEquals(icons.size, icons.toSet().size)
+        assertEquals(BookAbilityIcons.justiciarOverrides["common_combat_proficiency"], BookAbilityIcons.texture("common_combat_proficiency", "Justiciar"))
+        assertNotEquals(BookAbilityIcons.texture("door_anti_divination", "Door"), BookAbilityIcons.texture("door_anti_divination", "Justiciar"))
+        assertEquals(BookAbilityIcons.doorOverrides["door_anti_divination"], BookAbilityIcons.texture("door_anti_divination", "Door"))
+        assertEquals(BookAbilityIcons.errorOverrides["common_combat_proficiency"], BookAbilityIcons.texture("common_combat_proficiency", "Error"))
+        for (pathway in listOf("Fool", "Sun", "WhiteTower", "Death", null)) {
+            for (identity in BookAbilityIcons.justiciarOverrides.keys) {
+                assertNotEquals(BookAbilityIcons.justiciarOverrides[identity], BookAbilityIcons.texture(identity, pathway), "$identity in $pathway")
+            }
+        }
+    }
+
+    @Test
+    fun everyDeathPowerHasItsOwnIconAndGreenRitualStaysInDeath() {
+        GameRegistries.bootstrap()
+        val death = ModPathways.byName("Death")!!
+        val identities = (0..9).flatMap { death.abilitiesFor(it) }.map { it.identity.id }.toSet()
+        val icons = identities.map { identity ->
+            BookAbilityIcons.texture(identity, "Death").also { assertNotNull(it, identity) }
+        }
+        assertEquals(20, identities.size)
+        assertEquals(icons.size, icons.toSet().size)
+        assertEquals(BookAbilityIcons.deathOverrides["common_ritual_magic"], BookAbilityIcons.texture("common_ritual_magic", "Death"))
+        val ritualVariants = listOf("Death", "Fool", "Sun", "WhiteTower").map { BookAbilityIcons.texture("common_ritual_magic", it) }
+        assertEquals(4, ritualVariants.toSet().size)
+        for (pathway in listOf("Justiciar", "Door", "Error", null)) {
+            assertNull(BookAbilityIcons.texture("common_ritual_magic", pathway))
+        }
+    }
+
+    @Test
+    fun everyErrorPowerIncludingConceptualTheftsHasItsOwnIcon() {
+        GameRegistries.bootstrap()
+        val error = ModPathways.byName("Error")!!
+        val identities = (0..9).flatMap { error.abilitiesFor(it) }.map { it.identity.id }.toSet()
+        val icons = identities.map { identity ->
+            BookAbilityIcons.texture(identity, "Error").also { assertNotNull(it, identity) }
+        }
+        assertEquals(19, identities.size)
+        assertEquals(6, identities.count { it.startsWith("error_conceptual_") })
+        assertEquals(icons.size, icons.toSet().size)
+        assertEquals(BookAbilityIcons.errorOverrides["common_combat_proficiency"], BookAbilityIcons.texture("common_combat_proficiency", "Error"))
+        assertNotEquals(BookAbilityIcons.texture("common_combat_proficiency", "Justiciar"), BookAbilityIcons.texture("common_combat_proficiency", "Error"))
+        for (pathway in listOf("Fool", "Sun", "Death", "Door", null)) {
+            assertNull(BookAbilityIcons.texture("common_combat_proficiency", pathway))
+        }
+        assertNull(BookAbilityIcons.texture("door_anti_divination", "Error"))
+        assertNull(BookAbilityIcons.texture("common_ritual_magic", "Error"))
+    }
+
+    @Test
+    fun everyTyrantPowerHasItsOwnIconIncludingSharedTierUpgrades() {
+        GameRegistries.bootstrap()
+        val tyrant = ModPathways.byName("Tyrant")!!
+        val identities = (0..9).flatMap { tyrant.abilitiesFor(it) }.map { it.identity.id }.toSet()
+        val icons = identities.map { identity ->
+            BookAbilityIcons.texture(identity, "Tyrant").also { assertNotNull(it, identity) }
+        }
+        assertEquals(31, identities.size)
+        assertEquals(icons.size, icons.toSet().size)
+        for (identity in listOf("tyrant_physique", "tyrant_stance")) {
+            assertTrue(tyrant.abilitiesFor(9).any { it.identity.id == identity })
+            assertTrue(tyrant.abilitiesFor(6).any { it.identity.id == identity })
+        }
+        assertNull(BookAbilityIcons.texture("common_combat_proficiency", "Tyrant"))
+        assertNull(BookAbilityIcons.texture("common_ritual_magic", "Tyrant"))
+    }
+
+    @Test
+    fun everyWhiteTowerPowerHasItsOwnIconAndSharedVariantsStayDistinct() {
+        GameRegistries.bootstrap()
+        val tower = ModPathways.byName("WhiteTower")!!
+        val identities = (0..9).flatMap { tower.abilitiesFor(it) }.map { it.identity.id }.toSet()
+        val icons = identities.map { identity ->
+            BookAbilityIcons.texture(identity, "WhiteTower").also { assertNotNull(it, identity) }
+        }
+        assertEquals(10, identities.size)
+        assertEquals(icons.size, icons.toSet().size)
+        for ((identity, icon) in BookAbilityIcons.whiteTowerOverrides) {
+            assertEquals(icon, BookAbilityIcons.texture(identity, "WhiteTower"))
+            for (pathway in listOf("Fool", "Door", "Sun", "Death", "Justiciar", "Error", "Tyrant", "Visionary", null)) {
+                assertNotEquals(icon, BookAbilityIcons.texture(identity, pathway), "$identity in $pathway")
+            }
+        }
+        assertEquals(3, listOf("WhiteTower", "Justiciar", "Error").map {
+            BookAbilityIcons.texture("common_combat_proficiency", it)
+        }.toSet().size)
+        assertNull(BookAbilityIcons.texture("door_anti_divination", "WhiteTower"))
+    }
+
     @Test
     fun everyPathwayLabelKeepsReadableContrastOnPaper() {
         fun luminance(rgb: Int): Double {

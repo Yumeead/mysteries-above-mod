@@ -1,0 +1,178 @@
+{
+  "pathway": "Error",
+  "palette": "#6699A1",
+  "size": 32,
+  "icons": [
+    {
+      "asset": "error_shadow_theft",
+      "identity": "error_shadow_theft",
+      "sequence": 9,
+      "name": "Крадіжка тіні",
+      "concept": "Рука з темряви за спиною цілі дістає коштовність із кишені.",
+      "mode": "generate",
+      "source": "source/error_shadow_theft.png"
+    },
+    {
+      "asset": "error_observation",
+      "identity": "error_observation",
+      "sequence": 9,
+      "name": "Покращена спостережливість",
+      "concept": "Уважне око відчуває коштовну жилу за каменем за напрямком світлого пилу.",
+      "mode": "generate",
+      "source": "source/error_observation.png"
+    },
+    {
+      "asset": "error_combat_proficiency",
+      "identity": "common_combat_proficiency",
+      "sequence": 9,
+      "name": "Бойова майстерність",
+      "concept": "Короткий клинок відхиляє стрілу, залишаючи світлий слід точного парирування.",
+      "mode": "generate",
+      "source": "source/error_combat_proficiency.png"
+    },
+    {
+      "asset": "error_physique",
+      "identity": "error_physique",
+      "sequence": 9,
+      "name": "Фізичні посилення → Тіло Крадія снів",
+      "concept": "Спритна постать робить низький бічний крок; світло підкреслює рух м’язів.",
+      "mode": "generate",
+      "source": "source/error_physique.png"
+    },
+    {
+      "asset": "error_swindler_charm",
+      "identity": "error_swindler_charm",
+      "sequence": 8,
+      "name": "Шарм Афериста",
+      "concept": "Спокійна усмішка й розслаблена чужа рука показують довіру, що виникає сама.",
+      "mode": "generate",
+      "source": "source/error_swindler_charm.png"
+    },
+    {
+      "asset": "error_eloquence",
+      "identity": "error_eloquence",
+      "sequence": 8,
+      "name": "Красномовність",
+      "concept": "Світлі хвилі голосу змушують ворожий клинок опуститися.",
+      "mode": "generate",
+      "source": "source/error_eloquence.png"
+    },
+    {
+      "asset": "error_thought_misdirection",
+      "identity": "error_thought_misdirection",
+      "sequence": 8,
+      "name": "Підміна думок",
+      "concept": "Роздвоєна хвиля хибної уваги повертає двох ворогів один проти одного.",
+      "mode": "generate",
+      "source": "source/error_thought_misdirection.png"
+    },
+    {
+      "asset": "error_mental_disruption",
+      "identity": "error_mental_disruption",
+      "sequence": 8,
+      "name": "Ментальний розлад",
+      "concept": "Навколо голови розходяться несумісні площини фальшивих стін.",
+      "mode": "generate",
+      "source": "source/error_mental_disruption.png"
+    },
+    {
+      "asset": "error_material_theft",
+      "identity": "error_material_theft",
+      "sequence": 8,
+      "name": "Крадіжка матеріалів",
+      "concept": "Духовний матеріал проходить крізь кам’яну стіну до простягнутих пальців.",
+      "mode": "generate",
+      "source": "source/error_material_theft.png"
+    },
+    {
+      "asset": "error_decryption",
+      "identity": "error_decryption",
+      "sequence": 7,
+      "name": "Дешифрування",
+      "concept": "Вузол прихованих слідів розплутується в чіткі світлі нитки над каменем.",
+      "mode": "generate",
+      "source": "source/error_decryption.png"
+    },
+    {
+      "asset": "error_power_theft",
+      "identity": "error_power_theft",
+      "sequence": 6,
+      "name": "Крадіжка сили",
+      "concept": "Сформований магічний заряд відривається від чужої долоні й переходить до крадія.",
+      "mode": "generate",
+      "source": "source/error_power_theft.png"
+    },
+    {
+      "asset": "error_mental_fortitude",
+      "identity": "error_mental_fortitude",
+      "sequence": 6,
+      "name": "Стійкість розуму",
+      "concept": "Міцне світле ядро розуму лишається цілим, відкидаючи темні тріщини.",
+      "mode": "generate",
+      "source": "source/error_mental_fortitude.png"
+    },
+    {
+      "asset": "error_conceptual_thought",
+      "identity": "error_conceptual_thought",
+      "sequence": 5,
+      "name": "Крадіжка думки",
+      "concept": "Нитка наміру залишає спорожнілу голову й змушує крадія кинутися вперед.",
+      "mode": "generate",
+      "source": "source/error_conceptual_thought.png"
+    },
+    {
+      "asset": "error_conceptual_attack",
+      "identity": "error_conceptual_attack",
+      "sequence": 5,
+      "name": "Крадіжка удару",
+      "concept": "Ворожий удар згортається всередину долоні й стає зарядом для відповіді.",
+      "mode": "generate",
+      "source": "source/error_conceptual_attack.png"
+    },
+    {
+      "asset": "error_conceptual_ideal",
+      "identity": "error_conceptual_ideal",
+      "sequence": 5,
+      "name": "Крадіжка ідеалу",
+      "concept": "Тепла іскра прагнення виходить із грудей, а постать без неї схиляється.",
+      "mode": "generate",
+      "source": "source/error_conceptual_ideal.png"
+    },
+    {
+      "asset": "error_conceptual_dream",
+      "identity": "error_conceptual_dream",
+      "sequence": 5,
+      "name": "Крадіжка сну",
+      "concept": "Сон витягується з голови на подушці та зберігається в руці крадія.",
+      "mode": "generate",
+      "source": "source/error_conceptual_dream.png"
+    },
+    {
+      "asset": "error_conceptual_capacity",
+      "identity": "error_conceptual_capacity",
+      "sequence": 5,
+      "name": "Крадіжка здатності",
+      "concept": "Примарне крило переходить від цілі до крадія як символ забраного польоту.",
+      "mode": "generate",
+      "source": "source/error_conceptual_capacity.png"
+    },
+    {
+      "asset": "error_conceptual_heart",
+      "identity": "error_conceptual_heart",
+      "sequence": 5,
+      "name": "Крадіжка серця",
+      "concept": "Червоне серце переходить під світлий хват крадія; біля власника лишається порожній відбиток.",
+      "mode": "generate",
+      "source": "source/error_conceptual_heart.png"
+    },
+    {
+      "asset": "error_theft_of_heavenly_secrets",
+      "identity": "error_theft_of_heavenly_secrets",
+      "sequence": 5,
+      "name": "Крадіжка Таємниць Небес",
+      "concept": "Зілля на вівтарі й запозичене небесне світло надають чужій личині прийняття.",
+      "mode": "generate",
+      "source": "source/error_theft_of_heavenly_secrets.png"
+    }
+  ]
+}
