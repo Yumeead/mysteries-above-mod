@@ -35,6 +35,15 @@ object ModSounds {
     /** A heartbeat at the edge: you hear your own body because there is nothing else left to hear. */
     val HEARTBEAT: SoundEvent = event("heartbeat")
 
+    /** The Justiciar's law proclaimed: a dry knock, high and short. */
+    val GAVEL: SoundEvent = event("gavel")
+
+    /** One step of something that grows or goes out in steps: a link of iron taken up. */
+    val RATCHET: SoundEvent = event("ratchet")
+
+    /** Iron meeting iron: a hoop snapping shut, a law breached. */
+    val CLANG: SoundEvent = event("clang")
+
     /** Forces the class to initialise before the registries close. */
     fun register() {
         declared.forEach { Registry.register(BuiltInRegistries.SOUND_EVENT, it.location(), it) }
