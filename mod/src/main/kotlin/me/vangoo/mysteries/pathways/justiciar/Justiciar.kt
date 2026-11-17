@@ -16,7 +16,6 @@ import me.vangoo.mysteries.pathways.justiciar.abilities.Punishment
 import me.vangoo.mysteries.pathways.justiciar.abilities.PsychicLashing
 import me.vangoo.mysteries.pathways.justiciar.abilities.PsychicPiercing
 import me.vangoo.mysteries.pathways.justiciar.abilities.Recognition
-import me.vangoo.mysteries.pathways.justiciar.abilities.SpawnProhibition
 import me.vangoo.mysteries.pathways.justiciar.abilities.Verdict
 import me.vangoo.mysteries.pathways.justiciar.abilities.WhipOfPain
 import net.minecraft.network.chat.Component
@@ -75,7 +74,6 @@ object Justiciar {
             6 to listOf(
                 Verdict(),
                 PowerProhibition(),
-                SpawnProhibition(),
             ),
             5 to listOf(
                 Punishment(),

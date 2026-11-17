@@ -24,6 +24,9 @@ sealed interface CastReport {
     /** Someone stole this power: the owner cannot call it until the window closes. */
     data class Suppressed(val secondsLeft: Long) : CastReport
 
+    /** A Judge's Prohibition stands over the caster and forbids what this power does. Nothing is charged. */
+    data object Forbidden : CastReport
+
     /** The player is not a Beyonder at all. */
     data object NotBeyonder : CastReport
 }
@@ -42,6 +45,8 @@ object CastMessages {
 
         is CastReport.Suppressed ->
             Component.literal("Цю силу у вас вкрали — повернеться за ${report.secondsLeft} с")
+
+        is CastReport.Forbidden -> Component.literal("Тут це заборонено")
 
         is CastReport.Resisted ->
             Component.literal("Ціль чинила опір! (шанс успіху ${report.chance.getFormattedChance()})")
@@ -68,6 +73,7 @@ object CastMessages {
         is CastReport.NotBeyonder -> Fizzle.NONE
         is CastReport.OnCooldown -> Fizzle.CLICK
         is CastReport.Suppressed -> Fizzle.SPARK
+        is CastReport.Forbidden -> Fizzle.SPARK
         is CastReport.Resisted -> Fizzle.NONE
         is CastReport.Refused -> when (report.reason) {
             is CastRefusal.NotOwned -> Fizzle.NONE

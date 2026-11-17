@@ -96,6 +96,8 @@ object MysteriesAboveMod : ModInitializer {
 
         // Sun's Oaths are debts the world holds: paid by hand, broken on the wall clock.
         Oaths.install()
+        // A Judge's Prohibition of teleportation stops a pearl or a chorus fruit before it is used.
+        me.vangoo.mysteries.pathways.justiciar.Prohibitions.install()
         // The suns in a Seeker's eyes are synced to every client, so both sides must know the attachment.
         Eyes.install()
 

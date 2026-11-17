@@ -58,6 +58,9 @@ class AbilityExecutor(
             return report(caster, CastReport.Suppressed(TheftRegistry.suppressionSecondsLeft(caster.uuid, ability.identity)))
         }
 
+        // A Judge's law over where the caster stands: a power it forbids does not happen, and costs nothing.
+        if (me.vangoo.mysteries.pathways.justiciar.Prohibitions.forbids(caster, ability.identity)) return report(caster, CastReport.Forbidden)
+
         // The first call of something stolen starts its real term. Unconditional on purpose: the
         // gate lives inside the record, so nothing here knows what a reserve term is.
         TheftRegistry.markUsed(caster.uuid, ability.identity)

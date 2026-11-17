@@ -24,7 +24,7 @@ object BookAbilityIcons {
         "justiciar_physique", "justiciar_authority", "justiciar_arbiters_gaze", "justiciar_area_of_jurisdiction",
         "justiciar_recognition", "justiciar_intuition", "justiciar_whip_of_pain", "justiciar_psychic_piercing",
         "justiciar_brand_of_restraint", "justiciar_psychic_lashing", "justiciar_verdict", "justiciar_power_prohibition",
-        "justiciar_spawn_prohibition", "justiciar_punishment",
+        "justiciar_punishment",
         "death_undead_knowledge", "death_cadaveric_resilience", "death_gloomy_presence", "death_death_sight",
         "death_spirit_vision", "death_physique", "death_spirit_communication", "death_eye_of_death",
         "death_spirit_perception", "death_voice_of_the_dead", "death_spirit_channeling", "death_corpse_guise",
@@ -184,7 +184,7 @@ object BookAbilityIcons {
         "scales" to "justiciar_area_of_jurisdiction justiciar_verdict",
         "card" to "fool_paper_substitution",
         "moon" to "sun_night_vision visionary_dream_traversal",
-        "chains" to "justiciar_brand_of_restraint justiciar_power_prohibition justiciar_spawn_prohibition",
+        "chains" to "justiciar_brand_of_restraint justiciar_power_prohibition",
         "spiral" to "error_mental_disruption visionary_surge_of_insanity",
         "crown" to "justiciar_authority",
     )
