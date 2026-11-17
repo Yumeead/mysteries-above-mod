@@ -5,25 +5,25 @@ import me.vangoo.domain.valueobjects.Sequence
 import me.vangoo.mysteries.ability.AbilityOutcome
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
-import net.minecraft.core.particles.DustParticleOptions
-import net.minecraft.core.particles.ParticleTypes
+import me.vangoo.mysteries.effect.privateText
+import me.vangoo.mysteries.net.payload.WorldEffectPayload
+import me.vangoo.mysteries.pathways.justiciar.lash
 import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
+import net.minecraft.world.InteractionHand
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.player.Player
-import net.minecraft.world.phys.Vec3
-import kotlin.math.PI
-import kotlin.math.max
-import kotlin.math.sin
 
 /**
  * Justiciar, Seq. 7 (Interrogator): **Whip of Pain**.
  *
- * A whip of crackling force strikes the target under the crosshair and forces the truth out: the
- * caster reads their Sequence, held weapon and health straight off the pain.
+ * A barbed whip is swung over the shoulder, unrolls and cracks on the target; the blow and the debuffs
+ * land with the crack, not before. The pain shakes answers out of the target, and they
+ * hang over it one at a time for the caster alone: what rank it is, what it holds, how much is left of it.
+ * This is knowledge, so it is the one place the power writes into the world.
  */
 class WhipOfPain : ActiveAbility(AbilityIdentity.of("justiciar_whip_of_pain")) {
 
@@ -34,10 +34,10 @@ class WhipOfPain : ActiveAbility(AbilityIdentity.of("justiciar_whip_of_pain")) {
     override fun cooldownSeconds(sequence: Sequence): Int = COOLDOWN_SECONDS
 
     override fun description(sequence: Sequence): Component = Component.literal(
-        "Матеріалізує електричний батіг у ціль під прицілом.\n" +
+        "Батіг із залізних ланок б'є в ціль під прицілом.\n" +
             "▪ Шкода $DAMAGE, Повільність і Сліпота\n" +
             "▪ Дальність $RANGE бл.\n" +
-            "▪ Змушує ціль розкрити секрети: Послідовність, зброю, здоров'я",
+            "▪ Болю не стримати: над ціллю по черзі з'являються Послідовність, зброя й здоров'я, їх бачите лише ви",
     )
 
     override fun contestedTarget(context: CastContext): LivingEntity? = context.targeting.lookingAt(RANGE)
@@ -45,64 +45,55 @@ class WhipOfPain : ActiveAbility(AbilityIdentity.of("justiciar_whip_of_pain")) {
     override fun cast(context: CastContext): AbilityOutcome {
         val target = context.targeting.lookingAt(RANGE)
             ?: return AbilityOutcome.failed("Немає цілі під прицілом")
-
-        drawWhip(context.level, context.eye, target.eyePosition)
-        context.level.playSound(
-            null, target.x, target.y, target.z,
-            SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.8f, 1.5f,
-        )
-
-        target.hurtServer(context.level, context.level.damageSources().indirectMagic(context.caster, context.caster), DAMAGE)
-        target.addEffect(MobEffectInstance(MobEffects.SLOWNESS, 60, 4))
-        target.addEffect(MobEffectInstance(MobEffects.BLINDNESS, 40, 0))
-
-        interrogate(context, target)
-        return AbilityOutcome.done("Хлист Болю розколов волю цілі")
-    }
-
-    private fun interrogate(context: CastContext, target: LivingEntity) {
         val caster = context.caster
-        context.messaging.tell(caster, Component.literal("▬▬▬▬ ПРИМУСОВИЙ ДОПИТ ▬▬▬▬"))
-        context.messaging.tell(
-            caster,
-            Component.literal("Ціль: ${target.name.string} | HP: ${"%.1f".format(target.health)}"),
-        )
+        val level = context.level
+        val color = context.effects.pathwayColor
 
-        val defender = context.beyonders.of(target.uuid)
-        context.messaging.tell(
-            caster,
-            Component.literal(
-                if (defender != null) "Статус: Потойбічний (Посл. ${defender.sequenceLevel})" else "Статус: Звичайна людина",
-            ),
-        )
+        lash(level, caster, target, WorldEffectPayload.Lash.Shape.WHIP, color)
+        caster.swing(InteractionHand.MAIN_HAND, true)
+        level.playSound(null, caster.x, caster.y, caster.z, SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.7f, 0.6f)
 
-        if (target is Player) {
-            context.messaging.tell(caster, Component.literal("Зброя: ${target.mainHandItem.displayName.string}"))
+        // The crack: the whip is taut on this tick, and so is the blow.
+        context.scheduling.after(WorldEffectPayload.Lash.WHIP_CRACK_TICKS) {
+            if (!target.isAlive) return@after
+            level.playSound(
+                null, target.x, target.y, target.z,
+                SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 0.8f, 1.5f,
+            )
+            target.hurtServer(level, level.damageSources().indirectMagic(caster, caster), DAMAGE)
+            target.addEffect(MobEffectInstance(MobEffects.SLOWNESS, 60, 4))
+            target.addEffect(MobEffectInstance(MobEffects.BLINDNESS, 40, 0))
         }
-        context.messaging.tell(caster, Component.literal("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"))
+
+        val beyonders = context.beyonders
+        INTERROGATION_TICKS.forEachIndexed { question, delay ->
+            context.scheduling.after(delay) {
+                if (!target.isAlive) return@after
+                val answer = when (question) {
+                    0 -> beyonders.of(target.uuid)?.let { Component.literal("Посл. ${it.sequenceLevel}") } ?: Component.literal("Не Потойбічний")
+                    1 -> (target as? Player)?.mainHandItem?.takeUnless { it.isEmpty }?.displayName ?: Component.literal("Нічого в руці")
+                    else -> Component.literal(health(target))
+                }
+                privateText(caster, target.eyePosition, answer, ANSWER_TICKS, color, anchor = target)
+            }
+        }
+        return AbilityOutcome.Done()
     }
 
-    /** A sagging arc of sparks — the "whip" shape, rather than a straight beam. */
-    private fun drawWhip(level: net.minecraft.server.level.ServerLevel, from: Vec3, to: Vec3) {
-        val span = to.subtract(from)
-        val length = span.length()
-        if (length < 0.1) return
-
-        val points = max(12, (length * 6).toInt())
-        for (i in 0..points) {
-            val t = i.toDouble() / points
-            val sag = sin(t * PI) * SAG_DEPTH
-            val point = from.add(span.scale(t)).subtract(0.0, sag, 0.0)
-            level.sendParticles(WHIP_DUST, point.x, point.y, point.z, 1, 0.0, 0.0, 0.0, 0.0)
-        }
-        level.sendParticles(ParticleTypes.ELECTRIC_SPARK, to.x, to.y, to.z, 20, 0.3, 0.3, 0.3, 0.1)
+    /** What is left of [target] as [SQUARES] squares, a filled one for each fifth. */
+    private fun health(target: LivingEntity): String {
+        val filled = Math.ceil(SQUARES * target.health / target.maxHealth.toDouble()).toInt().coerceIn(0, SQUARES)
+        return "■".repeat(filled) + "□".repeat(SQUARES - filled)
     }
 
     private companion object {
         const val RANGE = 10.0
         const val DAMAGE = 7.0f
-        const val SAG_DEPTH = 0.45
         const val COOLDOWN_SECONDS = 12
-        val WHIP_DUST = DustParticleOptions(0xFFF078, 0.8f)
+        const val SQUARES = 5
+
+        /** Ticks after the cast at which each answer is shaken out, and for how long it hangs. */
+        val INTERROGATION_TICKS = intArrayOf(10, 20, 30)
+        const val ANSWER_TICKS = 80
     }
 }

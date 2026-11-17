@@ -188,10 +188,124 @@ sealed interface WorldEffectPayload : CustomPacketPayload {
         }
     }
 
+    /**
+     * The Justiciar's law set in iron on [entity] (or in its hand), for [ticks]: [kind] says what is drawn.
+     * It is gold for an instant and cools to iron; everything in it stands along the axes of the world.
+     * [color] is the gold's RGB. The phases are the client's — ticks are all the server has to agree on.
+     */
+    data class Edict(val kind: EdictKind, val entity: Int, val color: Int, val ticks: Int) : WorldEffectPayload {
+        companion object {
+            /** Ticks Authority's aura builds for: three knocks, a pause, the blow. The client flares it on this tick. */
+            const val SEAL_TICKS = 120
+
+            /** Ticks between the knocks, each of which lifts the aura a step. */
+            const val SEAL_KNOCK_TICKS = 40
+
+            /** Ticks after the blow before the eyes go out. */
+            const val STRIKE_TICKS = 2
+
+            /** Ticks the aura takes to burn out after the blow: the tail of the packet's [ticks]. */
+            const val AURA_FADE_TICKS = 20
+
+            /** Ticks a hoop takes to break once its term is over: the tail of the packet's [ticks]. */
+            const val BREAK_TICKS = 10
+
+            /** Bonds: chains that break out of the ground, one every [BOND_STAGGER_TICKS], each coiling for [BOND_REACH_TICKS]. */
+            const val BOND_CHAINS = 3
+            const val BOND_STAGGER_TICKS = 3
+            const val BOND_REACH_TICKS = 6
+
+            /** The tick chain [chain] snaps tight on the body: the server's ratchet lands on it. */
+            fun bondSnap(chain: Int): Int = chain * BOND_STAGGER_TICKS + BOND_REACH_TICKS
+
+            /** The tick the crown, after the last chain, closes on the head. */
+            val CROWN_SNAP: Int get() = bondSnap(BOND_CHAINS - 1) + 3
+
+            /** Verdict, Exile: the ticks its wave of force takes to run out and die. */
+            const val EXILE_TICKS = 16
+
+            /** Verdict, Imprison: the walls close round the target one layer at a time. */
+            const val IMPRISON_LAYERS = 3
+            const val IMPRISON_LAYER_TICKS = 3
+
+            /** Verdict, Death: the ticks the Judge's dash takes, the blow landing on the last. */
+            const val DEATH_DASH_TICKS = 4
+
+            /** Verdict, Flog: three strokes of the unseen whip, this many ticks apart. */
+            const val FLOG_STROKES = 3
+            const val FLOG_STROKE_TICKS = 6
+        }
+    }
+
+    /**
+     * A line between two bodies, riding both frame by frame: from [from]'s hand (the eyes, for a needle) to
+     * [to]'s body. [shape] says how it is drawn and how long it lives ([Lash.life]).
+     */
+    /**
+     * The Judge's Prohibition, a law over a round of ground: [sign] is what it forbids, [at] and [radius] where. With
+     * [breach] set (an entity id, not [NO_ANCHOR]) it is not the law going up but someone breaking it: the sign
+     * flashes over them and the law's weight comes down on them.
+     */
+    data class Prohibition(
+        val at: Vec3,
+        val radius: Float,
+        val sign: ProhibitionSign,
+        val ticks: Int,
+        val color: Int,
+        val breach: Int = NO_ANCHOR,
+    ) : WorldEffectPayload {
+        companion object {
+            /** Ticks the law takes to spread from the Judge's palm to its edge. */
+            const val SPREAD_TICKS = 30
+
+            /** Ticks a breach is shown for. */
+            const val BREACH_TICKS = 24
+        }
+    }
+
+    data class Lash(val from: Int, val to: Int, val shape: Shape, val color: Int) : WorldEffectPayload {
+        enum class Shape(val life: Int) {
+            /** A segmented whip swung over the shoulder: it unrolls, cracks at [WHIP_CRACK_TICKS] and is drawn back. */
+            WHIP(life = 14),
+
+            /** Two bolts of lightning out of the eyes into the head, crackling; the target's spirit is knocked out of it. */
+            NEEDLE(life = 10),
+
+            /** A short arc of lightning that jumps from the blade onto what it struck. */
+            BOLT(life = 6),
+
+            /** Lightning crawling over the weapon in the caster's hand ([to] is the caster too), for its whole charge. */
+            COAT(life = 200),
+
+            /** Verdict, Death: the Judge's dash to the target, dragging afterimages, and the blow. */
+            DASH(life = Edict.DEATH_DASH_TICKS + 14),
+
+            /** Verdict, Flog: the strokes of an unseen whip, torn into the target's body. */
+            FLOG(life = Edict.FLOG_STROKES * Edict.FLOG_STROKE_TICKS + 16),
+
+            /**
+             * Punishment: [from] (the Paladin) has chosen [to]. A dawn behind the Paladin, unseen shackles on the
+             * target's feet, and in the target's own eyes the Paladin grows. As long as the mark lasts.
+             */
+            MARK(life = 30 * 20),
+        }
+
+        companion object {
+            /** Ticks a needle or a bolt takes to reach its target. */
+            const val REACH_TICKS = 2
+
+            /** Ticks from the swing to the whip's crack. Shared, so the blow lands on the crack. */
+            const val WHIP_CRACK_TICKS = 7
+        }
+    }
+
     companion object {
 
         const val NO_ANCHOR = -1
         const val MAX_SPOOL_TICKS = 1200
+
+        /** A law outlasts a light: an edict or a prohibition may stand this long (the Prohibition, 45 s). */
+        const val MAX_LAW_TICKS = 1200
         const val MAX_GLOW = 64
         const val MAX_TICKS = 200
         const val MAX_WIDTH = 4f
@@ -308,6 +422,29 @@ sealed interface WorldEffectPayload : CustomPacketPayload {
                             buf.writeVarInt(payload.from)
                             buf.writeVarInt(payload.to)
                         }
+                        is Edict -> {
+                            buf.writeByte(EDICT)
+                            buf.writeByte(payload.kind.ordinal)
+                            buf.writeVarInt(payload.entity)
+                            buf.writeInt(payload.color)
+                            buf.writeVarInt(payload.ticks)
+                        }
+                        is Prohibition -> {
+                            buf.writeByte(PROHIBITION)
+                            Vec3.STREAM_CODEC.encode(buf, payload.at)
+                            buf.writeFloat(payload.radius)
+                            buf.writeByte(payload.sign.ordinal)
+                            buf.writeVarInt(payload.ticks)
+                            buf.writeInt(payload.color)
+                            buf.writeVarInt(payload.breach)
+                        }
+                        is Lash -> {
+                            buf.writeByte(LASH)
+                            buf.writeVarInt(payload.from)
+                            buf.writeVarInt(payload.to)
+                            buf.writeByte(payload.shape.ordinal)
+                            buf.writeInt(payload.color)
+                        }
                     }
                 },
                 StreamDecoder { buf ->
@@ -373,6 +510,22 @@ sealed interface WorldEffectPayload : CustomPacketPayload {
                                 ?: throw DecoderException("Невідомий рух обличчя")
                             Face(kind, buf.readVarInt(), buf.readVarInt())
                         }
+                        EDICT -> {
+                            val kind = EdictKind.entries.getOrNull(buf.readByte().toInt()) ?: throw DecoderException("Невідомий едикт")
+                            Edict(kind, buf.readVarInt(), buf.readInt(), buf.readVarInt().coerceIn(1, MAX_LAW_TICKS))
+                        }
+                        LASH -> {
+                            val from = buf.readVarInt()
+                            val to = buf.readVarInt()
+                            val shape = Lash.Shape.entries.getOrNull(buf.readByte().toInt()) ?: throw DecoderException("Невідома лінія")
+                            Lash(from, to, shape, buf.readInt())
+                        }
+                        PROHIBITION -> {
+                            val at = Vec3.STREAM_CODEC.decode(buf)
+                            val radius = buf.readFloat().takeIf { it.isFinite() }?.coerceIn(0f, MAX_LENGTH.toFloat()) ?: 0f
+                            val sign = ProhibitionSign.entries.getOrNull(buf.readByte().toInt()) ?: throw DecoderException("Невідома заборона")
+                            Prohibition(at, radius, sign, buf.readVarInt().coerceIn(1, MAX_LAW_TICKS), buf.readInt(), buf.readVarInt())
+                        }
                         else -> throw DecoderException("Невідома форма світла: $tag")
                     }
                 },
@@ -392,7 +545,39 @@ sealed interface WorldEffectPayload : CustomPacketPayload {
         private const val AIR_SHOT = 11
         private const val PENDULUM = 12
         private const val VISION = 13
+        private const val EDICT = 14
+        private const val LASH = 15
+        private const val PROHIBITION = 16
     }
+}
+
+/** What an [WorldEffectPayload.Edict] draws. */
+/** What a Prohibition forbids: the novel's own examples. */
+enum class ProhibitionSign {
+    FLIGHT,
+    TELEPORTATION,
+    INVISIBILITY,
+    UNDEAD,
+}
+
+enum class EdictKind {
+    /** A square frame over the hand, built a side at a time, closed and struck down into the palm: Authority. */
+    SEAL,
+
+    /** Three square hoops dropped down the body — ankles, belt, chest — that snap shut and cool to iron. */
+    BONDS,
+
+    /** A small hoop on the head, after the others: for a Beyonder, whose powers are locked. */
+    CROWN,
+
+    /** Verdict, Exile: a wave of force out from the Judge. */
+    EXILE,
+
+    /** Verdict, Imprison: transparent walls closing round the target in layers, a viscous liquid running down them. */
+    IMPRISON,
+
+    /** Verdict, Confinement: a transparent cell round where the target stood, rippling where it is struck. */
+    CONFINE,
 }
 
 /**

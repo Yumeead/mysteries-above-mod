@@ -94,7 +94,8 @@ class BookArtTest {
         val icons = identities.map { identity ->
             BookAbilityIcons.texture(identity, "Justiciar").also { assertNotNull(it, identity) }
         }
-        assertEquals(16, identities.size)
+        // 15 since 17.11.2026: Spawn Prohibition merged into Prohibition's Undead mode.
+        assertEquals(15, identities.size)
         assertEquals(icons.size, icons.toSet().size)
         assertEquals(BookAbilityIcons.justiciarOverrides["common_combat_proficiency"], BookAbilityIcons.texture("common_combat_proficiency", "Justiciar"))
         assertNotEquals(BookAbilityIcons.texture("door_anti_divination", "Door"), BookAbilityIcons.texture("door_anti_divination", "Justiciar"))

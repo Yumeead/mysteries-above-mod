@@ -1,15 +1,22 @@
 package me.vangoo.mysteries.pathways.justiciar.abilities
 
+import me.vangoo.domain.PathwayBranding
 import me.vangoo.domain.valueobjects.AbilityIdentity
 import me.vangoo.domain.valueobjects.Sequence
 import me.vangoo.domain.valueobjects.SequenceBasedSuccessChance
 import me.vangoo.mysteries.ability.AbilityOutcome
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
-import net.minecraft.core.particles.ParticleTypes
+import me.vangoo.mysteries.effect.EyeGlow
+import me.vangoo.mysteries.effect.Eyes
+import me.vangoo.mysteries.effect.ward
+import me.vangoo.mysteries.net.payload.WorldEffectPayload.Edict
+import me.vangoo.mysteries.pathways.justiciar.gavel
+import me.vangoo.mysteries.pathways.justiciar.seal
 import net.minecraft.network.chat.Component
-import net.minecraft.sounds.SoundEvents
-import net.minecraft.sounds.SoundSource
+import net.minecraft.network.protocol.game.ClientboundPlayerRotationPacket
+import net.minecraft.server.level.ServerLevel
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.EquipmentSlot
@@ -21,9 +28,13 @@ import net.minecraft.world.item.ItemStack
 /**
  * Justiciar, Seq. 9 (Arbiter): **Authority**.
  *
- * An aura of undeniable authority. Everyone nearby feels it build for a few seconds; when it
- * lands, ordinary people drop what they are holding and stumble, while hostile creatures simply
- * take a blow.
+ * Pressure that builds for six seconds in three knocks: an aura kindles round the Arbiter, as everyone near sees
+ * it, and rises a step at each knock; on the fourth it flares and strikes. Ordinary people bow their heads and drop
+ * what they hold, hostile creatures take a blow. Nothing is written: the knocks, the aura and the bowed heads are
+ * all there is (the user's call, 16.11.2026: no item over the hand, an aura in the manner of Nen, but laconic).
+ *
+ * Who is struck is whoever stands in range **when the frame closes**, not when it was begun: three knocks
+ * are time to step away. A cast with no one around at all is a refusal and costs nothing.
  *
  * The plugin told friend from foe with a six-branch heuristic (nametag, villager, golem, horse,
  * tameable, animal). Vanilla already drew that line and called it [Enemy] — the marker interface
@@ -38,56 +49,54 @@ class Authority : ActiveAbility(AbilityIdentity.of("justiciar_authority")) {
     override fun cooldownSeconds(sequence: Sequence): Int = COOLDOWN_SECONDS
 
     override fun description(sequence: Sequence): Component = Component.literal(
-        "Випромінює ауру неоспорюваного авторитету.\n" +
-            "▪ Радіус ${RADIUS.toInt()} бл., ефект настає через ${BUILDUP_TICKS / 20} с\n" +
-            "▪ Гравці впускають зброю та броню, дістають Повільність I на 10 с\n" +
+        "Довкола вас розгоряється аура влади і за ${Edict.SEAL_TICKS / 20} с вибухає тиском.\n" +
+            "▪ Радіус ${RADIUS.toInt()} бл., цілі визначаються в мить удару\n" +
+            "▪ Гравці впускають зброю та броню, схиляють голову, дістають Повільність I на 10 с\n" +
             "▪ Вороже до нечисті: $MOB_DAMAGE шкоди\n" +
             "▪ Не чіпає мирних істот",
     )
 
     override fun cast(context: CastContext): AbilityOutcome {
         val caster = context.caster
-        val box = caster.boundingBox.inflate(RADIUS)
-        val nearby = context.level.getEntitiesOfClass(LivingEntity::class.java, box) { it !== caster }
-        val players = nearby.filterIsInstance<net.minecraft.server.level.ServerPlayer>()
-        val hostiles = nearby.filter { it is Enemy }
+        if (struck(context).isEmpty()) return AbilityOutcome.failed("Поруч нікого, на кого можна тиснути")
 
-        if (players.isEmpty() && hostiles.isEmpty()) {
-            context.messaging.actionBar(caster, Component.literal("Аура Авторитету активована. Поруч немає цілей..."))
-            return AbilityOutcome.done("Аура Авторитету розсіялась у порожнечі")
+        seal(context.level, caster, context.effects.pathwayColor)
+        Eyes.light(caster, EyeGlow.GOLD)
+        // Three knocks, each a little higher than the last; the blow is the fourth, and the loudest.
+        for (knock in 0 until KNOCKS) {
+            context.scheduling.after(knock * Edict.SEAL_KNOCK_TICKS) { gavel(context.level, caster.position(), 0.6f + 0.15f * knock, 0.8f + 0.15f * knock) }
         }
-
-        buildup(context)
-        context.messaging.actionBar(caster, Component.literal("Аура Авторитету активована! Ефект через ${BUILDUP_TICKS / 20} с..."))
 
         val casterSequence = context.beyonder.sequenceLevel
-        context.scheduling.after(BUILDUP_TICKS) {
-            var subdued = 0
-            var resisted = 0
-            for (target in players) {
+        context.scheduling.after(Edict.SEAL_TICKS) {
+            gavel(context.level, caster.position(), 1.4f, 0.7f)
+            for (target in struck(context)) {
                 if (!target.isAlive) continue
-                val defender = context.beyonders.of(target.uuid)
-                if (defender != null && !SequenceBasedSuccessChance(casterSequence, defender.sequenceLevel).rollSuccess()) {
-                    resisted++
-                    continue
+                if (target is ServerPlayer) {
+                    val defender = context.beyonders.of(target.uuid)
+                    if (defender != null && !SequenceBasedSuccessChance(casterSequence, defender.sequenceLevel).rollSuccess()) {
+                        ward(target, PathwayBranding.liquidOf(defender.pathway.name))
+                        continue
+                    }
+                    subdue(context.level, target)
+                } else {
+                    target.hurtServer(context.level, context.level.damageSources().indirectMagic(caster, caster), MOB_DAMAGE)
                 }
-                subdue(context.level, target)
-                subdued++
             }
-            for (mob in hostiles) {
-                if (!mob.isAlive) continue
-                mob.hurtServer(context.level, context.level.damageSources().indirectMagic(caster, caster), MOB_DAMAGE)
-            }
-            context.messaging.actionBar(
-                caster,
-                Component.literal("Авторитет: підкорено $subdued, опиралось $resisted, вражено нечисті ${hostiles.size}"),
-            )
         }
+        context.scheduling.after(Edict.SEAL_TICKS + Edict.STRIKE_TICKS) { Eyes.dim(caster) }
 
-        return AbilityOutcome.done("Аура Авторитету наростає")
+        return AbilityOutcome.Done()
     }
 
-    private fun subdue(level: net.minecraft.server.level.ServerLevel, target: net.minecraft.server.level.ServerPlayer) {
+    /** Who stands where the blow would land now: other players, and hostile creatures. */
+    private fun struck(context: CastContext): List<LivingEntity> {
+        val caster = context.caster
+        val box = caster.boundingBox.inflate(RADIUS)
+        return context.level.getEntitiesOfClass(LivingEntity::class.java, box) { it !== caster && (it is ServerPlayer || it is Enemy) }
+    }
+
+    private fun subdue(level: ServerLevel, target: ServerPlayer) {
         val drop = target.position()
         for (slot in EquipmentSlot.entries) {
             val stack = target.getItemBySlot(slot)
@@ -102,28 +111,18 @@ class Authority : ActiveAbility(AbilityIdentity.of("justiciar_authority")) {
             }
         }
         target.addEffect(MobEffectInstance(MobEffects.SLOWNESS, SLOWNESS_DURATION_TICKS, 0))
-        level.sendParticles(ParticleTypes.CRIT, drop.x, drop.y + 1.0, drop.z, 25, 0.5, 1.0, 0.5, 0.1)
-        level.playSound(
-            null, drop.x, drop.y, drop.z,
-            SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.PLAYERS, 0.5f, 1.2f,
-        )
-    }
-
-    private fun buildup(context: CastContext) {
-        val center = context.origin
-        context.level.sendParticles(ParticleTypes.ENCHANT, center.x, center.y + 1.0, center.z, 60, RADIUS * 0.3, 1.0, RADIUS * 0.3, 0.3)
-        context.level.playSound(
-            null, center.x, center.y, center.z,
-            SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8f, 1.2f,
-        )
+        // The head bows: the pitch is set, not turned, so it does not matter where it was looking.
+        target.connection.send(ClientboundPlayerRotationPacket(target.yRot, false, (target.xRot + BOW_PITCH).coerceAtMost(MAX_PITCH), false))
     }
 
     private companion object {
         const val RADIUS = 15.0
-        const val BUILDUP_TICKS = 120
+        const val KNOCKS = 3
         const val SLOWNESS_DURATION_TICKS = 200
         const val DROP_PICKUP_DELAY_TICKS = 60
         const val MOB_DAMAGE = 8.0f
         const val COOLDOWN_SECONDS = 30
+        const val BOW_PITCH = 40f
+        const val MAX_PITCH = 85f
     }
 }

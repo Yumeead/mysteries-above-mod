@@ -88,6 +88,8 @@ metadata:
   - `runtimeOnly("maven.modrinth:sodium:mc26.2-0.9.2-fabric")` і `…iris:1.11.4+26.2-fabric`;
   - `clearRunDirectory = false` у `configureTests`;
   - пак і `config/iris.properties` (`enableShaders=true`, `shaderPack=…zip`) покласти в run-каталог;
+    r5.9.3 на диску вже немає (16.11.2026), є Complementary Reimagined r5.7.1 у
+    `~/curseforge/minecraft/Instances/All of Create/shaderpacks/` — Iris 1.11.4 його бере;
   - після перевірки все відкотити.
 
 **Коміти, коли попросять:** спершу віха B, потім стовп. `Light.kt`, `Effects.kt`, access widener, `CLAUDE.md`,

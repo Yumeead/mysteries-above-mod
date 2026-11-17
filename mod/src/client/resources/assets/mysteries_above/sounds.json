@@ -16,5 +16,27 @@
       { "name": "minecraft:mob/warden/heartbeat_4", "volume": 0.55, "pitch": 0.80 }
     ],
     "subtitle": "subtitles.mysteries_above.heartbeat"
+  },
+  "gavel": {
+    "sounds": [
+      { "name": "minecraft:random/anvil_land", "volume": 0.45, "pitch": 1.7 }
+    ],
+    "subtitle": "subtitles.mysteries_above.gavel"
+  },
+  "ratchet": {
+    "sounds": [
+      { "name": "minecraft:block/chain/step1", "volume": 0.7, "pitch": 1.5 },
+      { "name": "minecraft:block/chain/step2", "volume": 0.7, "pitch": 1.5 },
+      { "name": "minecraft:block/chain/step3", "volume": 0.7, "pitch": 1.5 }
+    ],
+    "subtitle": "subtitles.mysteries_above.ratchet"
+  },
+  "clang": {
+    "sounds": [
+      { "name": "minecraft:block/iron_trapdoor/close1", "volume": 0.8, "pitch": 1.2 },
+      { "name": "minecraft:block/iron_trapdoor/close2", "volume": 0.8, "pitch": 1.2 },
+      { "name": "minecraft:block/iron_trapdoor/close3", "volume": 0.8, "pitch": 1.2 }
+    ],
+    "subtitle": "subtitles.mysteries_above.clang"
   }
 }

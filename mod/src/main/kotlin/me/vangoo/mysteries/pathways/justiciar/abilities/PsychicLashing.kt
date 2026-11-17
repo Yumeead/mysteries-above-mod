@@ -5,20 +5,28 @@ import me.vangoo.domain.valueobjects.Sequence
 import me.vangoo.mysteries.ability.AbilityOutcome
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
-import net.minecraft.core.particles.ParticleTypes
+import me.vangoo.mysteries.ability.context.on
+import me.vangoo.mysteries.event.IncomingDamage
+import me.vangoo.mysteries.net.payload.WorldEffectPayload
+import me.vangoo.mysteries.pathways.justiciar.clang
+import me.vangoo.mysteries.pathways.justiciar.lash
 import net.minecraft.network.chat.Component
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
+import net.minecraft.world.damagesource.DamageTypes
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
-import net.minecraft.world.entity.LivingEntity
-import net.minecraft.world.phys.Vec3
 
 /**
  * Justiciar, Seq. 7 (Interrogator): **Psychic Lashing**.
  *
- * An illusory bolt that whips the mind of the nearest enemy, then leaps to the next one — up to
- * [MAX_BOUNCES] targets — dealing mental damage down the chain.
+ * As the novel has it: the Interrogator coats a cold weapon in bolts of illusory lightning, and for a while it
+ * strikes the Spirit Body as well as the flesh. Lightning crawls over the weapon in hand for [CHARGE_TICKS]
+ * (seen by everyone); every melee blow in that time adds [SPIRIT_DAMAGE] and an arc that jumps from the blade
+ * onto the one struck.
+ *
+ * The plugin threw a bolt that hopped from target to target. That was a ranged power standing in for this
+ * one; the lore's power is a weapon that is suddenly worth fearing up close.
  */
 class PsychicLashing : ActiveAbility(AbilityIdentity.of("justiciar_psychic_lashing")) {
 
@@ -29,58 +37,35 @@ class PsychicLashing : ActiveAbility(AbilityIdentity.of("justiciar_psychic_lashi
     override fun cooldownSeconds(sequence: Sequence): Int = COOLDOWN_SECONDS
 
     override fun description(sequence: Sequence): Component = Component.literal(
-        "Випускає розряд ілюзорної блискавки в ціль під прицілом (дальність $CAST_RANGE бл.).\n" +
-            "▪ Перескакує на найближчих ворогів, до $MAX_BOUNCES цілей\n" +
-            "▪ Шкода за влучання: $DAMAGE_PER_HIT",
+        "Зброя в руці вкривається ілюзорними блискавками на ${CHARGE_TICKS / 20} с.\n" +
+            "▪ Кожен удар нею б'є й по Духовному Тілу: ще $SPIRIT_DAMAGE шкоди\n" +
+            "▪ Потрібна зброя в головній руці",
     )
 
-    override fun contestedTarget(context: CastContext): LivingEntity? = context.targeting.lookingAt(CAST_RANGE)
-
     override fun cast(context: CastContext): AbilityOutcome {
-        var current: LivingEntity? = context.targeting.lookingAt(CAST_RANGE)
-            ?: return AbilityOutcome.failed("Немає цілі для атаки")
+        val caster = context.caster
+        if (caster.mainHandItem.isEmpty) return AbilityOutcome.failed("Візьміть у руку зброю")
 
-        val hit = mutableSetOf(context.caster.uuid)
-        var origin = context.eye
-        var bounces = 0
+        val level = context.level
+        val color = context.effects.pathwayColor
+        lash(level, caster, caster, WorldEffectPayload.Lash.Shape.COAT, color)
+        level.playSound(null, caster.x, caster.y, caster.z, SoundEvents.TRIDENT_THUNDER.value(), SoundSource.PLAYERS, 0.4f, 1.8f)
 
-        while (current != null && bounces < MAX_BOUNCES) {
-            strike(context, current, origin)
-            hit += current.uuid
-            origin = current.eyePosition
-            bounces++
-            current = nextTarget(context, current.position(), hit)
+        context.events.on<IncomingDamage>(CHARGE_TICKS) { damage ->
+            // A blow of the hand that holds the weapon: not an arrow, not this power's own damage.
+            if (damage.attacker !== caster || damage.directCause !== caster || !damage.source.`is`(DamageTypes.PLAYER_ATTACK)) return@on
+            val target = damage.victim
+            damage.amount += SPIRIT_DAMAGE
+            target.addEffect(MobEffectInstance(MobEffects.SLOWNESS, 10, 2))
+            lash(level, caster, target, WorldEffectPayload.Lash.Shape.BOLT, color)
+            clang(level, target.position(), 1.6f)
         }
-
-        return AbilityOutcome.done("Психічне Шмагання вразило $bounces ціл(ей)")
-    }
-
-    private fun strike(context: CastContext, target: LivingEntity, from: Vec3) {
-        val to = target.eyePosition
-        context.level.sendParticles(ParticleTypes.FIREWORK, to.x, to.y, to.z, 10, 0.1, 0.1, 0.1, 0.05)
-        context.level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, to.x, to.y, to.z, 5, 0.2, 0.2, 0.2, 0.02)
-        context.level.playSound(
-            null, target.x, target.y, target.z,
-            SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 1.0f, 1.8f,
-        )
-        target.hurtServer(context.level, context.level.damageSources().indirectMagic(context.caster, context.caster), DAMAGE_PER_HIT)
-        target.addEffect(MobEffectInstance(MobEffects.SLOWNESS, 10, 2))
-    }
-
-    private fun nextTarget(context: CastContext, center: Vec3, excluded: Set<java.util.UUID>): LivingEntity? {
-        val box = net.minecraft.world.phys.AABB.ofSize(center, BOUNCE_RANGE * 2, BOUNCE_RANGE * 2, BOUNCE_RANGE * 2)
-        val rangeSquared = BOUNCE_RANGE * BOUNCE_RANGE
-        val candidates = context.level.getEntitiesOfClass(LivingEntity::class.java, box) {
-            it.uuid !in excluded && it.position().distanceToSqr(center) <= rangeSquared
-        }
-        return candidates.minByOrNull { it.position().distanceToSqr(center) }
+        return AbilityOutcome.Done()
     }
 
     private companion object {
-        const val CAST_RANGE = 12.0
-        const val BOUNCE_RANGE = 6.0
-        const val MAX_BOUNCES = 4
-        const val DAMAGE_PER_HIT = 5.0f
-        const val COOLDOWN_SECONDS = 15
+        val CHARGE_TICKS = WorldEffectPayload.Lash.Shape.COAT.life
+        const val SPIRIT_DAMAGE = 5.0f
+        const val COOLDOWN_SECONDS = 20
     }
 }

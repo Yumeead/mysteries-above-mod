@@ -56,9 +56,13 @@ object WorldEffects : HudElement {
         LevelRenderEvents.COLLECT_SUBMITS.register(Strands::submit)
         LevelRenderEvents.COLLECT_SUBMITS.register(SpiritThreads::submit)
         // Bent air reads the frame's colour once the solid entities are in it; it is drawn with the translucent ones.
-        LevelRenderEvents.AFTER_SOLID_FEATURES.register { if (AirShots.active && !ShaderPacks.inUse) Refraction.captureColor() }
+        LevelRenderEvents.AFTER_SOLID_FEATURES.register { if ((AirShots.active || Verdicts.bending) && !ShaderPacks.inUse) Refraction.captureColor() }
         LevelRenderEvents.COLLECT_SUBMITS.register(AirShots::submit)
         LevelRenderEvents.COLLECT_SUBMITS.register(Pendulums::submit)
+        LevelRenderEvents.COLLECT_SUBMITS.register(Edicts::submit)
+        LevelRenderEvents.COLLECT_SUBMITS.register(Lashes::submit)
+        LevelRenderEvents.COLLECT_SUBMITS.register(Laws::submit)
+        LevelRenderEvents.COLLECT_SUBMITS.register(Marks::submit)
     }
 
     fun accept(payload: WorldEffectPayload) {
@@ -77,11 +81,22 @@ object WorldEffects : HudElement {
             is WorldEffectPayload.Face -> Paper.accept(payload)
             is WorldEffectPayload.AirShot -> AirShots.accept(payload)
             is WorldEffectPayload.Pendulum -> Pendulums.accept(payload)
+            is WorldEffectPayload.Edict -> Edicts.accept(payload)
+            is WorldEffectPayload.Lash -> Lashes.accept(payload)
+            is WorldEffectPayload.Prohibition -> Laws.accept(payload)
             is WorldEffectPayload.Vision -> me.vangoo.mysteries.client.hud.DreamVision.accept(payload)
         }
     }
 
+    /**
+     * For client game tests: every effect stands at its age while this is set. A screenshot takes several
+     * ticks, so a test that wants each phase of a swing lets one tick through between shots.
+     */
+    @JvmStatic
+    var held = false
+
     fun tick() {
+        if (held) return
         previousFlash = flash
         flash = if (flash < FLASH_GONE) 0f else flash * FLASH_DECAY
         if (Minecraft.getInstance().isPaused) return
@@ -92,6 +107,10 @@ object WorldEffects : HudElement {
         Strands.tick()
         AirShots.tick()
         Pendulums.tick()
+        Edicts.tick()
+        Lashes.tick()
+        Laws.tick()
+        Marks.tick()
         me.vangoo.mysteries.client.hud.DreamVision.tick()
     }
 
@@ -103,6 +122,10 @@ object WorldEffects : HudElement {
         Strands.clear()
         AirShots.clear()
         Pendulums.clear()
+        Edicts.clear()
+        Lashes.clear()
+        Laws.clear()
+        Marks.clear()
         me.vangoo.mysteries.client.hud.DreamVision.clear()
         flash = 0f
         previousFlash = 0f

@@ -11,7 +11,10 @@
     "InterfaceWidgetMixin",
     "InterfaceSelectionMixin",
     "ChatLayoutMixin",
-    "PrivateGlowMixin"
+    "PrivateGlowMixin",
+    "HeldItemCoatMixin",
+    "HeldItemLayerMixin",
+    "PaladinLoomMixin"
   ],
   "injectors": {
     "defaultRequire": 1
