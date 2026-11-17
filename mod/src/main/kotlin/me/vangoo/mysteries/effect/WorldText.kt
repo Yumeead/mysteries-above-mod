@@ -25,6 +25,8 @@ import org.joml.Vector3f
  * the light they hang in, not to a sign. It is [Spirits.EPHEMERAL], so a line left half-said when
  * the chunk unloaded never comes back from disk.
  *
+ * With [fadeInTicks] the words also come up out of nothing instead of appearing at once.
+ *
  * Returns the display, so whoever placed it can take it away early; `null` if it could not be placed.
  */
 fun worldText(
@@ -33,6 +35,7 @@ fun worldText(
     at: Vec3,
     text: Component,
     durationTicks: Int,
+    fadeInTicks: Int = 0,
 ): Display.TextDisplay? {
     require(durationTicks > 0) { "Тривалість тексту мусить бути додатною: $durationTicks" }
     val tag = CompoundTag()
@@ -40,6 +43,7 @@ fun worldText(
     tag.put(Display.TextDisplay.TAG_TEXT, ComponentSerialization.CODEC.encodeStart(NbtOps.INSTANCE, text).getOrThrow())
     tag.putString(Display.TAG_BILLBOARD, "center")
     tag.putInt("line_width", LINE_WIDTH)
+    if (fadeInTicks > 0) tag.putByte("text_opacity", MIN_ALPHA.toByte())
     tag.putInt("background", 0)
     tag.putBoolean("shadow", true)
     tag.put(
@@ -61,8 +65,11 @@ fun worldText(
     val fade = minOf(FADE_TICKS, durationTicks)
     var step = 0
     scheduling.every(FADE_STEP_TICKS) {
-        val left = durationTicks - (++step) * FADE_STEP_TICKS
-        if (left in 1..fade) {
+        val elapsed = (++step) * FADE_STEP_TICKS
+        val left = durationTicks - elapsed
+        if (elapsed <= fadeInTicks) {
+            display.setTextOpacity((MIN_ALPHA + (OPAQUE - MIN_ALPHA) * elapsed / fadeInTicks).toByte())
+        } else if (left in 1..fade) {
             val alpha = MIN_ALPHA + (OPAQUE - MIN_ALPHA) * left / fade
             display.setTextOpacity(alpha.toByte())
         }
