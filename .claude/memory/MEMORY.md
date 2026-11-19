@@ -19,4 +19,4 @@
 - [Fool + wheel rework plan](fool-and-wheel-rework-plan.md) — 14.11 decisions: Air Bullet refraction+flight, wheel walk/pin, threads tab, danger arrows, face registry, divination; order
 - [No dots, arrows, dashes in player text](player-text-no-dots-arrows-dashes.md) — never `·`, `→`, `—` or UI-explaining hints in anything the player reads; ~336 old literals remain
 - [Marionette will and orders](marionette-will-and-orders.md) — 15.11 decisions: no own will, follow/come/guard/assist semantics, weapons+kits, gather/arm removed, arrow switch, left panel, 4 s pin
-- [Justiciar effects design](justiciar-effects-design.md) — 16.11 design artifact (proposed, not reviewed): axis-aligned grammar, Edict/Lash/Precinct, 7 mechanic decisions awaiting the user; step 0 probe done (vanilla bars: yes, Iris too)
+- [Justiciar effects rework](justiciar-effects-design.md) — what is reworked (Seq. 9–5 merged, Jurisdiction 19.11 uncommitted) and what is left (Recognition, Intuition, Gaze, Brand attributes)

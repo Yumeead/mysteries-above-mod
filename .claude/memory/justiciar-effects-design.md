@@ -5,14 +5,15 @@ metadata:
   node_type: memory
   type: reference
   originSessionId: fc1debbe-0ac4-4f32-954f-8a1a4dee0700
-  modified: 2026-11-16T10:46:48.563Z
+  modified: 2026-11-19T20:10:38.847Z
 ---
 
 Design for moving all 13 Justiciar abilities (Seq. 9–5) onto the phenomena engine, written 16.11.2026 on request, as a
 sibling of the "Supernatural Rendering Engine" artifact (BS6LZBxMymFbKNCbRMpUWH):
 https://claude.ai/artifact/3MmcvvuFaZxwwZzWxdRpUv
 
-**Status on 16.11.2026: proposed, not yet reviewed by the user.** Verify before treating any of it as decided.
+**The artifact is history now**: its axis-aligned "stamp" grammar was rejected (see below) and most abilities were rebuilt
+differently. Use it for the per-ability lore and mechanics notes, not for how things look.
 Step 0 of its §8 (the probe) is done, on the user's request "only step 0": vanilla iron bars — yes, both as `block_display`
 and through `submitBlockModel`, under Iris + Complementary too; `textBackground()` cold iron works under the pack.
 Findings in `.claude/rules/world-effects.md` («Залізо Justiciar: проба»), scene in `JusticiarProbeClientGameTest`.
@@ -44,7 +45,13 @@ client tests): Verdict (5 lore sentences on wheel modes; Confinement = rune dome
 curved cooling welts after "strips look bad"), Prohibition (one ability, 4 laws, rune belt + edge veil + crossed-out
 sign, `Prohibitions` registry, executor refuses teleporting powers), Punishment (active mark: dawn burst, Paladin looms
 in the target's eyes via `PaladinLoomMixin`, shackles, x1.5 blows; Prohibition breakers auto-marked). User's standing
-rule since 17.11: nothing appears instantly. Left: Jurisdiction (Seq. 8), Recognition, Intuition, Gaze polish.
+rule since 17.11: nothing appears instantly. Seq. 6–5 and the Seq. 9/7 reworks are committed and merged (18.11, `129d781`).
+
+Jurisdiction reworked 19.11.2026 (uncommitted, client test only, awaiting the user's look): square zone, bound private
+to the Sheriff (posts rise near the edge, wave on cast, light along the edge on crossing), others see only a wave over
+the area when they walk in; iron-bar posts with 16 px sigils (`jurisdiction_sigils.png`) and a sagging cord. Details in
+`.claude/rules/world-effects.md` («Юрисдикція»). Still left: Recognition, Intuition (both still chat text), Gaze polish,
+Brand's attribute modifiers instead of Slowness 255.
 
 User decisions 17.11.2026 for Seq. 6–5 (all as I recommended): Verdict picks its sentence by **wheel modes**, not the
 item in hand; the set is the lore's: Exile, Imprison, Confinement, Death (dash with afterimages + blow), Flog (invisible
