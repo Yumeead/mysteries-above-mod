@@ -16,6 +16,7 @@ import me.vangoo.mysteries.beyonder.BeyonderStatus
 import me.vangoo.mysteries.pathways.ModPathways
 import net.fabricmc.fabric.api.gametest.v1.GameTest
 import net.minecraft.commands.arguments.EntityAnchorArgument
+import net.minecraft.core.BlockPos
 import net.minecraft.gametest.framework.GameTestHelper
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.EntityTypes
@@ -155,8 +156,12 @@ class AbilityGameTests {
         fun reset(gaze: Gaze, tool: Item) {
             if (husk?.isAlive != true) {
                 husk?.discard()
-                husk = helper.spawn(EntityTypes.HUSK, helper.at(1, 4)).also { it.setNoAi(true) }
+                // Relative to the test: `spawn` adds the test's origin itself, and the absolute `at` here put the husk
+                // a world away, so every power aimed at a creature had nothing under the gaze.
+                husk = helper.spawn(EntityTypes.HUSK, BlockPos(1, 1, 4)).also { it.setNoAi(true) }
             }
+            val standing = husk!!.position().distanceTo(helper.at(1, 4))
+            if (standing > 1.0) helper.fail("лушпайка не на своєму місці: за $standing бл.")
             if (!bystander.isAlive) bystander.setHealth(bystander.maxHealth)
             caster.health = caster.maxHealth
             bystander.health = bystander.maxHealth
