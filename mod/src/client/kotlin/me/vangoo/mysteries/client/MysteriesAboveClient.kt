@@ -139,6 +139,7 @@ object MysteriesAboveClient : ClientModInitializer {
             HintHud.clear()
             DangerArrows.clear()
             me.vangoo.mysteries.client.beyonder.ClientDossiers.clear()
+            me.vangoo.mysteries.client.render.SkinEyes.clear()
             PuppetSkins.masks.clear()
             WorldEffects.clear()
         }

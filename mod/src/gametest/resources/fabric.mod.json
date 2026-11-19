@@ -108,6 +108,10 @@
       {
         "adapter": "kotlin",
         "value": "me.vangoo.mysteries.gametest.RestraintClientGameTest"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.gametest.EyesClientGameTest"
       }
     ]
   },
