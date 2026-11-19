@@ -58,6 +58,9 @@ class AbilityExecutor(
             return report(caster, CastReport.Suppressed(TheftRegistry.suppressionSecondsLeft(caster.uuid, ability.identity)))
         }
 
+        // A bound body calls on nothing: refused before anything is charged.
+        if (Restraints.isRestrained(caster)) return report(caster, CastReport.Restrained)
+
         // A Judge's law over where the caster stands: a power it forbids does not happen, and costs nothing.
         if (me.vangoo.mysteries.pathways.justiciar.Prohibitions.forbids(caster, ability.identity)) return report(caster, CastReport.Forbidden)
 

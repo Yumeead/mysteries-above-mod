@@ -22,6 +22,10 @@
       {
         "adapter": "kotlin",
         "value": "me.vangoo.mysteries.gametest.MarionetteGameTests"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.gametest.RestraintGameTests"
       }
     ],
     "fabric-client-gametest": [
@@ -100,6 +104,10 @@
       {
         "adapter": "kotlin",
         "value": "me.vangoo.mysteries.gametest.JusticiarSheriffClientGameTest"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.gametest.RestraintClientGameTest"
       }
     ]
   },

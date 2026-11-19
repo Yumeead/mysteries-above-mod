@@ -48,6 +48,7 @@ object AbilityRequests {
         // ability itself announces the new state (`onEnable`/`onDisable`), the same way a cast
         // words its own outcome.
         if (spec is ToggleablePassiveAbility) {
+            if (me.vangoo.mysteries.ability.Restraints.isRestrained(player)) return report(player, CastReport.Restrained)
             val nowEnabled = AbilityServices.passives.toggle(player, spec)
             AbilityServices.statePump.pushNow(player.uuid)
             return CastReport.Performed(AbilityOutcome.done(if (nowEnabled) "Увімкнено" else "Вимкнено"), null)
