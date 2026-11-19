@@ -6,6 +6,7 @@ import me.vangoo.mysteries.ability.AbilityMode
 import me.vangoo.mysteries.ability.AbilityOutcome
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
+import me.vangoo.mysteries.ability.Restraints
 import me.vangoo.mysteries.effect.worldText
 import me.vangoo.mysteries.net.payload.EdictKind
 import me.vangoo.mysteries.net.payload.WorldEffectPayload
@@ -14,15 +15,12 @@ import me.vangoo.mysteries.pathways.justiciar.clang
 import me.vangoo.mysteries.pathways.justiciar.edict
 import me.vangoo.mysteries.pathways.justiciar.gavel
 import me.vangoo.mysteries.pathways.justiciar.lash
-import me.vangoo.mysteries.pathways.justiciar.rootInPlace
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
 import net.minecraft.world.InteractionHand
-import net.minecraft.world.effect.MobEffectInstance
-import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.PositionMoveRotation
@@ -67,7 +65,7 @@ class Verdict : ActiveAbility(AbilityIdentity.of("justiciar_verdict")) {
     override fun description(sequence: Sequence): Component = Component.literal(
         "Ви вимовляєте вирок, і він здійснюється. Вирок обирається на колесі.\n" +
             "▪ Вигнання: відкидає ворогів у радіусі ${EXILE_RADIUS.toInt()} бл.\n" +
-            "▪ Ув'язнення: ціль під прицілом скута на ${IMPRISON_TICKS / 20} с\n" +
+            "▪ Ув'язнення: ціль під прицілом скута на ${IMPRISON_TICKS / 20} с, без руху, предметів і здібностей\n" +
             "▪ Ізоляція: ціль замкнена в прозорій сфері радіусом ${CONFINE_RADIUS.toInt()} бл. на ${CONFINE_TICKS / 20} с\n" +
             "▪ Смерть: ривок до цілі й удар на ${DEATH_DAMAGE.toInt()} шкоди\n" +
             "▪ Бичування: три удари невидимим батогом, рве обладунок\n" +
@@ -126,10 +124,7 @@ class Verdict : ActiveAbility(AbilityIdentity.of("justiciar_verdict")) {
     private fun imprison(context: CastContext, target: LivingEntity) {
         val level = context.level
         edict(level, target, EdictKind.IMPRISON, context.effects.pathwayColor, IMPRISON_TICKS)
-        target.addEffect(MobEffectInstance(MobEffects.SLOWNESS, IMPRISON_TICKS, 255, false, false))
-        target.addEffect(MobEffectInstance(MobEffects.JUMP_BOOST, IMPRISON_TICKS, 250, false, false))
-        target.addEffect(MobEffectInstance(MobEffects.MINING_FATIGUE, IMPRISON_TICKS, 4, false, false))
-        context.rootInPlace(target, IMPRISON_TICKS)
+        Restraints.hold(target, IMPRISON_TICKS)
         for (layer in 0 until Edict.IMPRISON_LAYERS) {
             context.scheduling.after(layer * Edict.IMPRISON_LAYER_TICKS) { clang(level, target.position(), 1.4f + 0.2f * layer) }
         }

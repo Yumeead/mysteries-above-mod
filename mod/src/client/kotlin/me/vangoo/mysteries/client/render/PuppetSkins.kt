@@ -37,9 +37,20 @@ object PuppetSkins {
         if (face == null) masks.remove(wearer) else masks[wearer] = face
     }
 
+    /**
+     * Skins made in place, with no download behind them, by wearer: for client tests, whose offline client can fetch
+     * no skin of its own. Nothing in the mod puts anything here.
+     */
+    private val dressed = HashMap<UUID, PlayerSkin>()
+
+    fun dress(wearer: UUID, skin: PlayerSkin?) {
+        if (skin == null) dressed.remove(wearer) else dressed[wearer] = skin
+    }
+
     /** The skin [player] should wear right now, or `null` for their own. */
     @JvmStatic
     fun worn(player: AbstractClientPlayer): PlayerSkin? {
+        dressed[player.uuid]?.let { return it }
         val client = Minecraft.getInstance()
         val possessing = if (player === client.player) ClientMarionettes.possessing else null
         if (possessing == null) return masks[player.uuid]?.let { of(it.partialProfile()) }

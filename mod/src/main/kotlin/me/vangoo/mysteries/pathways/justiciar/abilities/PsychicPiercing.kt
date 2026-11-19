@@ -7,6 +7,7 @@ import me.vangoo.domain.valueobjects.Sequence
 import me.vangoo.mysteries.ability.AbilityOutcome
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
+import me.vangoo.mysteries.ability.Restraints
 import me.vangoo.mysteries.ability.context.Fizzle
 import me.vangoo.mysteries.ability.runtime.LiveTargeting
 import me.vangoo.mysteries.ability.session
@@ -100,8 +101,8 @@ class PsychicPiercing : ActiveAbility(AbilityIdentity.of("justiciar_psychic_pier
             ward(target, if (targetPathway != null) PathwayBranding.liquidOf(targetPathway) else color)
         }
 
-        target.addEffect(MobEffectInstance(MobEffects.SLOWNESS, 20, 10))
-        target.addEffect(MobEffectInstance(MobEffects.JUMP_BOOST, 20, 128))
+        // The spirit knocked half out of the body: for a moment the body answers nothing.
+        Restraints.hold(target, STUN_TICKS)
         target.hurtServer(level, level.damageSources().indirectMagic(caster, caster), SPIRIT_DAMAGE)
         target.addEffect(MobEffectInstance(MobEffects.WITHER, 40, 1))
         if (target is Player) target.addEffect(MobEffectInstance(MobEffects.NAUSEA, 50, 0))
@@ -110,6 +111,7 @@ class PsychicPiercing : ActiveAbility(AbilityIdentity.of("justiciar_psychic_pier
     private companion object {
         const val RANGE = 5.0
         const val WINDOW_TICKS = 100 // 5 seconds
+        const val STUN_TICKS = 20
         const val SCAN_PERIOD_TICKS = 2
         const val SPIRIT_DAMAGE = 12.0f
         const val COOLDOWN_SECONDS = 20

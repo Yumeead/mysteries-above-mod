@@ -1,6 +1,7 @@
 package me.vangoo.mysteries.net
 
 import me.vangoo.mysteries.net.payload.AbilityActionPayload
+import me.vangoo.mysteries.net.payload.DossiersPayload
 import me.vangoo.mysteries.net.payload.AbilityRosterPayload
 import me.vangoo.mysteries.net.payload.AbilityStatePayload
 import me.vangoo.mysteries.net.payload.ChoiceAnswerPayload
@@ -84,6 +85,10 @@ object ModChannels {
     /** The face this player wears, for their own eyes (F5 and the arm); empty — their own. */
     val WORN_FACE: ClientboundChannel<WornFacePayload> =
         clientbound(WornFacePayload.TYPE, WornFacePayload.CODEC)
+
+    /** The Sheriff's files of those they have recognised: footprints in the world, «Справи» in the book. */
+    val DOSSIERS: ClientboundChannel<DossiersPayload> =
+        clientbound(DossiersPayload.TYPE, DossiersPayload.CODEC)
 
     /** A threat the Seer feels coming: an arrow around the crosshair turns towards it. */
     val DANGER: ClientboundChannel<DangerPayload> =

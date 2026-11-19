@@ -29,3 +29,8 @@ accessible	method	net/minecraft/world/entity/Display$TextDisplay	setTextOpacity	
 # shader and premultiplied blending. Vanilla builds every render type through this one factory and
 # keeps it package-private; there is no public way to a type that is not on its list.
 accessible	method	net/minecraft/client/renderer/rendertype/RenderType	create	(Ljava/lang/String;Lnet/minecraft/client/renderer/rendertype/RenderSetup;)Lnet/minecraft/client/renderer/rendertype/RenderType;
+
+# Restraint (ability/Restraints) — a bound player's own client refuses to move them: after the keyboard
+# is read, the movement it asked for is set to nothing. The keys are a public field, the movement
+# vector a protected one; nothing in vanilla ever overrules the keyboard from outside.
+accessible	field	net/minecraft/client/player/ClientInput	moveVector	Lnet/minecraft/world/phys/Vec2;

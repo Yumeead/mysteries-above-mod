@@ -22,6 +22,10 @@
       {
         "adapter": "kotlin",
         "value": "me.vangoo.mysteries.gametest.MarionetteGameTests"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.gametest.RestraintGameTests"
       }
     ],
     "fabric-client-gametest": [
@@ -92,6 +96,22 @@
       {
         "adapter": "kotlin",
         "value": "me.vangoo.mysteries.gametest.JusticiarPunishmentClientGameTest"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.gametest.JusticiarJurisdictionClientGameTest"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.gametest.JusticiarSheriffClientGameTest"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.gametest.RestraintClientGameTest"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.gametest.EyesClientGameTest"
       }
     ]
   },

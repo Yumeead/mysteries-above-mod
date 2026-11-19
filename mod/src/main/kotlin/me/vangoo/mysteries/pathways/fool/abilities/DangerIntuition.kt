@@ -2,36 +2,23 @@ package me.vangoo.mysteries.pathways.fool.abilities
 
 import me.vangoo.domain.valueobjects.AbilityIdentity
 import me.vangoo.domain.valueobjects.DangerPremonition
+import me.vangoo.domain.valueobjects.RgbColor
 import me.vangoo.domain.valueobjects.Sequence
 import me.vangoo.mysteries.ability.AbilityContext
 import me.vangoo.mysteries.ability.PermanentPassiveAbility
 import me.vangoo.mysteries.ability.Ticking
 import me.vangoo.mysteries.ability.context.on
-import me.vangoo.mysteries.event.IncomingDamage
-import me.vangoo.domain.valueobjects.RgbColor
 import me.vangoo.mysteries.effect.ModParticles
 import me.vangoo.mysteries.effect.privateGlow
 import me.vangoo.mysteries.effect.privateSound
 import me.vangoo.mysteries.effect.privateText
-import me.vangoo.mysteries.event.MobTargeting
-import me.vangoo.mysteries.event.ProjectileLaunched
-import me.vangoo.mysteries.net.ModChannels
-import me.vangoo.mysteries.net.payload.DangerPayload
-import me.vangoo.domain.services.ProjectileForecast
+import me.vangoo.mysteries.event.IncomingDamage
+import me.vangoo.mysteries.pathways.common.DangerSense
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
 import net.minecraft.network.chat.Component
-import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
-import net.minecraft.tags.ItemTags
-import net.minecraft.world.entity.Entity
-import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.Mob
-import net.minecraft.world.entity.item.PrimedTnt
-import net.minecraft.world.entity.monster.Creeper
-import net.minecraft.world.entity.projectile.Projectile
-import net.minecraft.world.item.BowItem
-import net.minecraft.world.item.CrossbowItem
 import net.minecraft.world.level.block.DoorBlock
 import net.minecraft.world.level.block.FenceGateBlock
 import net.minecraft.world.level.block.TrapDoorBlock
@@ -44,43 +31,20 @@ import kotlin.random.Random
 /**
  * Fool, Seq. 9 (Seer): **Danger Intuition**.
  *
- * The pathway's richest Seq. 9 power in the plugin, and the one that ports almost as-is: every
- * sub-mechanic here was already answering something the game can tell it directly, not a Spigot
- * workaround. Two changes from the plugin's shape:
+ * The sense of harm coming itself — a projectile foreseen at launch, a bow drawn, an armed enemy close, a mob closing
+ * in, a fuse burning — is [DangerSense], shared with the Justiciar's Sheriff. What is the Seer's own:
  *
- * - **The hostile-mob warning is an event, not a poll.** The plugin re-scanned every mob in
- *   range every half-second asking "is its target me". [MobTargeting] already exists on the bus
- *   (built for Error's Sequence 8 charms) and fires at the exact moment a mob acquires a target —
- *   using it here costs one subscription, not a scan.
- * - **The lethal dodge cancels through [IncomingDamage], not `EntityDamageEvent.setCancelled`.**
- *   Same mechanism `PowerProhibition`'s kill-ban already uses.
+ * - **Behind the door**: whoever stands behind a door the Seer looks at is outlined for them alone.
+ * - **A glimpse** of what the target under the crosshair will do next, now and then, a single word over its head.
+ * - **The lethal dodge**, cancelled through [IncomingDamage]: yanked away from the blow a beat before it lands.
  *
- * - **A projectile is foreseen the moment it leaves the string** ([ProjectileLaunched]): its whole
- *   flight is forecast with gravity ([ProjectileForecast]), and if it will pass by the Seer the
- *   warning comes at once, with the time to the blow. The half-second poll it replaces let an arrow
- *   cross thirty blocks unseen.
- *
- * What stays a half-second poll has no moment to wait for — it is a state, not an event: a bow drawn
- * or a crossbow loaded and aimed at the Seer, an armed player close and looking straight at them, a
- * mob closing in, a creeper hissing, a lit fuse; and the behind-the-door reveal and the prediction.
- *
- * Balance numbers live in [DangerPremonition] (`core`, phase 08 already ported it); this file is
- * effects only.
- *
- * ## The warning says where, not in words
- *
- * The first port wrote "a zombie took aim at you from the south-west" into the action bar. Now the
- * threat itself flares: an outline only the Seer sees, and a bell heard by the Seer alone, played
- * **from where the threat is**. And because a bell in a fight is easily missed and an outline behind
- * the back is not seen at all, a pixel arrow by the crosshair turns towards each threat
- * ([DangerPayload]) — pale while it is a presence, red and pulsing under a second from the blow. A
- * glimpse of what the target will do next hangs over its head as a single word.
+ * Balance numbers live in [DangerPremonition] (`core`); this file is effects only.
  */
 class DangerIntuition :
     PermanentPassiveAbility(AbilityIdentity.of("fool_danger_intuition")),
     Ticking {
 
-    override val tickPeriodTicks: Int = SCAN_PERIOD_TICKS
+    override val tickPeriodTicks: Int = DangerSense.SCAN_PERIOD_TICKS
 
     override val displayName: Component = Component.literal("Інтуїція небезпеки")
 
@@ -96,119 +60,28 @@ class DangerIntuition :
         )
     }
 
-    private val lastWarnings = HashMap<UUID, HashMap<UUID, Long>>()
+    private val sense = DangerSense()
     private val lastDoorReveal = HashMap<UUID, Long>()
     private val lastPrediction = HashMap<UUID, Long>()
     private val lastDodge = HashMap<UUID, Long>()
 
     override fun onActivate(context: AbilityContext) {
-        val owner = context.caster.uuid
-        lastWarnings[owner] = HashMap()
-
-        context.events.on<MobTargeting> { event ->
-            if (event.target !== context.caster) return@on
-            warn(context, event.mob)
-            point(context, event.mob, PRESENCE_TICKS, urgent = false)
-        }
-
+        sense.activate(context)
         context.events.on<IncomingDamage> { damage -> tryLethalDodge(context, damage) }
-
-        context.events.on<ProjectileLaunched> { event -> forecast(context, event.projectile) }
     }
 
     override fun onDeactivate(context: AbilityContext) {
         val owner = context.caster.uuid
-        lastWarnings.remove(owner)
+        sense.deactivate(owner)
         lastDoorReveal.remove(owner)
         lastPrediction.remove(owner)
         lastDodge.remove(owner)
     }
 
     override fun tick(context: AbilityContext) {
-        scanArmed(context)
-        scanChasers(context)
-        scanExplosives(context)
+        sense.scan(context)
         revealBehindDoor(context)
         predictNextAction(context)
-    }
-
-    // ── A projectile on its way ─────────────────────────────────────────────────
-
-    /** The flight forecast from the moment of launch: a warning only if it will pass by the Seer, and when. */
-    private fun forecast(context: AbilityContext, projectile: Projectile) {
-        val caster = context.caster
-        if (projectile.owner === caster || projectile.level() !== caster.level()) return
-        if (projectile.distanceToSqr(caster) > PROJECTILE_RADIUS * PROJECTILE_RADIUS) return
-        val from = projectile.position()
-        val velocity = projectile.deltaMovement
-        val body = caster.boundingBox.center
-        val ticks = ProjectileForecast.ticksToReach(
-            from.x, from.y, from.z, velocity.x, velocity.y, velocity.z, projectile.gravity,
-            body.x, body.y, body.z, HIT_RADIUS, FORECAST_TICKS,
-        ) ?: return
-        warn(context, projectile)
-        point(context, projectile, ticks, urgent = true)
-    }
-
-    // ── Weapons turned on the caster ────────────────────────────────────────────
-
-    /**
-     * A bow drawn or a crossbow loaded and aimed at the Seer, from anywhere in range; a melee weapon
-     * only close by and looking straight at them — holding a sword in their direction is not a threat.
-     */
-    private fun scanArmed(context: AbilityContext) {
-        val caster = context.caster
-        for (body in context.targeting.livingNear(SCAN_RADIUS)) {
-            if (body === caster) continue
-            val aimed = aimsRanged(body) && isLookingAt(body, caster, AIM_CONE)
-            val swinging = body is ServerPlayer && holdsMelee(body) &&
-                body.distanceTo(caster) <= MELEE_RANGE && isLookingAt(body, caster, MELEE_CONE)
-            if (!aimed && !swinging) continue
-            warn(context, body)
-            point(context, body, PRESENCE_TICKS, urgent = false)
-        }
-    }
-
-    private fun aimsRanged(body: LivingEntity): Boolean =
-        (body.isUsingItem && body.useItem.item is BowItem) ||
-            CrossbowItem.isCharged(body.mainHandItem) || CrossbowItem.isCharged(body.offhandItem)
-
-    private fun holdsMelee(player: ServerPlayer): Boolean =
-        player.mainHandItem.typeHolder().`is`(ItemTags.WEAPON_ENCHANTABLE)
-
-    private fun isLookingAt(observer: LivingEntity, target: LivingEntity, cone: Double): Boolean {
-        val toTarget = target.boundingBox.center.subtract(observer.eyePosition).normalize()
-        return observer.getViewVector(1.0f).normalize().dot(toTarget) > cone
-    }
-
-    // ── A mob closing in ─────────────────────────────────────────────────────────
-
-    /** Not only the moment it took aim: a mob already on the Seer's trail keeps being felt while it closes in. */
-    private fun scanChasers(context: AbilityContext) {
-        val caster = context.caster
-        for (body in context.targeting.livingNear(SCAN_RADIUS)) {
-            if (body !is Mob || body.target !== caster) continue
-            val toward = caster.position().subtract(body.position()).normalize()
-            if (body.deltaMovement.dot(toward) < CLOSING_SPEED && body.distanceTo(caster) > CLOSE_RANGE) continue
-            warn(context, body)
-            point(context, body, PRESENCE_TICKS, urgent = false)
-        }
-    }
-
-    // ── A fuse burning ───────────────────────────────────────────────────────────
-
-    /** A hissing creeper and a lit TNT near enough to hurt: the arrow counts down to the blast. */
-    private fun scanExplosives(context: AbilityContext) {
-        val caster = context.caster
-        val around = caster.boundingBox.inflate(BLAST_RANGE)
-        for (creeper in context.level.getEntitiesOfClass(Creeper::class.java, around) { it.swellDir > 0 }) {
-            warn(context, creeper)
-            point(context, creeper, ((1f - creeper.getSwelling(1f)) * CREEPER_FUSE).toInt(), urgent = true)
-        }
-        for (tnt in context.level.getEntitiesOfClass(PrimedTnt::class.java, around)) {
-            warn(context, tnt)
-            point(context, tnt, tnt.fuse, urgent = true)
-        }
     }
 
     // ── Behind the door ──────────────────────────────────────────────────────────
@@ -283,55 +156,7 @@ class DangerIntuition :
         context.level.playSound(null, caster.x, caster.y, caster.z, SoundEvents.ENDER_DRAGON_FLAP, SoundSource.PLAYERS, 0.8f, 1.6f)
     }
 
-    // ── Shared warning throttle ──────────────────────────────────────────────────
-
-    /** The arrow by the crosshair: sent on every sighting, it stays as long as [ticks] say. */
-    private fun point(context: AbilityContext, source: Entity, ticks: Int, urgent: Boolean) {
-        ModChannels.DANGER.sendTo(context.caster, DangerPayload(source.id, source.boundingBox.center, ticks.coerceAtLeast(0), urgent))
-    }
-
-    private fun warn(context: AbilityContext, source: Entity) {
-        val owner = context.caster.uuid
-        val warnings = lastWarnings.getOrPut(owner) { HashMap() }
-        val now = context.scheduling.tick
-        val last = warnings[source.uuid]
-        if (last != null && now - last < WARNING_COOLDOWN_TICKS) return
-        warnings[source.uuid] = now
-
-        val distance = context.caster.position().distanceTo(source.position())
-        val volume = (1.0 - (distance / SCAN_RADIUS)).coerceAtLeast(0.3).toFloat()
-        privateGlow(context.caster, listOf(source), WARN_GLOW_TICKS)
-        // Played from the threat itself: the ear tells the direction, so no word has to.
-        privateSound(context.caster, source.position(), SoundEvents.NOTE_BLOCK_BELL.value(), volume.coerceAtLeast(0.6f), 0.5f + volume)
-    }
-
     private companion object {
-        const val SCAN_RADIUS = 15.0
-        const val SCAN_PERIOD_TICKS = 10
-
-        /** An arrow is felt from as far as a bow reaches, and its flight forecast three seconds ahead. */
-        const val PROJECTILE_RADIUS = 48.0
-        const val FORECAST_TICKS = 60
-        /** How near the Seer's middle a forecast path must pass to count: a body, with a little to spare. */
-        const val HIT_RADIUS = 1.4
-
-        /** How narrow "looking at me" is: an aimed bow (~15 degrees) and a blade at arm's length (~25). */
-        const val AIM_CONE = 0.965
-        const val MELEE_CONE = 0.9
-        const val MELEE_RANGE = 5.0
-
-        /** A mob counts as closing in at this speed towards the Seer, or once it is this near. */
-        const val CLOSING_SPEED = 0.03
-        const val CLOSE_RANGE = 4.0
-
-        /** A creeper's or TNT's blast hurts this far; a creeper takes 30 ticks to blow once it hisses. */
-        const val BLAST_RANGE = 8.0
-        const val CREEPER_FUSE = 30f
-
-        /** A threat that is a presence rather than a timed blow is felt until the next scan, and a little after. */
-        const val PRESENCE_TICKS = SCAN_PERIOD_TICKS + 5
-        val WARNING_COOLDOWN_TICKS = 3L * TICKS_PER_SECOND
-
         const val DOOR_LOOK_RANGE = 3.0
         const val DOOR_REVEAL_RADIUS = 4.5
         val DOOR_GLOW_TICKS = 2 * TICKS_PER_SECOND
@@ -342,7 +167,6 @@ class DangerIntuition :
 
         const val MILLIS_PER_TICK = 50L
 
-        val WARN_GLOW_TICKS = 3 * TICKS_PER_SECOND / 2
         val GLIMPSE_TICKS = 2 * TICKS_PER_SECOND
         val GLIMPSE: RgbColor = RgbColor.of(214, 196, 240)
         val TRACE: RgbColor = RgbColor.of(170, 170, 182)

@@ -14,7 +14,8 @@
     "PrivateGlowMixin",
     "HeldItemCoatMixin",
     "HeldItemLayerMixin",
-    "PaladinLoomMixin"
+    "PaladinLoomMixin",
+    "KeyboardRestraintMixin"
   ],
   "injectors": {
     "defaultRequire": 1

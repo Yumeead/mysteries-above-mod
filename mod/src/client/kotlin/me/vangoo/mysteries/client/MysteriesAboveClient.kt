@@ -73,6 +73,7 @@ object MysteriesAboveClient : ClientModInitializer {
         // A power that did not come, and the light of one that did: both are drawn here, by this client alone.
         ModChannels.HINT.receiveOnClient { payload, _ -> HintHud.accept(payload) }
         ModChannels.DANGER.receiveOnClient { payload, _ -> DangerArrows.accept(payload) }
+        ModChannels.DOSSIERS.receiveOnClient { payload, _ -> me.vangoo.mysteries.client.beyonder.ClientDossiers.accept(payload) }
         ModChannels.FACE_GALLERY.receiveOnClient { payload, context -> context.client().gui.setScreen(FaceGalleryScreen(payload)) }
         ModChannels.WORN_FACE.receiveOnClient { payload, _ -> PuppetSkins.mask(payload.wearer, payload.face) }
         ModChannels.WORLD_EFFECT.receiveOnClient { payload, _ -> WorldEffects.accept(payload) }
@@ -137,6 +138,8 @@ object MysteriesAboveClient : ClientModInitializer {
             CreatureMoves.clear()
             HintHud.clear()
             DangerArrows.clear()
+            me.vangoo.mysteries.client.beyonder.ClientDossiers.clear()
+            me.vangoo.mysteries.client.render.SkinEyes.clear()
             PuppetSkins.masks.clear()
             WorldEffects.clear()
         }
