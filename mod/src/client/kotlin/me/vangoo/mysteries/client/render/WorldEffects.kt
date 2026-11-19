@@ -62,6 +62,7 @@ object WorldEffects : HudElement {
         LevelRenderEvents.COLLECT_SUBMITS.register(Edicts::submit)
         LevelRenderEvents.COLLECT_SUBMITS.register(Lashes::submit)
         LevelRenderEvents.COLLECT_SUBMITS.register(Laws::submit)
+        LevelRenderEvents.COLLECT_SUBMITS.register(Jurisdictions::submit)
         LevelRenderEvents.COLLECT_SUBMITS.register(Marks::submit)
     }
 
@@ -84,6 +85,7 @@ object WorldEffects : HudElement {
             is WorldEffectPayload.Edict -> Edicts.accept(payload)
             is WorldEffectPayload.Lash -> Lashes.accept(payload)
             is WorldEffectPayload.Prohibition -> Laws.accept(payload)
+            is WorldEffectPayload.Jurisdiction -> Jurisdictions.accept(payload)
             is WorldEffectPayload.Vision -> me.vangoo.mysteries.client.hud.DreamVision.accept(payload)
         }
     }
@@ -110,6 +112,7 @@ object WorldEffects : HudElement {
         Edicts.tick()
         Lashes.tick()
         Laws.tick()
+        Jurisdictions.tick()
         Marks.tick()
         me.vangoo.mysteries.client.hud.DreamVision.tick()
     }
@@ -125,6 +128,7 @@ object WorldEffects : HudElement {
         Edicts.clear()
         Lashes.clear()
         Laws.clear()
+        Jurisdictions.clear()
         Marks.clear()
         me.vangoo.mysteries.client.hud.DreamVision.clear()
         flash = 0f

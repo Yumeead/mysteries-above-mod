@@ -2,6 +2,7 @@ package me.vangoo.mysteries.net.payload
 
 import io.netty.handler.codec.DecoderException
 import me.vangoo.mysteries.modId
+import net.minecraft.core.BlockPos
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.ComponentSerialization
@@ -263,6 +264,27 @@ sealed interface WorldEffectPayload : CustomPacketPayload {
         }
     }
 
+    /**
+     * A Sheriff's Jurisdiction, the square of ground [half] blocks out from the block [centre]. [kind] says who is told:
+     * [Kind.OWN] goes to the Sheriff alone and stands until [Kind.CLEAR] with the same [id]; [Kind.REVEAL] goes to someone
+     * who has just walked in, and is only a wave of light running over the ground from [from], gone once it has passed.
+     */
+    data class Jurisdiction(
+        val id: Int,
+        val kind: Kind,
+        val centre: BlockPos,
+        val half: Int,
+        val from: Vec3,
+        val color: Int,
+    ) : WorldEffectPayload {
+        enum class Kind { OWN, REVEAL, CLEAR }
+
+        companion object {
+            /** Blocks the wave's front runs a tick. */
+            const val WAVE_SPEED = 1.2f
+        }
+    }
+
     data class Lash(val from: Int, val to: Int, val shape: Shape, val color: Int) : WorldEffectPayload {
         enum class Shape(val life: Int) {
             /** A segmented whip swung over the shoulder: it unrolls, cracks at [WHIP_CRACK_TICKS] and is drawn back. */
@@ -438,6 +460,15 @@ sealed interface WorldEffectPayload : CustomPacketPayload {
                             buf.writeInt(payload.color)
                             buf.writeVarInt(payload.breach)
                         }
+                        is Jurisdiction -> {
+                            buf.writeByte(JURISDICTION)
+                            buf.writeVarInt(payload.id)
+                            buf.writeByte(payload.kind.ordinal)
+                            BlockPos.STREAM_CODEC.encode(buf, payload.centre)
+                            buf.writeVarInt(payload.half)
+                            Vec3.STREAM_CODEC.encode(buf, payload.from)
+                            buf.writeInt(payload.color)
+                        }
                         is Lash -> {
                             buf.writeByte(LASH)
                             buf.writeVarInt(payload.from)
@@ -526,6 +557,16 @@ sealed interface WorldEffectPayload : CustomPacketPayload {
                             val sign = ProhibitionSign.entries.getOrNull(buf.readByte().toInt()) ?: throw DecoderException("Невідома заборона")
                             Prohibition(at, radius, sign, buf.readVarInt().coerceIn(1, MAX_LAW_TICKS), buf.readInt(), buf.readVarInt())
                         }
+                        JURISDICTION -> {
+                            val id = buf.readVarInt()
+                            val kind = Jurisdiction.Kind.entries.getOrNull(buf.readByte().toInt()) ?: throw DecoderException("Невідома юрисдикція")
+                            val centre = BlockPos.STREAM_CODEC.decode(buf)
+                            val half = buf.readVarInt().coerceIn(0, MAX_JURISDICTION)
+                            var from = Vec3.STREAM_CODEC.decode(buf)
+                            // The wave starts on the ground it lights, not anywhere a broken packet says.
+                            if (from.distanceTo(Vec3.atBottomCenterOf(centre)) > half * 1.5 + 4) from = Vec3.atBottomCenterOf(centre)
+                            Jurisdiction(id, kind, centre, half, from, buf.readInt())
+                        }
                         else -> throw DecoderException("Невідома форма світла: $tag")
                     }
                 },
@@ -548,6 +589,10 @@ sealed interface WorldEffectPayload : CustomPacketPayload {
         private const val EDICT = 14
         private const val LASH = 15
         private const val PROHIBITION = 16
+        private const val JURISDICTION = 17
+
+        /** The widest a Sheriff's square may reach out from its centre. */
+        const val MAX_JURISDICTION = 256
     }
 }
 
