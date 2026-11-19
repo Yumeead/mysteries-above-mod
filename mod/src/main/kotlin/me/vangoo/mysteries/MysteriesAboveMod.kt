@@ -98,6 +98,7 @@ object MysteriesAboveMod : ModInitializer {
         Oaths.install()
         // A Judge's Prohibition of teleportation stops a pearl or a chorus fruit before it is used.
         me.vangoo.mysteries.pathways.justiciar.Prohibitions.install()
+        me.vangoo.mysteries.pathways.justiciar.Dossiers.install()
         // The suns in a Seeker's eyes are synced to every client, so both sides must know the attachment.
         Eyes.install()
 

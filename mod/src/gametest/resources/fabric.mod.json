@@ -96,6 +96,10 @@
       {
         "adapter": "kotlin",
         "value": "me.vangoo.mysteries.gametest.JusticiarJurisdictionClientGameTest"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "me.vangoo.mysteries.gametest.JusticiarSheriffClientGameTest"
       }
     ]
   },

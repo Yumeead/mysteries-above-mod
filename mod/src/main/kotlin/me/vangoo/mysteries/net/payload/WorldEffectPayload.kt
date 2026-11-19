@@ -285,6 +285,14 @@ sealed interface WorldEffectPayload : CustomPacketPayload {
         }
     }
 
+    /**
+     * The Sheriff's Recognition, for the Sheriff alone: [stage] [Scrutiny.Stage.GAZE] starts four corners closing round
+     * [entity] over [ticks]; [Scrutiny.Stage.LOST] lets them go; [Scrutiny.Stage.KNOWN] snaps them shut and flashes.
+     */
+    data class Scrutiny(val entity: Int, val stage: Stage, val ticks: Int, val color: Int) : WorldEffectPayload {
+        enum class Stage { GAZE, LOST, KNOWN }
+    }
+
     data class Lash(val from: Int, val to: Int, val shape: Shape, val color: Int) : WorldEffectPayload {
         enum class Shape(val life: Int) {
             /** A segmented whip swung over the shoulder: it unrolls, cracks at [WHIP_CRACK_TICKS] and is drawn back. */
@@ -469,6 +477,13 @@ sealed interface WorldEffectPayload : CustomPacketPayload {
                             Vec3.STREAM_CODEC.encode(buf, payload.from)
                             buf.writeInt(payload.color)
                         }
+                        is Scrutiny -> {
+                            buf.writeByte(SCRUTINY)
+                            buf.writeVarInt(payload.entity)
+                            buf.writeByte(payload.stage.ordinal)
+                            buf.writeVarInt(payload.ticks)
+                            buf.writeInt(payload.color)
+                        }
                         is Lash -> {
                             buf.writeByte(LASH)
                             buf.writeVarInt(payload.from)
@@ -567,6 +582,11 @@ sealed interface WorldEffectPayload : CustomPacketPayload {
                             if (from.distanceTo(Vec3.atBottomCenterOf(centre)) > half * 1.5 + 4) from = Vec3.atBottomCenterOf(centre)
                             Jurisdiction(id, kind, centre, half, from, buf.readInt())
                         }
+                        SCRUTINY -> {
+                            val entity = buf.readVarInt()
+                            val stage = Scrutiny.Stage.entries.getOrNull(buf.readByte().toInt()) ?: throw DecoderException("Невідомий погляд")
+                            Scrutiny(entity, stage, buf.readVarInt().coerceIn(0, MAX_TICKS), buf.readInt())
+                        }
                         else -> throw DecoderException("Невідома форма світла: $tag")
                     }
                 },
@@ -590,6 +610,7 @@ sealed interface WorldEffectPayload : CustomPacketPayload {
         private const val LASH = 15
         private const val PROHIBITION = 16
         private const val JURISDICTION = 17
+        private const val SCRUTINY = 18
 
         /** The widest a Sheriff's square may reach out from its centre. */
         const val MAX_JURISDICTION = 256

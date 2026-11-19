@@ -10,6 +10,7 @@ import me.vangoo.mysteries.client.AbilityGroup
 import me.vangoo.mysteries.client.ClientOptions
 import me.vangoo.mysteries.client.beyonder.ClientAbilityState
 import me.vangoo.mysteries.client.beyonder.ClientMarionettes
+import me.vangoo.mysteries.client.beyonder.ClientDossiers
 import me.vangoo.mysteries.client.input.ModKeys
 import me.vangoo.mysteries.client.net.sendToServer
 import me.vangoo.mysteries.client.render.UiTheme
@@ -67,7 +68,12 @@ fun originLine(origin: AbilityRosterPayload.Origin?, pathwayRgb: Int): Component
  */
 class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("book.$MOD_ID.title")) {
 
-    enum class Page(val icon: String) { STATUS("status"), LIBRARY("library"), KEYS("keys"), GROUPS("groups") }
+    enum class Page(val icon: String) { STATUS("status"), LIBRARY("library"), KEYS("keys"), GROUPS("groups"), CASES("cases") }
+
+    /** The tabs shown: «Справи» only once the Sheriff remembers someone. */
+    private val pages: List<Page> get() = Page.entries.filter { it != Page.CASES || ClientDossiers.entries.isNotEmpty() }
+
+    private val cases by lazy { CasesPage(font, { g, id, x, y, w, h -> sprite(g, id, x, y, w, h) }, ROW_ON, SLOT) }
 
     private var page = initial ?: lastPage
 
@@ -151,6 +157,7 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
         lw = (cw - GAP) * 9 / 20
         rx = cx + lw + GAP
         rw = cx + cw - rx
+        if (page !in pages) page = Page.LIBRARY
 
         addRenderableWidget(GrimoireButton(bx + bw - 31, by + 5, 22, 22,
             HudSettingsScreen.tr("settings"), icon = modId("spirituality/settings")) {
@@ -196,6 +203,10 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
             rebuildWidgets()
             return
         }
+        if (page == Page.CASES) {
+            if (ClientDossiers.entries.isEmpty()) { open(Page.LIBRARY); return }
+            if (cases.stale) cases.rebuild()
+        }
         // Cooldowns, spirituality and toggles move on their own: refresh the live labels.
         refreshLive()
     }
@@ -219,6 +230,7 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
             Page.LIBRARY -> { rebuildLibrary(); rebuildDetail() }
             Page.KEYS -> rebuildKeys()
             Page.GROUPS -> rebuildGroups()
+            Page.CASES -> cases.layout(cx, cy, lw, rx, rw, ch, accent)
         }
         refreshLive()
     }
@@ -409,6 +421,7 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
                 detailStateColor = color
             }
             Page.STATUS -> if (statusTick++ % 10 == 0) rebuildStatus()
+            Page.CASES -> cases.refresh(statusTick++)
             else -> Unit
         }
     }
@@ -496,10 +509,9 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
             onClose()
             return true
         }
-        // 1–4 open the sections without the mouse.
-        if (!typing && event.key() in GLFW.GLFW_KEY_1..GLFW.GLFW_KEY_4) {
-            open(Page.entries[event.key() - GLFW.GLFW_KEY_1])
-            return true
+        // The number keys open the sections without the mouse.
+        if (!typing && event.key() in GLFW.GLFW_KEY_1..GLFW.GLFW_KEY_9) {
+            pages.getOrNull(event.key() - GLFW.GLFW_KEY_1)?.let { open(it); return true }
         }
         return super.keyPressed(event)
     }
@@ -518,7 +530,7 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
         val x = event.x().toInt()
         val y = event.y().toInt()
 
-        Page.entries.forEachIndexed { i, p ->
+        pages.forEachIndexed { i, p ->
             if (inside(x, y, tabX(i), by + 31, tabWidth(), TAB_H)) { open(p); return true }
         }
         if (super.mouseClicked(event, doubleClick)) return true
@@ -530,6 +542,7 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
             Page.LIBRARY -> clickLibrary(x, y)
             Page.KEYS -> clickKeys(x, y)
             Page.GROUPS -> clickGroups(x, y)
+            Page.CASES -> cases.click(x, y)
         }
         return true
     }
@@ -623,6 +636,7 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
             Page.KEYS -> scroll = (scroll + step).coerceIn(0, (rows.size - visibleRows).coerceAtLeast(0))
             Page.GROUPS -> if (mouseX >= rx) scroll = (scroll + step).coerceIn(0, (rows.size - groupVisible()).coerceAtLeast(0))
             Page.STATUS -> statusScroll = (statusScroll + step * LINE * 2).coerceIn(0, (statusHeight - ch + 16).coerceAtLeast(0))
+            Page.CASES -> cases.scrollBy(mouseX, step)
         }
         return true
     }
@@ -632,14 +646,14 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
     override fun extractBackground(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, partialTick: Float) {
         super.extractBackground(graphics, mouseX, mouseY, partialTick)
         sprite(graphics, COVER, bx, by, bw, bh)
-        Page.entries.forEachIndexed { i, p ->
+        pages.forEachIndexed { i, p ->
             val x = tabX(i)
             val selected = p == page
             sprite(graphics, if (selected) ROW_ON else ROW_OFF, x, by + 31, tabWidth(), TAB_H)
             if (!selected && inside(mouseX, mouseY, x, by + 31, tabWidth(), TAB_H)) graphics.outline(x, by + 31, tabWidth(), TAB_H, UiTheme.argb(UiTheme.ACCENT_DEEP, 1f))
         }
         when (page) {
-            Page.STATUS, Page.LIBRARY, Page.GROUPS -> {
+            Page.STATUS, Page.LIBRARY, Page.GROUPS, Page.CASES -> {
                 sprite(graphics, LEAF, cx, cy, lw, ch)
                 sprite(graphics, LEAF, rx, cy, rw, ch)
             }
@@ -653,7 +667,7 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
     override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, partialTick: Float) {
         super.extractRenderState(graphics, mouseX, mouseY, partialTick)
 
-        Page.entries.forEachIndexed { i, p ->
+        pages.forEachIndexed { i, p ->
             val label = tr("page.${p.name.lowercase()}")
             val rgb = if (p == page) UiTheme.TEXT else UiTheme.MUTED
             val left = tabX(i) + (tabWidth() - font.width(label) - 15) / 2
@@ -666,6 +680,7 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
             Page.LIBRARY -> drawLibrary(graphics, mouseX, mouseY)
             Page.KEYS -> drawKeys(graphics, mouseX, mouseY)
             Page.GROUPS -> drawGroups(graphics, mouseX, mouseY)
+            Page.CASES -> cases.draw(graphics, mouseX, mouseY)
         }
     }
 
@@ -960,7 +975,7 @@ class AbilityBookScreen(initial: Page? = null) : Screen(Component.translatable("
         graphics.fill(x, ty, x + 2, ty + thumb, UiTheme.argb(UiTheme.ACCENT_DEEP, 1f))
     }
 
-    private fun tabWidth() = (cw - 9) / Page.entries.size
+    private fun tabWidth() = (cw - 3 * pages.size + 3) / pages.size
     private fun tabX(i: Int) = cx + i * (tabWidth() + 3)
     private fun filterWidth() = (lw - 9 - filterColumns) / filterColumns
     private fun filterX(i: Int) = cx + 5 + (i % filterColumns) * (filterWidth() + 1)
