@@ -5,15 +5,12 @@ import me.vangoo.domain.valueobjects.Sequence
 import me.vangoo.mysteries.ability.AbilityOutcome
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
+import me.vangoo.mysteries.ability.Restraints
 import me.vangoo.mysteries.net.payload.WorldEffectPayload.Edict
 import me.vangoo.mysteries.pathways.justiciar.bonds
 import me.vangoo.mysteries.pathways.justiciar.clang
 import me.vangoo.mysteries.pathways.justiciar.ratchet
-import me.vangoo.mysteries.pathways.justiciar.rootInPlace
 import net.minecraft.network.chat.Component
-import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.effect.MobEffectInstance
-import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.LivingEntity
 
 /**
@@ -21,9 +18,9 @@ import net.minecraft.world.entity.LivingEntity
  *
  * Three chains break out of the ground one after another and coil round the body (ankles, belt and arms,
  * chest), red-hot, and snap tight; shackles close on the ankles, and on a Beyonder an iron ring settles on the
- * head and locks their powers. The iron cools, stands while the term lasts, and falls apart at the end. The
- * victim is rooted for as long, and says nothing in chat: the chains are the notice, and the locks on the
- * powers show in the victim's own HUD.
+ * head. The iron cools, stands while the term lasts, and falls apart at the end. For as long the victim is bound
+ * ([Restraints]): the game refuses them every step, jump, item and power. Nothing in chat: the chains are the
+ * notice.
  */
 class BrandOfRestraint : ActiveAbility(AbilityIdentity.of("justiciar_brand_of_restraint")) {
 
@@ -35,8 +32,8 @@ class BrandOfRestraint : ActiveAbility(AbilityIdentity.of("justiciar_brand_of_re
 
     override fun description(sequence: Sequence): Component = Component.literal(
         "Розпечені ланцюги виривають із землі й скручують ворога під прицілом (дальність $RANGE бл.).\n" +
-            "▪ Ціль повністю знерухомлюється на ${DURATION_TICKS / 20} с\n" +
-            "▪ Якщо ціль Потойбічний, на голову лягає залізний обруч і блокує її здібності",
+            "▪ Ціль скута на ${DURATION_TICKS / 20} с: не ходить, не стрибає, не користується ні предметами, ні здібностями\n" +
+            "▪ Потойбічному на голову лягає ще й залізний обруч",
     )
 
     override fun contestedTarget(context: CastContext): LivingEntity? = context.targeting.lookingAt(RANGE)
@@ -54,13 +51,7 @@ class BrandOfRestraint : ActiveAbility(AbilityIdentity.of("justiciar_brand_of_re
         }
         if (beyonder) context.scheduling.after(Edict.CROWN_SNAP) { clang(context.level, at) }
 
-        target.addEffect(MobEffectInstance(MobEffects.SLOWNESS, DURATION_TICKS, 255))
-        target.addEffect(MobEffectInstance(MobEffects.JUMP_BOOST, DURATION_TICKS, 250))
-        target.addEffect(MobEffectInstance(MobEffects.MINING_FATIGUE, DURATION_TICKS, 255))
-        target.addEffect(MobEffectInstance(MobEffects.WEAKNESS, DURATION_TICKS, 5))
-        context.rootInPlace(target, DURATION_TICKS)
-
-        if (target is ServerPlayer) context.cooldowns.lockAll(target.uuid, DURATION_TICKS / 20)
+        Restraints.hold(target, DURATION_TICKS)
         return AbilityOutcome.Done()
     }
 

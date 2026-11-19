@@ -7,6 +7,7 @@ import me.vangoo.domain.valueobjects.SpiritMediumLore
 import me.vangoo.mysteries.ability.AbilityOutcome
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
+import me.vangoo.mysteries.ability.Restraints
 import me.vangoo.mysteries.ability.context.on
 import me.vangoo.mysteries.effect.ModParticles
 import me.vangoo.mysteries.event.IncomingDamage
@@ -16,7 +17,6 @@ import me.vangoo.mysteries.pathways.death.Retinue
 import me.vangoo.mysteries.pathways.death.Spirits
 import me.vangoo.mysteries.pathways.death.isUndead
 import me.vangoo.mysteries.pathways.death.payBranch
-import me.vangoo.mysteries.pathways.justiciar.rootInPlace
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
 import me.vangoo.mysteries.schedule.TaskHandle
 import net.minecraft.core.BlockPos
@@ -263,7 +263,13 @@ class SpiritChanneling : ActiveAbility(AbilityIdentity.of("death_spirit_channeli
         context.scheduling.after(hold) {
             softened.forEach { (pos, was) -> if (level.getBlockState(pos).`is`(Blocks.MUD)) level.setBlockAndUpdate(pos, was) }
         }
-        context.rootInPlace(target, hold, boundaryParticle = ParticleTypes.MYCELIUM)
+        Restraints.hold(target, hold)
+        // The mud working round the feet it holds.
+        val anchor = target.position()
+        val mud = context.scheduling.every(MUD_PERIOD_TICKS, 0) {
+            level.sendParticles(ParticleTypes.MYCELIUM, anchor.x, anchor.y + 0.3, anchor.z, 3, 0.3, 0.2, 0.3, 0.0)
+        }
+        context.scheduling.after(hold) { mud.cancel() }
         target.addEffect(MobEffectInstance(MobEffects.BLINDNESS, BLINDNESS_TICKS, 0))
 
         val swamp = SpiritMediumLore.EARTH_SWAMP_RADIUS
@@ -349,6 +355,7 @@ class SpiritChanneling : ActiveAbility(AbilityIdentity.of("death_spirit_channeli
 
     private companion object {
         const val USHER = 6
+        const val MUD_PERIOD_TICKS = 4
 
         val EYE_OFFERINGS: Set<Item> = setOf(Items.ENDER_EYE, Items.SPYGLASS)
         val FROST_OFFERINGS: Set<Item> = setOf(

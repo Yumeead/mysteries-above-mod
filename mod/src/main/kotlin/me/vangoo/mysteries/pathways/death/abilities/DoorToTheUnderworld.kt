@@ -7,6 +7,7 @@ import me.vangoo.domain.valueobjects.Sequence
 import me.vangoo.mysteries.ability.AbilityOutcome
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
+import me.vangoo.mysteries.ability.Restraints
 import me.vangoo.mysteries.ability.context.on
 import me.vangoo.mysteries.ability.session
 import me.vangoo.mysteries.effect.ModParticles
@@ -15,7 +16,6 @@ import me.vangoo.mysteries.pathways.death.DEATH_COLOR
 import me.vangoo.mysteries.pathways.death.Retinue
 import me.vangoo.mysteries.pathways.death.Spirits
 import me.vangoo.mysteries.pathways.death.Underworld
-import me.vangoo.mysteries.pathways.justiciar.rootInPlace
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.chat.Component
@@ -216,8 +216,7 @@ class DoorToTheUnderworld : ActiveAbility(AbilityIdentity.of("death_door_to_the_
             level.sendParticles(ParticleTypes.SCULK_SOUL, victim.x, victim.y + 0.2, victim.z, 4, 0.3, 0.2, 0.3, 0.01)
             level.sendParticles(ModParticles.glyph(DEATH_COLOR.shade(-0.2)), victim.x, victim.y + 0.5, victim.z, 3, 0.25, 0.3, 0.25, 0.0)
             if (!bound.add(victim.uuid)) continue
-            victim.addEffect(MobEffectInstance(MobEffects.SLOWNESS, ticks, GatekeeperLore.BIND_SLOWNESS_AMPLIFIER))
-            context.rootInPlace(victim, ticks)
+            Restraints.hold(victim, ticks)
             context.scheduling.after(ticks) { bound.remove(victim.uuid) }
         }
     }

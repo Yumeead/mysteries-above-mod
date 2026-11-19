@@ -6,6 +6,7 @@ import me.vangoo.domain.valueobjects.Sequence
 import me.vangoo.mysteries.ability.AbilityOutcome
 import me.vangoo.mysteries.ability.ActiveAbility
 import me.vangoo.mysteries.ability.CastContext
+import me.vangoo.mysteries.ability.Restraints
 import me.vangoo.mysteries.schedule.TICKS_PER_SECOND
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
@@ -72,7 +73,8 @@ class Telepathy : ActiveAbility(AbilityIdentity.of("visionary_telepathy")) {
         val waitTicks = (WAIT_SECONDS * TICKS_PER_SECOND * multiplier).roundToInt()
 
         target.addEffect(MobEffectInstance(MobEffects.BLINDNESS, waitTicks, 255))
-        target.addEffect(MobEffectInstance(MobEffects.SLOWNESS, waitTicks, 255))
+        // The isolated mind leaves the body standing; only a crouch, the consent, is left to it.
+        Restraints.hold(target, waitTicks)
         context.level.playSound(null, target.x, target.y, target.z, SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1f, 0.5f)
 
         context.messaging.tell(target, Component.literal("░░░ 👁 ВАШ РОЗУМ ІЗОЛЬОВАНО 👁 ░░░"))

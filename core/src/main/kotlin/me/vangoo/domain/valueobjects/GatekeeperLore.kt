@@ -102,11 +102,8 @@ object GatekeeperLore {
     private const val BIND_RADIUS = 6.0
     private const val BIND_RADIUS_CAP = 11.0
 
-    /** The pace of control, not its power — fixed, like DRAG_SLOWNESS_SECONDS. */
+    /** The pace of control, not its power — fixed, like DRAG_SLOWNESS_SECONDS. A bound body does not move at all. */
     const val BIND_DURATION_SECONDS = 4
-
-    /** Level index: 4 = Slowness V. */
-    const val BIND_SLOWNESS_AMPLIFIER = 4
 
     /** Bound Hands radius (blocks): Seq. 5 = 6, grows WEAK up to an 11 ceiling. */
     fun bindRadius(sequence: Sequence): Double =
