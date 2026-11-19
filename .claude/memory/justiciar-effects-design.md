@@ -54,7 +54,7 @@ Intuition and Recognition reworked 19.11.2026 (uncommitted, same branch). User d
 Danger Intuition" (shared `pathways/common/DangerSense`, plus "being watched", now a permanent passive); Recognition =
 remember people (gaze 1.5 s), see their footprints, and a book tab «Справи» that appears once anyone is remembered,
 with everything known about each (user asked for the tab). Details in `.claude/rules/world-effects.md`.
-Still left: Gaze polish, Brand's attribute modifiers instead of Slowness 255; two-client checks of all of Seq. 8.
+Brand and Imprisonment now use full restraint ([[full-restraint-not-attributes]], 19.11). Still left: Gaze polish (undefined), two-client checks of all of Seq. 8, docs/progress.md entry for Justiciar is stale.
 
 User decisions 17.11.2026 for Seq. 6–5 (all as I recommended): Verdict picks its sentence by **wheel modes**, not the
 item in hand; the set is the lore's: Exile, Imprison, Confinement, Death (dash with afterimages + blow), Flog (invisible

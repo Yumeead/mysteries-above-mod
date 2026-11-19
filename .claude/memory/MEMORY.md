@@ -20,3 +20,4 @@
 - [No dots, arrows, dashes in player text](player-text-no-dots-arrows-dashes.md) — never `·`, `→`, `—` or UI-explaining hints in anything the player reads; ~336 old literals remain
 - [Marionette will and orders](marionette-will-and-orders.md) — 15.11 decisions: no own will, follow/come/guard/assist semantics, weapons+kits, gather/arm removed, arrow switch, left panel, 4 s pin
 - [Justiciar effects rework](justiciar-effects-design.md) — Seq. 9–5 merged; Seq. 8 (Jurisdiction, Intuition, Recognition + «Справи» tab) on feat/justiciar-sheriff; left: Gaze, Brand attributes
+- [Full restraint, not attributes](full-restraint-not-attributes.md) — any power that roots/binds/stuns calls Restraints.hold; never Slowness 255, attribute maxing or teleport anchors (user, 19.11)
