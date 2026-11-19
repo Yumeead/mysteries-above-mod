@@ -5,7 +5,7 @@ metadata:
   node_type: memory
   type: reference
   originSessionId: fc1debbe-0ac4-4f32-954f-8a1a4dee0700
-  modified: 2026-11-19T20:10:38.847Z
+  modified: 2026-11-19T20:52:08.681Z
 ---
 
 Design for moving all 13 Justiciar abilities (Seq. 9–5) onto the phenomena engine, written 16.11.2026 on request, as a
@@ -47,11 +47,14 @@ sign, `Prohibitions` registry, executor refuses teleporting powers), Punishment 
 in the target's eyes via `PaladinLoomMixin`, shackles, x1.5 blows; Prohibition breakers auto-marked). User's standing
 rule since 17.11: nothing appears instantly. Seq. 6–5 and the Seq. 9/7 reworks are committed and merged (18.11, `129d781`).
 
-Jurisdiction reworked 19.11.2026 (uncommitted, client test only, awaiting the user's look): square zone, bound private
-to the Sheriff (posts rise near the edge, wave on cast, light along the edge on crossing), others see only a wave over
-the area when they walk in; iron-bar posts with 16 px sigils (`jurisdiction_sigils.png`) and a sagging cord. Details in
-`.claude/rules/world-effects.md` («Юрисдикція»). Still left: Recognition, Intuition (both still chat text), Gaze polish,
-Brand's attribute modifiers instead of Slowness 255.
+Jurisdiction reworked 19.11.2026 and committed on `feat/justiciar-sheriff` (not merged): square zone, bound private
+to the Sheriff, others see only a wave over the area when they walk in; iron-bar posts with 16 px sigils.
+
+Intuition and Recognition reworked 19.11.2026 (uncommitted, same branch). User decisions: Intuition "like the Fool's
+Danger Intuition" (shared `pathways/common/DangerSense`, plus "being watched", now a permanent passive); Recognition =
+remember people (gaze 1.5 s), see their footprints, and a book tab «Справи» that appears once anyone is remembered,
+with everything known about each (user asked for the tab). Details in `.claude/rules/world-effects.md`.
+Still left: Gaze polish, Brand's attribute modifiers instead of Slowness 255; two-client checks of all of Seq. 8.
 
 User decisions 17.11.2026 for Seq. 6–5 (all as I recommended): Verdict picks its sentence by **wheel modes**, not the
 item in hand; the set is the lore's: Exile, Imprison, Confinement, Death (dash with afterimages + blow), Flog (invisible
